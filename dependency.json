@@ -1,5 +1,8 @@
 {
     "include": {
+        "spryker/ai-foundation": "Provides basic AI functionality.",
+        "spryker/catalog": "Provides Catalog functionality.",
+        "spryker/configuration": "Provides BO configuration.",
         "spryker/transfer": "Provides transfer objects definition with strict types and `::get*OrFail()` functionality."
     }
 }
