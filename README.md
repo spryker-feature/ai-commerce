@@ -7,7 +7,7 @@ AiCommerce module description.
 ## Installation
 
 ```
-composer require sprykerfeature/ai-commerce
+composer require spryker-feature/ai-commerce
 ```
 
 ## Documentation
