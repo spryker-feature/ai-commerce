@@ -14,4 +14,10 @@
         <property name="errors" type="Error[]" singular="error"/>
     </transfer>
 
+    <transfer name="PromptMessage">
+    </transfer>
+
+    <transfer name="Error">
+    </transfer>
+
 </transfers>

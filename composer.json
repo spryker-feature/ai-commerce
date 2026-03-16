@@ -1,5 +1,5 @@
 {
-    "name": "sprykerfeature/ai-commerce",
+    "name": "spryker-feature/ai-commerce",
     "type": "library",
     "description": "AiCommerce module",
     "license": "proprietary",
