@@ -5,7 +5,7 @@
 
     <transfer name="PromptRequest" strict="true">
         <property name="promptMessage" type="PromptMessage"/>
-        <property name="aiConfigurationName" type="string"/>
+        <property name="aiConfigurationName" type="string" description="The configuration name of ai configuration"/>
     </transfer>
 
     <transfer name="PromptResponse" strict="true">
@@ -14,7 +14,7 @@
         <property name="errors" type="Error[]" singular="error"/>
     </transfer>
 
-    <transfer name="PromptMessage">
+    <transfer name="PromptMessage" strict="true">
     </transfer>
 
     <transfer name="Error">

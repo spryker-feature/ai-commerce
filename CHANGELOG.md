@@ -1,3 +1,3 @@
 # AiCommerce Changelog
 
-[Release Changelog](https://github.com/sprykerfeature/ai-commerce/releases)
+[Release Changelog](https://github.com/spryker-feature/ai-commerce/releases)
