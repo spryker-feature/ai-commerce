@@ -6,7 +6,7 @@
     "require": {
         "php": ">=8.3",
         "spryker/ai-foundation": "^0.6.0",
-        "spryker/catalog": "^5.11.0",
+        "spryker/catalog": "^5.10.0",
         "spryker/configuration": "^0.1.0",
         "spryker/kernel": "^3.72.0",
         "spryker/transfer": "^3.42.0"
