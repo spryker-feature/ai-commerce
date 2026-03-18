@@ -1,0 +1,173 @@
+<?php
+
+/**
+ * Copyright © 2016-present Spryker Systems GmbH. All rights reserved.
+ * Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
+ */
+
+declare(strict_types=1);
+
+namespace SprykerFeature\Zed\AiCommerce\Communication\Controller;
+
+use Generated\Shared\Transfer\BackofficeAssistantConversationCollectionDeleteCriteriaTransfer;
+use Generated\Shared\Transfer\BackofficeAssistantConversationConditionsTransfer;
+use Generated\Shared\Transfer\BackofficeAssistantConversationCriteriaTransfer;
+use Spryker\Zed\Kernel\Communication\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Csrf\CsrfToken;
+
+/**
+ * @method \SprykerFeature\Zed\AiCommerce\Communication\AiCommerceCommunicationFactory getFactory()
+ * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceFacadeInterface getFacade()
+ */
+class BackofficeAssistantConversationController extends AbstractController
+{
+    protected const string RESPONSE_KEY_HISTORIES = 'histories';
+
+    protected const string RESPONSE_KEY_AVAILABLE_AGENTS = 'available_agents';
+
+    protected const string RESPONSE_KEY_CONVERSATION_REFERENCE = 'conversation_reference';
+
+    protected const string RESPONSE_KEY_NAME = 'name';
+
+    protected const string RESPONSE_KEY_AGENT = 'agent';
+
+    protected const string RESPONSE_KEY_USER_SELECTED_AGENT = 'user_selected_agent';
+
+    protected const string RESPONSE_KEY_ERROR = 'error';
+
+    protected const string RESPONSE_KEY_SUCCESS = 'success';
+
+    protected const string REQUEST_KEY_CONVERSATION_REFERENCE = 'conversationReference';
+
+    protected const string CSRF_TOKEN_ID = 'backoffice-assistant';
+
+    protected const string CSRF_TOKEN_PARAM = '_token';
+
+    protected const string ERROR_MISSING_CONVERSATION_REFERENCE = 'Missing conversationReference';
+
+    protected const string ERROR_CONVERSATION_NOT_FOUND = 'Conversation not found';
+
+    protected const string ERROR_INVALID_CSRF_TOKEN = 'Invalid or missing CSRF token.';
+
+    protected const string ERROR_MISSING_CONVERSATION_REFERENCE_PARAM = 'Missing conversation_reference';
+
+    public function indexAction(): JsonResponse
+    {
+        $userUuid = $this->getFactory()->getUserFacade()->getCurrentUser()->getUuidOrFail();
+
+        $criteria = (new BackofficeAssistantConversationCriteriaTransfer())
+            ->setBackofficeAssistantConversationConditions(
+                (new BackofficeAssistantConversationConditionsTransfer())->addUserUuid($userUuid),
+            );
+
+        $collection = $this->getFacade()->getBackofficeAssistantConversationCollection($criteria);
+
+        $availableAgents = array_map(
+            static fn ($plugin) => $plugin->getName(),
+            $this->getFactory()->getBackofficeAssistantAgentPlugins(),
+        );
+
+        return $this->jsonResponse([
+            static::RESPONSE_KEY_HISTORIES => array_map(
+                static fn ($conversation) => [
+                    static::RESPONSE_KEY_CONVERSATION_REFERENCE => $conversation->getConversationReference(),
+                    static::RESPONSE_KEY_NAME => $conversation->getName(),
+                    static::RESPONSE_KEY_AGENT => $conversation->getAgent() ?? '',
+                    static::RESPONSE_KEY_USER_SELECTED_AGENT => $conversation->getUserSelectedAgent() ?? '',
+                ],
+                $collection->getBackofficeAssistantConversations()->getArrayCopy(),
+            ),
+            static::RESPONSE_KEY_AVAILABLE_AGENTS => $availableAgents,
+        ]);
+    }
+
+    public function detailAction(Request $request): JsonResponse
+    {
+        $conversationReference = (string)$request->query->get(static::REQUEST_KEY_CONVERSATION_REFERENCE, '');
+
+        if (!$conversationReference) {
+            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => static::ERROR_MISSING_CONVERSATION_REFERENCE], 400);
+        }
+
+        $userUuid = $this->getFactory()->getUserFacade()->getCurrentUser()->getUuidOrFail();
+
+        $criteria = (new BackofficeAssistantConversationCriteriaTransfer())
+            ->setBackofficeAssistantConversationConditions(
+                (new BackofficeAssistantConversationConditionsTransfer())
+                    ->addUserUuid($userUuid)
+                    ->addConversationReference($conversationReference)
+                    ->setWithMessages(true),
+            );
+
+        $collection = $this->getFacade()->getBackofficeAssistantConversationCollection($criteria);
+
+        if ($collection->getBackofficeAssistantConversations()->count() === 0) {
+            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => static::ERROR_CONVERSATION_NOT_FOUND], 404);
+        }
+
+        /** @var \Generated\Shared\Transfer\BackofficeAssistantConversationTransfer $conversation */
+        $conversation = $collection->getBackofficeAssistantConversations()->offsetGet(0);
+
+        return $this->jsonResponse(
+            array_merge(
+                $conversation->toArray(),
+                [
+                    static::RESPONSE_KEY_AGENT => $conversation->getAgent() ?? '',
+                    static::RESPONSE_KEY_USER_SELECTED_AGENT => $conversation->getUserSelectedAgent() ?? '',
+                ],
+            ),
+        );
+    }
+
+    public function deleteAction(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true) ?? [];
+
+        $token = (string)($data[static::CSRF_TOKEN_PARAM] ?? '');
+
+        if (!$this->isValidCsrfToken($token)) {
+            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => static::ERROR_INVALID_CSRF_TOKEN], 403);
+        }
+
+        $conversationReference = (string)($data[static::RESPONSE_KEY_CONVERSATION_REFERENCE] ?? '');
+
+        if (!$conversationReference) {
+            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => static::ERROR_MISSING_CONVERSATION_REFERENCE_PARAM], 400);
+        }
+
+        $userUuid = (string)$this->getFactory()->getUserFacade()->getCurrentUser()->getUuidOrFail();
+
+        $ownershipCriteria = (new BackofficeAssistantConversationCriteriaTransfer())
+            ->setBackofficeAssistantConversationConditions(
+                (new BackofficeAssistantConversationConditionsTransfer())
+                    ->addUserUuid($userUuid)
+                    ->addConversationReference($conversationReference),
+            );
+
+        $collection = $this->getFacade()->getBackofficeAssistantConversationCollection($ownershipCriteria);
+
+        if ($collection->getBackofficeAssistantConversations()->count() === 0) {
+            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => static::ERROR_CONVERSATION_NOT_FOUND], 404);
+        }
+
+        $deleteCriteria = (new BackofficeAssistantConversationCollectionDeleteCriteriaTransfer())
+            ->addConversationReference($conversationReference);
+
+        $this->getFacade()->deleteBackofficeAssistantConversationCollection($deleteCriteria);
+
+        return $this->jsonResponse([static::RESPONSE_KEY_SUCCESS => true]);
+    }
+
+    protected function isValidCsrfToken(string $token): bool
+    {
+        if (!$token) {
+            return false;
+        }
+
+        return $this->getFactory()
+            ->getCsrfTokenManager()
+            ->isTokenValid(new CsrfToken(static::CSRF_TOKEN_ID, $token));
+    }
+}

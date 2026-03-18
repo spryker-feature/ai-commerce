@@ -5,6 +5,8 @@
  * Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  */
 
+declare(strict_types=1);
+
 namespace SprykerFeature\Shared\AiCommerce;
 
 /**
@@ -12,4 +14,23 @@ namespace SprykerFeature\Shared\AiCommerce;
  */
 interface AiCommerceConstants
 {
+    /**
+     * @api
+     */
+    public const string AI_CONFIGURATION_INTENT_ROUTER = 'AI_CONFIGURATION_INTENT_ROUTER';
+
+    /**
+     * @api
+     */
+    public const string AI_CONFIGURATION_GENERAL_PURPOSE = 'AI_CONFIGURATION_GENERAL_PURPOSE';
+
+    /**
+     * @api
+     */
+    public const string AI_MODEL_FAST = 'gpt-4o-mini';
+
+    /**
+     * @api
+     */
+    public const string AI_MODEL_ADVANCED = 'gpt-4.1';
 }
