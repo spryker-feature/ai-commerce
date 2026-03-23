@@ -13,4 +13,18 @@ use Spryker\Zed\Kernel\AbstractBundleConfig;
 
 class AiCommerceConfig extends AbstractBundleConfig
 {
+    protected const string CONFIGURATION_KEY_AI_COMMERCE_BACKOFFICE_ASSISTANT_GENERAL_IS_ENABLED = 'ai_commerce:backoffice_assistant:general:is_enabled';
+
+    protected const bool BACKOFFICE_ASSISTANT_DEFAULT_IS_ENABLED = true;
+
+    /**
+     * Specification:
+     * - Returns true if the Backoffice Assistant feature is enabled.
+     *
+     * @api
+     */
+    public function isBackofficeAssistantEnabled(): bool
+    {
+        return (bool)filter_var($this->getModuleConfig(static::CONFIGURATION_KEY_AI_COMMERCE_BACKOFFICE_ASSISTANT_GENERAL_IS_ENABLED, static::BACKOFFICE_ASSISTANT_DEFAULT_IS_ENABLED), FILTER_VALIDATE_BOOLEAN);
+    }
 }

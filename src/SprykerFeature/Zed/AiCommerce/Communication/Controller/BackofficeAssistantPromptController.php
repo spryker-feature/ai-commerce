@@ -19,6 +19,7 @@ use Symfony\Component\Security\Csrf\CsrfToken;
 /**
  * @method \SprykerFeature\Zed\AiCommerce\Communication\AiCommerceCommunicationFactory getFactory()
  * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceFacadeInterface getFacade()
+ * @method \SprykerFeature\Zed\AiCommerce\AiCommerceConfig getConfig()
  */
 class BackofficeAssistantPromptController extends AbstractController
 {
@@ -50,10 +51,16 @@ class BackofficeAssistantPromptController extends AbstractController
 
     protected const string RESPONSE_KEY_ERROR = 'error';
 
+    protected const string ERROR_BACKOFFICE_ASSISTANT_DISABLED = 'Backoffice Assistant is disabled.';
+
     protected const string ERROR_INVALID_CSRF_TOKEN = 'Invalid or missing CSRF token.';
 
     public function indexAction(Request $request): JsonResponse|StreamedResponse
     {
+        if (!$this->getConfig()->isBackofficeAssistantEnabled()) {
+            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => static::ERROR_BACKOFFICE_ASSISTANT_DISABLED], 403);
+        }
+
         $data = json_decode($request->getContent(), true) ?? [];
 
         $token = (string)($data[static::CSRF_TOKEN_PARAM] ?? '');

@@ -1,30 +1,30 @@
-Open AI Assistant,KI-Assistenten öffnen
-Assistant,Assistent
-AI Assistant,KI-Assistent
-Chat history,Chatverlauf
-New conversation,Neues Gespräch
-Backoffice Assistant,Backoffice-Assistent
-Select agent,Agent auswählen
-Auto,Automatisch
-Close AI Assistant,KI-Assistent schließen
-No conversations yet. Start a new one!,Noch keine Unterhaltungen. Starten Sie eine neue!
-Attach file,Datei anhängen
-Ask me anything...,Fragen Sie mich alles...
-Message input,Nachrichteneingabe
-Send message,Nachricht senden
-Retry,Erneut versuchen
-Arguments,Argumente
-Show result,Ergebnis anzeigen
-Hide result,Ergebnis ausblenden
+"Open AI Assistant","KI-Assistenten öffnen"
+"Assistant","Assistent"
+"AI Assistant","KI-Assistent"
+"Chat history","Chatverlauf"
+"New conversation","Neues Gespräch"
+"Backoffice Assistant","Backoffice-Assistent"
+"Select agent","Agent auswählen"
+"Auto","Automatisch"
+"Close AI Assistant","KI-Assistent schließen"
+"No conversations yet. Start a new one!","Noch keine Unterhaltungen. Starten Sie eine neue!"
+"Attach file","Datei anhängen"
+"Ask me anything...","Fragen Sie mich alles..."
+"Message input","Nachrichteneingabe"
+"Send message","Nachricht senden"
+"Retry","Erneut versuchen"
+"Arguments","Argumente"
+"Show result","Ergebnis anzeigen"
+"Hide result","Ergebnis ausblenden"
 "Unsupported file type: ","Nicht unterstützter Dateityp: "
 "File too large (max 5 MB): ","Datei zu groß (max. 5 MB): "
-Failed to load conversations.,Unterhaltungen konnten nicht geladen werden.
-Delete conversation,Unterhaltung löschen
+"Failed to load conversations.","Unterhaltungen konnten nicht geladen werden."
+"Delete conversation","Unterhaltung löschen"
 "Hello, %userName%! How can I help you today?","Hallo, %userName%! Wie kann ich Ihnen heute helfen?"
 "Request failed with status ","Anfrage fehlgeschlagen mit Status "
-Request interrupted.,Anfrage unterbrochen.
+"Request interrupted.","Anfrage unterbrochen."
 "Connection error. Please try again.","Verbindungsfehler. Bitte versuchen Sie es erneut."
-No response received.,Keine Antwort erhalten.
+"No response received.","Keine Antwort erhalten."
 "Error: ","Fehler: "
-Failed to load conversation history.,Unterhaltungsverlauf konnte nicht geladen werden.
-Tool Result,Werkzeugergebnis
+"Failed to load conversation history.","Unterhaltungsverlauf konnte nicht geladen werden."
+"Tool Result","Werkzeugergebnis"

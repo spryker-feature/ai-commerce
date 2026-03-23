@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=../../../../Spryker/Configuration/resources/configuration/configuration-schema-v1.json
+features:
+    - key: ai_commerce
+      name: AI Commerce
+      description: AI Commerce configuration.
+      enabled: true
+      order: 0
+      tabs:
+          - key: backoffice_assistant
+            name: Backoffice Assistant
+            description: Backoffice Assistant configuration.
+            enabled: true
+            order: 0
+            groups:
+                - key: general
+                  name: General
+                  description: General settings for the Backoffice Assistant.
+                  enabled: true
+                  order: 0
+                  scopes:
+                      - global
+                  settings:
+                      - key: is_enabled
+                        name: Enable Backoffice Assistant
+                        description: When enabled, the AI-powered Backoffice Assistant chat widget is available in the Backoffice.
+                        type: boolean
+                        default_value: 'true'
+                        enabled: true
+                        secret: false
+                        storefront: false
+                        scopes:
+                            - global

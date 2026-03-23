@@ -1,6 +1,7 @@
-<link rel="stylesheet" href="{{ assetsPath('css/spryker-zed-ai-commerce.css') }}" />
+{% if isBackofficeAssistantEnabled() %}
+    <link rel="stylesheet" href="{{ assetsPath('css/spryker-zed-ai-commerce.css') }}" />
 
-<button type="button"
+    <button type="button"
             class="backoffice-assistant__toggle js-backoffice-assistant__toggle"
             aria-label="{{ 'AI Assistant' | trans }}">
         <span class="backoffice-assistant__toggle-icon">&#x1F916;</span>
@@ -94,10 +95,11 @@
         </div>
     </div>
 
-<script>
-    window.BackofficeAssistantConfig = {
-        userName: '{{ username is defined ? username | e('js') : '' }}',
-        csrfToken: '{{ csrf_token('backoffice-assistant') | e('js') }}'
-    };
-</script>
-<script src="{{ assetsPath('js/spryker-zed-ai-commerce.js') }}"></script>
+    <script>
+        window.BackofficeAssistantConfig = {
+            userName: '{{ username is defined ? username | e('js') : '' }}',
+            csrfToken: '{{ csrf_token('backoffice-assistant') | e('js') }}'
+        };
+    </script>
+    <script src="{{ assetsPath('js/spryker-zed-ai-commerce.js') }}"></script>
+{% endif %}
