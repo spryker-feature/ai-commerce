@@ -1,19 +1,19 @@
 "Open AI Assistant","Open AI Assistant"
-"Assistant","Assistant"
+Assistant,Assistant
 "AI Assistant","AI Assistant"
 "Chat history","Chat history"
 "New conversation","New conversation"
 "Backoffice Assistant","Backoffice Assistant"
 "Select agent","Select agent"
-"Auto","Auto"
+Auto,Auto
 "Close AI Assistant","Close AI Assistant"
 "No conversations yet. Start a new one!","No conversations yet. Start a new one!"
 "Attach file","Attach file"
 "Ask me anything...","Ask me anything..."
 "Message input","Message input"
 "Send message","Send message"
-"Retry","Retry"
-"Arguments","Arguments"
+Retry,Retry
+Arguments,Arguments
 "Show result","Show result"
 "Hide result","Hide result"
 "Unsupported file type: ","Unsupported file type: "
