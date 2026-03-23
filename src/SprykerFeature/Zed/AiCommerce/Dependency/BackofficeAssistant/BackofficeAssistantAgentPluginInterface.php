@@ -16,7 +16,7 @@ interface BackofficeAssistantAgentPluginInterface
 {
     /**
      * Specification:
-     * - Returns the unique agent name used for routing (e.g., "Product").
+     * - Returns the unique agent name used for routing (for example, "Product").
      * - This name is matched against IntentRouterResponseTransfer::agent.
      *
      * @api

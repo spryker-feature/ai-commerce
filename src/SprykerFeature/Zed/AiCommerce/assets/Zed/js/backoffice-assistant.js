@@ -3,8 +3,13 @@
 const BACKOFFICE_ASSISTANT_STORAGE_KEY = 'backoffice_assistant_state';
 const BACKOFFICE_ASSISTANT_MAX_FILE_SIZE = 5 * 1024 * 1024;
 const BACKOFFICE_ASSISTANT_ALLOWED_TYPES = [
-    'image/png', 'image/jpeg', 'image/gif', 'image/webp',
-    'application/pdf', 'text/plain', 'text/csv',
+    'image/png',
+    'image/jpeg',
+    'image/gif',
+    'image/webp',
+    'application/pdf',
+    'text/plain',
+    'text/csv',
 ];
 const BACKOFFICE_ASSISTANT_SELECTORS = {
     toggle: '.js-backoffice-assistant__toggle',
@@ -44,10 +49,13 @@ function BackofficeAssistantState() {
 
 BackofficeAssistantState.prototype.save = function (isOpen) {
     try {
-        localStorage.setItem(BACKOFFICE_ASSISTANT_STORAGE_KEY, JSON.stringify({
-            isOpen: isOpen,
-            conversationReference: this.conversationReference,
-        }));
+        localStorage.setItem(
+            BACKOFFICE_ASSISTANT_STORAGE_KEY,
+            JSON.stringify({
+                isOpen: isOpen,
+                conversationReference: this.conversationReference,
+            }),
+        );
     } catch (e) {
         // localStorage may be unavailable
     }
@@ -82,8 +90,8 @@ BackofficeAssistantApi.prototype.fetchHistories = function () {
 };
 
 BackofficeAssistantApi.prototype.fetchConversationDetail = function (conversationReference) {
-    const url = BACKOFFICE_ASSISTANT_ENDPOINTS.detail +
-        '?conversationReference=' + encodeURIComponent(conversationReference);
+    const url =
+        BACKOFFICE_ASSISTANT_ENDPOINTS.detail + '?conversationReference=' + encodeURIComponent(conversationReference);
 
     return fetch(url, {
         headers: { 'X-Requested-With': 'XMLHttpRequest' },
@@ -225,9 +233,19 @@ BackofficeAssistantMarkdownParser.prototype.parse = function (text) {
         }
 
         const tag = listType === 'ol' ? 'ol' : 'ul';
-        outputParts.push('<' + tag + '>' + listBuffer.map(function (item) {
-            return '<li>' + item + '</li>';
-        }).join('') + '</' + tag + '>');
+        outputParts.push(
+            '<' +
+                tag +
+                '>' +
+                listBuffer
+                    .map(function (item) {
+                        return '<li>' + item + '</li>';
+                    })
+                    .join('') +
+                '</' +
+                tag +
+                '>',
+        );
         listBuffer = [];
         listType = null;
     }
@@ -290,7 +308,7 @@ BackofficeAssistantMarkdownParser.prototype.parse = function (text) {
             return linkText;
         }
 
-        return '<a href="' + url + '" target="_blank" rel="noopener noreferrer">' + linkText + '</a>';
+        return '<a href="' + self.escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">' + linkText + '</a>';
     });
 
     // Restore inline code
@@ -400,7 +418,10 @@ BackofficeAssistantMessageRenderer.prototype.addToolCallMessage = function (name
 BackofficeAssistantMessageRenderer.prototype.createToolCallLabel = function (name) {
     const label = document.createElement('div');
     label.classList.add('backoffice-assistant__tool-call-label');
-    label.innerHTML = '<i class="fa fa-cog"></i> ' + name;
+    const icon = document.createElement('i');
+    icon.className = 'fa fa-cog';
+    label.appendChild(icon);
+    label.appendChild(document.createTextNode(' ' + name));
 
     return label;
 };
@@ -664,7 +685,8 @@ BackofficeAssistantHistories.prototype.hide = function () {
 BackofficeAssistantHistories.prototype.load = function () {
     const self = this;
 
-    this.api.fetchHistories()
+    this.api
+        .fetchHistories()
         .then(function (data) {
             const histories = data.histories || [];
 
@@ -728,17 +750,22 @@ BackofficeAssistantHistories.prototype.deleteItem = function (conversationRefere
     listItem.style.pointerEvents = 'none';
     listItem.classList.add('backoffice-assistant__histories-item--deleting');
 
-    this.api.deleteConversation(conversationReference)
+    this.api
+        .deleteConversation(conversationReference)
         .then(function () {
-            listItem.addEventListener('transitionend', function () {
-                listItem.remove();
+            listItem.addEventListener(
+                'transitionend',
+                function () {
+                    listItem.remove();
 
-                if (self.historiesList.children.length === 0) {
-                    self.historiesEmpty.hidden = false;
-                }
+                    if (self.historiesList.children.length === 0) {
+                        self.historiesEmpty.hidden = false;
+                    }
 
-                self.onDeleteCurrent(conversationReference);
-            }, { once: true });
+                    self.onDeleteCurrent(conversationReference);
+                },
+                { once: true },
+            );
 
             listItem.classList.add('backoffice-assistant__histories-item--deleted');
         })
@@ -868,7 +895,8 @@ BackofficeAssistant.prototype.showGreeting = function () {
 BackofficeAssistant.prototype.loadAvailableAgents = function () {
     const self = this;
 
-    this.api.fetchHistories()
+    this.api
+        .fetchHistories()
         .then(function (data) {
             self.agentBadge.populateSelector(data.available_agents || []);
         })
@@ -980,7 +1008,8 @@ BackofficeAssistant.prototype.doSendMessage = function (prompt, messageAttachmen
     this.state.abortController = new AbortController();
     const signal = this.state.abortController.signal;
 
-    this.api.sendPrompt(body, signal)
+    this.api
+        .sendPrompt(body, signal)
         .then(function (response) {
             if (!response.ok) {
                 loadingEl.remove();
@@ -1125,7 +1154,8 @@ BackofficeAssistant.prototype.loadConversationDetail = function (conversationRef
     this.histories.hide();
     this.renderer.clear();
 
-    this.api.fetchConversationDetail(conversationReference)
+    this.api
+        .fetchConversationDetail(conversationReference)
         .then(function (data) {
             if (data.agent) {
                 self.agentBadge.update(data.agent);

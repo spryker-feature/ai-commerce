@@ -37,8 +37,6 @@ class AttachmentBuilder implements AttachmentBuilderInterface
     ];
 
     /**
-     * {@inheritDoc}
-     *
      * @param array<int, array<string, string>> $rawAttachments
      *
      * @return array<\Generated\Shared\Transfer\AttachmentTransfer>

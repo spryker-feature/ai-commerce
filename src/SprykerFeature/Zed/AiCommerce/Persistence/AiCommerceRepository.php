@@ -12,6 +12,7 @@ namespace SprykerFeature\Zed\AiCommerce\Persistence;
 use ArrayObject;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCollectionTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCriteriaTransfer;
+use Generated\Shared\Transfer\BackofficeAssistantConversationTransfer;
 use Spryker\Zed\Kernel\Persistence\AbstractRepository;
 use Spryker\Zed\PropelOrm\Business\Runtime\ActiveQuery\Criteria;
 
@@ -51,9 +52,12 @@ class AiCommerceRepository extends AbstractRepository implements AiCommerceRepos
 
         $query->orderByIdBackofficeAssistantConversation(Criteria::DESC);
 
-        $conversations = $this->getFactory()
-            ->createBackofficeAssistantConversationMapper()
-            ->mapEntityCollectionToTransferCollection($query->find(), []);
+        $mapper = $this->getFactory()->createBackofficeAssistantConversationMapper();
+        $conversations = [];
+
+        foreach ($query->find() as $entity) {
+            $conversations[] = $mapper->mapEntityToTransfer($entity, new BackofficeAssistantConversationTransfer());
+        }
 
         return (new BackofficeAssistantConversationCollectionTransfer())
             ->setBackofficeAssistantConversations(new ArrayObject($conversations));

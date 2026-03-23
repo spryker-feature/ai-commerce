@@ -31,6 +31,24 @@ class PromptHandler implements PromptHandlerInterface
 {
     protected const string AGENT_GUARDRAIL = 'Guardrail';
 
+    protected const string KEY_TYPE = 'type';
+
+    protected const string KEY_AGENT = 'agent';
+
+    protected const string KEY_CONVERSATION_REFERENCE = 'conversation_reference';
+
+    protected const string KEY_MESSAGE = 'message';
+
+    protected const string KEY_NAME = 'name';
+
+    protected const string KEY_ARGUMENTS = 'arguments';
+
+    protected const string KEY_RESULT = 'result';
+
+    protected const string MESSAGE_PROMPT_REQUIRED = 'Prompt is required';
+
+    protected const string MESSAGE_AI_SERVICE_UNAVAILABLE = 'AI service unavailable';
+
     /**
      * @param array<\SprykerFeature\Zed\AiCommerce\Dependency\BackofficeAssistant\BackofficeAssistantAgentPluginInterface> $agentPlugins
      */
@@ -53,7 +71,7 @@ class PromptHandler implements PromptHandlerInterface
         $prompt = (string)$promptRequestTransfer->getPrompt();
 
         if (!$prompt) {
-            $this->eventEmitter->emit(BackofficeAssistantEventType::Error, ['message' => 'Prompt is required']);
+            $this->eventEmitter->emit(BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => static::MESSAGE_PROMPT_REQUIRED]);
 
             return $response;
         }
@@ -104,8 +122,8 @@ class PromptHandler implements PromptHandlerInterface
         }
 
         $this->eventEmitter->emit(BackofficeAssistantEventType::AgentSelected, [
-            'agent' => $selectedAgent,
-            'conversation_reference' => $conversationReference,
+            static::KEY_AGENT => $selectedAgent,
+            static::KEY_CONVERSATION_REFERENCE => $conversationReference,
         ]);
 
         return $this->executeSelectedAgent($promptRequestTransfer, $response, $selectedAgent, $conversationReference);
@@ -128,7 +146,7 @@ class PromptHandler implements PromptHandlerInterface
         );
 
         if (!$intentRouterResponse) {
-            $this->eventEmitter->emit(BackofficeAssistantEventType::Error, ['message' => 'AI service unavailable']);
+            $this->eventEmitter->emit(BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => static::MESSAGE_AI_SERVICE_UNAVAILABLE]);
 
             return $response;
         }
@@ -147,20 +165,20 @@ class PromptHandler implements PromptHandlerInterface
         }
 
         $this->eventEmitter->emit(BackofficeAssistantEventType::AgentSelected, [
-            'agent' => $selectedAgent,
-            'conversation_reference' => $conversationReference,
+            static::KEY_AGENT => $selectedAgent,
+            static::KEY_CONVERSATION_REFERENCE => $conversationReference,
         ]);
 
         if ($selectedAgent !== $previousAgent && $selectedAgent !== static::AGENT_GUARDRAIL) {
             $this->eventEmitter->emit(BackofficeAssistantEventType::Reasoning, [
-                'message' => $intentRouterResponse->getReasoningMessage(),
+                static::KEY_MESSAGE => $intentRouterResponse->getReasoningMessage(),
             ]);
         }
 
         if ($selectedAgent === static::AGENT_GUARDRAIL) {
             $this->eventEmitter->emit(BackofficeAssistantEventType::AiResponse, [
-                'message' => $intentRouterResponse->getReasoningMessage(),
-                'conversation_reference' => $conversationReference,
+                static::KEY_MESSAGE => $intentRouterResponse->getReasoningMessage(),
+                static::KEY_CONVERSATION_REFERENCE => $conversationReference,
             ]);
 
             return $response;
@@ -250,8 +268,8 @@ class PromptHandler implements PromptHandlerInterface
         }
 
         $this->eventEmitter->emit(BackofficeAssistantEventType::AgentSelected, [
-            'agent' => $previousAgent,
-            'conversation_reference' => $conversationReference,
+            static::KEY_AGENT => $previousAgent,
+            static::KEY_CONVERSATION_REFERENCE => $conversationReference,
         ]);
 
         return $previousAgent;
@@ -279,15 +297,15 @@ class PromptHandler implements PromptHandlerInterface
 
             foreach ($agentResponse->getToolInvocations() as $toolInvocation) {
                 $this->eventEmitter->emit(BackofficeAssistantEventType::ToolCall, [
-                    'name' => $toolInvocation->getName(),
-                    'arguments' => $toolInvocation->getArguments(),
-                    'result' => $toolInvocation->getResult(),
+                    static::KEY_NAME => $toolInvocation->getName(),
+                    static::KEY_ARGUMENTS => $toolInvocation->getArguments(),
+                    static::KEY_RESULT => $toolInvocation->getResult(),
                 ]);
             }
 
             $this->eventEmitter->emit(BackofficeAssistantEventType::AiResponse, [
-                'message' => $agentResponse->getAiResponse(),
-                'conversation_reference' => $conversationReference,
+                static::KEY_MESSAGE => $agentResponse->getAiResponse(),
+                static::KEY_CONVERSATION_REFERENCE => $conversationReference,
             ]);
 
             break;

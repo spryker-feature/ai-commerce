@@ -6,18 +6,111 @@
     <transfer name="PromptRequest" strict="true">
         <property name="promptMessage" type="PromptMessage"/>
         <property name="aiConfigurationName" type="string" description="The configuration name of ai configuration"/>
+        <property name="conversationReference" type="string" description="Optional conversation identifier for chat history persistence. When provided, enables storage-backed conversation history."/>
+        <property name="structuredMessage" type="object" description="Transfer object that defines the schema for structured response from the LLM."/>
     </transfer>
 
     <transfer name="PromptResponse" strict="true">
         <property name="message" type="PromptMessage"/>
         <property name="isSuccessful" type="bool"/>
         <property name="errors" type="Error[]" singular="error"/>
+        <property name="structuredMessage" type="object" description="Transfer object containing the structured response data returned by the LLM."/>
     </transfer>
 
     <transfer name="PromptMessage" strict="true">
+        <property name="type" type="string" description="Message type: user, assistant, tool_call, or tool_result"/>
+        <property name="content" type="string"/>
     </transfer>
 
     <transfer name="Error">
+    </transfer>
+
+    <transfer name="BackofficeAssistantConversation" strict="true">
+        <property name="messages" type="PromptMessage[]" singular="message"/>
+        <property name="userSelectedAgent" type="string"/>
+        <property name="agent" type="string"/>
+        <property name="name" type="string"/>
+        <property name="conversationReference" type="string"/>
+        <property name="userUuid" type="string"/>
+        <property name="idBackofficeAssistantConversation" type="int"/>
+    </transfer>
+
+    <transfer name="BackofficeAssistantConversationCollection" strict="true">
+        <property name="backofficeAssistantConversations" type="BackofficeAssistantConversation[]" singular="backofficeAssistantConversation"/>
+    </transfer>
+
+    <transfer name="BackofficeAssistantConversationCriteria" strict="true">
+        <property name="backofficeAssistantConversationConditions" type="BackofficeAssistantConversationConditions"/>
+    </transfer>
+
+    <transfer name="BackofficeAssistantConversationConditions" strict="true">
+        <property name="withMessages" type="bool"/>
+        <property name="conversationReferences" type="string[]" singular="conversationReference"/>
+        <property name="userUuids" type="string[]" singular="userUuid"/>
+        <property name="backofficeAssistantConversationIds" type="int[]" singular="idBackofficeAssistantConversation"/>
+    </transfer>
+
+    <transfer name="BackofficeAssistantConversationCollectionRequest" strict="true">
+        <property name="backofficeAssistantConversations" type="BackofficeAssistantConversation[]" singular="backofficeAssistantConversation"/>
+    </transfer>
+
+    <transfer name="BackofficeAssistantConversationCollectionResponse" strict="true">
+        <property name="errors" type="Error[]" singular="error"/>
+        <property name="backofficeAssistantConversations" type="BackofficeAssistantConversation[]" singular="backofficeAssistantConversation"/>
+    </transfer>
+
+    <transfer name="BackofficeAssistantConversationCollectionDeleteCriteria" strict="true">
+        <property name="conversationReferences" type="string[]" singular="conversationReference"/>
+    </transfer>
+
+    <transfer name="BackofficeAssistantPromptRequest" strict="true">
+        <property name="userUuid" type="string"/>
+        <property name="selectedAgent" type="string"/>
+        <property name="context" type="array" singular="contextItem"/>
+        <property name="rawAttachments" type="array" singular="rawAttachment"/>
+        <property name="attachments" type="Attachment[]" singular="attachment"/>
+        <property name="conversationReference" type="string"/>
+        <property name="prompt" type="string"/>
+    </transfer>
+
+    <transfer name="BackofficeAssistantPromptResponse" strict="true">
+        <property name="toolInvocations" type="ToolInvocation[]" singular="toolInvocation"/>
+        <property name="conversationReference" type="string"/>
+        <property name="aiResponse" type="string"/>
+    </transfer>
+
+    <transfer name="IntentRouterResponse" strict="true">
+        <property name="reasoningMessage" type="string" description="Message to be displayed to the user about the decision taken."/>
+        <property name="agent" type="string" description="The next agent to be called for the given intent. Select agent among provided agents with description. If no agent is selected, the agent will be 'Guardrail'."/>
+    </transfer>
+
+    <transfer name="Attachment" strict="true">
+        <property name="type" type="string"/>
+    </transfer>
+
+    <transfer name="ConversationHistoryCriteria" strict="true">
+        <property name="conversationHistoryConditions" type="ConversationHistoryConditions" description="Filtering conditions for conversation histories."/>
+    </transfer>
+
+    <transfer name="ConversationHistoryConditions" strict="true">
+        <property name="conversationReferences" type="string[]" singular="conversationReference" description="Conversation references to retrieve history for. Uses IN operation - each reference retrieves one conversation."/>
+    </transfer>
+
+    <transfer name="ConversationHistory" strict="true">
+    </transfer>
+
+    <transfer name="ConversationHistoryCollection" strict="true">
+        <property name="conversationHistories" type="ConversationHistory[]" singular="conversationHistory" description="Collection of conversation histories."/>
+    </transfer>
+
+    <transfer name="ToolInvocation" strict="true">
+        <property name="name" type="string" description="The unique identifier of the tool that was called."/>
+        <property name="arguments" type="array" singular="argument" description="The parameters passed to the tool during execution."/>
+        <property name="result" type="string" description="The result returned after executing the tool."/>
+    </transfer>
+
+    <transfer name="User">
+        <property name="uuid" type="string" strict="true"/>
     </transfer>
 
 </transfers>

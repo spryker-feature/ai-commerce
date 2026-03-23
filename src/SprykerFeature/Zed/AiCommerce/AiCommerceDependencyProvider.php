@@ -79,7 +79,7 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
 
     protected function addBackofficeAssistantAgentPlugins(Container $container): Container
     {
-        $container->set(static::PLUGINS_BACKOFFICE_ASSISTANT_AGENT, function (): array {
+        $container->set(static::PLUGINS_BACKOFFICE_ASSISTANT_AGENT, function (Container $container): array {
             return $this->getBackofficeAssistantAgentPlugins();
         });
 

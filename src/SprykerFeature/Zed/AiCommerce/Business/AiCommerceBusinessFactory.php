@@ -74,7 +74,7 @@ class AiCommerceBusinessFactory extends AbstractBusinessFactory
         return $this->getProvidedDependency(AiCommerceDependencyProvider::SERVICE_AI_COMMERCE);
     }
 
-    public function getSseEventEmitter(): SseEventEmitterInterface
+    public function createSseEventEmitter(): SseEventEmitterInterface
     {
         return new SseEventEmitter();
     }
@@ -88,7 +88,7 @@ class AiCommerceBusinessFactory extends AbstractBusinessFactory
             $this->getAiFoundationFacade(),
             $this->getBackofficeAssistantAgentPlugins(),
             $this->createAttachmentBuilder(),
-            $this->getSseEventEmitter(),
+            $this->createSseEventEmitter(),
             $this->createIntentRouter(),
         );
     }

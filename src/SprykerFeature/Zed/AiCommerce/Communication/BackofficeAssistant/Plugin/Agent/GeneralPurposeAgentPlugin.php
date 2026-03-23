@@ -22,8 +22,6 @@ class GeneralPurposeAgentPlugin extends AbstractPlugin implements BackofficeAssi
 {
     protected const string NAME = 'General Purpose Agent';
 
-    protected const string MESSAGE_NO_RESPONSE = 'No response received.';
-
     public function getName(): string
     {
         return static::NAME;

@@ -13,12 +13,14 @@ use SprykerFeature\Shared\AiCommerce\BackofficeAssistant\BackofficeAssistantEven
 
 class SseEventEmitter implements SseEventEmitterInterface
 {
+    protected const string KEY_TYPE = 'type';
+
     /**
      * {@inheritDoc}
      */
     public function emit(BackofficeAssistantEventType $type, array $payload): void
     {
-        $encoded = json_encode(array_merge(['type' => $type->value], $payload));
+        $encoded = json_encode(array_merge([static::KEY_TYPE => $type->value], $payload));
 
         if ($encoded === false) {
             return;
