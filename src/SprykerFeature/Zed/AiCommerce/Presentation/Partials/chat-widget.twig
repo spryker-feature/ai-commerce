@@ -2,40 +2,58 @@
 
 <button type="button"
             class="backoffice-assistant__toggle js-backoffice-assistant__toggle"
-            aria-label="Open AI Assistant">
+            aria-label="{{ 'AI Assistant' | trans }}">
         <span class="backoffice-assistant__toggle-icon">&#x1F916;</span>
-        <span class="backoffice-assistant__toggle-text">Assistant</span>
+        <span class="backoffice-assistant__toggle-text">{{ 'Assistant' | trans }}</span>
     </button>
 
-    <div class="backoffice-assistant__panel js-backoffice-assistant__panel" role="dialog" aria-label="AI Assistant">
+    <div class="backoffice-assistant__panel js-backoffice-assistant__panel"
+         role="dialog"
+         aria-label="{{ 'AI Assistant' | trans }}"
+         data-i18n-retry="{{ 'Retry' | trans | e('html_attr') }}"
+         data-i18n-arguments="{{ 'Arguments' | trans | e('html_attr') }}"
+         data-i18n-show-result="{{ 'Show result' | trans | e('html_attr') }}"
+         data-i18n-hide-result="{{ 'Hide result' | trans | e('html_attr') }}"
+         data-i18n-unsupported-file-type="{{ 'Unsupported file type: ' | trans | e('html_attr') }}"
+         data-i18n-file-too-large="{{ 'File too large (max 5 MB): ' | trans | e('html_attr') }}"
+         data-i18n-failed-load-conversations="{{ 'Failed to load conversations.' | trans | e('html_attr') }}"
+         data-i18n-delete-conversation="{{ 'Delete conversation' | trans | e('html_attr') }}"
+         data-i18n-greeting="{{ 'Hello, %userName%! How can I help you today?' | trans({'%userName%': '__USERNAME__'}) | e('html_attr') }}"
+         data-i18n-request-failed="{{ 'Request failed with status ' | trans | e('html_attr') }}"
+         data-i18n-request-interrupted="{{ 'Request interrupted.' | trans | e('html_attr') }}"
+         data-i18n-connection-error="{{ 'Connection error. Please try again.' | trans | e('html_attr') }}"
+         data-i18n-no-response="{{ 'No response received.' | trans | e('html_attr') }}"
+         data-i18n-error-prefix="{{ 'Error: ' | trans | e('html_attr') }}"
+         data-i18n-failed-load-history="{{ 'Failed to load conversation history.' | trans | e('html_attr') }}"
+         data-i18n-tool-result="{{ 'Tool Result' | trans | e('html_attr') }}">
         <div class="backoffice-assistant__header">
             <div class="backoffice-assistant__header-actions">
                 <button type="button"
                         class="backoffice-assistant__header-btn js-backoffice-assistant__history-btn"
-                        title="Chat history"
-                        aria-label="Chat history">
+                        title="{{ 'Chat history' | trans }}"
+                        aria-label="{{ 'Chat history' | trans }}">
                     <span class="fa fa-history"></span>
                 </button>
                 <button type="button"
                         class="backoffice-assistant__header-btn js-backoffice-assistant__new-chat"
-                        title="New conversation"
-                        aria-label="New conversation">
+                        title="{{ 'New conversation' | trans }}"
+                        aria-label="{{ 'New conversation' | trans }}">
                     <span class="fa fa-plus"></span>
                 </button>
             </div>
             <div class="backoffice-assistant__header-center">
-                <strong class="backoffice-assistant__header-title">Backoffice Assistant</strong>
+                <strong class="backoffice-assistant__header-title">{{ 'Backoffice Assistant' | trans }}</strong>
                 <div class="backoffice-assistant__agent-row">
                     <span class="backoffice-assistant__agent-badge js-backoffice-assistant__agent-badge"></span>
                     <select class="backoffice-assistant__agent-select js-backoffice-assistant__agent-select"
-                            aria-label="Select agent">
-                        <option value="">Auto</option>
+                            aria-label="{{ 'Select agent' | trans }}">
+                        <option value="">{{ 'Auto' | trans }}</option>
                     </select>
                 </div>
             </div>
             <button type="button"
                     class="backoffice-assistant__close js-backoffice-assistant__close"
-                    aria-label="Close AI Assistant">
+                    aria-label="{{ 'Close AI Assistant' | trans }}">
                 <span class="fa fa-times"></span>
             </button>
         </div>
@@ -43,7 +61,7 @@
         <div class="backoffice-assistant__histories js-backoffice-assistant__histories" hidden>
             <ul class="backoffice-assistant__histories-list js-backoffice-assistant__histories-list"></ul>
             <p class="backoffice-assistant__histories-empty js-backoffice-assistant__histories-empty" hidden>
-                No conversations yet. Start a new one!
+                {{ 'No conversations yet. Start a new one!' | trans }}
             </p>
         </div>
 
@@ -54,8 +72,8 @@
             <div class="backoffice-assistant__footer-row">
                 <button type="button"
                         class="backoffice-assistant__attach js-backoffice-assistant__attach"
-                        aria-label="Attach file"
-                        title="Attach file">
+                        aria-label="{{ 'Attach file' | trans }}"
+                        title="{{ 'Attach file' | trans }}">
                     <span class="fa fa-paperclip"></span>
                 </button>
                 <input type="file"
@@ -65,11 +83,11 @@
                        hidden />
                 <textarea class="backoffice-assistant__input js-backoffice-assistant__input"
                           rows="1"
-                          placeholder="Ask me anything..."
-                          aria-label="Message input"></textarea>
+                          placeholder="{{ 'Ask me anything...' | trans }}"
+                          aria-label="{{ 'Message input' | trans }}"></textarea>
                 <button type="button"
                         class="backoffice-assistant__send js-backoffice-assistant__send"
-                        aria-label="Send message">
+                        aria-label="{{ 'Send message' | trans }}">
                     <span class="fa fa-paper-plane"></span>
                 </button>
             </div>

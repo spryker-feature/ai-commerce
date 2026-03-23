@@ -1,0 +1,30 @@
+Open AI Assistant,Open AI Assistant
+Assistant,Assistant
+AI Assistant,AI Assistant
+Chat history,Chat history
+New conversation,New conversation
+Backoffice Assistant,Backoffice Assistant
+Select agent,Select agent
+Auto,Auto
+Close AI Assistant,Close AI Assistant
+No conversations yet. Start a new one!,No conversations yet. Start a new one!
+Attach file,Attach file
+Ask me anything...,Ask me anything...
+Message input,Message input
+Send message,Send message
+Retry,Retry
+Arguments,Arguments
+Show result,Show result
+Hide result,Hide result
+"Unsupported file type: ","Unsupported file type: "
+"File too large (max 5 MB): ","File too large (max 5 MB): "
+Failed to load conversations.,Failed to load conversations.
+Delete conversation,Delete conversation
+"Hello, %userName%! How can I help you today?","Hello, %userName%! How can I help you today?"
+"Request failed with status ","Request failed with status "
+Request interrupted.,Request interrupted.
+"Connection error. Please try again.","Connection error. Please try again."
+No response received.,No response received.
+"Error: ","Error: "
+Failed to load conversation history.,Failed to load conversation history.
+Tool Result,Tool Result

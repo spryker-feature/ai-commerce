@@ -311,9 +311,10 @@ BackofficeAssistantMarkdownParser.prototype.parse = function (text) {
 
 // --- Message Renderer ---
 
-function BackofficeAssistantMessageRenderer(messagesEl) {
+function BackofficeAssistantMessageRenderer(messagesEl, i18n) {
     this.messagesEl = messagesEl;
     this.markdownParser = new BackofficeAssistantMarkdownParser();
+    this.i18n = i18n;
 }
 
 BackofficeAssistantMessageRenderer.prototype.scrollToBottom = function () {
@@ -357,7 +358,7 @@ BackofficeAssistantMessageRenderer.prototype.addRetryButton = function (onRetry)
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.classList.add('backoffice-assistant__retry-btn');
-    btn.textContent = 'Retry';
+    btn.textContent = this.i18n.retry;
     btn.addEventListener('click', function () {
         btn.remove();
         onRetry();
@@ -410,7 +411,7 @@ BackofficeAssistantMessageRenderer.prototype.createToolCallArgs = function (args
 
     const sectionLabel = document.createElement('span');
     sectionLabel.classList.add('backoffice-assistant__tool-call-section-label');
-    sectionLabel.textContent = 'Arguments';
+    sectionLabel.textContent = this.i18n.arguments;
     section.appendChild(sectionLabel);
 
     const code = document.createElement('pre');
@@ -428,7 +429,7 @@ BackofficeAssistantMessageRenderer.prototype.createToolCallResult = function (re
     const toggleBtn = document.createElement('button');
     toggleBtn.type = 'button';
     toggleBtn.classList.add('backoffice-assistant__tool-call-toggle');
-    toggleBtn.textContent = 'Show result';
+    toggleBtn.textContent = this.i18n.showResult;
     section.appendChild(toggleBtn);
 
     const code = document.createElement('pre');
@@ -442,9 +443,11 @@ BackofficeAssistantMessageRenderer.prototype.createToolCallResult = function (re
 
     section.appendChild(code);
 
+    const i18n = this.i18n;
+
     toggleBtn.addEventListener('click', function () {
         const isCollapsed = code.classList.toggle('backoffice-assistant__tool-call-code--collapsed');
-        toggleBtn.textContent = isCollapsed ? 'Show result' : 'Hide result';
+        toggleBtn.textContent = isCollapsed ? i18n.showResult : i18n.hideResult;
     });
 
     return section;
@@ -471,11 +474,12 @@ BackofficeAssistantMessageRenderer.prototype.clear = function () {
 
 // --- Attachment Manager ---
 
-function BackofficeAssistantAttachmentManager(previewEl, fileInputEl, state, renderer) {
+function BackofficeAssistantAttachmentManager(previewEl, fileInputEl, state, renderer, i18n) {
     this.previewEl = previewEl;
     this.fileInputEl = fileInputEl;
     this.state = state;
     this.renderer = renderer;
+    this.i18n = i18n;
 }
 
 BackofficeAssistantAttachmentManager.prototype.handleFileSelect = function (files) {
@@ -488,13 +492,13 @@ BackofficeAssistantAttachmentManager.prototype.handleFileSelect = function (file
 
 BackofficeAssistantAttachmentManager.prototype.processFile = function (file) {
     if (BACKOFFICE_ASSISTANT_ALLOWED_TYPES.indexOf(file.type) === -1) {
-        this.renderer.addMessage('ai', 'Unsupported file type: ' + file.name);
+        this.renderer.addMessage('ai', this.i18n.unsupportedFileType + file.name);
 
         return;
     }
 
     if (file.size > BACKOFFICE_ASSISTANT_MAX_FILE_SIZE) {
-        this.renderer.addMessage('ai', 'File too large (max 5 MB): ' + file.name);
+        this.renderer.addMessage('ai', this.i18n.fileTooLarge + file.name);
 
         return;
     }
@@ -626,7 +630,7 @@ BackofficeAssistantAgentBadge.prototype.setSelectedAgent = function (value) {
 
 // --- Histories Manager ---
 
-function BackofficeAssistantHistories(elements, api, onSelect, onDeleteCurrent) {
+function BackofficeAssistantHistories(elements, api, onSelect, onDeleteCurrent, i18n) {
     this.historiesEl = elements.histories;
     this.historiesList = elements.historiesList;
     this.historiesEmpty = elements.historiesEmpty;
@@ -637,6 +641,7 @@ function BackofficeAssistantHistories(elements, api, onSelect, onDeleteCurrent) 
     this.api = api;
     this.onSelect = onSelect;
     this.onDeleteCurrent = onDeleteCurrent;
+    this.i18n = i18n;
 }
 
 BackofficeAssistantHistories.prototype.show = function () {
@@ -678,7 +683,7 @@ BackofficeAssistantHistories.prototype.load = function () {
         })
         .catch(function () {
             self.historiesEmpty.hidden = false;
-            self.historiesEmpty.textContent = 'Failed to load conversations.';
+            self.historiesEmpty.textContent = self.i18n.failedLoadConversations;
         });
 };
 
@@ -702,7 +707,7 @@ BackofficeAssistantHistories.prototype.createHistoryItem = function (entry) {
     const deleteBtn = document.createElement('button');
     deleteBtn.type = 'button';
     deleteBtn.classList.add('backoffice-assistant__histories-item-delete');
-    deleteBtn.title = 'Delete conversation';
+    deleteBtn.title = this.i18n.deleteConversation;
     deleteBtn.innerHTML = '<i class="fa fa-trash"></i>';
     deleteBtn.addEventListener('click', function (e) {
         e.stopPropagation();
@@ -754,19 +759,22 @@ function BackofficeAssistant() {
 
     this.state = new BackofficeAssistantState();
     this.api = new BackofficeAssistantApi();
-    this.renderer = new BackofficeAssistantMessageRenderer(this.elements.messages);
+    this.i18n = this.resolveTranslations();
+    this.renderer = new BackofficeAssistantMessageRenderer(this.elements.messages, this.i18n);
     this.agentBadge = new BackofficeAssistantAgentBadge(this.elements.agentBadge, this.elements.agentSelect);
     this.attachments = new BackofficeAssistantAttachmentManager(
         this.elements.attachmentsPreview,
         this.elements.fileInput,
         this.state,
         this.renderer,
+        this.i18n,
     );
     this.histories = new BackofficeAssistantHistories(
         this.elements,
         this.api,
         this.loadConversationDetail.bind(this),
         this.handleConversationDeleted.bind(this),
+        this.i18n,
     );
 
     this.init();
@@ -801,6 +809,29 @@ BackofficeAssistant.prototype.resolveElements = function () {
     };
 };
 
+BackofficeAssistant.prototype.resolveTranslations = function () {
+    var dataset = this.elements.panel.dataset;
+
+    return {
+        retry: dataset.i18nRetry || 'Retry',
+        arguments: dataset.i18nArguments || 'Arguments',
+        showResult: dataset.i18nShowResult || 'Show result',
+        hideResult: dataset.i18nHideResult || 'Hide result',
+        unsupportedFileType: dataset.i18nUnsupportedFileType || 'Unsupported file type: ',
+        fileTooLarge: dataset.i18nFileTooLarge || 'File too large (max 5 MB): ',
+        failedLoadConversations: dataset.i18nFailedLoadConversations || 'Failed to load conversations.',
+        deleteConversation: dataset.i18nDeleteConversation || 'Delete conversation',
+        greeting: dataset.i18nGreeting || 'Hello, __USERNAME__! How can I help you today?',
+        requestFailed: dataset.i18nRequestFailed || 'Request failed with status ',
+        requestInterrupted: dataset.i18nRequestInterrupted || 'Request interrupted.',
+        connectionError: dataset.i18nConnectionError || 'Connection error. Please try again.',
+        noResponse: dataset.i18nNoResponse || 'No response received.',
+        errorPrefix: dataset.i18nErrorPrefix || 'Error: ',
+        failedLoadHistory: dataset.i18nFailedLoadHistory || 'Failed to load conversation history.',
+        toolResult: dataset.i18nToolResult || 'Tool Result',
+    };
+};
+
 BackofficeAssistant.prototype.init = function () {
     this.loadAvailableAgents();
     this.restorePersistedState();
@@ -831,7 +862,7 @@ BackofficeAssistant.prototype.closePanel = function () {
 BackofficeAssistant.prototype.showGreeting = function () {
     const userName = (window.BackofficeAssistantConfig && window.BackofficeAssistantConfig.userName) || 'there';
     this.state.greetingShown = true;
-    this.renderer.addMessage('ai', 'Hello, ' + userName + '! How can I help you today?');
+    this.renderer.addMessage('ai', this.i18n.greeting.replace('__USERNAME__', userName));
 };
 
 BackofficeAssistant.prototype.loadAvailableAgents = function () {
@@ -952,7 +983,15 @@ BackofficeAssistant.prototype.doSendMessage = function (prompt, messageAttachmen
     this.api.sendPrompt(body, signal)
         .then(function (response) {
             if (!response.ok) {
-                throw new Error('Request failed with status ' + response.status);
+                loadingEl.remove();
+                self.renderer.addMessage('ai', self.i18n.requestFailed + response.status);
+                self.renderer.addRetryButton(function () {
+                    self.doSendMessage(prompt, messageAttachments);
+                });
+                self.setWaiting(false);
+                self.elements.input.focus();
+
+                return;
             }
 
             return self.readStream(response, prompt, loadingEl, messageAttachments);
@@ -961,12 +1000,12 @@ BackofficeAssistant.prototype.doSendMessage = function (prompt, messageAttachmen
             loadingEl.remove();
 
             if (err.name === 'AbortError') {
-                self.renderer.addMessage('ai', 'Request interrupted.');
+                self.renderer.addMessage('ai', self.i18n.requestInterrupted);
 
                 return;
             }
 
-            self.renderer.addMessage('ai', 'Connection error. Please try again.');
+            self.renderer.addMessage('ai', self.i18n.connectionError);
             self.renderer.addRetryButton(function () {
                 self.doSendMessage(prompt, messageAttachments);
             });
@@ -995,7 +1034,7 @@ BackofficeAssistant.prototype.readStream = function (response, prompt, loadingEl
                 loadingEl.remove();
 
                 if (!receivedEvents) {
-                    self.renderer.addMessage('ai', 'No response received.');
+                    self.renderer.addMessage('ai', self.i18n.noResponse);
                     self.renderer.addRetryButton(function () {
                         self.doSendMessage(prompt, messageAttachments);
                     });
@@ -1046,7 +1085,7 @@ BackofficeAssistant.prototype.handleSseEvent = function (data, prompt, loadingEl
             break;
         case 'error':
             loadingEl.remove();
-            this.renderer.addMessage('ai', 'Error: ' + data.message);
+            this.renderer.addMessage('ai', this.i18n.errorPrefix + data.message);
             this.renderer.addRetryButton(function () {
                 self.doSendMessage(prompt, messageAttachments);
             });
@@ -1062,7 +1101,7 @@ BackofficeAssistant.prototype.handleLegacySseEvent = function (data, prompt, loa
 
     if (data.error) {
         loadingEl.remove();
-        this.renderer.addMessage('ai', 'Error: ' + data.error);
+        this.renderer.addMessage('ai', this.i18n.errorPrefix + data.error);
         this.renderer.addRetryButton(function () {
             self.doSendMessage(prompt, messageAttachments);
         });
@@ -1097,7 +1136,7 @@ BackofficeAssistant.prototype.loadConversationDetail = function (conversationRef
             self.elements.input.focus();
         })
         .catch(function () {
-            self.renderer.addMessage('ai', 'Failed to load conversation history.');
+            self.renderer.addMessage('ai', self.i18n.failedLoadHistory);
         });
 };
 
@@ -1117,7 +1156,7 @@ BackofficeAssistant.prototype.renderConversationMessages = function (messages) {
 
                 break;
             case 'tool_result':
-                this.renderer.addToolCallMessage('Tool Result', null, msg.content || '');
+                this.renderer.addToolCallMessage(this.i18n.toolResult, null, msg.content || '');
 
                 break;
             default:
