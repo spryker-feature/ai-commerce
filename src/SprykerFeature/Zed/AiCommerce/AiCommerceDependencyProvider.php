@@ -17,6 +17,8 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
 {
     public const string FACADE_AI_FOUNDATION = 'FACADE_AI_FOUNDATION';
 
+    public const string FACADE_GLOSSARY = 'FACADE_GLOSSARY';
+
     public const string FACADE_USER = 'FACADE_USER';
 
     public const string SERVICE_AI_COMMERCE = 'SERVICE_AI_COMMERCE';
@@ -34,6 +36,7 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
 
         $container = $this->addUserFacade($container);
         $container = $this->addCsrfProviderService($container);
+        $container = $this->addGlossaryFacade($container);
         $container = $this->addBackofficeAssistantAgentPlugins($container);
 
         return $container;
@@ -45,6 +48,7 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
 
         $container = $this->addAiCommerceService($container);
         $container = $this->addAiFoundationFacade($container);
+        $container = $this->addGlossaryFacade($container);
         $container = $this->addBackofficeAssistantAgentPlugins($container);
 
         return $container;
@@ -72,6 +76,15 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
     {
         $container->set(static::FACADE_AI_FOUNDATION, function (Container $container) {
             return $container->getLocator()->aiFoundation()->facade();
+        });
+
+        return $container;
+    }
+
+    protected function addGlossaryFacade(Container $container): Container
+    {
+        $container->set(static::FACADE_GLOSSARY, function (Container $container) {
+            return $container->getLocator()->glossary()->facade();
         });
 
         return $container;

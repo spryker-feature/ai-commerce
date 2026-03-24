@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace SprykerFeature\Zed\AiCommerce\Communication;
 
+use Spryker\Zed\Glossary\Business\GlossaryFacadeInterface;
 use Spryker\Zed\Kernel\Communication\AbstractCommunicationFactory;
 use Spryker\Zed\User\Business\UserFacadeInterface;
 use SprykerFeature\Zed\AiCommerce\AiCommerceDependencyProvider;
@@ -36,5 +37,10 @@ class AiCommerceCommunicationFactory extends AbstractCommunicationFactory
     public function getCsrfTokenManager(): CsrfTokenManagerInterface
     {
         return $this->getProvidedDependency(AiCommerceDependencyProvider::SERVICE_FORM_CSRF_PROVIDER);
+    }
+
+    public function getGlossaryFacade(): GlossaryFacadeInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_GLOSSARY);
     }
 }

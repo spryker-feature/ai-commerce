@@ -14,11 +14,6 @@ use Generated\Shared\Transfer\BackofficeAssistantConversationCollectionResponseT
 
 interface BackofficeAssistantConversationDeleterInterface
 {
-    /**
-     * Specification:
-     * - Deletes conversation records matching the given delete criteria.
-     * - Deletes by conversationReferences when provided.
-     */
     public function deleteCollection(
         BackofficeAssistantConversationCollectionDeleteCriteriaTransfer $deleteCriteriaTransfer,
     ): BackofficeAssistantConversationCollectionResponseTransfer;

@@ -29,7 +29,7 @@ class BackofficeAssistantConversationCreator implements BackofficeAssistantConve
 
         foreach ($collectionRequestTransfer->getBackofficeAssistantConversations() as $conversationTransfer) {
             $conversationReference = $this->aiCommerceService->generateConversationReference(
-                (string)$conversationTransfer->getUserUuid(),
+                $conversationTransfer->getUserUuidOrFail(),
             );
 
             $conversationTransfer->setConversationReference($conversationReference);

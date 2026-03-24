@@ -12,12 +12,6 @@ namespace SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Attachment;
 interface AttachmentBuilderInterface
 {
     /**
-     * Specification:
-     * - Validates raw attachment data (size, count, media type).
-     * - Decodes base64 content and builds AttachmentTransfer objects.
-     * - Skips invalid attachments and logs warnings.
-     * - Returns array of valid AttachmentTransfer objects.
-     *
      * @param array<int, array<string, string>> $rawAttachments
      *
      * @return array<\Generated\Shared\Transfer\AttachmentTransfer>

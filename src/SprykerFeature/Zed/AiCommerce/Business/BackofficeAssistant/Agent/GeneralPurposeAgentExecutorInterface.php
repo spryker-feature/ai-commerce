@@ -14,12 +14,6 @@ use Generated\Shared\Transfer\BackofficeAssistantPromptResponseTransfer;
 
 interface GeneralPurposeAgentExecutorInterface
 {
-    /**
-     * Specification:
-     * - Sends the prompt to AI foundation using the general-purpose AI configuration.
-     * - Attaches any provided attachments to the prompt message.
-     * - Returns a response transfer with the AI response text and conversation reference.
-     */
     public function execute(
         BackofficeAssistantPromptRequestTransfer $promptRequestTransfer,
     ): BackofficeAssistantPromptResponseTransfer;

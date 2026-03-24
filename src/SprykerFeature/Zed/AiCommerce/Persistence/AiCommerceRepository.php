@@ -11,8 +11,10 @@ namespace SprykerFeature\Zed\AiCommerce\Persistence;
 
 use ArrayObject;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCollectionTransfer;
+use Generated\Shared\Transfer\BackofficeAssistantConversationConditionsTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCriteriaTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationTransfer;
+use Orm\Zed\AiCommerce\Persistence\SpyBackofficeAssistantConversationQuery;
 use Spryker\Zed\Kernel\Persistence\AbstractRepository;
 use Spryker\Zed\PropelOrm\Business\Runtime\ActiveQuery\Criteria;
 
@@ -30,8 +32,26 @@ class AiCommerceRepository extends AbstractRepository implements AiCommerceRepos
             return new BackofficeAssistantConversationCollectionTransfer();
         }
 
-        $query = $this->getFactory()->createBackofficeAssistantConversationQuery();
+        $query = $this->applyConditionsToQuery(
+            $this->getFactory()->createBackofficeAssistantConversationQuery(),
+            $conditions,
+        );
 
+        $mapper = $this->getFactory()->createBackofficeAssistantConversationMapper();
+        $conversations = [];
+
+        foreach ($query->find() as $entity) {
+            $conversations[] = $mapper->mapEntityToTransfer($entity, new BackofficeAssistantConversationTransfer());
+        }
+
+        return (new BackofficeAssistantConversationCollectionTransfer())
+            ->setBackofficeAssistantConversations(new ArrayObject($conversations));
+    }
+
+    protected function applyConditionsToQuery(
+        SpyBackofficeAssistantConversationQuery $query,
+        BackofficeAssistantConversationConditionsTransfer $conditions,
+    ): SpyBackofficeAssistantConversationQuery {
         $userUuids = $conditions->getUserUuids();
 
         if ($userUuids !== []) {
@@ -52,14 +72,6 @@ class AiCommerceRepository extends AbstractRepository implements AiCommerceRepos
 
         $query->orderByIdBackofficeAssistantConversation(Criteria::DESC);
 
-        $mapper = $this->getFactory()->createBackofficeAssistantConversationMapper();
-        $conversations = [];
-
-        foreach ($query->find() as $entity) {
-            $conversations[] = $mapper->mapEntityToTransfer($entity, new BackofficeAssistantConversationTransfer());
-        }
-
-        return (new BackofficeAssistantConversationCollectionTransfer())
-            ->setBackofficeAssistantConversations(new ArrayObject($conversations));
+        return $query;
     }
 }

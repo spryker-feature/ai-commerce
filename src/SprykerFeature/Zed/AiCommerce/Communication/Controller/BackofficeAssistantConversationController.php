@@ -45,20 +45,18 @@ class BackofficeAssistantConversationController extends AbstractController
 
     protected const string CSRF_TOKEN_PARAM = '_token';
 
-    protected const string ERROR_MISSING_CONVERSATION_REFERENCE = 'Missing conversationReference';
+    protected const string ERROR_MISSING_CONVERSATION_REFERENCE = 'backoffice_assistant.error.missing_conversation_reference';
 
-    protected const string ERROR_CONVERSATION_NOT_FOUND = 'Conversation not found';
+    protected const string ERROR_CONVERSATION_NOT_FOUND = 'backoffice_assistant.error.conversation_not_found';
 
-    protected const string ERROR_BACKOFFICE_ASSISTANT_DISABLED = 'Backoffice Assistant is disabled.';
+    protected const string ERROR_BACKOFFICE_ASSISTANT_DISABLED = 'backoffice_assistant.error.disabled';
 
-    protected const string ERROR_INVALID_CSRF_TOKEN = 'Invalid or missing CSRF token.';
-
-    protected const string ERROR_MISSING_CONVERSATION_REFERENCE_PARAM = 'Missing conversation_reference';
+    protected const string ERROR_INVALID_CSRF_TOKEN = 'backoffice_assistant.error.invalid_csrf_token';
 
     public function indexAction(): JsonResponse
     {
         if (!$this->getFactory()->getConfig()->isBackofficeAssistantEnabled()) {
-            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => static::ERROR_BACKOFFICE_ASSISTANT_DISABLED], 403);
+            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getGlossaryFacade()->translate(static::ERROR_BACKOFFICE_ASSISTANT_DISABLED)], 403);
         }
 
         $userUuid = $this->getFactory()->getUserFacade()->getCurrentUser()->getUuidOrFail();
@@ -92,13 +90,13 @@ class BackofficeAssistantConversationController extends AbstractController
     public function detailAction(Request $request): JsonResponse
     {
         if (!$this->getFactory()->getConfig()->isBackofficeAssistantEnabled()) {
-            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => static::ERROR_BACKOFFICE_ASSISTANT_DISABLED], 403);
+            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getGlossaryFacade()->translate(static::ERROR_BACKOFFICE_ASSISTANT_DISABLED)], 403);
         }
 
         $conversationReference = (string)$request->query->get(static::REQUEST_KEY_CONVERSATION_REFERENCE, '');
 
         if (!$conversationReference) {
-            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => static::ERROR_MISSING_CONVERSATION_REFERENCE], 400);
+            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getGlossaryFacade()->translate(static::ERROR_MISSING_CONVERSATION_REFERENCE)], 400);
         }
 
         $userUuid = $this->getFactory()->getUserFacade()->getCurrentUser()->getUuidOrFail();
@@ -114,7 +112,7 @@ class BackofficeAssistantConversationController extends AbstractController
         $collection = $this->getFacade()->getBackofficeAssistantConversationCollection($criteria);
 
         if ($collection->getBackofficeAssistantConversations()->count() === 0) {
-            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => static::ERROR_CONVERSATION_NOT_FOUND], 404);
+            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getGlossaryFacade()->translate(static::ERROR_CONVERSATION_NOT_FOUND)], 404);
         }
 
         /** @var \Generated\Shared\Transfer\BackofficeAssistantConversationTransfer $conversation */
@@ -134,7 +132,7 @@ class BackofficeAssistantConversationController extends AbstractController
     public function deleteAction(Request $request): JsonResponse
     {
         if (!$this->getFactory()->getConfig()->isBackofficeAssistantEnabled()) {
-            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => static::ERROR_BACKOFFICE_ASSISTANT_DISABLED], 403);
+            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getGlossaryFacade()->translate(static::ERROR_BACKOFFICE_ASSISTANT_DISABLED)], 403);
         }
 
         $data = json_decode($request->getContent(), true) ?? [];
@@ -142,16 +140,16 @@ class BackofficeAssistantConversationController extends AbstractController
         $token = (string)($data[static::CSRF_TOKEN_PARAM] ?? '');
 
         if (!$this->isValidCsrfToken($token)) {
-            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => static::ERROR_INVALID_CSRF_TOKEN], 403);
+            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getGlossaryFacade()->translate(static::ERROR_INVALID_CSRF_TOKEN)], 403);
         }
 
         $conversationReference = (string)($data[static::RESPONSE_KEY_CONVERSATION_REFERENCE] ?? '');
 
         if (!$conversationReference) {
-            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => static::ERROR_MISSING_CONVERSATION_REFERENCE_PARAM], 400);
+            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getGlossaryFacade()->translate(static::ERROR_MISSING_CONVERSATION_REFERENCE)], 400);
         }
 
-        $userUuid = (string)$this->getFactory()->getUserFacade()->getCurrentUser()->getUuidOrFail();
+        $userUuid = $this->getFactory()->getUserFacade()->getCurrentUser()->getUuidOrFail();
 
         $ownershipCriteria = (new BackofficeAssistantConversationCriteriaTransfer())
             ->setBackofficeAssistantConversationConditions(
@@ -163,7 +161,7 @@ class BackofficeAssistantConversationController extends AbstractController
         $collection = $this->getFacade()->getBackofficeAssistantConversationCollection($ownershipCriteria);
 
         if ($collection->getBackofficeAssistantConversations()->count() === 0) {
-            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => static::ERROR_CONVERSATION_NOT_FOUND], 404);
+            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getGlossaryFacade()->translate(static::ERROR_CONVERSATION_NOT_FOUND)], 404);
         }
 
         $deleteCriteria = (new BackofficeAssistantConversationCollectionDeleteCriteriaTransfer())

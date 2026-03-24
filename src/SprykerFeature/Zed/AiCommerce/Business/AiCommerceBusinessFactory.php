@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace SprykerFeature\Zed\AiCommerce\Business;
 
 use Spryker\Zed\AiFoundation\Business\AiFoundationFacadeInterface;
+use Spryker\Zed\Glossary\Business\GlossaryFacadeInterface;
 use Spryker\Zed\Kernel\Business\AbstractBusinessFactory;
 use SprykerFeature\Service\AiCommerce\AiCommerceServiceInterface;
 use SprykerFeature\Zed\AiCommerce\AiCommerceDependencyProvider;
@@ -27,6 +28,8 @@ use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Conversation\Back
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Conversation\BackofficeAssistantConversationUpdaterInterface;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Emitter\SseEventEmitter;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Emitter\SseEventEmitterInterface;
+use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Prompt\BackofficeAssistantPromptRequestValidator;
+use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Prompt\BackofficeAssistantPromptRequestValidatorInterface;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Prompt\IntentRouter;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Prompt\IntentRouterInterface;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Prompt\PromptHandler;
@@ -90,7 +93,19 @@ class AiCommerceBusinessFactory extends AbstractBusinessFactory
             $this->createAttachmentBuilder(),
             $this->createSseEventEmitter(),
             $this->createIntentRouter(),
+            $this->createBackofficeAssistantPromptRequestValidator(),
+            $this->getGlossaryFacade(),
         );
+    }
+
+    public function getGlossaryFacade(): GlossaryFacadeInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_GLOSSARY);
+    }
+
+    public function createBackofficeAssistantPromptRequestValidator(): BackofficeAssistantPromptRequestValidatorInterface
+    {
+        return new BackofficeAssistantPromptRequestValidator($this->getConfig());
     }
 
     public function createIntentRouter(): IntentRouterInterface

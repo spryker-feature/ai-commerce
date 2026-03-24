@@ -20,6 +20,7 @@ use Generated\Shared\Transfer\ConversationHistoryConditionsTransfer;
 use Generated\Shared\Transfer\ConversationHistoryCriteriaTransfer;
 use Generated\Shared\Transfer\ConversationHistoryTransfer;
 use Spryker\Zed\AiFoundation\Business\AiFoundationFacadeInterface;
+use Spryker\Zed\Glossary\Business\GlossaryFacadeInterface;
 use SprykerFeature\Shared\AiCommerce\BackofficeAssistant\BackofficeAssistantEventType;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Attachment\AttachmentBuilderInterface;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Conversation\BackofficeAssistantConversationCreatorInterface;
@@ -45,8 +46,6 @@ class PromptHandler implements PromptHandlerInterface
 
     protected const string KEY_RESULT = 'result';
 
-    protected const string MESSAGE_PROMPT_REQUIRED = 'Prompt is required';
-
     protected const string MESSAGE_AI_SERVICE_UNAVAILABLE = 'AI service unavailable';
 
     /**
@@ -61,6 +60,8 @@ class PromptHandler implements PromptHandlerInterface
         protected AttachmentBuilderInterface $attachmentBuilder,
         protected SseEventEmitterInterface $eventEmitter,
         protected IntentRouterInterface $intentRouter,
+        protected BackofficeAssistantPromptRequestValidatorInterface $promptRequestValidator,
+        protected GlossaryFacadeInterface $glossaryFacade,
     ) {
     }
 
@@ -68,18 +69,20 @@ class PromptHandler implements PromptHandlerInterface
     {
         $response = new BackofficeAssistantPromptResponseTransfer();
 
-        $prompt = (string)$promptRequestTransfer->getPrompt();
+        $validationErrors = $this->promptRequestValidator->validate($promptRequestTransfer);
 
-        if (!$prompt) {
-            $this->eventEmitter->emit(BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => static::MESSAGE_PROMPT_REQUIRED]);
+        if ($validationErrors !== []) {
+            foreach ($validationErrors as $errorKey) {
+                $this->eventEmitter->emit(BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => $this->glossaryFacade->translate($errorKey)]);
+            }
 
             return $response;
         }
 
         $conversationReference = $this->resolveConversationReference(
-            $prompt,
+            $promptRequestTransfer->getPromptOrFail(),
             (string)$promptRequestTransfer->getConversationReference(),
-            (string)$promptRequestTransfer->getUserUuid(),
+            $promptRequestTransfer->getUserUuidOrFail(),
         );
 
         $response->setConversationReference($conversationReference);
@@ -140,7 +143,7 @@ class PromptHandler implements PromptHandlerInterface
 
         $intentRouterResponse = $this->intentRouter->route(
             $conversationHistory,
-            (string)$promptRequestTransfer->getPrompt(),
+            $promptRequestTransfer->getPromptOrFail(),
             $previousAgent,
             $promptRequestTransfer->getContext(),
         );
@@ -187,12 +190,17 @@ class PromptHandler implements PromptHandlerInterface
         return $this->executeSelectedAgent($promptRequestTransfer, $response, $selectedAgent, $conversationReference);
     }
 
-    protected function resolveConversationReference(string $prompt, string $requestedRef, string $userUuid): string
+    protected function resolveConversationReference(string $prompt, string $requestedConversationReference, string $userUuid): string
     {
-        if ($requestedRef && $this->hasBackofficeAssistantConversationForUser($userUuid, $requestedRef)) {
-            return $requestedRef;
+        if ($requestedConversationReference && $this->hasBackofficeAssistantConversationForUser($userUuid, $requestedConversationReference)) {
+            return $requestedConversationReference;
         }
 
+        return $this->createNewConversation($userUuid, $prompt);
+    }
+
+    protected function createNewConversation(string $userUuid, string $prompt): string
+    {
         $response = $this->conversationCreator->createCollection(
             (new BackofficeAssistantConversationCollectionRequestTransfer())
                 ->addBackofficeAssistantConversation(

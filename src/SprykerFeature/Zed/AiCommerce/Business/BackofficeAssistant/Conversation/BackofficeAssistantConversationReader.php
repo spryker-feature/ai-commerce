@@ -12,6 +12,7 @@ namespace SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Conversatio
 use ArrayObject;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCollectionTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCriteriaTransfer;
+use Generated\Shared\Transfer\ConversationHistoryCollectionTransfer;
 use Generated\Shared\Transfer\ConversationHistoryConditionsTransfer;
 use Generated\Shared\Transfer\ConversationHistoryCriteriaTransfer;
 use Spryker\Zed\AiFoundation\Business\AiFoundationFacadeInterface;
@@ -47,25 +48,15 @@ class BackofficeAssistantConversationReader implements BackofficeAssistantConver
             return;
         }
 
-        $conversationReferences = [];
+        $conditions = $this->buildConversationHistoryConditions($conversations);
+        $criteria = (new ConversationHistoryCriteriaTransfer())->setConversationHistoryConditions($conditions);
+
+        $historiesIndexedByReference = $this->indexHistoriesByReference(
+            $this->aiFoundationFacade->getConversationHistoryCollection($criteria),
+        );
 
         foreach ($conversations as $conversation) {
-            $conversationReferences[] = (string)$conversation->getConversationReference();
-        }
-
-        $criteria = (new ConversationHistoryCriteriaTransfer())
-            ->setConversationHistoryConditions(
-                (new ConversationHistoryConditionsTransfer())->setConversationReferences($conversationReferences),
-            );
-
-        $historiesByReference = [];
-
-        foreach ($this->aiFoundationFacade->getConversationHistoryCollection($criteria)->getConversationHistories() as $history) {
-            $historiesByReference[(string)$history->getConversationReference()] = $history;
-        }
-
-        foreach ($conversations as $conversation) {
-            $history = $historiesByReference[(string)$conversation->getConversationReference()] ?? null;
+            $history = $historiesIndexedByReference[(string)$conversation->getConversationReference()] ?? null;
 
             if ($history === null) {
                 continue;
@@ -73,6 +64,34 @@ class BackofficeAssistantConversationReader implements BackofficeAssistantConver
 
             $conversation->setMessages($this->filterMessages($history->getMessages()));
         }
+    }
+
+    /**
+     * @param \ArrayObject<int, \Generated\Shared\Transfer\BackofficeAssistantConversationTransfer> $conversations
+     */
+    protected function buildConversationHistoryConditions(ArrayObject $conversations): ConversationHistoryConditionsTransfer
+    {
+        $conditions = new ConversationHistoryConditionsTransfer();
+
+        foreach ($conversations as $conversation) {
+            $conditions->addConversationReference($conversation->getConversationReferenceOrFail());
+        }
+
+        return $conditions;
+    }
+
+    /**
+     * @return array<string, \Generated\Shared\Transfer\ConversationHistoryTransfer>
+     */
+    protected function indexHistoriesByReference(ConversationHistoryCollectionTransfer $historyCollection): array
+    {
+        $historiesIndexedByReference = [];
+
+        foreach ($historyCollection->getConversationHistories() as $history) {
+            $historiesIndexedByReference[(string)$history->getConversationReference()] = $history;
+        }
+
+        return $historiesIndexedByReference;
     }
 
     /**

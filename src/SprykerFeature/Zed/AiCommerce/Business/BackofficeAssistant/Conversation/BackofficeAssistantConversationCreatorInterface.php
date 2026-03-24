@@ -14,12 +14,6 @@ use Generated\Shared\Transfer\BackofficeAssistantConversationCollectionResponseT
 
 interface BackofficeAssistantConversationCreatorInterface
 {
-    /**
-     * Specification:
-     * - Creates conversation records from the given collection request.
-     * - Generates a unique conversation reference for each conversation via AiCommerceService.
-     * - Returns the created conversations with generated primary keys and conversation references set.
-     */
     public function createCollection(
         BackofficeAssistantConversationCollectionRequestTransfer $collectionRequestTransfer,
     ): BackofficeAssistantConversationCollectionResponseTransfer;

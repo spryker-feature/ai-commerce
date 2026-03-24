@@ -24,7 +24,7 @@ features:
                         name: Enable Backoffice Assistant
                         description: When enabled, the AI-powered Backoffice Assistant chat widget is available in the Backoffice.
                         type: boolean
-                        default_value: 'true'
+                        default_value: 'false'
                         enabled: true
                         secret: false
                         storefront: false
