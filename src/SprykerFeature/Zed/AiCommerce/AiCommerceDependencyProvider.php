@@ -21,8 +21,6 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
 
     public const string FACADE_USER = 'FACADE_USER';
 
-    public const string SERVICE_AI_COMMERCE = 'SERVICE_AI_COMMERCE';
-
     public const string PLUGINS_BACKOFFICE_ASSISTANT_AGENT = 'PLUGINS_BACKOFFICE_ASSISTANT_AGENT';
 
     /**
@@ -46,7 +44,6 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
     {
         $container = parent::provideBusinessLayerDependencies($container);
 
-        $container = $this->addAiCommerceService($container);
         $container = $this->addAiFoundationFacade($container);
         $container = $this->addGlossaryFacade($container);
         $container = $this->addBackofficeAssistantAgentPlugins($container);
@@ -58,15 +55,6 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
     {
         $container->set(static::FACADE_USER, function (Container $container) {
             return $container->getLocator()->user()->facade();
-        });
-
-        return $container;
-    }
-
-    protected function addAiCommerceService(Container $container): Container
-    {
-        $container->set(static::SERVICE_AI_COMMERCE, function (Container $container) {
-            return $container->getLocator()->aiCommerce()->service();
         });
 
         return $container;

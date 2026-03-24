@@ -88,7 +88,7 @@ class BackofficeAssistantConversationReader implements BackofficeAssistantConver
         $historiesIndexedByReference = [];
 
         foreach ($historyCollection->getConversationHistories() as $history) {
-            $historiesIndexedByReference[(string)$history->getConversationReference()] = $history;
+            $historiesIndexedByReference[$history->getConversationReferenceOrFail()] = $history;
         }
 
         return $historiesIndexedByReference;

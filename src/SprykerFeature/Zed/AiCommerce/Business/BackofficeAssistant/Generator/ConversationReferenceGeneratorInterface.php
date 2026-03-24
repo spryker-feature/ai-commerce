@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace SprykerFeature\Service\AiCommerce\BackofficeAssistant\Generator;
+namespace SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Generator;
 
 interface ConversationReferenceGeneratorInterface
 {

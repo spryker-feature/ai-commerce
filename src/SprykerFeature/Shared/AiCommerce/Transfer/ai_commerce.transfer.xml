@@ -8,6 +8,7 @@
         <property name="aiConfigurationName" type="string" description="The configuration name of ai configuration"/>
         <property name="conversationReference" type="string" description="Optional conversation identifier for chat history persistence. When provided, enables storage-backed conversation history."/>
         <property name="structuredMessage" type="object" description="Transfer object that defines the schema for structured response from the LLM."/>
+        <property name="maxRetries" type="int" description="Maximum number of retry attempts for the request in case of failures. Defaults to 1."/>
     </transfer>
 
     <transfer name="PromptResponse" strict="true">
@@ -20,6 +21,7 @@
     <transfer name="PromptMessage" strict="true">
         <property name="type" type="string" description="Message type: user, assistant, tool_call, or tool_result"/>
         <property name="content" type="string"/>
+        <property name="attachments" type="Attachment[]" singular="attachment"/>
     </transfer>
 
     <transfer name="Error">
@@ -86,6 +88,7 @@
 
     <transfer name="Attachment" strict="true">
         <property name="type" type="string"/>
+        <property name="content" type="string"/>
     </transfer>
 
     <transfer name="ConversationHistoryCriteria" strict="true">
@@ -97,6 +100,8 @@
     </transfer>
 
     <transfer name="ConversationHistory" strict="true">
+        <property name="messages" type="PromptMessage[]" singular="message" description="Collection of conversation messages in PromptMessage format."/>
+        <property name="conversationReference" type="string" description="Unique identifier for a conversation thread."/>
     </transfer>
 
     <transfer name="ConversationHistoryCollection" strict="true">

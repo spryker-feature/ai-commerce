@@ -12,7 +12,6 @@ namespace SprykerFeature\Zed\AiCommerce\Business;
 use Spryker\Zed\AiFoundation\Business\AiFoundationFacadeInterface;
 use Spryker\Zed\Glossary\Business\GlossaryFacadeInterface;
 use Spryker\Zed\Kernel\Business\AbstractBusinessFactory;
-use SprykerFeature\Service\AiCommerce\AiCommerceServiceInterface;
 use SprykerFeature\Zed\AiCommerce\AiCommerceDependencyProvider;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Agent\GeneralPurposeAgentExecutor;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Agent\GeneralPurposeAgentExecutorInterface;
@@ -28,6 +27,8 @@ use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Conversation\Back
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Conversation\BackofficeAssistantConversationUpdaterInterface;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Emitter\SseEventEmitter;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Emitter\SseEventEmitterInterface;
+use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Generator\ConversationReferenceGenerator;
+use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Generator\ConversationReferenceGeneratorInterface;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Prompt\BackofficeAssistantPromptRequestValidator;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Prompt\BackofficeAssistantPromptRequestValidatorInterface;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Prompt\IntentRouter;
@@ -54,8 +55,13 @@ class AiCommerceBusinessFactory extends AbstractBusinessFactory
     {
         return new BackofficeAssistantConversationCreator(
             $this->getEntityManager(),
-            $this->getAiCommerceService(),
+            $this->createConversationReferenceGenerator(),
         );
+    }
+
+    public function createConversationReferenceGenerator(): ConversationReferenceGeneratorInterface
+    {
+        return new ConversationReferenceGenerator();
     }
 
     public function createBackofficeAssistantConversationUpdater(): BackofficeAssistantConversationUpdaterInterface
@@ -70,11 +76,6 @@ class AiCommerceBusinessFactory extends AbstractBusinessFactory
         return new BackofficeAssistantConversationDeleter(
             $this->getEntityManager(),
         );
-    }
-
-    public function getAiCommerceService(): AiCommerceServiceInterface
-    {
-        return $this->getProvidedDependency(AiCommerceDependencyProvider::SERVICE_AI_COMMERCE);
     }
 
     public function createSseEventEmitter(): SseEventEmitterInterface
