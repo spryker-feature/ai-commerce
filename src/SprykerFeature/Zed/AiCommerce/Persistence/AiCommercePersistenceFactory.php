@@ -10,7 +10,9 @@ declare(strict_types=1);
 namespace SprykerFeature\Zed\AiCommerce\Persistence;
 
 use Orm\Zed\AiCommerce\Persistence\SpyBackofficeAssistantConversationQuery;
+use Orm\Zed\Sales\Persistence\SpySalesOrderQuery;
 use Spryker\Zed\Kernel\Persistence\AbstractPersistenceFactory;
+use SprykerFeature\Zed\AiCommerce\AiCommerceDependencyProvider;
 use SprykerFeature\Zed\AiCommerce\Persistence\Propel\Mapper\BackofficeAssistantConversationMapper;
 
 /**
@@ -23,6 +25,11 @@ class AiCommercePersistenceFactory extends AbstractPersistenceFactory
     public function createBackofficeAssistantConversationQuery(): SpyBackofficeAssistantConversationQuery
     {
         return SpyBackofficeAssistantConversationQuery::create();
+    }
+
+    public function getSalesOrderPropelQuery(): SpySalesOrderQuery
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::PROPEL_QUERY_SALES_ORDER);
     }
 
     public function createBackofficeAssistantConversationMapper(): BackofficeAssistantConversationMapper

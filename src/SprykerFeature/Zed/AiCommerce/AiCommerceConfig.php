@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace SprykerFeature\Zed\AiCommerce;
 
 use Spryker\Zed\Kernel\AbstractBundleConfig;
+use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
 
 class AiCommerceConfig extends AbstractBundleConfig
 {
@@ -79,5 +80,21 @@ class AiCommerceConfig extends AbstractBundleConfig
     public function getBackofficeAssistantAttachmentAllowedMediaTypes(): array
     {
         return static::BACKOFFICE_ASSISTANT_ATTACHMENT_ALLOWED_MEDIA_TYPES;
+    }
+
+    /**
+     * Specification:
+     * - Returns the names of AI configurations that should be used for the Backoffice Assistant SSE event.
+     *
+     * @api
+     *
+     * @return array<string>
+     */
+    public function getBackofficeAssistantSseAiConfigurationNames(): array
+    {
+        return [
+            AiCommerceConstants::AI_CONFIGURATION_GENERAL_PURPOSE,
+            AiCommerceConstants::AI_CONFIGURATION_ORDER_MANAGEMENT,
+        ];
     }
 }

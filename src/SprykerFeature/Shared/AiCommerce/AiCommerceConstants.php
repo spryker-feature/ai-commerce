@@ -33,4 +33,14 @@ interface AiCommerceConstants
      * @api
      */
     public const string AI_MODEL_ADVANCED = 'gpt-4.1';
+
+    /**
+     * @api
+     */
+    public const string AI_CONFIGURATION_ORDER_MANAGEMENT = 'AI_CONFIGURATION_ORDER_MANAGEMENT';
+
+    /**
+     * @api
+     */
+    public const string TOOL_SET_ORDER_MANAGEMENT = 'order_management_tools';
 }

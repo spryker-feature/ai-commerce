@@ -12,9 +12,13 @@ namespace SprykerFeature\Zed\AiCommerce\Business;
 use Spryker\Zed\AiFoundation\Business\AiFoundationFacadeInterface;
 use Spryker\Zed\Glossary\Business\GlossaryFacadeInterface;
 use Spryker\Zed\Kernel\Business\AbstractBusinessFactory;
+use Spryker\Zed\Oms\Business\OmsFacadeInterface;
+use Spryker\Zed\Sales\Business\SalesFacadeInterface;
 use SprykerFeature\Zed\AiCommerce\AiCommerceDependencyProvider;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Agent\GeneralPurposeAgentExecutor;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Agent\GeneralPurposeAgentExecutorInterface;
+use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Agent\OrderManagementAgentExecutor;
+use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Agent\OrderManagementAgentExecutorInterface;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Attachment\AttachmentBuilder;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Attachment\AttachmentBuilderInterface;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Conversation\BackofficeAssistantConversationCreator;
@@ -29,6 +33,16 @@ use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Emitter\SseEventE
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Emitter\SseEventEmitterInterface;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Generator\ConversationReferenceGenerator;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Generator\ConversationReferenceGeneratorInterface;
+use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OmsProcessDefinitionReader;
+use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OmsProcessDefinitionReaderInterface;
+use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OrderDetailsReader;
+use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OrderDetailsReaderInterface;
+use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OrderManualEventsReader;
+use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OrderManualEventsReaderInterface;
+use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OrderOmsTransitionsReader;
+use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OrderOmsTransitionsReaderInterface;
+use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OrderStateFlagsReader;
+use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OrderStateFlagsReaderInterface;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Prompt\BackofficeAssistantPromptRequestValidator;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Prompt\BackofficeAssistantPromptRequestValidatorInterface;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Prompt\IntentRouter;
@@ -138,5 +152,45 @@ class AiCommerceBusinessFactory extends AbstractBusinessFactory
     public function createGeneralPurposeAgentExecutor(): GeneralPurposeAgentExecutorInterface
     {
         return new GeneralPurposeAgentExecutor($this->getAiFoundationFacade());
+    }
+
+    public function createOrderManagementAgentExecutor(): OrderManagementAgentExecutorInterface
+    {
+        return new OrderManagementAgentExecutor($this->getAiFoundationFacade());
+    }
+
+    public function createOrderOmsTransitionsReader(): OrderOmsTransitionsReaderInterface
+    {
+        return new OrderOmsTransitionsReader($this->getRepository(), $this->getOmsFacade());
+    }
+
+    public function createOrderDetailsReader(): OrderDetailsReaderInterface
+    {
+        return new OrderDetailsReader($this->getSalesFacade());
+    }
+
+    public function createOrderManualEventsReader(): OrderManualEventsReaderInterface
+    {
+        return new OrderManualEventsReader($this->getOmsFacade(), $this->getSalesFacade());
+    }
+
+    public function createOmsProcessDefinitionReader(): OmsProcessDefinitionReaderInterface
+    {
+        return new OmsProcessDefinitionReader($this->getRepository(), $this->getOmsFacade());
+    }
+
+    public function createOrderStateFlagsReader(): OrderStateFlagsReaderInterface
+    {
+        return new OrderStateFlagsReader($this->getRepository(), $this->getOmsFacade());
+    }
+
+    public function getOmsFacade(): OmsFacadeInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_OMS);
+    }
+
+    public function getSalesFacade(): SalesFacadeInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_SALES);
     }
 }

@@ -105,8 +105,9 @@ class BackofficeAssistantConversationReader implements BackofficeAssistantConver
 
         foreach ($messages as $message) {
             $content = $message->getContent();
+            $hasToolInvocations = $message->getToolInvocations()->count() > 0;
 
-            if ($content === null || $content === '') {
+            if (($content === null || $content === '') && !$hasToolInvocations) {
                 continue;
             }
 

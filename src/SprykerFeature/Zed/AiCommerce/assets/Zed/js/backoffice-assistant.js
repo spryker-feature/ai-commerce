@@ -1099,7 +1099,11 @@ BackofficeAssistant.prototype.handleSseEvent = function (data, prompt, loadingEl
 
             break;
         case 'tool_call':
-            this.renderer.addToolCallMessage(data.name, data.arguments, data.result);
+            this.renderer.addToolCallMessage(data.name, data.arguments, null);
+
+            break;
+        case 'tool_call_result':
+            this.renderer.addToolCallMessage(data.name, null, data.result);
 
             break;
         case 'ai_response':
@@ -1182,11 +1186,25 @@ BackofficeAssistant.prototype.renderConversationMessages = function (messages) {
 
                 break;
             case 'tool_call':
-                this.renderer.addToolCallMessage(msg.content || 'tool', null, null);
+                if (msg.tool_invocations && msg.tool_invocations.length > 0) {
+                    for (var j = 0; j < msg.tool_invocations.length; j++) {
+                        var inv = msg.tool_invocations[j];
+                        this.renderer.addToolCallMessage(inv.name || 'tool', inv.arguments || null, null);
+                    }
+                } else {
+                    this.renderer.addToolCallMessage(msg.content || 'tool', null, null);
+                }
 
                 break;
             case 'tool_result':
-                this.renderer.addToolCallMessage(this.i18n.toolResult, null, msg.content || '');
+                if (msg.tool_invocations && msg.tool_invocations.length > 0) {
+                    for (var k = 0; k < msg.tool_invocations.length; k++) {
+                        var invResult = msg.tool_invocations[k];
+                        this.renderer.addToolCallMessage(invResult.name || this.i18n.toolResult, invResult.arguments || null, invResult.result || null);
+                    }
+                } else {
+                    this.renderer.addToolCallMessage(this.i18n.toolResult, null, msg.content || '');
+                }
 
                 break;
             default:

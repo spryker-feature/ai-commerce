@@ -40,12 +40,6 @@ class PromptHandler implements PromptHandlerInterface
 
     protected const string KEY_MESSAGE = 'message';
 
-    protected const string KEY_NAME = 'name';
-
-    protected const string KEY_ARGUMENTS = 'arguments';
-
-    protected const string KEY_RESULT = 'result';
-
     protected const string MESSAGE_AI_SERVICE_UNAVAILABLE = 'AI service unavailable';
 
     /**
@@ -303,13 +297,8 @@ class PromptHandler implements PromptHandlerInterface
 
             $agentResponse = $agentPlugin->executeAgent($agentRequest);
 
-            foreach ($agentResponse->getToolInvocations() as $toolInvocation) {
-                $this->eventEmitter->emit(BackofficeAssistantEventType::ToolCall, [
-                    static::KEY_NAME => $toolInvocation->getName(),
-                    static::KEY_ARGUMENTS => $toolInvocation->getArguments(),
-                    static::KEY_RESULT => $toolInvocation->getResult(),
-                ]);
-            }
+            // Tool call SSE events are emitted in real-time by BackofficeAssistantSsePreToolCallPlugin
+            // and BackofficeAssistantSsePostToolCallPlugin via AiFoundation plugin stacks.
 
             $this->eventEmitter->emit(BackofficeAssistantEventType::AiResponse, [
                 static::KEY_MESSAGE => $agentResponse->getAiResponse(),

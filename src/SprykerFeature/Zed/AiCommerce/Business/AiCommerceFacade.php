@@ -62,4 +62,35 @@ class AiCommerceFacade extends AbstractFacade implements AiCommerceFacadeInterfa
     ): BackofficeAssistantPromptResponseTransfer {
         return $this->getFactory()->createGeneralPurposeAgentExecutor()->execute($promptRequestTransfer);
     }
+
+    public function executeOrderManagementAgent(
+        BackofficeAssistantPromptRequestTransfer $promptRequestTransfer,
+    ): BackofficeAssistantPromptResponseTransfer {
+        return $this->getFactory()->createOrderManagementAgentExecutor()->execute($promptRequestTransfer);
+    }
+
+    public function getOrderOmsTransitions(string $orderReference): string
+    {
+        return $this->getFactory()->createOrderOmsTransitionsReader()->getOrderOmsTransitions($orderReference);
+    }
+
+    public function getOrderDetails(string $orderReference): string
+    {
+        return $this->getFactory()->createOrderDetailsReader()->getOrderDetails($orderReference);
+    }
+
+    public function getOrderManualEvents(string $orderReference): string
+    {
+        return $this->getFactory()->createOrderManualEventsReader()->getOrderManualEvents($orderReference);
+    }
+
+    public function getOmsProcessDefinition(string $orderReference): string
+    {
+        return $this->getFactory()->createOmsProcessDefinitionReader()->getOmsProcessDefinition($orderReference);
+    }
+
+    public function getOrderStateFlags(string $orderReference): string
+    {
+        return $this->getFactory()->createOrderStateFlagsReader()->getOrderStateFlags($orderReference);
+    }
 }

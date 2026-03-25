@@ -16,4 +16,5 @@ enum BackofficeAssistantEventType: string
     case Reasoning = 'reasoning';
     case AiResponse = 'ai_response';
     case ToolCall = 'tool_call';
+    case ToolCallResult = 'tool_call_result';
 }

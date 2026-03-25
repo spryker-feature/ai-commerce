@@ -23,4 +23,20 @@ interface AiCommerceRepositoryInterface
     public function getBackofficeAssistantConversationCollection(
         BackofficeAssistantConversationCriteriaTransfer $criteriaTransfer,
     ): BackofficeAssistantConversationCollectionTransfer;
+
+    /**
+     * Specification:
+     * - Finds the OMS process name associated with the given order reference.
+     * - Returns null if no order or process is found.
+     */
+    public function findProcessNameByOrderReference(string $orderReference): ?string;
+
+    /**
+     * Specification:
+     * - Finds the OMS process name and distinct item state names for the given order reference.
+     * - Returns array with 'processName' (nullable string) and 'stateNames' (array of strings).
+     *
+     * @return array{processName: ?string, stateNames: array<string>}
+     */
+    public function findProcessAndStateNamesByOrderReference(string $orderReference): array;
 }
