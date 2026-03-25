@@ -11,15 +11,17 @@ namespace SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Agent;
 
 use Generated\Shared\Transfer\BackofficeAssistantPromptRequestTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantPromptResponseTransfer;
+use Generated\Shared\Transfer\OrderManagementAgentResponseTransfer;
 use Generated\Shared\Transfer\PromptMessageTransfer;
 use Generated\Shared\Transfer\PromptRequestTransfer;
 use Spryker\Shared\AiFoundation\AiFoundationConstants;
+use Spryker\Shared\Log\LoggerTrait;
 use Spryker\Zed\AiFoundation\Business\AiFoundationFacadeInterface;
 use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
 
 class OrderManagementAgentExecutor implements OrderManagementAgentExecutorInterface
 {
-    protected const string NO_RESPONSE_FALLBACK = 'No response received.';
+    use LoggerTrait;
 
     public function __construct(
         protected AiFoundationFacadeInterface $aiFoundationFacade,
@@ -32,6 +34,7 @@ class OrderManagementAgentExecutor implements OrderManagementAgentExecutorInterf
         $promptRequest = (new PromptRequestTransfer())
             ->setAiConfigurationName(AiCommerceConstants::AI_CONFIGURATION_ORDER_MANAGEMENT)
             ->setConversationReference($promptRequestTransfer->getConversationReference())
+            ->setStructuredMessage(new OrderManagementAgentResponseTransfer())
             ->addToolSetName(AiCommerceConstants::TOOL_SET_ORDER_MANAGEMENT)
             ->setPromptMessage(
                 (new PromptMessageTransfer())
@@ -42,8 +45,21 @@ class OrderManagementAgentExecutor implements OrderManagementAgentExecutorInterf
 
         $promptResponse = $this->aiFoundationFacade->prompt($promptRequest);
 
-        return (new BackofficeAssistantPromptResponseTransfer())
-            ->setAiResponse($promptResponse->getMessage()?->getContent() ?? static::NO_RESPONSE_FALLBACK)
-            ->setConversationReference($promptRequestTransfer->getConversationReference());
+        $backofficeAssistantPromptResponse = new BackofficeAssistantPromptResponseTransfer();
+
+        if (!$promptResponse->getIsSuccessful()) {
+            $this->getLogger()->error(sprintf('OrderManagementAgent prompt response is not successful: %s', json_encode($promptResponse->getErrors()->getArrayCopy())));
+
+            return $backofficeAssistantPromptResponse;
+        }
+
+        /** @var \Generated\Shared\Transfer\OrderManagementAgentResponseTransfer $orderManagementAgentResponse */
+        $orderManagementAgentResponse = $promptResponse->getStructuredMessage();
+
+        $backofficeAssistantPromptResponse->setAgent($orderManagementAgentResponse->getAgent());
+        $backofficeAssistantPromptResponse->setMessage($orderManagementAgentResponse->getMessage());
+        $backofficeAssistantPromptResponse->setReasoningMessage($orderManagementAgentResponse->getReasoningMessage());
+
+        return $backofficeAssistantPromptResponse;
     }
 }

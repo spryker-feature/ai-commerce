@@ -11,15 +11,17 @@ namespace SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Agent;
 
 use Generated\Shared\Transfer\BackofficeAssistantPromptRequestTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantPromptResponseTransfer;
+use Generated\Shared\Transfer\GeneralPurposeAgentResponseTransfer;
 use Generated\Shared\Transfer\PromptMessageTransfer;
 use Generated\Shared\Transfer\PromptRequestTransfer;
 use Spryker\Shared\AiFoundation\AiFoundationConstants;
+use Spryker\Shared\Log\LoggerTrait;
 use Spryker\Zed\AiFoundation\Business\AiFoundationFacadeInterface;
 use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
 
 class GeneralPurposeAgentExecutor implements GeneralPurposeAgentExecutorInterface
 {
-    protected const string NO_RESPONSE_FALLBACK = 'No response received.';
+    use LoggerTrait;
 
     public function __construct(
         protected AiFoundationFacadeInterface $aiFoundationFacade,
@@ -32,6 +34,7 @@ class GeneralPurposeAgentExecutor implements GeneralPurposeAgentExecutorInterfac
         $promptRequest = (new PromptRequestTransfer())
             ->setAiConfigurationName(AiCommerceConstants::AI_CONFIGURATION_GENERAL_PURPOSE)
             ->setConversationReference($promptRequestTransfer->getConversationReference())
+            ->setStructuredMessage(new GeneralPurposeAgentResponseTransfer())
             ->setPromptMessage(
                 (new PromptMessageTransfer())
                     ->setType(AiFoundationConstants::MESSAGE_TYPE_USER)
@@ -41,8 +44,21 @@ class GeneralPurposeAgentExecutor implements GeneralPurposeAgentExecutorInterfac
 
         $promptResponse = $this->aiFoundationFacade->prompt($promptRequest);
 
-        return (new BackofficeAssistantPromptResponseTransfer())
-            ->setAiResponse($promptResponse->getMessage()?->getContent() ?? static::NO_RESPONSE_FALLBACK)
-            ->setConversationReference($promptRequestTransfer->getConversationReference());
+        $backofficeAssistantPromptResponse = new BackofficeAssistantPromptResponseTransfer();
+
+        if (!$promptResponse->getIsSuccessful()) {
+            $this->getLogger()->error(sprintf('GeneralPurposeAgent prompt response is not successful: %s', json_encode($promptResponse->getErrors()->getArrayCopy())));
+
+            return $backofficeAssistantPromptResponse;
+        }
+
+        /** @var \Generated\Shared\Transfer\GeneralPurposeAgentResponseTransfer $generalPurposeAgentResponse */
+        $generalPurposeAgentResponse = $promptResponse->getStructuredMessage();
+
+        $backofficeAssistantPromptResponse->setAgent($generalPurposeAgentResponse->getAgent());
+        $backofficeAssistantPromptResponse->setMessage($generalPurposeAgentResponse->getMessage());
+        $backofficeAssistantPromptResponse->setReasoningMessage($generalPurposeAgentResponse->getReasoningMessage());
+
+        return $backofficeAssistantPromptResponse;
     }
 }

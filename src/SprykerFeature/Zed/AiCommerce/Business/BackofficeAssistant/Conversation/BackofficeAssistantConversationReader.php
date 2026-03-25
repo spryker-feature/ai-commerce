@@ -15,11 +15,15 @@ use Generated\Shared\Transfer\BackofficeAssistantConversationCriteriaTransfer;
 use Generated\Shared\Transfer\ConversationHistoryCollectionTransfer;
 use Generated\Shared\Transfer\ConversationHistoryConditionsTransfer;
 use Generated\Shared\Transfer\ConversationHistoryCriteriaTransfer;
+use Generated\Shared\Transfer\PromptMessageTransfer;
+use Spryker\Shared\AiFoundation\AiFoundationConstants;
 use Spryker\Zed\AiFoundation\Business\AiFoundationFacadeInterface;
 use SprykerFeature\Zed\AiCommerce\Persistence\AiCommerceRepositoryInterface;
 
 class BackofficeAssistantConversationReader implements BackofficeAssistantConversationReaderInterface
 {
+    protected const string KEY_MESSAGE = 'message';
+
     public function __construct(
         protected AiCommerceRepositoryInterface $repository,
         protected AiFoundationFacadeInterface $aiFoundationFacade,
@@ -94,6 +98,27 @@ class BackofficeAssistantConversationReader implements BackofficeAssistantConver
         return $historiesIndexedByReference;
     }
 
+    protected function extractStructuredContent(PromptMessageTransfer $message): void
+    {
+        if ($message->getType() !== AiFoundationConstants::MESSAGE_TYPE_ASSISTANT) {
+            return;
+        }
+
+        $content = $message->getContent();
+
+        if ($content === null || $content === '') {
+            return;
+        }
+
+        $decoded = json_decode($content, true);
+
+        if (!is_array($decoded) || !isset($decoded[static::KEY_MESSAGE])) {
+            return;
+        }
+
+        $message->setContent((string)$decoded[static::KEY_MESSAGE]);
+    }
+
     /**
      * @param \ArrayObject<int, \Generated\Shared\Transfer\PromptMessageTransfer> $messages
      *
@@ -104,6 +129,8 @@ class BackofficeAssistantConversationReader implements BackofficeAssistantConver
         $filtered = new ArrayObject();
 
         foreach ($messages as $message) {
+            $this->extractStructuredContent($message);
+
             $content = $message->getContent();
             $hasToolInvocations = $message->getToolInvocations()->count() > 0;
 

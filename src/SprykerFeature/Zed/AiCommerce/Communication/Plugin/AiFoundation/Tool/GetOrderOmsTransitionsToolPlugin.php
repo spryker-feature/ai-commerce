@@ -7,28 +7,36 @@
 
 declare(strict_types=1);
 
-namespace SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Plugin\Tool;
+namespace SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool;
 
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolParameter;
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 
 /**
+ * {@inheritDoc}
+ *
+ * @api
+ *
  * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceFacadeInterface getFacade()
  */
-class GetOrderDetailsToolPlugin extends AbstractPlugin implements ToolPluginInterface
+class GetOrderOmsTransitionsToolPlugin extends AbstractPlugin implements ToolPluginInterface
 {
     public function getName(): string
     {
-        return 'get_order_details';
+        return 'get_order_oms_transitions';
     }
 
     public function getDescription(): string
     {
-        return 'Get basic order details including items, amounts, dates, and customer information by order reference.';
+        return 'Get current OMS state and available transitions for an order by its reference. Returns transition details including events, conditions, and targets.';
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * @api
+     *
      * @return array<\Spryker\Zed\AiFoundation\Dependency\Tools\ToolParameterInterface>
      */
     public function getParameters(): array
@@ -43,8 +51,15 @@ class GetOrderDetailsToolPlugin extends AbstractPlugin implements ToolPluginInte
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @api
+     *
+     * @param mixed ...$arguments
+     */
     public function execute(...$arguments): mixed
     {
-        return $this->getFacade()->getOrderDetails((string)($arguments[0] ?? ''));
+        return $this->getFacade()->getOrderOmsTransitions((string)($arguments[0] ?? ''));
     }
 }

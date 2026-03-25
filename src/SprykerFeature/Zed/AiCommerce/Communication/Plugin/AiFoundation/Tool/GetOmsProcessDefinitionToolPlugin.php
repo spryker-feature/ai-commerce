@@ -7,28 +7,36 @@
 
 declare(strict_types=1);
 
-namespace SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Plugin\Tool;
+namespace SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool;
 
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolParameter;
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 
 /**
+ * {@inheritDoc}
+ *
+ * @api
+ *
  * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceFacadeInterface getFacade()
  */
-class GetOrderManualEventsToolPlugin extends AbstractPlugin implements ToolPluginInterface
+class GetOmsProcessDefinitionToolPlugin extends AbstractPlugin implements ToolPluginInterface
 {
     public function getName(): string
     {
-        return 'get_order_manual_events';
+        return 'get_oms_process_definition';
     }
 
     public function getDescription(): string
     {
-        return 'Get available manual events that can be triggered for an order. Shows which manual actions are available from the current state.';
+        return 'Get the full OMS process definition for an order including all states, transitions, events, and subprocesses.';
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * @api
+     *
      * @return array<\Spryker\Zed\AiFoundation\Dependency\Tools\ToolParameterInterface>
      */
     public function getParameters(): array
@@ -43,8 +51,15 @@ class GetOrderManualEventsToolPlugin extends AbstractPlugin implements ToolPlugi
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @api
+     *
+     * @param mixed ...$arguments
+     */
     public function execute(...$arguments): mixed
     {
-        return $this->getFacade()->getOrderManualEvents((string)($arguments[0] ?? ''));
+        return $this->getFacade()->getOmsProcessDefinition((string)($arguments[0] ?? ''));
     }
 }

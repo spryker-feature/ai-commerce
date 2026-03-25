@@ -7,28 +7,36 @@
 
 declare(strict_types=1);
 
-namespace SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Plugin\Tool;
+namespace SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool;
 
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolParameter;
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 
 /**
+ * {@inheritDoc}
+ *
+ * @api
+ *
  * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceFacadeInterface getFacade()
  */
-class GetOrderStateFlagsToolPlugin extends AbstractPlugin implements ToolPluginInterface
+class GetOrderManualEventsToolPlugin extends AbstractPlugin implements ToolPluginInterface
 {
     public function getName(): string
     {
-        return 'get_order_state_flags';
+        return 'get_order_manual_events';
     }
 
     public function getDescription(): string
     {
-        return 'Check state flags such as cancellable or reserved for the current states of an order.';
+        return 'Get available manual events that can be triggered for an order. Shows which manual actions are available from the current state.';
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * @api
+     *
      * @return array<\Spryker\Zed\AiFoundation\Dependency\Tools\ToolParameterInterface>
      */
     public function getParameters(): array
@@ -43,8 +51,15 @@ class GetOrderStateFlagsToolPlugin extends AbstractPlugin implements ToolPluginI
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @api
+     *
+     * @param mixed ...$arguments
+     */
     public function execute(...$arguments): mixed
     {
-        return $this->getFacade()->getOrderStateFlags((string)($arguments[0] ?? ''));
+        return $this->getFacade()->getOrderManualEvents((string)($arguments[0] ?? ''));
     }
 }

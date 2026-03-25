@@ -15,7 +15,6 @@ use Generated\Shared\Transfer\BackofficeAssistantConversationConditionsTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCriteriaTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantPromptRequestTransfer;
-use Generated\Shared\Transfer\BackofficeAssistantPromptResponseTransfer;
 use Generated\Shared\Transfer\ConversationHistoryConditionsTransfer;
 use Generated\Shared\Transfer\ConversationHistoryCriteriaTransfer;
 use Generated\Shared\Transfer\ConversationHistoryTransfer;
@@ -59,10 +58,8 @@ class PromptHandler implements PromptHandlerInterface
     ) {
     }
 
-    public function handle(BackofficeAssistantPromptRequestTransfer $promptRequestTransfer): BackofficeAssistantPromptResponseTransfer
+    public function handle(BackofficeAssistantPromptRequestTransfer $promptRequestTransfer): void
     {
-        $response = new BackofficeAssistantPromptResponseTransfer();
-
         $validationErrors = $this->promptRequestValidator->validate($promptRequestTransfer);
 
         if ($validationErrors !== []) {
@@ -70,7 +67,7 @@ class PromptHandler implements PromptHandlerInterface
                 $this->eventEmitter->emit(BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => $this->glossaryFacade->translate($errorKey)]);
             }
 
-            return $response;
+            return;
         }
 
         $conversationReference = $this->resolveConversationReference(
@@ -78,8 +75,6 @@ class PromptHandler implements PromptHandlerInterface
             (string)$promptRequestTransfer->getConversationReference(),
             $promptRequestTransfer->getUserUuidOrFail(),
         );
-
-        $response->setConversationReference($conversationReference);
 
         $selectedAgent = (string)$promptRequestTransfer->getSelectedAgent();
 
@@ -93,18 +88,19 @@ class PromptHandler implements PromptHandlerInterface
         );
 
         if ($selectedAgent) {
-            return $this->handleSelectedAgent($promptRequestTransfer, $response, $conversationReference, $selectedAgent);
+            $this->handleSelectedAgent($promptRequestTransfer, $conversationReference, $selectedAgent);
+
+            return;
         }
 
-        return $this->handleIntentRouting($promptRequestTransfer, $response, $conversationReference);
+        $this->handleIntentRouting($promptRequestTransfer, $conversationReference);
     }
 
     protected function handleSelectedAgent(
         BackofficeAssistantPromptRequestTransfer $promptRequestTransfer,
-        BackofficeAssistantPromptResponseTransfer $response,
         string $conversationReference,
         string $selectedAgent,
-    ): BackofficeAssistantPromptResponseTransfer {
+    ): void {
         $previousAgent = $this->emitPreviousAgentEvent($conversationReference);
 
         if ($previousAgent !== $selectedAgent) {
@@ -123,14 +119,13 @@ class PromptHandler implements PromptHandlerInterface
             static::KEY_CONVERSATION_REFERENCE => $conversationReference,
         ]);
 
-        return $this->executeSelectedAgent($promptRequestTransfer, $response, $selectedAgent, $conversationReference);
+        $this->executeSelectedAgent($promptRequestTransfer, $selectedAgent, $conversationReference);
     }
 
     protected function handleIntentRouting(
         BackofficeAssistantPromptRequestTransfer $promptRequestTransfer,
-        BackofficeAssistantPromptResponseTransfer $response,
         string $conversationReference,
-    ): BackofficeAssistantPromptResponseTransfer {
+    ): void {
         $previousAgent = $this->resolveConversationAgent($conversationReference);
 
         $conversationHistory = $this->resolveConversationHistory($conversationReference);
@@ -145,7 +140,7 @@ class PromptHandler implements PromptHandlerInterface
         if (!$intentRouterResponse) {
             $this->eventEmitter->emit(BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => static::MESSAGE_AI_SERVICE_UNAVAILABLE]);
 
-            return $response;
+            return;
         }
 
         $selectedAgent = $intentRouterResponse->getAgent() ?: static::AGENT_GUARDRAIL;
@@ -178,10 +173,10 @@ class PromptHandler implements PromptHandlerInterface
                 static::KEY_CONVERSATION_REFERENCE => $conversationReference,
             ]);
 
-            return $response;
+            return;
         }
 
-        return $this->executeSelectedAgent($promptRequestTransfer, $response, $selectedAgent, $conversationReference);
+        $this->executeSelectedAgent($promptRequestTransfer, $selectedAgent, $conversationReference);
     }
 
     protected function resolveConversationReference(string $prompt, string $requestedConversationReference, string $userUuid): string
@@ -279,10 +274,9 @@ class PromptHandler implements PromptHandlerInterface
 
     protected function executeSelectedAgent(
         BackofficeAssistantPromptRequestTransfer $promptRequestTransfer,
-        BackofficeAssistantPromptResponseTransfer $response,
         string $selectedAgent,
         string $conversationReference,
-    ): BackofficeAssistantPromptResponseTransfer {
+    ): void {
         $attachments = $this->attachmentBuilder->buildAttachmentTransfers($promptRequestTransfer->getRawAttachments());
 
         $agentRequest = (new BackofficeAssistantPromptRequestTransfer())
@@ -295,19 +289,36 @@ class PromptHandler implements PromptHandlerInterface
                 continue;
             }
 
-            $agentResponse = $agentPlugin->executeAgent($agentRequest);
+            $backofficeAssistantPromptResponse = $agentPlugin->executeAgent($agentRequest);
 
-            // Tool call SSE events are emitted in real-time by BackofficeAssistantSsePreToolCallPlugin
-            // and BackofficeAssistantSsePostToolCallPlugin via AiFoundation plugin stacks.
+            if ($backofficeAssistantPromptResponse->getMessage() === null) {
+                $this->eventEmitter->emit(BackofficeAssistantEventType::Error, [
+                    static::KEY_MESSAGE => static::MESSAGE_AI_SERVICE_UNAVAILABLE,
+                ]);
+
+                break;
+            }
+
+            if ($backofficeAssistantPromptResponse->getAgent() === static::AGENT_GUARDRAIL) {
+                $this->eventEmitter->emit(BackofficeAssistantEventType::AgentSelected, [
+                    static::KEY_AGENT => static::AGENT_GUARDRAIL,
+                    static::KEY_CONVERSATION_REFERENCE => $conversationReference,
+                ]);
+            }
+
+            if ($backofficeAssistantPromptResponse->getReasoningMessage()) {
+                $this->eventEmitter->emit(BackofficeAssistantEventType::Reasoning, [
+                    static::KEY_MESSAGE => $backofficeAssistantPromptResponse->getReasoningMessage(),
+                    static::KEY_CONVERSATION_REFERENCE => $conversationReference,
+                ]);
+            }
 
             $this->eventEmitter->emit(BackofficeAssistantEventType::AiResponse, [
-                static::KEY_MESSAGE => $agentResponse->getAiResponse(),
+                static::KEY_MESSAGE => $backofficeAssistantPromptResponse->getMessage(),
                 static::KEY_CONVERSATION_REFERENCE => $conversationReference,
             ]);
 
             break;
         }
-
-        return $response;
     }
 }

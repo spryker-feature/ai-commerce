@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Plugin\Agent;
+namespace SprykerFeature\Zed\AiCommerce\Communication\Plugin\Agent;
 
 use Generated\Shared\Transfer\BackofficeAssistantPromptRequestTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantPromptResponseTransfer;
@@ -15,12 +15,16 @@ use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 use SprykerFeature\Zed\AiCommerce\Dependency\BackofficeAssistant\BackofficeAssistantAgentPluginInterface;
 
 /**
+ * {@inheritDoc}
+ *
+ * @api
+ *
  * @method \SprykerFeature\Zed\AiCommerce\Communication\AiCommerceCommunicationFactory getFactory()
  * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceFacadeInterface getFacade()
  */
-class OrderManagementAgentPlugin extends AbstractPlugin implements BackofficeAssistantAgentPluginInterface
+class GeneralPurposeAgentPlugin extends AbstractPlugin implements BackofficeAssistantAgentPluginInterface
 {
-    protected const string NAME = 'Order Management';
+    protected const string NAME = 'General Purpose Agent';
 
     public function getName(): string
     {
@@ -29,12 +33,12 @@ class OrderManagementAgentPlugin extends AbstractPlugin implements BackofficeAss
 
     public function getDescription(): string
     {
-        return 'Handles questions about order OMS states, transitions, manual events, and process definitions. Examples: "Why is order DE--123 stuck?", "What events does order DE--123 expect?", "Is order DE--123 cancellable?"';
+        return 'Handles questions only about Spryker Backoffice navigation. Examples: "Where can I manage user roles?", "How do I access the CMS pages?"';
     }
 
     public function executeAgent(
         BackofficeAssistantPromptRequestTransfer $backofficeAssistantPromptRequest,
     ): BackofficeAssistantPromptResponseTransfer {
-        return $this->getFacade()->executeOrderManagementAgent($backofficeAssistantPromptRequest);
+        return $this->getFacade()->executeGeneralPurposeAgent($backofficeAssistantPromptRequest);
     }
 }

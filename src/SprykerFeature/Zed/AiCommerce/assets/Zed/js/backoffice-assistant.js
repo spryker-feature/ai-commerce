@@ -598,6 +598,7 @@ BackofficeAssistantAttachmentManager.prototype.clear = function () {
 function BackofficeAssistantAgentBadge(badgeEl, selectEl) {
     this.badgeEl = badgeEl;
     this.selectEl = selectEl;
+    this.pendingSelectedAgent = null;
 }
 
 BackofficeAssistantAgentBadge.prototype.update = function (agentName) {
@@ -614,6 +615,7 @@ BackofficeAssistantAgentBadge.prototype.update = function (agentName) {
 BackofficeAssistantAgentBadge.prototype.reset = function () {
     this.badgeEl.textContent = '';
     this.badgeEl.classList.remove('backoffice-assistant__agent-badge--animate');
+    this.pendingSelectedAgent = null;
 
     if (this.selectEl) {
         this.selectEl.value = '';
@@ -637,6 +639,11 @@ BackofficeAssistantAgentBadge.prototype.populateSelector = function (agentNames)
         opt.textContent = name;
         selectEl.appendChild(opt);
     });
+
+    if (this.pendingSelectedAgent) {
+        this.selectEl.value = this.pendingSelectedAgent;
+        this.pendingSelectedAgent = null;
+    }
 };
 
 BackofficeAssistantAgentBadge.prototype.getSelectedAgent = function () {
@@ -644,8 +651,15 @@ BackofficeAssistantAgentBadge.prototype.getSelectedAgent = function () {
 };
 
 BackofficeAssistantAgentBadge.prototype.setSelectedAgent = function (value) {
-    if (this.selectEl) {
+    if (!this.selectEl) {
+        return;
+    }
+
+    if (this.selectEl.options.length > 1) {
         this.selectEl.value = value || '';
+    } else {
+        // Options not yet populated — defer until populateSelector runs
+        this.pendingSelectedAgent = value || null;
     }
 };
 
@@ -1200,7 +1214,11 @@ BackofficeAssistant.prototype.renderConversationMessages = function (messages) {
                 if (msg.tool_invocations && msg.tool_invocations.length > 0) {
                     for (var k = 0; k < msg.tool_invocations.length; k++) {
                         var invResult = msg.tool_invocations[k];
-                        this.renderer.addToolCallMessage(invResult.name || this.i18n.toolResult, invResult.arguments || null, invResult.result || null);
+                        this.renderer.addToolCallMessage(
+                            invResult.name || this.i18n.toolResult,
+                            invResult.arguments || null,
+                            invResult.result || null,
+                        );
                     }
                 } else {
                     this.renderer.addToolCallMessage(this.i18n.toolResult, null, msg.content || '');

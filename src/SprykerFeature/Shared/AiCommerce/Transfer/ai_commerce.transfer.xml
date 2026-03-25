@@ -76,14 +76,26 @@
     </transfer>
 
     <transfer name="BackofficeAssistantPromptResponse" strict="true">
-        <property name="toolInvocations" type="ToolInvocation[]" singular="toolInvocation"/>
-        <property name="conversationReference" type="string"/>
-        <property name="aiResponse" type="string"/>
+        <property name="message" type="string"/>
+        <property name="reasoningMessage" type="string"/>
+        <property name="agent" type="string"/>
     </transfer>
 
     <transfer name="IntentRouterResponse" strict="true">
         <property name="reasoningMessage" type="string" description="Message to be displayed to the user about the decision taken."/>
         <property name="agent" type="string" description="The next agent to be called for the given intent. Select agent among provided agents with description. If no agent is selected, the agent will be 'Guardrail'."/>
+    </transfer>
+
+    <transfer name="OrderManagementAgentResponse" strict="true">
+        <property name="message" type="string" description="Response message to be displayed to the user."/>
+        <property name="reasoningMessage" type="string" description="Message to be displayed to the user as a reason why 'Guardrail' agent is selected."/>
+        <property name="agent" type="string" description="Set 'Order Management' by default and answer to user is provided. Set 'Guardrail' if user's intent is not related supported agent functionality.."/>
+    </transfer>
+
+    <transfer name="GeneralPurposeAgentResponse" strict="true">
+        <property name="message" type="string" description="Response message to be displayed to the user."/>
+        <property name="reasoningMessage" type="string" description="Message to be displayed to the user as a reason why 'Guardrail' agent is selected."/>
+        <property name="agent" type="string" description="Set 'General Purpose' by default and answer to user is provided. Set 'Guardrail' if user's intent is not related supported agent functionality."/>
     </transfer>
 
     <transfer name="Attachment" strict="true">
@@ -116,6 +128,59 @@
 
     <transfer name="User">
         <property name="uuid" type="string" strict="true"/>
+    </transfer>
+
+    <transfer name="OrderCriteria" strict="true">
+        <property name="orderConditions" type="OrderConditions"/>
+    </transfer>
+
+    <transfer name="OrderConditions" strict="true">
+        <property name="orderReferences" type="string[]" singular="orderReference"/>
+    </transfer>
+
+    <transfer name="OrderCollection">
+        <property name="orders" type="Order[]" singular="order"/>
+    </transfer>
+
+    <transfer name="Order">
+        <property name="totals" type="Totals"/>
+        <property name="customer" type="Customer"/>
+        <property name="orderReference" type="string"/>
+        <property name="createdAt" type="string"/>
+        <property name="currencyIsoCode" type="string"/>
+        <property name="store" type="string"/>
+        <property name="items" type="Item[]" singular="item"/>
+    </transfer>
+
+    <transfer name="Totals">
+        <property name="grandTotal" type="int"/>
+        <property name="subtotal" type="int"/>
+        <property name="discountTotal" type="int"/>
+    </transfer>
+
+    <transfer name="Customer">
+        <property name="firstName" type="string"/>
+        <property name="lastName" type="string"/>
+        <property name="email" type="string"/>
+    </transfer>
+
+    <transfer name="Item">
+        <property name="name" type="string"/>
+        <property name="sku" type="string"/>
+        <property name="quantity" type="int"/>
+        <property name="unitPrice" type="int"/>
+        <property name="state" type="ItemState"/>
+    </transfer>
+
+    <transfer name="ItemState">
+        <property name="name" type="string"/>
+    </transfer>
+
+    <transfer name="AiToolCall" strict="true">
+        <property name="promptRequest" type="PromptRequest"/>
+        <property name="toolName" type="string"/>
+        <property name="toolResult" type="string"/>
+        <property name="toolArguments" type="array" singular="toolArgument"/>
     </transfer>
 
 </transfers>

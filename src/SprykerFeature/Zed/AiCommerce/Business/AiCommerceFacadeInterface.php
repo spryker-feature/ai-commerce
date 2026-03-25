@@ -73,13 +73,13 @@ interface AiCommerceFacadeInterface
      * Specification:
      * - Validates and resolves the conversation reference, creating one if needed.
      * - Routes the prompt to the appropriate agent via intent routing.
-     * - Returns a response with ordered SSE events to stream to the client.
+     * - Emits SSE events to stream progress to the client.
      *
      * @api
      */
     public function handleBackofficeAssistantPrompt(
         BackofficeAssistantPromptRequestTransfer $promptRequestTransfer,
-    ): BackofficeAssistantPromptResponseTransfer;
+    ): void;
 
     /**
      * Specification:

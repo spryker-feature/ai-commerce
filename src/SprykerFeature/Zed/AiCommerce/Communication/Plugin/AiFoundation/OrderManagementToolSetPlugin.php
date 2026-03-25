@@ -7,24 +7,33 @@
 
 declare(strict_types=1);
 
-namespace SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Plugin\ToolSet;
+namespace SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation;
 
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolSetPluginInterface;
 use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
-use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Plugin\Tool\GetOmsProcessDefinitionToolPlugin;
-use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Plugin\Tool\GetOrderDetailsToolPlugin;
-use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Plugin\Tool\GetOrderManualEventsToolPlugin;
-use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Plugin\Tool\GetOrderOmsTransitionsToolPlugin;
-use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Plugin\Tool\GetOrderStateFlagsToolPlugin;
+use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOmsProcessDefinitionToolPlugin;
+use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderDetailsToolPlugin;
+use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderManualEventsToolPlugin;
+use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderOmsTransitionsToolPlugin;
+use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderStateFlagsToolPlugin;
 
 class OrderManagementToolSetPlugin implements ToolSetPluginInterface
 {
+    /**
+     * {@inheritDoc}
+     *
+     * @api
+     */
     public function getName(): string
     {
         return AiCommerceConstants::TOOL_SET_ORDER_MANAGEMENT;
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * @api
+     *
      * @return array<\Spryker\Zed\AiFoundation\Dependency\Tools\ToolPluginInterface>
      */
     public function getTools(): array

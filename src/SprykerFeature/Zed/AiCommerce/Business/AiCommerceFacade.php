@@ -53,8 +53,8 @@ class AiCommerceFacade extends AbstractFacade implements AiCommerceFacadeInterfa
 
     public function handleBackofficeAssistantPrompt(
         BackofficeAssistantPromptRequestTransfer $promptRequestTransfer,
-    ): BackofficeAssistantPromptResponseTransfer {
-        return $this->getFactory()->createPromptHandler()->handle($promptRequestTransfer);
+    ): void {
+        $this->getFactory()->createPromptHandler()->handle($promptRequestTransfer);
     }
 
     public function executeGeneralPurposeAgent(
