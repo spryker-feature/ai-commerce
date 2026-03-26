@@ -30,7 +30,7 @@ class GetBackofficeCapabilitiesToolPlugin extends AbstractPlugin implements Tool
 
     public function getDescription(): string
     {
-        return 'Returns a structured overview of all Backoffice capabilities and sections. Use this tool when the user asks what the Backoffice can do, which features are available, or what sections exist.';
+        return 'Returns a structured overview of all Backoffice capabilities, action and sections. Use this tool when the user asks what the Backoffice can do, how to do any action in Backoffice, which features are available, or what sections exist.';
     }
 
     /**

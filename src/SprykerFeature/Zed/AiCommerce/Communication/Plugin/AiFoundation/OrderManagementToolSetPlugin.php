@@ -10,14 +10,14 @@ declare(strict_types=1);
 namespace SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation;
 
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolSetPluginInterface;
+use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
-use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOmsProcessDefinitionToolPlugin;
-use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderDetailsToolPlugin;
-use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderManualEventsToolPlugin;
-use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderOmsTransitionsToolPlugin;
-use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderStateFlagsToolPlugin;
 
-class OrderManagementToolSetPlugin implements ToolSetPluginInterface
+/**
+ * @method \SprykerFeature\Zed\AiCommerce\Communication\AiCommerceCommunicationFactory getFactory()
+ * @method \SprykerFeature\Zed\AiCommerce\AiCommerceConfig getConfig()
+ */
+class OrderManagementToolSetPlugin extends AbstractPlugin implements ToolSetPluginInterface
 {
     /**
      * {@inheritDoc}
@@ -39,11 +39,11 @@ class OrderManagementToolSetPlugin implements ToolSetPluginInterface
     public function getTools(): array
     {
         return [
-            new GetOrderOmsTransitionsToolPlugin(),
-            new GetOrderDetailsToolPlugin(),
-            new GetOrderManualEventsToolPlugin(),
-            new GetOmsProcessDefinitionToolPlugin(),
-            new GetOrderStateFlagsToolPlugin(),
+            $this->getFactory()->createGetOrderOmsTransitionsToolPlugin(),
+            $this->getFactory()->createGetOrderDetailsToolPlugin(),
+            $this->getFactory()->createGetOrderManualEventsToolPlugin(),
+            $this->getFactory()->createGetOmsProcessDefinitionToolPlugin(),
+            $this->getFactory()->createGetOrderStateFlagsToolPlugin(),
         ];
     }
 }

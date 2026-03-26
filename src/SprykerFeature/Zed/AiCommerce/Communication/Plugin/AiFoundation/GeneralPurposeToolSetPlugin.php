@@ -10,11 +10,14 @@ declare(strict_types=1);
 namespace SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation;
 
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolSetPluginInterface;
+use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
-use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetBackofficeCapabilities\GetBackofficeCapabilitiesToolPlugin;
-use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetNavigationToolPlugin;
 
-class GeneralPurposeToolSetPlugin implements ToolSetPluginInterface
+/**
+ * @method \SprykerFeature\Zed\AiCommerce\Communication\AiCommerceCommunicationFactory getFactory()
+ * @method \SprykerFeature\Zed\AiCommerce\AiCommerceConfig getConfig()
+ */
+class GeneralPurposeToolSetPlugin extends AbstractPlugin implements ToolSetPluginInterface
 {
     /**
      * {@inheritDoc}
@@ -36,8 +39,8 @@ class GeneralPurposeToolSetPlugin implements ToolSetPluginInterface
     public function getTools(): array
     {
         return [
-            new GetNavigationToolPlugin(),
-            new GetBackofficeCapabilitiesToolPlugin(),
+            $this->getFactory()->createGetNavigationToolPlugin(),
+            $this->getFactory()->createGetBackofficeCapabilitiesToolPlugin(),
         ];
     }
 }

@@ -18,6 +18,7 @@ use Generated\Shared\Transfer\BackofficeAssistantPromptRequestTransfer;
 use Generated\Shared\Transfer\ConversationHistoryConditionsTransfer;
 use Generated\Shared\Transfer\ConversationHistoryCriteriaTransfer;
 use Generated\Shared\Transfer\ConversationHistoryTransfer;
+use Spryker\Shared\Log\LoggerTrait;
 use Spryker\Zed\AiFoundation\Business\AiFoundationFacadeInterface;
 use Spryker\Zed\Glossary\Business\GlossaryFacadeInterface;
 use SprykerFeature\Shared\AiCommerce\BackofficeAssistant\BackofficeAssistantEventType;
@@ -26,9 +27,12 @@ use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Conversation\Back
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Conversation\BackofficeAssistantConversationReaderInterface;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Conversation\BackofficeAssistantConversationUpdaterInterface;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Emitter\SseEventEmitterInterface;
+use Throwable;
 
 class PromptHandler implements PromptHandlerInterface
 {
+    use LoggerTrait;
+
     protected const string AGENT_GUARDRAIL = 'Guardrail';
 
     protected const string KEY_TYPE = 'type';
@@ -60,40 +64,49 @@ class PromptHandler implements PromptHandlerInterface
 
     public function handle(BackofficeAssistantPromptRequestTransfer $promptRequestTransfer): void
     {
-        $validationErrors = $this->promptRequestValidator->validate($promptRequestTransfer);
+        try {
+            $validationErrors = $this->promptRequestValidator->validate($promptRequestTransfer);
 
-        if ($validationErrors !== []) {
-            foreach ($validationErrors as $errorKey) {
-                $this->eventEmitter->emit(BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => $this->glossaryFacade->translate($errorKey)]);
+            if ($validationErrors !== []) {
+                foreach ($validationErrors as $errorKey) {
+                    $this->eventEmitter->emit(BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => $this->glossaryFacade->translate($errorKey)]);
+                }
+
+                return;
             }
 
-            return;
+            $conversationReference = $this->resolveConversationReference(
+                $promptRequestTransfer->getPromptOrFail(),
+                (string)$promptRequestTransfer->getConversationReference(),
+                $promptRequestTransfer->getUserUuidOrFail(),
+            );
+
+            $selectedAgent = (string)$promptRequestTransfer->getSelectedAgent();
+
+            $this->conversationUpdater->updateCollection(
+                (new BackofficeAssistantConversationCollectionRequestTransfer())
+                    ->addBackofficeAssistantConversation(
+                        (new BackofficeAssistantConversationTransfer())
+                            ->setConversationReference($conversationReference)
+                            ->setUserSelectedAgent($selectedAgent ?: null),
+                    ),
+            );
+
+            if ($selectedAgent) {
+                $this->handleSelectedAgent($promptRequestTransfer, $conversationReference, $selectedAgent);
+
+                return;
+            }
+
+            $this->handleIntentRouting($promptRequestTransfer, $conversationReference);
+        } catch (Throwable $throwable) {
+            $this->getLogger()->error(
+                sprintf('Backoffice assistant prompt handling failed: %s', $throwable->getMessage()),
+                ['exception' => $throwable],
+            );
+
+            $this->eventEmitter->emit(BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => static::MESSAGE_AI_SERVICE_UNAVAILABLE]);
         }
-
-        $conversationReference = $this->resolveConversationReference(
-            $promptRequestTransfer->getPromptOrFail(),
-            (string)$promptRequestTransfer->getConversationReference(),
-            $promptRequestTransfer->getUserUuidOrFail(),
-        );
-
-        $selectedAgent = (string)$promptRequestTransfer->getSelectedAgent();
-
-        $this->conversationUpdater->updateCollection(
-            (new BackofficeAssistantConversationCollectionRequestTransfer())
-                ->addBackofficeAssistantConversation(
-                    (new BackofficeAssistantConversationTransfer())
-                        ->setConversationReference($conversationReference)
-                        ->setUserSelectedAgent($selectedAgent ?: null),
-                ),
-        );
-
-        if ($selectedAgent) {
-            $this->handleSelectedAgent($promptRequestTransfer, $conversationReference, $selectedAgent);
-
-            return;
-        }
-
-        $this->handleIntentRouting($promptRequestTransfer, $conversationReference);
     }
 
     protected function handleSelectedAgent(
