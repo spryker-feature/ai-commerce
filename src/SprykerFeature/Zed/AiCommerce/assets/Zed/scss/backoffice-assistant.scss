@@ -454,8 +454,8 @@ $backoffice-assistant-retry-color: #11856e;
             align-self: flex-start;
             max-width: 90%;
             padding: 8px 12px;
-            background: #eef2ff;
-            border: 1px solid #c7d2fe;
+            background: #f0faf7;
+            border: 1px solid #b3ddd5;
             border-radius: 8px;
             font-size: 12px;
             color: #333;
@@ -667,7 +667,7 @@ $backoffice-assistant-retry-color: #11856e;
     &__tool-call-label {
         font-weight: 600;
         font-size: 12px;
-        color: #4f46e5;
+        color: #11856e;
         margin-bottom: 4px;
 
         i {
@@ -712,14 +712,14 @@ $backoffice-assistant-retry-color: #11856e;
     &__tool-call-toggle {
         background: none;
         border: none;
-        color: #4f46e5;
+        color: #11856e;
         font-size: 11px;
         cursor: pointer;
         padding: 0;
         text-decoration: underline;
 
         &:hover {
-            color: #3730a3;
+            color: color.adjust(#11856e, $lightness: -10%);
         }
     }
 }
