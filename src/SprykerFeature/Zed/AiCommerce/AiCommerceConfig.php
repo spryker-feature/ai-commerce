@@ -84,6 +84,17 @@ class AiCommerceConfig extends AbstractBundleConfig
 
     /**
      * Specification:
+     * - Returns the absolute path to the Backoffice navigation cache file.
+     *
+     * @api
+     */
+    public function getBackofficeNavigationCachePath(): string
+    {
+        return APPLICATION_ROOT_DIR . '/src/Generated/Zed/Navigation/codeBucket/navigation.cache';
+    }
+
+    /**
+     * Specification:
      * - Returns the names of AI configurations that should be used for the Backoffice Assistant SSE event.
      *
      * @api

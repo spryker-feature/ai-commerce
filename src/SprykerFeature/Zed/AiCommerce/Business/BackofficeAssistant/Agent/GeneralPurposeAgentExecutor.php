@@ -35,6 +35,7 @@ class GeneralPurposeAgentExecutor implements GeneralPurposeAgentExecutorInterfac
             ->setAiConfigurationName(AiCommerceConstants::AI_CONFIGURATION_GENERAL_PURPOSE)
             ->setConversationReference($promptRequestTransfer->getConversationReference())
             ->setStructuredMessage(new GeneralPurposeAgentResponseTransfer())
+            ->addToolSetName(AiCommerceConstants::TOOL_SET_GENERAL_PURPOSE)
             ->setPromptMessage(
                 (new PromptMessageTransfer())
                     ->setType(AiFoundationConstants::MESSAGE_TYPE_USER)
@@ -47,7 +48,10 @@ class GeneralPurposeAgentExecutor implements GeneralPurposeAgentExecutorInterfac
         $backofficeAssistantPromptResponse = new BackofficeAssistantPromptResponseTransfer();
 
         if (!$promptResponse->getIsSuccessful()) {
-            $this->getLogger()->error(sprintf('GeneralPurposeAgent prompt response is not successful: %s', json_encode($promptResponse->getErrors()->getArrayCopy())));
+            $this->getLogger()->error(sprintf(
+                'GeneralPurposeAgent prompt response is not successful: %s',
+                implode(', ', array_map(static fn ($error) => $error->getMessage(), $promptResponse->getErrors()->getArrayCopy())),
+            ));
 
             return $backofficeAssistantPromptResponse;
         }

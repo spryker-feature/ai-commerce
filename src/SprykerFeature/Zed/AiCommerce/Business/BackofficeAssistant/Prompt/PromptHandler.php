@@ -304,13 +304,13 @@ class PromptHandler implements PromptHandlerInterface
                     static::KEY_AGENT => static::AGENT_GUARDRAIL,
                     static::KEY_CONVERSATION_REFERENCE => $conversationReference,
                 ]);
-            }
 
-            if ($backofficeAssistantPromptResponse->getReasoningMessage()) {
-                $this->eventEmitter->emit(BackofficeAssistantEventType::Reasoning, [
-                    static::KEY_MESSAGE => $backofficeAssistantPromptResponse->getReasoningMessage(),
-                    static::KEY_CONVERSATION_REFERENCE => $conversationReference,
-                ]);
+                if ($backofficeAssistantPromptResponse->getReasoningMessage()) {
+                    $this->eventEmitter->emit(BackofficeAssistantEventType::Reasoning, [
+                        static::KEY_MESSAGE => $backofficeAssistantPromptResponse->getReasoningMessage(),
+                        static::KEY_CONVERSATION_REFERENCE => $conversationReference,
+                    ]);
+                }
             }
 
             $this->eventEmitter->emit(BackofficeAssistantEventType::AiResponse, [

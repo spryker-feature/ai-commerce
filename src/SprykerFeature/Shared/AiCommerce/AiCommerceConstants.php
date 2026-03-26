@@ -43,4 +43,9 @@ interface AiCommerceConstants
      * @api
      */
     public const string TOOL_SET_ORDER_MANAGEMENT = 'order_management_tools';
+
+    /**
+     * @api
+     */
+    public const string TOOL_SET_GENERAL_PURPOSE = 'general_purpose_tools';
 }

@@ -1,0 +1,43 @@
+<?php
+
+/**
+ * Copyright © 2016-present Spryker Systems GmbH. All rights reserved.
+ * Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
+ */
+
+declare(strict_types=1);
+
+namespace SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation;
+
+use Spryker\Zed\AiFoundation\Dependency\Tools\ToolSetPluginInterface;
+use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
+use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetBackofficeCapabilities\GetBackofficeCapabilitiesToolPlugin;
+use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetNavigationToolPlugin;
+
+class GeneralPurposeToolSetPlugin implements ToolSetPluginInterface
+{
+    /**
+     * {@inheritDoc}
+     *
+     * @api
+     */
+    public function getName(): string
+    {
+        return AiCommerceConstants::TOOL_SET_GENERAL_PURPOSE;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @api
+     *
+     * @return array<\Spryker\Zed\AiFoundation\Dependency\Tools\ToolPluginInterface>
+     */
+    public function getTools(): array
+    {
+        return [
+            new GetNavigationToolPlugin(),
+            new GetBackofficeCapabilitiesToolPlugin(),
+        ];
+    }
+}

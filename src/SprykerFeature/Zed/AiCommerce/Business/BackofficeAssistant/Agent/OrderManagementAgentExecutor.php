@@ -48,7 +48,10 @@ class OrderManagementAgentExecutor implements OrderManagementAgentExecutorInterf
         $backofficeAssistantPromptResponse = new BackofficeAssistantPromptResponseTransfer();
 
         if (!$promptResponse->getIsSuccessful()) {
-            $this->getLogger()->error(sprintf('OrderManagementAgent prompt response is not successful: %s', json_encode($promptResponse->getErrors()->getArrayCopy())));
+            $this->getLogger()->error(sprintf(
+                'OrderManagementAgent prompt response is not successful: %s',
+                implode(', ', array_map(static fn ($error) => $error->getMessage(), $promptResponse->getErrors()->getArrayCopy())),
+            ));
 
             return $backofficeAssistantPromptResponse;
         }
