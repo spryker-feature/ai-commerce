@@ -1,11 +1,46 @@
 import { STORAGE_KEY } from './constants';
 
 export class BackofficeAssistantState {
-    conversationReference = null;
-    isWaiting = false;
-    greetingShown = false;
-    pendingAttachments = [];
-    abortController = null;
+    #conversationReference = null;
+    #isWaiting = false;
+    #greetingShown = false;
+    #pendingAttachments = [];
+    #abortController = null;
+
+    get conversationReference() {
+        return this.#conversationReference;
+    }
+    set conversationReference(value) {
+        this.#conversationReference = value;
+    }
+
+    get isWaiting() {
+        return this.#isWaiting;
+    }
+    set isWaiting(value) {
+        this.#isWaiting = value;
+    }
+
+    get greetingShown() {
+        return this.#greetingShown;
+    }
+    set greetingShown(value) {
+        this.#greetingShown = value;
+    }
+
+    get pendingAttachments() {
+        return this.#pendingAttachments;
+    }
+    set pendingAttachments(value) {
+        this.#pendingAttachments = value;
+    }
+
+    get abortController() {
+        return this.#abortController;
+    }
+    set abortController(value) {
+        this.#abortController = value;
+    }
 
     save(isOpen) {
         try {
@@ -13,7 +48,7 @@ export class BackofficeAssistantState {
                 STORAGE_KEY,
                 JSON.stringify({
                     isOpen: isOpen,
-                    conversationReference: this.conversationReference,
+                    conversationReference: this.#conversationReference,
                 }),
             );
         } catch {
@@ -32,8 +67,8 @@ export class BackofficeAssistantState {
     }
 
     reset() {
-        this.conversationReference = null;
-        this.greetingShown = false;
-        this.pendingAttachments = [];
+        this.#conversationReference = null;
+        this.#greetingShown = false;
+        this.#pendingAttachments = [];
     }
 }

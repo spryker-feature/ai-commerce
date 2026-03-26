@@ -1,18 +1,19 @@
 export class BackofficeAssistantStreamParser {
-    buffer = '';
+    #buffer = '';
+    #onEvent;
 
     constructor(onEvent) {
-        this.onEvent = onEvent;
+        this.#onEvent = onEvent;
     }
 
     feed(chunk) {
-        this.buffer += chunk;
+        this.#buffer += chunk;
 
-        let boundary = this.buffer.indexOf('\n\n');
+        let boundary = this.#buffer.indexOf('\n\n');
 
         while (boundary !== -1) {
-            const block = this.buffer.substring(0, boundary);
-            this.buffer = this.buffer.substring(boundary + 2);
+            const block = this.#buffer.substring(0, boundary);
+            this.#buffer = this.#buffer.substring(boundary + 2);
 
             const lines = block.split('\n');
 
@@ -22,13 +23,13 @@ export class BackofficeAssistantStreamParser {
                 }
 
                 try {
-                    this.onEvent(JSON.parse(lines[i].slice(6)));
+                    this.#onEvent(JSON.parse(lines[i].slice(6)));
                 } catch {
                     // Skip malformed JSON
                 }
             }
 
-            boundary = this.buffer.indexOf('\n\n');
+            boundary = this.#buffer.indexOf('\n\n');
         }
     }
 }
