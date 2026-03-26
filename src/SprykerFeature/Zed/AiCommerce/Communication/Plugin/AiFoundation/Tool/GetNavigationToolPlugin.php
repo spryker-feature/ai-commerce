@@ -83,6 +83,10 @@ class GetNavigationToolPlugin extends AbstractPlugin implements ToolPluginInterf
                 continue;
             }
 
+            if (isset($entry['visible']) && (int)$entry['visible'] === 0) {
+                continue;
+            }
+
             $label = (string)($entry['label'] ?? '');
             $title = (string)($entry['title'] ?? '');
             $path = $this->buildPath($entry);
