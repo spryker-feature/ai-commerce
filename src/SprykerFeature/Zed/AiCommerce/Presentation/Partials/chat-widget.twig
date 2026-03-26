@@ -93,6 +93,59 @@
                 </button>
             </div>
         </div>
+
+        <template data-id="backoffice-assistant-message">
+            <div class="backoffice-assistant__message"></div>
+        </template>
+
+        <template data-id="backoffice-assistant-loading">
+            <div class="backoffice-assistant__message backoffice-assistant__message--ai backoffice-assistant__message--loading">
+                <span class="backoffice-assistant__typing-dot"></span>
+                <span class="backoffice-assistant__typing-dot"></span>
+                <span class="backoffice-assistant__typing-dot"></span>
+            </div>
+        </template>
+
+        <template data-id="backoffice-assistant-retry">
+            <button type="button" class="backoffice-assistant__retry-btn"></button>
+        </template>
+
+        <template data-id="backoffice-assistant-tool-call">
+            <div class="backoffice-assistant__tool-call-label">
+                <i class="fa fa-cog"></i>
+                <span class="backoffice-assistant__tool-call-name"></span>
+            </div>
+            <div class="backoffice-assistant__tool-call-section">
+                <span class="backoffice-assistant__tool-call-section-label"></span>
+                <pre class="backoffice-assistant__tool-call-code"></pre>
+            </div>
+            <div class="backoffice-assistant__tool-call-section">
+                <button type="button" class="backoffice-assistant__tool-call-toggle"></button>
+                <pre class="backoffice-assistant__tool-call-code backoffice-assistant__tool-call-code--collapsed"></pre>
+            </div>
+        </template>
+
+        <template data-id="backoffice-assistant-attachment-chip">
+            <div class="backoffice-assistant__attachment-chip">
+                <span class="backoffice-assistant__attachment-chip-name"></span>
+                <button type="button" class="backoffice-assistant__attachment-chip-remove"><i class="fa fa-times"></i></button>
+            </div>
+        </template>
+
+        <template data-id="backoffice-assistant-attachment-pill">
+            <span class="backoffice-assistant__message-attachment-pill">
+                <i class="fa fa-file"></i>
+                <span class="backoffice-assistant__message-attachment-pill-name"></span>
+            </span>
+        </template>
+
+        <template data-id="backoffice-assistant-history-item">
+            <li class="backoffice-assistant__histories-item">
+                <span class="backoffice-assistant__histories-item-name"></span>
+                <span class="backoffice-assistant__histories-item-agent"></span>
+                <button type="button" class="backoffice-assistant__histories-item-delete"><i class="fa fa-trash"></i></button>
+            </li>
+        </template>
     </div>
 
     <script>
