@@ -53,6 +53,12 @@ export class BackofficeAssistantMessageRenderer {
         return el;
     }
 
+    keepLoadingIndicatorAtBottom(loadingEl) {
+        if (loadingEl && loadingEl.isConnected && this.#messagesEl.lastElementChild !== loadingEl) {
+            this.#messagesEl.appendChild(loadingEl);
+        }
+    }
+
     addRetryButton(onRetry) {
         const fragment = this.#templates.retry.content.cloneNode(true);
         const btn = fragment.firstElementChild;

@@ -5,6 +5,7 @@ import { BackofficeAssistantMessageRenderer } from './BackofficeAssistantMessage
 import { BackofficeAssistantAttachmentManager } from './BackofficeAssistantAttachmentManager';
 import { BackofficeAssistantAgentBadge } from './BackofficeAssistantAgentBadge';
 import { BackofficeAssistantHistories } from './BackofficeAssistantHistories';
+import { BackofficeAssistantPageContext } from './BackofficeAssistantPageContext';
 
 export class BackofficeAssistant {
     static #selectors = {
@@ -24,6 +25,7 @@ export class BackofficeAssistant {
         attach: '.js-backoffice-assistant__attach',
         fileInput: '.js-backoffice-assistant__file-input',
         attachmentsPreview: '.js-backoffice-assistant__attachments-preview',
+        pageContextSuggestions: '.js-backoffice-assistant__page-context-suggestions',
         footer: '.js-backoffice-assistant__footer',
     };
 
@@ -35,6 +37,7 @@ export class BackofficeAssistant {
     #agentBadge;
     #attachments;
     #histories;
+    #pageContext;
     #cssClasses;
     #iconClasses;
 
@@ -88,6 +91,11 @@ export class BackofficeAssistant {
             this.#i18n,
             this.#cssClasses,
         );
+        this.#pageContext = new BackofficeAssistantPageContext(
+            this.#elements.pageContextSuggestions,
+            this.#elements.panel,
+            this.#i18n,
+        );
 
         this.#init();
     }
@@ -117,6 +125,7 @@ export class BackofficeAssistant {
             attach: panel.querySelector(BackofficeAssistant.#selectors.attach),
             fileInput: panel.querySelector(BackofficeAssistant.#selectors.fileInput),
             attachmentsPreview: panel.querySelector(BackofficeAssistant.#selectors.attachmentsPreview),
+            pageContextSuggestions: panel.querySelector(BackofficeAssistant.#selectors.pageContextSuggestions),
             footer: panel.querySelector(BackofficeAssistant.#selectors.footer),
         };
     }
@@ -141,6 +150,7 @@ export class BackofficeAssistant {
             errorPrefix: dataset.i18nErrorPrefix || 'Error: ',
             failedLoadHistory: dataset.i18nFailedLoadHistory || 'Failed to load conversation history.',
             toolResult: dataset.i18nToolResult || 'Tool Result',
+            pageContextLabel: dataset.i18nPageContextLabel || 'Page context',
         };
     }
 
@@ -159,8 +169,15 @@ export class BackofficeAssistant {
         this.#elements.toggle.hidden = true;
         this.#loadAvailableAgents();
         this.#state.save(true);
+        this.#pageContext.showSuggestion();
 
-        if (!this.#state.greetingShown && !this.#state.conversationReference) {
+        if (this.#state.conversationReference && !this.#state.greetingShown) {
+            this.#loadConversationDetail(this.#state.conversationReference);
+
+            return;
+        }
+
+        if (!this.#state.greetingShown) {
             this.#showGreeting();
         }
     }
@@ -191,6 +208,7 @@ export class BackofficeAssistant {
         this.#agentBadge.reset();
         this.#renderer.clear();
         this.#histories.hide();
+        this.#pageContext.reset();
         this.#elements.input.value = '';
         this.#elements.input.focus();
         this.#showGreeting();
@@ -267,9 +285,11 @@ export class BackofficeAssistant {
 
         this.#setWaiting(true);
 
+        const contextPrefix = this.#pageContext.getContextPrefix();
+        this.#pageContext.clear();
         const loadingEl = this.#renderer.addLoadingIndicator();
         const body = {
-            prompt: prompt,
+            prompt: contextPrefix + prompt,
             context: { current_page: this.#getBreadcrumb() },
             selected_agent: this.#agentBadge.getSelectedAgent(),
         };
@@ -360,14 +380,17 @@ export class BackofficeAssistant {
                 break;
             case 'reasoning':
                 this.#renderer.addReasoningMessage(data.message);
+                this.#renderer.keepLoadingIndicatorAtBottom(loadingEl);
 
                 break;
             case 'tool_call':
                 this.#renderer.addToolCallMessage(data.name, data.arguments, null);
+                this.#renderer.keepLoadingIndicatorAtBottom(loadingEl);
 
                 break;
             case 'tool_call_result':
                 this.#renderer.addToolCallMessage(data.name, null, data.result);
+                this.#renderer.keepLoadingIndicatorAtBottom(loadingEl);
 
                 break;
             case 'ai_response':
@@ -501,6 +524,7 @@ export class BackofficeAssistant {
         this.#elements.panel.classList.add(this.#cssClasses.panelOpen);
         this.#elements.toggle.hidden = true;
         this.#state.greetingShown = true;
+        this.#pageContext.showSuggestion();
 
         if (this.#state.conversationReference) {
             this.#loadConversationDetail(this.#state.conversationReference);

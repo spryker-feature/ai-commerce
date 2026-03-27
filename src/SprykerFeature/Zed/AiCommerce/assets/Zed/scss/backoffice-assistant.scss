@@ -563,6 +563,84 @@ $backoffice-assistant-retry-color: #11856e;
         }
     }
 
+    &__page-context-suggestions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+
+        &:empty {
+            display: none;
+        }
+    }
+
+    &__page-context-suggestion {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #e8f5f2;
+        color: $backoffice-assistant-user-bubble-bg;
+        font-size: 11px;
+        font-weight: 500;
+        padding: 4px 10px;
+        border: 1px dashed color.adjust($backoffice-assistant-user-bubble-bg, $lightness: 20%);
+        border-radius: 14px;
+        cursor: pointer;
+        transition:
+            background 150ms ease,
+            border-color 150ms ease;
+        animation: backoffice-assistant-message-appear 200ms ease-out;
+
+        &:hover {
+            background: color.adjust(#e8f5f2, $lightness: -4%);
+            border-color: $backoffice-assistant-user-bubble-bg;
+        }
+
+        i {
+            font-size: 10px;
+        }
+    }
+
+    &__context-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #e8f5f2;
+        color: $backoffice-assistant-user-bubble-bg;
+        font-size: 11px;
+        font-weight: 500;
+        padding: 3px 8px;
+        border-radius: 12px;
+        max-width: 220px;
+        animation: backoffice-assistant-message-appear 200ms ease-out;
+
+        i {
+            font-size: 10px;
+            flex-shrink: 0;
+        }
+    }
+
+    &__context-chip-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__context-chip-remove {
+        background: none;
+        border: none;
+        color: $backoffice-assistant-user-bubble-bg;
+        cursor: pointer;
+        padding: 0 2px;
+        font-size: 10px;
+        line-height: 1;
+        opacity: 0.7;
+        transition: opacity 150ms ease;
+
+        &:hover {
+            opacity: 1;
+        }
+    }
+
     &__attach {
         flex-shrink: 0;
         width: 36px;

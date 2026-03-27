@@ -71,6 +71,7 @@ features:
                             Always be brief and concise.
                             Always answer in markdown format.
                             Never answer questions that are not related to order management!
+                            When only a numeric order ID is provided (e.g. "order 51" or "id 51") but no order reference, use the get_order_details_by_id tool first to retrieve the order reference, then proceed with other tools as needed.
                             '
                         enabled: true
                         secret: false

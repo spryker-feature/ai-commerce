@@ -35,7 +35,7 @@ class GetOrderDetailsByIdToolPlugin extends AbstractPlugin implements ToolPlugin
      */
     public function getDescription(): string
     {
-        return 'Get basic order details including items, amounts, dates, and customer information by numeric sales order ID.';
+        return 'Use to get basic order reference and details like items, amounts, dates, and customer information by numeric sales order ID.';
     }
 
     /**

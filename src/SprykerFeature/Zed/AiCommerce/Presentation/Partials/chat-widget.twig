@@ -32,7 +32,8 @@
          data-i18n-no-response="{{ 'No response received.' | trans | e('html_attr') }}"
          data-i18n-error-prefix="{{ 'Error: ' | trans | e('html_attr') }}"
          data-i18n-failed-load-history="{{ 'Failed to load conversation history.' | trans | e('html_attr') }}"
-         data-i18n-tool-result="{{ 'Tool Result' | trans | e('html_attr') }}">
+         data-i18n-tool-result="{{ 'Tool Result' | trans | e('html_attr') }}"
+         data-i18n-page-context-label="{{ 'Page context' | trans | e('html_attr') }}">
         <div class="backoffice-assistant__header">
             <div class="backoffice-assistant__header-actions">
                 <button type="button"
@@ -76,6 +77,7 @@
 
         <div class="backoffice-assistant__footer js-backoffice-assistant__footer">
             <div class="backoffice-assistant__attachments-preview js-backoffice-assistant__attachments-preview"></div>
+            <div class="backoffice-assistant__page-context-suggestions js-backoffice-assistant__page-context-suggestions"></div>
             <div class="backoffice-assistant__footer-row">
                 <button type="button"
                         class="backoffice-assistant__attach js-backoffice-assistant__attach"
@@ -153,6 +155,22 @@
                 <i class="fa fa-file"></i>
                 <span class="backoffice-assistant__message-attachment-pill-name"></span>
             </span>
+        </template>
+
+        <template data-id="backoffice-assistant-page-context-suggestion">
+            <button type="button" class="backoffice-assistant__page-context-suggestion">
+                <i class="fa fa-map-marker"></i>
+                <span class="backoffice-assistant__page-context-suggestion-label"></span>
+                <i class="fa fa-plus-circle"></i>
+            </button>
+        </template>
+
+        <template data-id="backoffice-assistant-page-context-chip">
+            <div class="backoffice-assistant__context-chip">
+                <i class="fa fa-map-marker"></i>
+                <span class="backoffice-assistant__context-chip-name"></span>
+                <button type="button" class="backoffice-assistant__context-chip-remove"><i class="fa fa-times"></i></button>
+            </div>
         </template>
 
         <template data-id="backoffice-assistant-history-item">
