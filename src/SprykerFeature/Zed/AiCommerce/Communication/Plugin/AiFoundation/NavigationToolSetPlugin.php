@@ -17,7 +17,7 @@ use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
  * @method \SprykerFeature\Zed\AiCommerce\Communication\AiCommerceCommunicationFactory getFactory()
  * @method \SprykerFeature\Zed\AiCommerce\AiCommerceConfig getConfig()
  */
-class GeneralPurposeToolSetPlugin extends AbstractPlugin implements ToolSetPluginInterface
+class NavigationToolSetPlugin extends AbstractPlugin implements ToolSetPluginInterface
 {
     /**
      * {@inheritDoc}
