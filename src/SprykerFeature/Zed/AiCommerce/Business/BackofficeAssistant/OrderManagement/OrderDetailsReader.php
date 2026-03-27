@@ -20,6 +20,17 @@ class OrderDetailsReader implements OrderDetailsReaderInterface
     {
     }
 
+    public function getOrderDetailsById(int $idSalesOrder): string
+    {
+        $orderTransfer = $this->salesFacade->findOrderByIdSalesOrder($idSalesOrder);
+
+        if ($orderTransfer === null) {
+            return '{}';
+        }
+
+        return (string)json_encode($this->buildOrderDetailsData($orderTransfer), JSON_PRETTY_PRINT);
+    }
+
     public function getOrderDetails(string $orderReference): string
     {
         $orderCriteriaTransfer = (new OrderCriteriaTransfer())

@@ -29,6 +29,7 @@ use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\CreateD
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetBackofficeCapabilities\GetBackofficeCapabilitiesToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetDiscountDetailsToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetNavigationToolPlugin;
+use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderDetailsByIdToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderDetailsToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderManualEventsToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderOmsTransitionsToolPlugin;
@@ -127,6 +128,11 @@ class AiCommerceCommunicationFactory extends AbstractCommunicationFactory
     public function createGetOrderDetailsToolPlugin(): ToolPluginInterface
     {
         return new GetOrderDetailsToolPlugin();
+    }
+
+    public function createGetOrderDetailsByIdToolPlugin(): ToolPluginInterface
+    {
+        return new GetOrderDetailsByIdToolPlugin();
     }
 
     public function createGetOrderManualEventsToolPlugin(): ToolPluginInterface

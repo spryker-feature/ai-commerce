@@ -11,6 +11,7 @@ namespace SprykerFeatureTest\Zed\AiCommerce\Business;
 
 use Codeception\Test\Unit;
 use Generated\Shared\Transfer\OrderTransfer;
+use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderDetailsByIdToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderDetailsToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderManualEventsToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderOmsTransitionsToolPlugin;
@@ -57,6 +58,35 @@ class OrderManagementToolPluginsTest extends Unit
     {
         // Act
         $result = (new GetOrderDetailsToolPlugin())->execute(orderReference: 'NONEXISTENT-ORDER-REF-' . uniqid());
+
+        // Assert
+        $this->assertSame('{}', $result);
+    }
+
+    public function testGetOrderDetailsByIdToolPluginReturnsJsonWithOrderData(): void
+    {
+        // Arrange
+        $orderReference = uniqid('TEST-ORDER-', true);
+        $this->tester->configureTestStateMachine([static::PROCESS_NAME]);
+        $idSalesOrder = $this->tester->createOrder([OrderTransfer::ORDER_REFERENCE => $orderReference]);
+        $this->tester->createSalesOrderItemForOrder($idSalesOrder, ['process' => static::PROCESS_NAME, 'state' => static::ITEM_STATE]);
+
+        // Act
+        $result = (new GetOrderDetailsByIdToolPlugin())->execute(idSalesOrder: $idSalesOrder);
+
+        // Assert
+        $this->assertJson($result);
+        $decoded = json_decode($result, true);
+        $this->assertSame($orderReference, $decoded['orderReference']);
+        $this->assertArrayHasKey('totals', $decoded);
+        $this->assertArrayHasKey('items', $decoded);
+        $this->assertArrayHasKey('itemCount', $decoded);
+    }
+
+    public function testGetOrderDetailsByIdToolPluginReturnsEmptyJsonForUnknownId(): void
+    {
+        // Act
+        $result = (new GetOrderDetailsByIdToolPlugin())->execute(idSalesOrder: 999999);
 
         // Assert
         $this->assertSame('{}', $result);

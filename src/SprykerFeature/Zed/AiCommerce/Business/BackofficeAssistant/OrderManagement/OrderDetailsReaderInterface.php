@@ -12,4 +12,6 @@ namespace SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManage
 interface OrderDetailsReaderInterface
 {
     public function getOrderDetails(string $orderReference): string;
+
+    public function getOrderDetailsById(int $idSalesOrder): string;
 }
