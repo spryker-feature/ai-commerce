@@ -14,7 +14,7 @@ use Spryker\Zed\AiFoundation\Dependency\Tools\ToolPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 
 /**
- * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceFacadeInterface getFacade()
+ * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceBusinessFactory getBusinessFactory()
  */
 class GetOrderDetailsToolPlugin extends AbstractPlugin implements ToolPluginInterface
 {
@@ -66,6 +66,6 @@ class GetOrderDetailsToolPlugin extends AbstractPlugin implements ToolPluginInte
      */
     public function execute(...$arguments): mixed
     {
-        return $this->getFacade()->getOrderDetails((string)($arguments[0] ?? ''));
+        return $this->getBusinessFactory()->createOrderDetailsReader()->getOrderDetails((string)($arguments[0] ?? ''));
     }
 }

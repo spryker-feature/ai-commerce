@@ -27,7 +27,7 @@ use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Attachment\A
 use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Emitter\SseEventEmitterInterface;
 use Throwable;
 
-class PromptHandler implements PromptHandlerInterface
+class PromptProcessor implements PromptProcessorInterface
 {
     use LoggerTrait;
 

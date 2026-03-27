@@ -15,6 +15,7 @@ use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 
 /**
  * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceFacadeInterface getFacade()
+ * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceBusinessFactory getBusinessFactory()
  */
 class GetOrderOmsTransitionsToolPlugin extends AbstractPlugin implements ToolPluginInterface
 {
@@ -66,6 +67,6 @@ class GetOrderOmsTransitionsToolPlugin extends AbstractPlugin implements ToolPlu
      */
     public function execute(...$arguments): mixed
     {
-        return $this->getFacade()->getOrderOmsTransitions((string)($arguments[0] ?? ''));
+        return $this->getBusinessFactory()->createOrderOmsTransitionsReader()->getOrderOmsTransitions((string)($arguments[0] ?? ''));
     }
 }

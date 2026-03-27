@@ -11,6 +11,7 @@ namespace SprykerFeatureTest\Zed\AiCommerce\Business;
 
 use Codeception\Test\Unit;
 use Generated\Shared\Transfer\OrderTransfer;
+use SprykerFeature\Zed\AiCommerce\Business\AiCommerceBusinessFactory;
 use SprykerFeatureTest\Zed\AiCommerce\AiCommerceBusinessTester;
 
 /**
@@ -29,6 +30,15 @@ class OrderManagementReadersTest extends Unit
 
     protected AiCommerceBusinessTester $tester;
 
+    protected AiCommerceBusinessFactory $factory;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->factory = new AiCommerceBusinessFactory();
+    }
+
     public function testGetOrderDetailsReturnsJsonWithOrderData(): void
     {
         // Arrange
@@ -38,7 +48,7 @@ class OrderManagementReadersTest extends Unit
         $this->tester->createSalesOrderItemForOrder($idSalesOrder, ['process' => static::PROCESS_NAME, 'state' => static::ITEM_STATE]);
 
         // Act
-        $result = $this->tester->getFacade()->getOrderDetails($orderReference);
+        $result = $this->factory->createOrderDetailsReader()->getOrderDetails($orderReference);
 
         // Assert
         $this->assertJson($result);
@@ -52,7 +62,7 @@ class OrderManagementReadersTest extends Unit
     public function testGetOrderDetailsReturnsEmptyJsonForUnknownOrder(): void
     {
         // Act
-        $result = $this->tester->getFacade()->getOrderDetails('NONEXISTENT-ORDER-REF-' . uniqid());
+        $result = $this->factory->createOrderDetailsReader()->getOrderDetails('NONEXISTENT-ORDER-REF-' . uniqid());
 
         // Assert
         $this->assertSame('{}', $result);
@@ -67,7 +77,7 @@ class OrderManagementReadersTest extends Unit
         $this->tester->createSalesOrderItemForOrder($idSalesOrder, ['process' => static::PROCESS_NAME, 'state' => static::ITEM_STATE]);
 
         // Act
-        $result = $this->tester->getFacade()->getOrderManualEvents($orderReference);
+        $result = $this->factory->createOrderManualEventsReader()->getOrderManualEvents($orderReference);
 
         // Assert
         $this->assertJson($result);
@@ -79,7 +89,7 @@ class OrderManagementReadersTest extends Unit
     public function testGetOrderManualEventsReturnsEmptyJsonForUnknownOrder(): void
     {
         // Act
-        $result = $this->tester->getFacade()->getOrderManualEvents('NONEXISTENT-ORDER-REF-' . uniqid());
+        $result = $this->factory->createOrderManualEventsReader()->getOrderManualEvents('NONEXISTENT-ORDER-REF-' . uniqid());
 
         // Assert
         $this->assertSame('{}', $result);
@@ -94,7 +104,7 @@ class OrderManagementReadersTest extends Unit
         $this->tester->createSalesOrderItemForOrder($idSalesOrder, ['process' => static::PROCESS_NAME, 'state' => static::ITEM_STATE]);
 
         // Act
-        $result = $this->tester->getFacade()->getOrderOmsTransitions($orderReference);
+        $result = $this->factory->createOrderOmsTransitionsReader()->getOrderOmsTransitions($orderReference);
 
         // Assert
         $this->assertJson($result);
@@ -108,7 +118,7 @@ class OrderManagementReadersTest extends Unit
     public function testGetOrderOmsTransitionsReturnsEmptyJsonForUnknownOrder(): void
     {
         // Act
-        $result = $this->tester->getFacade()->getOrderOmsTransitions('NONEXISTENT-ORDER-REF-' . uniqid());
+        $result = $this->factory->createOrderOmsTransitionsReader()->getOrderOmsTransitions('NONEXISTENT-ORDER-REF-' . uniqid());
 
         // Assert
         $this->assertSame('{}', $result);
@@ -123,7 +133,7 @@ class OrderManagementReadersTest extends Unit
         $this->tester->createSalesOrderItemForOrder($idSalesOrder, ['process' => static::PROCESS_NAME, 'state' => static::ITEM_STATE]);
 
         // Act
-        $result = $this->tester->getFacade()->getOmsProcessDefinition($orderReference);
+        $result = $this->factory->createOmsProcessDefinitionReader()->getOmsProcessDefinition($orderReference);
 
         // Assert
         $this->assertJson($result);
@@ -137,7 +147,7 @@ class OrderManagementReadersTest extends Unit
     public function testGetOmsProcessDefinitionReturnsEmptyJsonForUnknownOrder(): void
     {
         // Act
-        $result = $this->tester->getFacade()->getOmsProcessDefinition('NONEXISTENT-ORDER-REF-' . uniqid());
+        $result = $this->factory->createOmsProcessDefinitionReader()->getOmsProcessDefinition('NONEXISTENT-ORDER-REF-' . uniqid());
 
         // Assert
         $this->assertSame('{}', $result);
@@ -152,7 +162,7 @@ class OrderManagementReadersTest extends Unit
         $this->tester->createSalesOrderItemForOrder($idSalesOrder, ['process' => static::PROCESS_NAME, 'state' => static::ITEM_STATE]);
 
         // Act
-        $result = $this->tester->getFacade()->getOrderStateFlags($orderReference);
+        $result = $this->factory->createOrderStateFlagsReader()->getOrderStateFlags($orderReference);
 
         // Assert
         $this->assertJson($result);
@@ -165,7 +175,7 @@ class OrderManagementReadersTest extends Unit
     public function testGetOrderStateFlagsReturnsEmptyJsonForUnknownOrder(): void
     {
         // Act
-        $result = $this->tester->getFacade()->getOrderStateFlags('NONEXISTENT-ORDER-REF-' . uniqid());
+        $result = $this->factory->createOrderStateFlagsReader()->getOrderStateFlags('NONEXISTENT-ORDER-REF-' . uniqid());
 
         // Assert
         $this->assertSame('{}', $result);

@@ -14,7 +14,7 @@ use Spryker\Zed\AiFoundation\Dependency\Tools\ToolPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 
 /**
- * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceFacadeInterface getFacade()
+ * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceBusinessFactory getBusinessFactory()
  */
 class GetOrderStateFlagsToolPlugin extends AbstractPlugin implements ToolPluginInterface
 {
@@ -66,6 +66,6 @@ class GetOrderStateFlagsToolPlugin extends AbstractPlugin implements ToolPluginI
      */
     public function execute(...$arguments): mixed
     {
-        return $this->getFacade()->getOrderStateFlags((string)($arguments[0] ?? ''));
+        return $this->getBusinessFactory()->createOrderStateFlagsReader()->getOrderStateFlags((string)($arguments[0] ?? ''));
     }
 }

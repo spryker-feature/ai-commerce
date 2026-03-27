@@ -14,11 +14,7 @@ use Spryker\Zed\AiFoundation\Dependency\Tools\ToolPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 
 /**
- * {@inheritDoc}
- *
- * @api
- *
- * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceFacadeInterface getFacade()
+ * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceBusinessFactory getBusinessFactory()
  */
 class GetOrderManualEventsToolPlugin extends AbstractPlugin implements ToolPluginInterface
 {
@@ -70,6 +66,6 @@ class GetOrderManualEventsToolPlugin extends AbstractPlugin implements ToolPlugi
      */
     public function execute(...$arguments): mixed
     {
-        return $this->getFacade()->getOrderManualEvents((string)($arguments[0] ?? ''));
+        return $this->getBusinessFactory()->createOrderManualEventsReader()->getOrderManualEvents((string)($arguments[0] ?? ''));
     }
 }

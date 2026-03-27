@@ -14,7 +14,7 @@ use Spryker\Zed\AiFoundation\Dependency\Tools\ToolPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 
 /**
- * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceFacadeInterface getFacade()
+ * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceBusinessFactory getBusinessFactory()
  */
 class GetOmsProcessDefinitionToolPlugin extends AbstractPlugin implements ToolPluginInterface
 {
@@ -66,6 +66,6 @@ class GetOmsProcessDefinitionToolPlugin extends AbstractPlugin implements ToolPl
      */
     public function execute(...$arguments): mixed
     {
-        return $this->getFacade()->getOmsProcessDefinition((string)($arguments[0] ?? ''));
+        return $this->getBusinessFactory()->createOmsProcessDefinitionReader()->getOmsProcessDefinition((string)($arguments[0] ?? ''));
     }
 }

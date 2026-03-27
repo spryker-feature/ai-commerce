@@ -11,7 +11,7 @@ namespace SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt
 
 use Generated\Shared\Transfer\BackofficeAssistantPromptRequestTransfer;
 
-interface PromptHandlerInterface
+interface PromptProcessorInterface
 {
     /**
      * Specification:

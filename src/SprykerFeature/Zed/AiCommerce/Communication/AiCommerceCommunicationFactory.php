@@ -23,8 +23,8 @@ use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\Backo
 use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\BackofficeAssistantPromptRequestValidatorInterface;
 use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\IntentRouter;
 use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\IntentRouterInterface;
-use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\PromptHandler;
-use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\PromptHandlerInterface;
+use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\PromptProcessor;
+use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\PromptProcessorInterface;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetBackofficeCapabilities\GetBackofficeCapabilitiesToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetNavigationToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOmsProcessDefinitionToolPlugin;
@@ -40,9 +40,9 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
  */
 class AiCommerceCommunicationFactory extends AbstractCommunicationFactory
 {
-    public function createPromptHandler(): PromptHandlerInterface
+    public function createPromptHandler(): PromptProcessorInterface
     {
-        return new PromptHandler(
+        return new PromptProcessor(
             $this->getFacade(),
             $this->getAiFoundationFacade(),
             $this->getBackofficeAssistantAgentPlugins(),

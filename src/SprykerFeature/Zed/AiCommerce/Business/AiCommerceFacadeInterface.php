@@ -66,49 +66,4 @@ interface AiCommerceFacadeInterface
     public function deleteBackofficeAssistantConversationCollection(
         BackofficeAssistantConversationCollectionDeleteCriteriaTransfer $deleteCriteriaTransfer,
     ): BackofficeAssistantConversationCollectionResponseTransfer;
-
-    /**
-     * Specification:
-     * - Returns current OMS state and available transitions for an order by reference.
-     * - Returns JSON string with current states and transition details.
-     *
-     * @api
-     */
-    public function getOrderOmsTransitions(string $orderReference): string;
-
-    /**
-     * Specification:
-     * - Returns basic order details by order reference as a JSON string.
-     * - Includes items, totals, customer info, and dates.
-     *
-     * @api
-     */
-    public function getOrderDetails(string $orderReference): string;
-
-    /**
-     * Specification:
-     * - Returns available manual events for an order by reference as a JSON string.
-     *
-     * @api
-     */
-    public function getOrderManualEvents(string $orderReference): string;
-
-    /**
-     * Specification:
-     * - Returns the full OMS process definition for the process associated with an order.
-     * - Includes all states, transitions, events, and subprocesses.
-     * - Returns JSON string.
-     *
-     * @api
-     */
-    public function getOmsProcessDefinition(string $orderReference): string;
-
-    /**
-     * Specification:
-     * - Returns state flags (such as cancellable or reserved) for the current states of an order.
-     * - Returns JSON string mapping state names to their flags.
-     *
-     * @api
-     */
-    public function getOrderStateFlags(string $orderReference): string;
 }
