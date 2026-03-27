@@ -11,8 +11,9 @@ export class BackofficeAssistantHistories {
     #onDeleteCurrent;
     #i18n;
     #historyItemTemplate;
+    #cssClasses;
 
-    constructor(elements, api, onSelect, onDeleteCurrent, panelEl, i18n) {
+    constructor(elements, api, onSelect, onDeleteCurrent, panelEl, i18n, cssClasses) {
         this.#historiesEl = elements.histories;
         this.#historiesList = elements.historiesList;
         this.#historiesEmpty = elements.historiesEmpty;
@@ -25,11 +26,12 @@ export class BackofficeAssistantHistories {
         this.#onDeleteCurrent = onDeleteCurrent;
         this.#i18n = i18n;
         this.#historyItemTemplate = panelEl.querySelector('[data-id="backoffice-assistant-history-item"]');
+        this.#cssClasses = cssClasses;
     }
 
     show() {
         this.#historiesEl.hidden = false;
-        this.#messagesEl.classList.add('backoffice-assistant__messages--hidden');
+        this.#messagesEl.classList.add(this.#cssClasses.messagesHidden);
         this.#footerEl.hidden = true;
         this.#inputEl.disabled = true;
         this.#sendBtn.disabled = true;
@@ -38,35 +40,34 @@ export class BackofficeAssistantHistories {
 
     hide() {
         this.#historiesEl.hidden = true;
-        this.#messagesEl.classList.remove('backoffice-assistant__messages--hidden');
+        this.#messagesEl.classList.remove(this.#cssClasses.messagesHidden);
         this.#footerEl.hidden = false;
         this.#inputEl.disabled = false;
         this.#sendBtn.disabled = false;
     }
 
-    #load() {
-        this.#api
-            .fetchHistories()
-            .then((data) => {
-                const histories = data.histories || [];
+    async #load() {
+        try {
+            const data = await this.#api.fetchHistories();
+            const histories = data.histories || [];
 
-                this.#historiesList.innerHTML = '';
+            this.#historiesList.innerHTML = '';
 
-                if (histories.length === 0) {
-                    this.#historiesEmpty.hidden = false;
-
-                    return;
-                }
-
-                this.#historiesEmpty.hidden = true;
-                histories.forEach((entry) => {
-                    this.#historiesList.appendChild(this.#createHistoryItem(entry));
-                });
-            })
-            .catch(() => {
+            if (histories.length === 0) {
                 this.#historiesEmpty.hidden = false;
-                this.#historiesEmpty.textContent = this.#i18n.failedLoadConversations;
-            });
+
+                return;
+            }
+
+            this.#historiesEmpty.hidden = true;
+
+            for (const entry of histories) {
+                this.#historiesList.appendChild(this.#createHistoryItem(entry));
+            }
+        } catch {
+            this.#historiesEmpty.hidden = false;
+            this.#historiesEmpty.textContent = this.#i18n.failedLoadConversations;
+        }
     }
 
     #createHistoryItem(entry) {
@@ -98,32 +99,29 @@ export class BackofficeAssistantHistories {
         return li;
     }
 
-    #deleteItem(conversationReference, listItem) {
-        listItem.style.pointerEvents = 'none';
-        listItem.classList.add('backoffice-assistant__histories-item--deleting');
+    async #deleteItem(conversationReference, listItem) {
+        listItem.classList.add(this.#cssClasses.itemDeleting);
 
-        this.#api
-            .deleteConversation(conversationReference)
-            .then(() => {
-                listItem.addEventListener(
-                    'transitionend',
-                    () => {
-                        listItem.remove();
+        try {
+            await this.#api.deleteConversation(conversationReference);
 
-                        if (this.#historiesList.children.length === 0) {
-                            this.#historiesEmpty.hidden = false;
-                        }
+            listItem.addEventListener(
+                'transitionend',
+                () => {
+                    listItem.remove();
 
-                        this.#onDeleteCurrent(conversationReference);
-                    },
-                    { once: true },
-                );
+                    if (this.#historiesList.children.length === 0) {
+                        this.#historiesEmpty.hidden = false;
+                    }
 
-                listItem.classList.add('backoffice-assistant__histories-item--deleted');
-            })
-            .catch(() => {
-                listItem.style.pointerEvents = '';
-                listItem.classList.remove('backoffice-assistant__histories-item--deleting');
-            });
+                    this.#onDeleteCurrent(conversationReference);
+                },
+                { once: true },
+            );
+
+            listItem.classList.add(this.#cssClasses.itemDeleted);
+        } catch {
+            listItem.classList.remove(this.#cssClasses.itemDeleting);
+        }
     }
 }

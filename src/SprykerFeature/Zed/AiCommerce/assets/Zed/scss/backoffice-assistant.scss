@@ -231,6 +231,7 @@ $backoffice-assistant-retry-color: #11856e;
         &--deleting {
             opacity: 0.5;
             cursor: default;
+            pointer-events: none;
 
             &:hover {
                 background: #f8f9fa;
@@ -606,6 +607,7 @@ $backoffice-assistant-retry-color: #11856e;
     &__input {
         flex: 1;
         resize: none;
+        field-sizing: content;
         border: 1px solid $backoffice-assistant-border;
         border-radius: 8px;
         padding: 8px 12px;

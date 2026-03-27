@@ -1,4 +1,3 @@
-import { SELECTORS } from './constants';
 import { BackofficeAssistantState } from './BackofficeAssistantState';
 import { BackofficeAssistantApi } from './BackofficeAssistantApi';
 import { BackofficeAssistantStreamParser } from './BackofficeAssistantStreamParser';
@@ -8,6 +7,26 @@ import { BackofficeAssistantAgentBadge } from './BackofficeAssistantAgentBadge';
 import { BackofficeAssistantHistories } from './BackofficeAssistantHistories';
 
 export class BackofficeAssistant {
+    static #selectors = {
+        toggle: '.js-backoffice-assistant__toggle',
+        panel: '.js-backoffice-assistant__panel',
+        close: '.js-backoffice-assistant__close',
+        historyBtn: '.js-backoffice-assistant__history-btn',
+        newChat: '.js-backoffice-assistant__new-chat',
+        messages: '.js-backoffice-assistant__messages',
+        histories: '.js-backoffice-assistant__histories',
+        historiesList: '.js-backoffice-assistant__histories-list',
+        historiesEmpty: '.js-backoffice-assistant__histories-empty',
+        input: '.js-backoffice-assistant__input',
+        send: '.js-backoffice-assistant__send',
+        agentBadge: '.js-backoffice-assistant__agent-badge',
+        agentSelect: '.js-backoffice-assistant__agent-select',
+        attach: '.js-backoffice-assistant__attach',
+        fileInput: '.js-backoffice-assistant__file-input',
+        attachmentsPreview: '.js-backoffice-assistant__attachments-preview',
+        footer: '.js-backoffice-assistant__footer',
+    };
+
     #elements;
     #state;
     #api;
@@ -16,13 +35,28 @@ export class BackofficeAssistant {
     #agentBadge;
     #attachments;
     #histories;
+    #cssClasses;
+    #iconClasses;
 
     constructor() {
         this.#elements = this.#resolveElements();
 
         if (!this.#elements) {
-            return;
+            throw new Error('BackofficeAssistant: required root elements not found');
         }
+
+        this.#cssClasses = {
+            panelOpen: this.#elements.panel.dataset.classPanelOpen,
+            sendStop: this.#elements.panel.dataset.classSendStop,
+            badgeAnimate: this.#elements.panel.dataset.classBadgeAnimate,
+            messagesHidden: this.#elements.panel.dataset.classMessagesHidden,
+            itemDeleting: this.#elements.panel.dataset.classItemDeleting,
+            itemDeleted: this.#elements.panel.dataset.classItemDeleted,
+        };
+        this.#iconClasses = {
+            send: this.#elements.send.dataset.iconSend,
+            stop: this.#elements.send.dataset.iconStop,
+        };
 
         this.#state = new BackofficeAssistantState();
         this.#api = new BackofficeAssistantApi();
@@ -32,7 +66,11 @@ export class BackofficeAssistant {
             this.#elements.panel,
             this.#i18n,
         );
-        this.#agentBadge = new BackofficeAssistantAgentBadge(this.#elements.agentBadge, this.#elements.agentSelect);
+        this.#agentBadge = new BackofficeAssistantAgentBadge(
+            this.#elements.agentBadge,
+            this.#elements.agentSelect,
+            this.#cssClasses,
+        );
         this.#attachments = new BackofficeAssistantAttachmentManager(
             this.#elements.attachmentsPreview,
             this.#elements.fileInput,
@@ -48,14 +86,15 @@ export class BackofficeAssistant {
             this.#handleConversationDeleted.bind(this),
             this.#elements.panel,
             this.#i18n,
+            this.#cssClasses,
         );
 
         this.#init();
     }
 
     #resolveElements() {
-        const toggle = document.querySelector(SELECTORS.toggle);
-        const panel = document.querySelector(SELECTORS.panel);
+        const toggle = document.querySelector(BackofficeAssistant.#selectors.toggle);
+        const panel = document.querySelector(BackofficeAssistant.#selectors.panel);
 
         if (!toggle || !panel) {
             return null;
@@ -64,21 +103,21 @@ export class BackofficeAssistant {
         return {
             toggle: toggle,
             panel: panel,
-            close: panel.querySelector(SELECTORS.close),
-            historyBtn: panel.querySelector(SELECTORS.historyBtn),
-            newChat: panel.querySelector(SELECTORS.newChat),
-            messages: panel.querySelector(SELECTORS.messages),
-            histories: panel.querySelector(SELECTORS.histories),
-            historiesList: panel.querySelector(SELECTORS.historiesList),
-            historiesEmpty: panel.querySelector(SELECTORS.historiesEmpty),
-            input: panel.querySelector(SELECTORS.input),
-            send: panel.querySelector(SELECTORS.send),
-            agentBadge: panel.querySelector(SELECTORS.agentBadge),
-            agentSelect: panel.querySelector(SELECTORS.agentSelect),
-            attach: panel.querySelector(SELECTORS.attach),
-            fileInput: panel.querySelector(SELECTORS.fileInput),
-            attachmentsPreview: panel.querySelector(SELECTORS.attachmentsPreview),
-            footer: panel.querySelector(SELECTORS.footer),
+            close: panel.querySelector(BackofficeAssistant.#selectors.close),
+            historyBtn: panel.querySelector(BackofficeAssistant.#selectors.historyBtn),
+            newChat: panel.querySelector(BackofficeAssistant.#selectors.newChat),
+            messages: panel.querySelector(BackofficeAssistant.#selectors.messages),
+            histories: panel.querySelector(BackofficeAssistant.#selectors.histories),
+            historiesList: panel.querySelector(BackofficeAssistant.#selectors.historiesList),
+            historiesEmpty: panel.querySelector(BackofficeAssistant.#selectors.historiesEmpty),
+            input: panel.querySelector(BackofficeAssistant.#selectors.input),
+            send: panel.querySelector(BackofficeAssistant.#selectors.send),
+            agentBadge: panel.querySelector(BackofficeAssistant.#selectors.agentBadge),
+            agentSelect: panel.querySelector(BackofficeAssistant.#selectors.agentSelect),
+            attach: panel.querySelector(BackofficeAssistant.#selectors.attach),
+            fileInput: panel.querySelector(BackofficeAssistant.#selectors.fileInput),
+            attachmentsPreview: panel.querySelector(BackofficeAssistant.#selectors.attachmentsPreview),
+            footer: panel.querySelector(BackofficeAssistant.#selectors.footer),
         };
     }
 
@@ -112,11 +151,11 @@ export class BackofficeAssistant {
     }
 
     #isPanelOpen() {
-        return this.#elements.panel.classList.contains('backoffice-assistant__panel--open');
+        return this.#elements.panel.classList.contains(this.#cssClasses.panelOpen);
     }
 
     #openPanel() {
-        this.#elements.panel.classList.add('backoffice-assistant__panel--open');
+        this.#elements.panel.classList.add(this.#cssClasses.panelOpen);
         this.#elements.toggle.hidden = true;
         this.#loadAvailableAgents();
         this.#state.save(true);
@@ -127,7 +166,7 @@ export class BackofficeAssistant {
     }
 
     #closePanel() {
-        this.#elements.panel.classList.remove('backoffice-assistant__panel--open');
+        this.#elements.panel.classList.remove(this.#cssClasses.panelOpen);
         this.#elements.toggle.hidden = false;
         this.#state.save(false);
     }
@@ -138,15 +177,13 @@ export class BackofficeAssistant {
         this.#renderer.addMessage('ai', this.#i18n.greeting.replace('__USERNAME__', userName));
     }
 
-    #loadAvailableAgents() {
-        this.#api
-            .fetchHistories()
-            .then((data) => {
-                this.#agentBadge.populateSelector(data.available_agents || []);
-            })
-            .catch(() => {
-                // Silently fail
-            });
+    async #loadAvailableAgents() {
+        try {
+            const data = await this.#api.fetchHistories();
+            this.#agentBadge.populateSelector(data.available_agents || []);
+        } catch {
+            // Silently ignore
+        }
     }
 
     #startNewConversation() {
@@ -168,20 +205,20 @@ export class BackofficeAssistant {
         const iconEl = this.#elements.send.querySelector('.fa');
 
         if (waiting) {
-            this.#elements.send.classList.add('backoffice-assistant__send--stop');
+            this.#elements.send.classList.add(this.#cssClasses.sendStop);
             this.#elements.send.disabled = false;
 
             if (iconEl) {
-                iconEl.classList.remove('fa-paper-plane');
-                iconEl.classList.add('fa-stop');
+                iconEl.classList.remove(this.#iconClasses.send);
+                iconEl.classList.add(this.#iconClasses.stop);
             }
         } else {
-            this.#elements.send.classList.remove('backoffice-assistant__send--stop');
+            this.#elements.send.classList.remove(this.#cssClasses.sendStop);
             this.#elements.send.disabled = false;
 
             if (iconEl) {
-                iconEl.classList.remove('fa-stop');
-                iconEl.classList.add('fa-paper-plane');
+                iconEl.classList.remove(this.#iconClasses.stop);
+                iconEl.classList.add(this.#iconClasses.send);
             }
         }
     }
@@ -218,14 +255,13 @@ export class BackofficeAssistant {
 
         const attachmentsSnapshot = this.#attachments.takeSnapshot();
         this.#elements.input.value = '';
-        this.#resizeInput();
         this.#doSendMessage(prompt, attachmentsSnapshot);
     }
 
-    #doSendMessage(prompt, messageAttachments) {
+    async #doSendMessage(prompt, messageAttachments) {
         const bubble = this.#renderer.addMessage('user', prompt);
 
-        if (messageAttachments && messageAttachments.length > 0) {
+        if (messageAttachments?.length > 0) {
             this.#renderer.addAttachmentPills(bubble, messageAttachments);
         }
 
@@ -242,52 +278,48 @@ export class BackofficeAssistant {
             body.conversation_reference = this.#state.conversationReference;
         }
 
-        if (messageAttachments && messageAttachments.length > 0) {
+        if (messageAttachments?.length > 0) {
             body.attachments = messageAttachments.map((a) => ({ content: a.content, mediaType: a.mediaType }));
         }
 
         this.#state.abortController = new AbortController();
         const signal = this.#state.abortController.signal;
 
-        this.#api
-            .sendPrompt(body, signal)
-            .then((response) => {
-                if (!response.ok) {
-                    loadingEl.remove();
-                    this.#renderer.addMessage('ai', this.#i18n.requestFailed + response.status);
-                    this.#renderer.addRetryButton(() => {
-                        this.#doSendMessage(prompt, messageAttachments);
-                    });
-                    this.#setWaiting(false);
-                    this.#elements.input.focus();
+        try {
+            const response = await this.#api.sendPrompt(body, signal);
 
-                    return;
-                }
-
-                return this.#readStream(response, prompt, loadingEl, messageAttachments);
-            })
-            .catch((err) => {
+            if (!response.ok) {
                 loadingEl.remove();
+                this.#renderer.addMessage('ai', this.#i18n.requestFailed + response.status);
+                this.#renderer.addRetryButton(() => {
+                    this.#doSendMessage(prompt, messageAttachments);
+                });
+                this.#setWaiting(false);
+                this.#elements.input.focus();
 
-                if (err.name === 'AbortError') {
-                    this.#renderer.addMessage('ai', this.#i18n.requestInterrupted);
+                return;
+            }
 
-                    return;
-                }
+            await this.#readStream(response, prompt, loadingEl, messageAttachments);
+        } catch (err) {
+            loadingEl.remove();
 
+            if (err.name === 'AbortError') {
+                this.#renderer.addMessage('ai', this.#i18n.requestInterrupted);
+            } else {
                 this.#renderer.addMessage('ai', this.#i18n.connectionError);
                 this.#renderer.addRetryButton(() => {
                     this.#doSendMessage(prompt, messageAttachments);
                 });
-            })
-            .finally(() => {
-                this.#state.abortController = null;
-                this.#setWaiting(false);
-                this.#elements.input.focus();
-            });
+            }
+        } finally {
+            this.#state.abortController = null;
+            this.#setWaiting(false);
+            this.#elements.input.focus();
+        }
     }
 
-    #readStream(response, prompt, loadingEl, messageAttachments) {
+    async #readStream(response, prompt, loadingEl, messageAttachments) {
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let receivedEvents = false;
@@ -297,28 +329,22 @@ export class BackofficeAssistant {
             this.#handleSseEvent(data, prompt, loadingEl, messageAttachments);
         });
 
-        const readChunk = () => {
-            return reader.read().then((result) => {
-                if (result.done) {
-                    loadingEl.remove();
+        while (true) {
+            const { done, value } = await reader.read();
 
-                    if (!receivedEvents) {
-                        this.#renderer.addMessage('ai', this.#i18n.noResponse);
-                        this.#renderer.addRetryButton(() => {
-                            this.#doSendMessage(prompt, messageAttachments);
-                        });
-                    }
+            if (done) {
+                break;
+            }
 
-                    return;
-                }
+            parser.feed(decoder.decode(value, { stream: true }));
+        }
 
-                parser.feed(decoder.decode(result.value, { stream: true }));
+        loadingEl.remove();
 
-                return readChunk();
-            });
-        };
-
-        return readChunk();
+        if (!receivedEvents) {
+            this.#renderer.addMessage('ai', this.#i18n.noResponse);
+            this.#renderer.addRetryButton(() => this.#doSendMessage(prompt, messageAttachments));
+        }
     }
 
     #handleSseEvent(data, prompt, loadingEl, messageAttachments) {
@@ -386,26 +412,25 @@ export class BackofficeAssistant {
         }
     }
 
-    #loadConversationDetail(conversationReference) {
+    async #loadConversationDetail(conversationReference) {
         this.#state.conversationReference = conversationReference;
         this.#state.save(true);
         this.#histories.hide();
         this.#renderer.clear();
 
-        this.#api
-            .fetchConversationDetail(conversationReference)
-            .then((data) => {
-                if (data.agent) {
-                    this.#agentBadge.update(data.agent);
-                }
+        try {
+            const data = await this.#api.fetchConversationDetail(conversationReference);
 
-                this.#agentBadge.setSelectedAgent(data.user_selected_agent);
-                this.#renderConversationMessages(data.messages);
-                this.#elements.input.focus();
-            })
-            .catch(() => {
-                this.#renderer.addMessage('ai', this.#i18n.failedLoadHistory);
-            });
+            if (data.agent) {
+                this.#agentBadge.update(data.agent);
+            }
+
+            this.#agentBadge.setSelectedAgent(data.user_selected_agent);
+            this.#renderConversationMessages(data.messages);
+            this.#elements.input.focus();
+        } catch {
+            this.#renderer.addMessage('ai', this.#i18n.failedLoadHistory);
+        }
     }
 
     #renderConversationMessages(messages) {
@@ -458,11 +483,6 @@ export class BackofficeAssistant {
         }
     }
 
-    #resizeInput() {
-        this.#elements.input.style.height = 'auto';
-        this.#elements.input.style.height = Math.min(this.#elements.input.scrollHeight, 120) + 'px';
-    }
-
     #restorePersistedState() {
         const savedState = this.#state.load();
 
@@ -474,17 +494,21 @@ export class BackofficeAssistant {
             this.#state.conversationReference = savedState.conversationReference;
         }
 
-        if (savedState.isOpen) {
-            this.#elements.panel.classList.add('backoffice-assistant__panel--open');
-            this.#elements.toggle.hidden = true;
-            this.#state.greetingShown = true;
-
-            if (this.#state.conversationReference) {
-                this.#loadConversationDetail(this.#state.conversationReference);
-            } else {
-                this.#showGreeting();
-            }
+        if (!savedState.isOpen) {
+            return;
         }
+
+        this.#elements.panel.classList.add(this.#cssClasses.panelOpen);
+        this.#elements.toggle.hidden = true;
+        this.#state.greetingShown = true;
+
+        if (this.#state.conversationReference) {
+            this.#loadConversationDetail(this.#state.conversationReference);
+
+            return;
+        }
+
+        this.#showGreeting();
     }
 
     #bindEvents() {
@@ -533,10 +557,6 @@ export class BackofficeAssistant {
                 event.preventDefault();
                 this.#sendMessage();
             }
-        });
-
-        this.#elements.input.addEventListener('input', () => {
-            this.#resizeInput();
         });
 
         document.addEventListener('keydown', (event) => {

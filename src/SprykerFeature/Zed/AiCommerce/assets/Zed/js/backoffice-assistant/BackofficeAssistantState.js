@@ -1,54 +1,19 @@
-import { STORAGE_KEY } from './constants';
-
 export class BackofficeAssistantState {
-    #conversationReference = null;
-    #isWaiting = false;
-    #greetingShown = false;
-    #pendingAttachments = [];
-    #abortController = null;
+    static #CONVERSATION_STORAGE_KEY = 'backoffice_assistant_state';
 
-    get conversationReference() {
-        return this.#conversationReference;
-    }
-    set conversationReference(value) {
-        this.#conversationReference = value;
-    }
-
-    get isWaiting() {
-        return this.#isWaiting;
-    }
-    set isWaiting(value) {
-        this.#isWaiting = value;
-    }
-
-    get greetingShown() {
-        return this.#greetingShown;
-    }
-    set greetingShown(value) {
-        this.#greetingShown = value;
-    }
-
-    get pendingAttachments() {
-        return this.#pendingAttachments;
-    }
-    set pendingAttachments(value) {
-        this.#pendingAttachments = value;
-    }
-
-    get abortController() {
-        return this.#abortController;
-    }
-    set abortController(value) {
-        this.#abortController = value;
-    }
+    conversationReference = null;
+    isWaiting = false;
+    greetingShown = false;
+    pendingAttachments = [];
+    abortController = null;
 
     save(isOpen) {
         try {
             localStorage.setItem(
-                STORAGE_KEY,
+                BackofficeAssistantState.#CONVERSATION_STORAGE_KEY,
                 JSON.stringify({
                     isOpen: isOpen,
-                    conversationReference: this.#conversationReference,
+                    conversationReference: this.conversationReference,
                 }),
             );
         } catch {
@@ -58,7 +23,7 @@ export class BackofficeAssistantState {
 
     load() {
         try {
-            const raw = localStorage.getItem(STORAGE_KEY);
+            const raw = localStorage.getItem(BackofficeAssistantState.#CONVERSATION_STORAGE_KEY);
 
             return raw ? JSON.parse(raw) : null;
         } catch {
@@ -67,8 +32,8 @@ export class BackofficeAssistantState {
     }
 
     reset() {
-        this.#conversationReference = null;
-        this.#greetingShown = false;
-        this.#pendingAttachments = [];
+        this.conversationReference = null;
+        this.greetingShown = false;
+        this.pendingAttachments = [];
     }
 }

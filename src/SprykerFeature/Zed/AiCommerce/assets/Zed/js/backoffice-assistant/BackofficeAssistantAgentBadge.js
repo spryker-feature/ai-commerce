@@ -1,49 +1,48 @@
 export class BackofficeAssistantAgentBadge {
     #badgeEl;
     #selectEl;
+    #cssClasses;
     #pendingSelectedAgent = null;
 
-    constructor(badgeEl, selectEl) {
+    constructor(badgeEl, selectEl, cssClasses) {
+        if (!badgeEl || !selectEl) {
+            throw new Error('BackofficeAssistantAgentBadge: required elements not found');
+        }
+
         this.#badgeEl = badgeEl;
         this.#selectEl = selectEl;
+        this.#cssClasses = cssClasses;
     }
 
     update(agentName) {
         const previousName = this.#badgeEl.textContent;
         this.#badgeEl.textContent = agentName;
-        this.#badgeEl.classList.remove('backoffice-assistant__agent-badge--animate');
+        this.#badgeEl.classList.remove(this.#cssClasses.badgeAnimate);
 
         if (agentName !== previousName) {
             void this.#badgeEl.offsetWidth;
-            this.#badgeEl.classList.add('backoffice-assistant__agent-badge--animate');
+            this.#badgeEl.classList.add(this.#cssClasses.badgeAnimate);
         }
     }
 
     reset() {
         this.#badgeEl.textContent = '';
-        this.#badgeEl.classList.remove('backoffice-assistant__agent-badge--animate');
+        this.#badgeEl.classList.remove(this.#cssClasses.badgeAnimate);
         this.#pendingSelectedAgent = null;
-
-        if (this.#selectEl) {
-            this.#selectEl.value = '';
-        }
+        this.#selectEl.value = '';
     }
 
     populateSelector(agentNames) {
-        if (!this.#selectEl) {
-            return;
-        }
-
         while (this.#selectEl.options.length > 1) {
             this.#selectEl.remove(1);
         }
 
-        agentNames.forEach((name) => {
+        for (const name of agentNames) {
             const opt = document.createElement('option');
             opt.value = name;
             opt.textContent = name;
             this.#selectEl.appendChild(opt);
-        });
+        }
 
         if (this.#pendingSelectedAgent) {
             this.#selectEl.value = this.#pendingSelectedAgent;
@@ -52,14 +51,10 @@ export class BackofficeAssistantAgentBadge {
     }
 
     getSelectedAgent() {
-        return this.#selectEl ? this.#selectEl.value : '';
+        return this.#selectEl.value;
     }
 
     setSelectedAgent(value) {
-        if (!this.#selectEl) {
-            return;
-        }
-
         if (this.#selectEl.options.length > 1) {
             this.#selectEl.value = value || '';
         } else {

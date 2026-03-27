@@ -16,6 +16,8 @@ export class BackofficeAssistantMessageRenderer {
             retry: panelEl.querySelector('[data-id="backoffice-assistant-retry"]'),
             toolCall: panelEl.querySelector('[data-id="backoffice-assistant-tool-call"]'),
             attachmentPill: panelEl.querySelector('[data-id="backoffice-assistant-attachment-pill"]'),
+            reasoning: panelEl.querySelector('[data-id="backoffice-assistant-reasoning"]'),
+            attachmentsContainer: panelEl.querySelector('[data-id="backoffice-assistant-attachments-container"]'),
         };
     }
 
@@ -66,10 +68,10 @@ export class BackofficeAssistantMessageRenderer {
     }
 
     addReasoningMessage(text) {
-        const bubble = document.createElement('div');
-        bubble.classList.add('backoffice-assistant__message', 'backoffice-assistant__message--reasoning');
-        bubble.textContent = text;
+        const fragment = this.#templates.reasoning.content.cloneNode(true);
+        const bubble = fragment.firstElementChild;
 
+        bubble.textContent = text;
         this.#messagesEl.appendChild(bubble);
         this.#scrollToBottom();
 
@@ -106,34 +108,22 @@ export class BackofficeAssistantMessageRenderer {
     }
 
     #createToolCallArgs(args) {
-        const section = document.createElement('div');
-        section.classList.add('backoffice-assistant__tool-call-section');
+        const fragment = this.#templates.toolCall.content.cloneNode(true);
+        const section = fragment.querySelector('[data-section="args"]');
 
-        const sectionLabel = document.createElement('span');
-        sectionLabel.classList.add('backoffice-assistant__tool-call-section-label');
-        sectionLabel.textContent = this.#i18n.arguments;
-        section.appendChild(sectionLabel);
-
-        const code = document.createElement('pre');
-        code.classList.add('backoffice-assistant__tool-call-code');
-        code.textContent = JSON.stringify(args, null, 2);
-        section.appendChild(code);
+        section.querySelector('.backoffice-assistant__tool-call-section-label').textContent = this.#i18n.arguments;
+        section.querySelector('.backoffice-assistant__tool-call-code').textContent = JSON.stringify(args, null, 2);
 
         return section;
     }
 
     #createToolCallResult(result) {
-        const section = document.createElement('div');
-        section.classList.add('backoffice-assistant__tool-call-section');
+        const fragment = this.#templates.toolCall.content.cloneNode(true);
+        const section = fragment.querySelector('[data-section="result"]');
+        const toggleBtn = section.querySelector('.backoffice-assistant__tool-call-toggle');
+        const code = section.querySelector('.backoffice-assistant__tool-call-code');
 
-        const toggleBtn = document.createElement('button');
-        toggleBtn.type = 'button';
-        toggleBtn.classList.add('backoffice-assistant__tool-call-toggle');
         toggleBtn.textContent = this.#i18n.showResult;
-        section.appendChild(toggleBtn);
-
-        const code = document.createElement('pre');
-        code.classList.add('backoffice-assistant__tool-call-code', 'backoffice-assistant__tool-call-code--collapsed');
 
         try {
             code.textContent = JSON.stringify(JSON.parse(result), null, 2);
@@ -141,27 +131,23 @@ export class BackofficeAssistantMessageRenderer {
             code.textContent = result;
         }
 
-        section.appendChild(code);
-
-        const i18n = this.#i18n;
-
         toggleBtn.addEventListener('click', () => {
             const isCollapsed = code.classList.toggle('backoffice-assistant__tool-call-code--collapsed');
-            toggleBtn.textContent = isCollapsed ? i18n.showResult : i18n.hideResult;
+            toggleBtn.textContent = isCollapsed ? this.#i18n.showResult : this.#i18n.hideResult;
         });
 
         return section;
     }
 
     addAttachmentPills(bubble, attachments) {
-        const container = document.createElement('div');
-        container.classList.add('backoffice-assistant__message-attachments');
+        const fragment = this.#templates.attachmentsContainer.content.cloneNode(true);
+        const container = fragment.firstElementChild;
 
-        for (let i = 0; i < attachments.length; i++) {
-            const fragment = this.#templates.attachmentPill.content.cloneNode(true);
-            const pill = fragment.firstElementChild;
+        for (const attachment of attachments) {
+            const pillFragment = this.#templates.attachmentPill.content.cloneNode(true);
+            const pill = pillFragment.firstElementChild;
 
-            pill.querySelector('.backoffice-assistant__message-attachment-pill-name').textContent = attachments[i].name;
+            pill.querySelector('.backoffice-assistant__message-attachment-pill-name').textContent = attachment.name;
             container.appendChild(pill);
         }
 

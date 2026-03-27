@@ -11,6 +11,12 @@
     <div class="backoffice-assistant__panel js-backoffice-assistant__panel"
          role="dialog"
          aria-label="{{ 'AI Assistant' | trans }}"
+         data-class-panel-open="backoffice-assistant__panel--open"
+         data-class-send-stop="backoffice-assistant__send--stop"
+         data-class-badge-animate="backoffice-assistant__agent-badge--animate"
+         data-class-messages-hidden="backoffice-assistant__messages--hidden"
+         data-class-item-deleting="backoffice-assistant__histories-item--deleting"
+         data-class-item-deleted="backoffice-assistant__histories-item--deleted"
          data-i18n-retry="{{ 'Retry' | trans | e('html_attr') }}"
          data-i18n-arguments="{{ 'Arguments' | trans | e('html_attr') }}"
          data-i18n-show-result="{{ 'Show result' | trans | e('html_attr') }}"
@@ -68,7 +74,7 @@
 
         <div class="backoffice-assistant__messages js-backoffice-assistant__messages"></div>
 
-        <div class="backoffice-assistant__footer">
+        <div class="backoffice-assistant__footer js-backoffice-assistant__footer">
             <div class="backoffice-assistant__attachments-preview js-backoffice-assistant__attachments-preview"></div>
             <div class="backoffice-assistant__footer-row">
                 <button type="button"
@@ -88,7 +94,9 @@
                           aria-label="{{ 'Message input' | trans }}"></textarea>
                 <button type="button"
                         class="backoffice-assistant__send js-backoffice-assistant__send"
-                        aria-label="{{ 'Send message' | trans }}">
+                        aria-label="{{ 'Send message' | trans }}"
+                        data-icon-send="fa-paper-plane"
+                        data-icon-stop="fa-stop">
                     <span class="fa fa-paper-plane"></span>
                 </button>
             </div>
@@ -110,16 +118,24 @@
             <button type="button" class="backoffice-assistant__retry-btn"></button>
         </template>
 
+        <template data-id="backoffice-assistant-reasoning">
+            <div class="backoffice-assistant__message backoffice-assistant__message--reasoning"></div>
+        </template>
+
+        <template data-id="backoffice-assistant-attachments-container">
+            <div class="backoffice-assistant__message-attachments"></div>
+        </template>
+
         <template data-id="backoffice-assistant-tool-call">
             <div class="backoffice-assistant__tool-call-label">
                 <i class="fa fa-cog"></i>
                 <span class="backoffice-assistant__tool-call-name"></span>
             </div>
-            <div class="backoffice-assistant__tool-call-section">
+            <div class="backoffice-assistant__tool-call-section" data-section="args">
                 <span class="backoffice-assistant__tool-call-section-label"></span>
                 <pre class="backoffice-assistant__tool-call-code"></pre>
             </div>
-            <div class="backoffice-assistant__tool-call-section">
+            <div class="backoffice-assistant__tool-call-section" data-section="result">
                 <button type="button" class="backoffice-assistant__tool-call-toggle"></button>
                 <pre class="backoffice-assistant__tool-call-code backoffice-assistant__tool-call-code--collapsed"></pre>
             </div>

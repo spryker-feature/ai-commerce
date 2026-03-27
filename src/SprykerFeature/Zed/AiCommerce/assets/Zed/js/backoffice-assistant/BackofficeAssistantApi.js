@@ -1,38 +1,45 @@
-import { ENDPOINTS } from './constants';
-
 export class BackofficeAssistantApi {
-    fetchHistories() {
-        return fetch(ENDPOINTS.histories, {
+    static #endpoints = {
+        prompt: '/ai-commerce/backoffice-assistant-prompt/index',
+        histories: '/ai-commerce/backoffice-assistant-conversation/index',
+        detail: '/ai-commerce/backoffice-assistant-conversation/detail',
+        delete: '/ai-commerce/backoffice-assistant-conversation/delete',
+    };
+
+    async fetchHistories() {
+        const response = await fetch(BackofficeAssistantApi.#endpoints.histories, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
-        }).then((response) => response.json());
+        });
+
+        return await response.json();
     }
 
-    fetchConversationDetail(conversationReference) {
-        const url = ENDPOINTS.detail + '?conversationReference=' + encodeURIComponent(conversationReference);
-
-        return fetch(url, {
+    async fetchConversationDetail(conversationReference) {
+        const url = `${BackofficeAssistantApi.#endpoints.detail}?conversationReference=${encodeURIComponent(conversationReference)}`;
+        const response = await fetch(url, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
-        }).then((response) => response.json());
+        });
+
+        return await response.json();
     }
 
-    deleteConversation(conversationReference) {
+    async deleteConversation(conversationReference) {
         const csrfToken = window.BackofficeAssistantConfig?.csrfToken ?? '';
-
-        return fetch(ENDPOINTS.delete, {
+        const response = await fetch(BackofficeAssistantApi.#endpoints.delete, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
             },
             body: JSON.stringify({ conversation_reference: conversationReference, _token: csrfToken }),
-        }).then((response) => {
-            if (!response.ok) {
-                throw new Error('Delete failed');
-            }
         });
+
+        if (!response.ok) {
+            throw new Error('Delete failed');
+        }
     }
 
-    sendPrompt(body, signal) {
+    async sendPrompt(body, signal) {
         const csrfToken = window.BackofficeAssistantConfig?.csrfToken ?? '';
         const options = {
             method: 'POST',
@@ -47,6 +54,6 @@ export class BackofficeAssistantApi {
             options.signal = signal;
         }
 
-        return fetch(ENDPOINTS.prompt, options);
+        return fetch(BackofficeAssistantApi.#endpoints.prompt, options);
     }
 }

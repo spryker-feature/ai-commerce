@@ -1,6 +1,6 @@
-import { MAX_FILE_SIZE } from './constants';
-
 export class BackofficeAssistantAttachmentManager {
+    static #MAX_FILE_SIZE = 5 * 1024 * 1024;
+
     #previewEl;
     #fileInputEl;
     #state;
@@ -31,13 +31,13 @@ export class BackofficeAssistantAttachmentManager {
     }
 
     #processFile(file) {
-        if (this.#allowedTypes.indexOf(file.type) === -1) {
+        if (!this.#allowedTypes.includes(file.type)) {
             this.#renderer.addMessage('ai', this.#i18n.unsupportedFileType + file.name);
 
             return;
         }
 
-        if (file.size > MAX_FILE_SIZE) {
+        if (file.size > BackofficeAssistantAttachmentManager.#MAX_FILE_SIZE) {
             this.#renderer.addMessage('ai', this.#i18n.fileTooLarge + file.name);
 
             return;
