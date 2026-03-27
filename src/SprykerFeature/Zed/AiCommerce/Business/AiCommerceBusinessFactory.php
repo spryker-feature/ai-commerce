@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace SprykerFeature\Zed\AiCommerce\Business;
 
 use Spryker\Zed\AiFoundation\Business\AiFoundationFacadeInterface;
+use Spryker\Zed\Discount\Business\DiscountFacadeInterface;
 use Spryker\Zed\Kernel\Business\AbstractBusinessFactory;
 use Spryker\Zed\Oms\Business\OmsFacadeInterface;
 use Spryker\Zed\Sales\Business\SalesFacadeInterface;
@@ -22,6 +23,12 @@ use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Conversation\Back
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Conversation\BackofficeAssistantConversationReaderInterface;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Conversation\BackofficeAssistantConversationUpdater;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Conversation\BackofficeAssistantConversationUpdaterInterface;
+use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\DiscountManagement\DiscountDetailsReader;
+use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\DiscountManagement\DiscountDetailsReaderInterface;
+use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\DiscountManagement\DiscountListReader;
+use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\DiscountManagement\DiscountListReaderInterface;
+use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\DiscountManagement\DiscountWriter;
+use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\DiscountManagement\DiscountWriterInterface;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OmsProcessDefinitionReader;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OmsProcessDefinitionReaderInterface;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OmsTransitionDataBuilder;
@@ -112,6 +119,26 @@ class AiCommerceBusinessFactory extends AbstractBusinessFactory
     public function createOrderStateFlagsReader(): OrderStateFlagsReaderInterface
     {
         return new OrderStateFlagsReader($this->getRepository(), $this->getOmsFacade());
+    }
+
+    public function createDiscountListReader(): DiscountListReaderInterface
+    {
+        return new DiscountListReader($this->getRepository());
+    }
+
+    public function createDiscountDetailsReader(): DiscountDetailsReaderInterface
+    {
+        return new DiscountDetailsReader($this->getDiscountFacade());
+    }
+
+    public function createDiscountWriter(): DiscountWriterInterface
+    {
+        return new DiscountWriter($this->getDiscountFacade());
+    }
+
+    public function getDiscountFacade(): DiscountFacadeInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_DISCOUNT);
     }
 
     public function getOmsFacade(): OmsFacadeInterface

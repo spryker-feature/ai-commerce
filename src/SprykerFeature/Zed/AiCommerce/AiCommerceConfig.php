@@ -106,6 +106,7 @@ class AiCommerceConfig extends AbstractBundleConfig
         return [
             AiCommerceConstants::AI_CONFIGURATION_GENERAL_PURPOSE,
             AiCommerceConstants::AI_CONFIGURATION_ORDER_MANAGEMENT,
+            AiCommerceConstants::AI_CONFIGURATION_DISCOUNT_MANAGEMENT,
         ];
     }
 }

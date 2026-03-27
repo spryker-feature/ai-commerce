@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace SprykerFeature\Zed\AiCommerce;
 
+use Orm\Zed\Discount\Persistence\SpyDiscountQuery;
 use Orm\Zed\Sales\Persistence\SpySalesOrderQuery;
 use Spryker\Zed\Kernel\AbstractBundleDependencyProvider;
 use Spryker\Zed\Kernel\Container;
@@ -17,6 +18,8 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
 {
     public const string FACADE_AI_FOUNDATION = 'FACADE_AI_FOUNDATION';
+
+    public const string FACADE_DISCOUNT = 'FACADE_DISCOUNT';
 
     public const string FACADE_GLOSSARY = 'FACADE_GLOSSARY';
 
@@ -27,6 +30,8 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
     public const string FACADE_USER = 'FACADE_USER';
 
     public const string PLUGINS_BACKOFFICE_ASSISTANT_AGENT = 'PLUGINS_BACKOFFICE_ASSISTANT_AGENT';
+
+    public const string PROPEL_QUERY_DISCOUNT = 'PROPEL_QUERY_DISCOUNT';
 
     public const string PROPEL_QUERY_SALES_ORDER = 'PROPEL_QUERY_SALES_ORDER';
 
@@ -53,6 +58,7 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
         $container = parent::provideBusinessLayerDependencies($container);
 
         $container = $this->addAiFoundationFacade($container);
+        $container = $this->addDiscountFacade($container);
         $container = $this->addOmsFacade($container);
         $container = $this->addSalesFacade($container);
 
@@ -116,7 +122,26 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
     public function providePersistenceLayerDependencies(Container $container): Container
     {
         $container = parent::providePersistenceLayerDependencies($container);
+        $container = $this->addDiscountPropelQuery($container);
         $container = $this->addSalesOrderPropelQuery($container);
+
+        return $container;
+    }
+
+    protected function addDiscountFacade(Container $container): Container
+    {
+        $container->set(static::FACADE_DISCOUNT, function (Container $container) {
+            return $container->getLocator()->discount()->facade();
+        });
+
+        return $container;
+    }
+
+    protected function addDiscountPropelQuery(Container $container): Container
+    {
+        $container->set(static::PROPEL_QUERY_DISCOUNT, $container->factory(function (): SpyDiscountQuery {
+            return SpyDiscountQuery::create();
+        }));
 
         return $container;
     }

@@ -66,6 +66,6 @@ class GetOmsProcessDefinitionToolPlugin extends AbstractPlugin implements ToolPl
      */
     public function execute(...$arguments): mixed
     {
-        return $this->getBusinessFactory()->createOmsProcessDefinitionReader()->getOmsProcessDefinition((string)($arguments[0] ?? ''));
+        return $this->getBusinessFactory()->createOmsProcessDefinitionReader()->getOmsProcessDefinition((string)$arguments['orderReference']);
     }
 }

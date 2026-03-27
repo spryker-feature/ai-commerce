@@ -3,6 +3,7 @@ export class BackofficeAssistantAgentBadge {
     #selectEl;
     #cssClasses;
     #pendingSelectedAgent = null;
+    #agentDescriptions = new Map();
 
     constructor(badgeEl, selectEl, cssClasses) {
         if (!badgeEl || !selectEl) {
@@ -17,6 +18,7 @@ export class BackofficeAssistantAgentBadge {
     update(agentName) {
         const previousName = this.#badgeEl.textContent;
         this.#badgeEl.textContent = agentName;
+        this.#badgeEl.title = this.#agentDescriptions.get(agentName) ?? '';
         this.#badgeEl.classList.remove(this.#cssClasses.badgeAnimate);
 
         if (agentName !== previousName) {
@@ -27,20 +29,29 @@ export class BackofficeAssistantAgentBadge {
 
     reset() {
         this.#badgeEl.textContent = '';
+        this.#badgeEl.title = '';
         this.#badgeEl.classList.remove(this.#cssClasses.badgeAnimate);
         this.#pendingSelectedAgent = null;
         this.#selectEl.value = '';
     }
 
-    populateSelector(agentNames) {
+    populateSelector(agents) {
         while (this.#selectEl.options.length > 1) {
             this.#selectEl.remove(1);
         }
 
-        for (const name of agentNames) {
+        this.#agentDescriptions.clear();
+
+        for (const agent of agents) {
+            const name = agent.name ?? agent;
+            const description = agent.description ?? '';
+
+            this.#agentDescriptions.set(name, description);
+
             const opt = document.createElement('option');
             opt.value = name;
             opt.textContent = name;
+            opt.title = description;
             this.#selectEl.appendChild(opt);
         }
 

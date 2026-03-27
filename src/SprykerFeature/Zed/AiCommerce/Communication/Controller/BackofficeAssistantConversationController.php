@@ -35,6 +35,8 @@ class BackofficeAssistantConversationController extends AbstractController
 
     protected const string RESPONSE_KEY_USER_SELECTED_AGENT = 'user_selected_agent';
 
+    protected const string RESPONSE_KEY_DESCRIPTION = 'description';
+
     protected const string RESPONSE_KEY_ERROR = 'error';
 
     protected const string RESPONSE_KEY_SUCCESS = 'success';
@@ -69,7 +71,10 @@ class BackofficeAssistantConversationController extends AbstractController
         $collection = $this->getFacade()->getBackofficeAssistantConversationCollection($criteria);
 
         $availableAgents = array_map(
-            static fn ($plugin) => $plugin->getName(),
+            static fn ($plugin) => [
+                static::RESPONSE_KEY_NAME => $plugin->getName(),
+                static::RESPONSE_KEY_DESCRIPTION => $plugin->getDescription(),
+            ],
             $this->getFactory()->getBackofficeAssistantAgentPlugins(),
         );
 

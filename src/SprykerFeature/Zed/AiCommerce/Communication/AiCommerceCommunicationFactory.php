@@ -25,13 +25,18 @@ use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\Inten
 use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\IntentRouterInterface;
 use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\PromptProcessor;
 use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\PromptProcessorInterface;
+use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\CreateDiscountToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetBackofficeCapabilities\GetBackofficeCapabilitiesToolPlugin;
+use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetDiscountDetailsToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetNavigationToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOmsProcessDefinitionToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderDetailsToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderManualEventsToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderOmsTransitionsToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderStateFlagsToolPlugin;
+use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\ListDiscountsToolPlugin;
+use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\ToggleDiscountVisibilityToolPlugin;
+use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\UpdateDiscountToolPlugin;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 /**
@@ -138,5 +143,30 @@ class AiCommerceCommunicationFactory extends AbstractCommunicationFactory
     public function createGetOrderStateFlagsToolPlugin(): ToolPluginInterface
     {
         return new GetOrderStateFlagsToolPlugin();
+    }
+
+    public function createListDiscountsToolPlugin(): ToolPluginInterface
+    {
+        return new ListDiscountsToolPlugin();
+    }
+
+    public function createGetDiscountDetailsToolPlugin(): ToolPluginInterface
+    {
+        return new GetDiscountDetailsToolPlugin();
+    }
+
+    public function createCreateDiscountToolPlugin(): ToolPluginInterface
+    {
+        return new CreateDiscountToolPlugin();
+    }
+
+    public function createUpdateDiscountToolPlugin(): ToolPluginInterface
+    {
+        return new UpdateDiscountToolPlugin();
+    }
+
+    public function createToggleDiscountVisibilityToolPlugin(): ToolPluginInterface
+    {
+        return new ToggleDiscountVisibilityToolPlugin();
     }
 }

@@ -16,7 +16,7 @@ use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 /**
  * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceBusinessFactory getBusinessFactory()
  */
-class GetOrderDetailsToolPlugin extends AbstractPlugin implements ToolPluginInterface
+class ListDiscountsToolPlugin extends AbstractPlugin implements ToolPluginInterface
 {
     /**
      * {@inheritDoc}
@@ -25,7 +25,7 @@ class GetOrderDetailsToolPlugin extends AbstractPlugin implements ToolPluginInte
      */
     public function getName(): string
     {
-        return 'get_order_details';
+        return 'list_discounts';
     }
 
     /**
@@ -35,7 +35,7 @@ class GetOrderDetailsToolPlugin extends AbstractPlugin implements ToolPluginInte
      */
     public function getDescription(): string
     {
-        return 'Get basic order details including items, amounts, dates, and customer information by order reference.';
+        return 'List discounts, optionally filtered by display name. Returns up to 50 discounts with basic info including ID, name, type, status, validity period, and calculator settings.';
     }
 
     /**
@@ -48,12 +48,7 @@ class GetOrderDetailsToolPlugin extends AbstractPlugin implements ToolPluginInte
     public function getParameters(): array
     {
         return [
-            new ToolParameter(
-                'orderReference',
-                'string',
-                'The order reference, for example DE--123',
-                true,
-            ),
+            new ToolParameter('searchTerm', 'string', 'Optional display name filter (partial match). Omit or pass empty string to list all discounts.', false),
         ];
     }
 
@@ -66,6 +61,6 @@ class GetOrderDetailsToolPlugin extends AbstractPlugin implements ToolPluginInte
      */
     public function execute(...$arguments): mixed
     {
-        return $this->getBusinessFactory()->createOrderDetailsReader()->getOrderDetails((string)$arguments['orderReference']);
+        return $this->getBusinessFactory()->createDiscountListReader()->getDiscountList($arguments['searchTerm'] ?? null);
     }
 }

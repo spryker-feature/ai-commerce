@@ -132,9 +132,14 @@ $backoffice-assistant-retry-color: #11856e;
         padding: 2px 8px;
         border-radius: 10px;
         transition: opacity 150ms ease;
+        cursor: help;
+
+        &:empty {
+            display: none;
+        }
 
         &--animate {
-            animation: backoffice-assistant-agent-pulse 600ms ease-out;
+            animation: backoffice-assistant-agent-pulse 100ms ease-out;
         }
     }
 

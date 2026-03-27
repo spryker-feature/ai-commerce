@@ -67,6 +67,6 @@ class GetOrderOmsTransitionsToolPlugin extends AbstractPlugin implements ToolPlu
      */
     public function execute(...$arguments): mixed
     {
-        return $this->getBusinessFactory()->createOrderOmsTransitionsReader()->getOrderOmsTransitions((string)($arguments[0] ?? ''));
+        return $this->getBusinessFactory()->createOrderOmsTransitionsReader()->getOrderOmsTransitions((string)$arguments['orderReference']);
     }
 }

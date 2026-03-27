@@ -62,4 +62,25 @@ interface AiCommerceConstants
      * @api
      */
     public const string CONFIGURATION_KEY_ORDER_MANAGEMENT_SYSTEM_PROMPT = 'ai_commerce:backoffice_assistant:system_prompts:order_management_system_prompt';
+
+    /**
+     * AI configuration name used by the discount management agent for handling discount-related queries and actions.
+     *
+     * @api
+     */
+    public const string AI_CONFIGURATION_DISCOUNT_MANAGEMENT = 'AI_CONFIGURATION_DISCOUNT_MANAGEMENT';
+
+    /**
+     * Tool set name that groups all discount management tools available to the discount management agent.
+     *
+     * @api
+     */
+    public const string TOOL_SET_DISCOUNT_MANAGEMENT = 'discount_management_tools';
+
+    /**
+     * Configuration key for the discount management agent system prompt.
+     *
+     * @api
+     */
+    public const string CONFIGURATION_KEY_DISCOUNT_MANAGEMENT_SYSTEM_PROMPT = 'ai_commerce:backoffice_assistant:system_prompts:discount_management_system_prompt';
 }

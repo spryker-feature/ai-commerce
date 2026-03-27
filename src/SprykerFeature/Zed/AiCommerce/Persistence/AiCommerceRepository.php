@@ -15,9 +15,11 @@ use Generated\Shared\Transfer\BackofficeAssistantConversationConditionsTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCriteriaTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationTransfer;
 use Orm\Zed\AiCommerce\Persistence\SpyBackofficeAssistantConversationQuery;
+use Orm\Zed\Discount\Persistence\Map\SpyDiscountTableMap;
 use Orm\Zed\Oms\Persistence\Map\SpyOmsOrderItemStateTableMap;
 use Orm\Zed\Oms\Persistence\Map\SpyOmsOrderProcessTableMap;
 use Orm\Zed\Sales\Persistence\SpySalesOrderItemQuery;
+use Propel\Runtime\ActiveQuery\Criteria as PropelCriteria;
 use Spryker\Zed\Kernel\Persistence\AbstractRepository;
 use Spryker\Zed\PropelOrm\Business\Runtime\ActiveQuery\Criteria;
 
@@ -81,6 +83,36 @@ class AiCommerceRepository extends AbstractRepository implements AiCommerceRepos
         $stateNames = array_values(array_unique(array_filter(array_column($rows, static::STATE_NAMES))));
 
         return ['processName' => $processName, 'stateNames' => $stateNames];
+    }
+
+    /**
+     * @module Discount
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function findDiscounts(?string $searchTerm, int $limit): array
+    {
+        $query = $this->getFactory()->getDiscountPropelQuery()
+            ->select([
+                SpyDiscountTableMap::COL_ID_DISCOUNT,
+                SpyDiscountTableMap::COL_DISPLAY_NAME,
+                SpyDiscountTableMap::COL_DISCOUNT_TYPE,
+                SpyDiscountTableMap::COL_IS_ACTIVE,
+                SpyDiscountTableMap::COL_VALID_FROM,
+                SpyDiscountTableMap::COL_VALID_TO,
+                SpyDiscountTableMap::COL_AMOUNT,
+                SpyDiscountTableMap::COL_CALCULATOR_PLUGIN,
+                SpyDiscountTableMap::COL_IS_EXCLUSIVE,
+                SpyDiscountTableMap::COL_PRIORITY,
+            ])
+            ->orderByIdDiscount('desc')
+            ->limit($limit);
+
+        if ($searchTerm !== null) {
+            $query->filterByDisplayName('%' . $searchTerm . '%', PropelCriteria::LIKE);
+        }
+
+        return array_values($query->find()->getData());
     }
 
     protected function applyProcessAndStateColumnsToItemQuery(SpySalesOrderItemQuery $itemQuery): SpySalesOrderItemQuery

@@ -32,4 +32,13 @@ interface AiCommerceRepositoryInterface
      * @return array{processName: ?string, stateNames: array<string>}
      */
     public function findProcessAndStateNamesByOrderReference(string $orderReference): array;
+
+    /**
+     * Specification:
+     * - Returns discount records optionally filtered by display name search term.
+     * - Limited to $limit results, ordered by ID descending.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function findDiscounts(?string $searchTerm, int $limit): array;
 }

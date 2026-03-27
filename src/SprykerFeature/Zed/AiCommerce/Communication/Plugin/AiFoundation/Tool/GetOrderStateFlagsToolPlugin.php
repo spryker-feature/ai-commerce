@@ -66,6 +66,6 @@ class GetOrderStateFlagsToolPlugin extends AbstractPlugin implements ToolPluginI
      */
     public function execute(...$arguments): mixed
     {
-        return $this->getBusinessFactory()->createOrderStateFlagsReader()->getOrderStateFlags((string)($arguments[0] ?? ''));
+        return $this->getBusinessFactory()->createOrderStateFlagsReader()->getOrderStateFlags((string)$arguments['orderReference']);
     }
 }

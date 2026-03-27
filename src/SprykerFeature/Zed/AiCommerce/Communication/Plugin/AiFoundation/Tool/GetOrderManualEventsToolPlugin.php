@@ -66,6 +66,6 @@ class GetOrderManualEventsToolPlugin extends AbstractPlugin implements ToolPlugi
      */
     public function execute(...$arguments): mixed
     {
-        return $this->getBusinessFactory()->createOrderManualEventsReader()->getOrderManualEvents((string)($arguments[0] ?? ''));
+        return $this->getBusinessFactory()->createOrderManualEventsReader()->getOrderManualEvents((string)$arguments['orderReference']);
     }
 }
