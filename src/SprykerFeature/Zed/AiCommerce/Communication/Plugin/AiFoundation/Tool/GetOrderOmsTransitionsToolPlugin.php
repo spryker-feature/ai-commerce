@@ -14,19 +14,25 @@ use Spryker\Zed\AiFoundation\Dependency\Tools\ToolPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 
 /**
- * {@inheritDoc}
- *
- * @api
- *
  * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceFacadeInterface getFacade()
  */
 class GetOrderOmsTransitionsToolPlugin extends AbstractPlugin implements ToolPluginInterface
 {
+    /**
+     * {@inheritDoc}
+     *
+     * @api
+     */
     public function getName(): string
     {
         return 'get_order_oms_transitions';
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @api
+     */
     public function getDescription(): string
     {
         return 'Get current OMS state and available transitions for an order by its reference. Returns transition details including events, conditions, and targets.';

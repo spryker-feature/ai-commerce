@@ -9,11 +9,22 @@ declare(strict_types=1);
 
 namespace SprykerFeature\Zed\AiCommerce\Communication;
 
+use Spryker\Zed\AiFoundation\Business\AiFoundationFacadeInterface;
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolPluginInterface;
 use Spryker\Zed\Glossary\Business\GlossaryFacadeInterface;
 use Spryker\Zed\Kernel\Communication\AbstractCommunicationFactory;
 use Spryker\Zed\User\Business\UserFacadeInterface;
 use SprykerFeature\Zed\AiCommerce\AiCommerceDependencyProvider;
+use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Attachment\AttachmentBuilder;
+use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Attachment\AttachmentBuilderInterface;
+use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Emitter\SseEventEmitter;
+use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Emitter\SseEventEmitterInterface;
+use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\BackofficeAssistantPromptRequestValidator;
+use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\BackofficeAssistantPromptRequestValidatorInterface;
+use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\IntentRouter;
+use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\IntentRouterInterface;
+use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\PromptHandler;
+use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\PromptHandlerInterface;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetBackofficeCapabilities\GetBackofficeCapabilitiesToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetNavigationToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOmsProcessDefinitionToolPlugin;
@@ -29,6 +40,48 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
  */
 class AiCommerceCommunicationFactory extends AbstractCommunicationFactory
 {
+    public function createPromptHandler(): PromptHandlerInterface
+    {
+        return new PromptHandler(
+            $this->getFacade(),
+            $this->getAiFoundationFacade(),
+            $this->getBackofficeAssistantAgentPlugins(),
+            $this->createAttachmentBuilder(),
+            $this->createSseEventEmitter(),
+            $this->createIntentRouter(),
+            $this->createBackofficeAssistantPromptRequestValidator(),
+            $this->getGlossaryFacade(),
+        );
+    }
+
+    public function createAttachmentBuilder(): AttachmentBuilderInterface
+    {
+        return new AttachmentBuilder();
+    }
+
+    public function createSseEventEmitter(): SseEventEmitterInterface
+    {
+        return new SseEventEmitter();
+    }
+
+    public function createIntentRouter(): IntentRouterInterface
+    {
+        return new IntentRouter(
+            $this->getAiFoundationFacade(),
+            $this->getBackofficeAssistantAgentPlugins(),
+        );
+    }
+
+    public function createBackofficeAssistantPromptRequestValidator(): BackofficeAssistantPromptRequestValidatorInterface
+    {
+        return new BackofficeAssistantPromptRequestValidator($this->getConfig());
+    }
+
+    public function getAiFoundationFacade(): AiFoundationFacadeInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_AI_FOUNDATION);
+    }
+
     public function getUserFacade(): UserFacadeInterface
     {
         return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_USER);

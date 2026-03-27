@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement;
 
 use Spryker\Zed\Oms\Business\OmsFacadeInterface;
-use Spryker\Zed\Oms\Business\Process\TransitionInterface;
 use SprykerFeature\Zed\AiCommerce\Persistence\AiCommerceRepositoryInterface;
 
 class OrderOmsTransitionsReader implements OrderOmsTransitionsReaderInterface
@@ -22,6 +21,7 @@ class OrderOmsTransitionsReader implements OrderOmsTransitionsReaderInterface
     public function __construct(
         protected AiCommerceRepositoryInterface $repository,
         protected OmsFacadeInterface $omsFacade,
+        protected OmsTransitionDataBuilderInterface $omsTransitionDataBuilder,
     ) {
     }
 
@@ -65,40 +65,10 @@ class OrderOmsTransitionsReader implements OrderOmsTransitionsReaderInterface
                     continue;
                 }
 
-                $result['transitions'][] = $this->buildTransitionData($transition);
+                $result['transitions'][] = $this->omsTransitionDataBuilder->buildTransitionData($transition);
             }
         }
 
         return (string)json_encode($result, JSON_PRETTY_PRINT);
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function buildTransitionData(TransitionInterface $transition): array
-    {
-        $transitionData = [
-            'source' => $transition->getSource()->getName(),
-            'target' => $transition->getTarget()->getName(),
-        ];
-
-        if ($transition->hasEvent()) {
-            $event = $transition->getEvent();
-            $transitionData['event'] = [
-                'name' => $event->getName(),
-                'manual' => $event->isManual(),
-                'onEnter' => $event->isOnEnter(),
-                'timeout' => $event->getTimeout(),
-                'command' => $event->getCommand(),
-            ];
-        }
-
-        if ($transition->hasCondition()) {
-            $transitionData['condition'] = $transition->getCondition();
-        }
-
-        $transitionData['happy'] = $transition->isHappy();
-
-        return $transitionData;
     }
 }

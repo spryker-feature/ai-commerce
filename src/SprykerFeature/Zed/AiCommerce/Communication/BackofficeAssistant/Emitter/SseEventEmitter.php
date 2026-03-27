@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Emitter;
+namespace SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Emitter;
 
 use SprykerFeature\Shared\AiCommerce\BackofficeAssistant\BackofficeAssistantEventType;
 

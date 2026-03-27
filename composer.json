@@ -28,8 +28,8 @@
         "spryker/twig": "*"
     },
     "suggest": {
-        "spryker/container": "ADD SUGGEST DESCRIPTION",
-        "spryker/twig": "ADD SUGGEST DESCRIPTION"
+        "spryker/container": "When using BackofficeAssistant",
+        "spryker/twig": "When using AiCommerceTwigPlugin"
     },
     "autoload": {
         "psr-4": {

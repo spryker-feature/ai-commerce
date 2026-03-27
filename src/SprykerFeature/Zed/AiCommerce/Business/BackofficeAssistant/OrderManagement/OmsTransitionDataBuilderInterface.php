@@ -9,7 +9,12 @@ declare(strict_types=1);
 
 namespace SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement;
 
-interface OrderOmsTransitionsReaderInterface
+use Spryker\Zed\Oms\Business\Process\TransitionInterface;
+
+interface OmsTransitionDataBuilderInterface
 {
-    public function getOrderOmsTransitions(string $orderReference): string;
+    /**
+     * @return array<string, mixed>
+     */
+    public function buildTransitionData(TransitionInterface $transition): array;
 }

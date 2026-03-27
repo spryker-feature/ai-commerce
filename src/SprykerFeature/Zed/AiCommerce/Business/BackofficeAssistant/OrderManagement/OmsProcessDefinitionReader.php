@@ -11,7 +11,6 @@ namespace SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManage
 
 use Spryker\Zed\Oms\Business\OmsFacadeInterface;
 use Spryker\Zed\Oms\Business\Process\ProcessInterface;
-use Spryker\Zed\Oms\Business\Process\TransitionInterface;
 use SprykerFeature\Zed\AiCommerce\Persistence\AiCommerceRepositoryInterface;
 
 class OmsProcessDefinitionReader implements OmsProcessDefinitionReaderInterface
@@ -19,12 +18,14 @@ class OmsProcessDefinitionReader implements OmsProcessDefinitionReaderInterface
     public function __construct(
         protected AiCommerceRepositoryInterface $repository,
         protected OmsFacadeInterface $omsFacade,
+        protected OmsTransitionDataBuilderInterface $omsTransitionDataBuilder,
     ) {
     }
 
     public function getOmsProcessDefinition(string $orderReference): string
     {
-        $processName = $this->repository->findProcessNameByOrderReference($orderReference);
+        $orderData = $this->repository->findProcessAndStateNamesByOrderReference($orderReference);
+        $processName = $orderData['processName'];
 
         if ($processName === null) {
             return '{}';
@@ -88,40 +89,10 @@ class OmsProcessDefinitionReader implements OmsProcessDefinitionReaderInterface
         $transitions = [];
 
         foreach ($process->getAllTransitions() as $transition) {
-            $transitions[] = $this->buildTransitionData($transition);
+            $transitions[] = $this->omsTransitionDataBuilder->buildTransitionData($transition);
         }
 
         return $transitions;
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function buildTransitionData(TransitionInterface $transition): array
-    {
-        $transitionData = [
-            'source' => $transition->getSource()->getName(),
-            'target' => $transition->getTarget()->getName(),
-        ];
-
-        if ($transition->hasEvent()) {
-            $event = $transition->getEvent();
-            $transitionData['event'] = [
-                'name' => $event->getName(),
-                'manual' => $event->isManual(),
-                'onEnter' => $event->isOnEnter(),
-                'timeout' => $event->getTimeout(),
-                'command' => $event->getCommand(),
-            ];
-        }
-
-        if ($transition->hasCondition()) {
-            $transitionData['condition'] = $transition->getCondition();
-        }
-
-        $transitionData['happy'] = $transition->isHappy();
-
-        return $transitionData;
     }
 
     /**

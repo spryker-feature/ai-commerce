@@ -11,8 +11,5 @@ namespace SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManage
 
 interface OmsProcessDefinitionReaderInterface
 {
-    /**
-     * @api
-     */
     public function getOmsProcessDefinition(string $orderReference): string;
 }

@@ -7,14 +7,14 @@
 
 declare(strict_types=1);
 
-namespace SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Prompt;
+namespace SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt;
 
 use Generated\Shared\Transfer\BackofficeAssistantPromptRequestTransfer;
 
 interface BackofficeAssistantPromptRequestValidatorInterface
 {
     /**
-     * @return array<string> List of translatable validation error messages.
+     * @return array<\Generated\Shared\Transfer\ErrorTransfer>
      */
     public function validate(BackofficeAssistantPromptRequestTransfer $promptRequestTransfer): array;
 }

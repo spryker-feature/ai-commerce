@@ -23,11 +23,11 @@ class AiCommerceEntityManager extends AbstractEntityManager implements AiCommerc
     ): BackofficeAssistantConversationTransfer {
         $mapper = $this->getFactory()->createBackofficeAssistantConversationMapper();
 
-        $entity = $mapper->mapTransferToEntity($conversationTransfer, new SpyBackofficeAssistantConversation());
+        $entity = $mapper->mapBackofficeAssistantConversationTransferToBackofficeAssistantConversationEntity($conversationTransfer, new SpyBackofficeAssistantConversation());
 
         $entity->save();
 
-        return $mapper->mapEntityToTransfer($entity, $conversationTransfer);
+        return $mapper->mapBackofficeAssistantConversationEntityToBackofficeAssistantConversationTransfer($entity, $conversationTransfer);
     }
 
     public function updateBackofficeAssistantConversation(
@@ -44,7 +44,7 @@ class AiCommerceEntityManager extends AbstractEntityManager implements AiCommerc
 
         $entity = $this->getFactory()
             ->createBackofficeAssistantConversationMapper()
-            ->mapTransferToEntity($conversationTransfer, $entity);
+            ->mapBackofficeAssistantConversationTransferToBackofficeAssistantConversationEntity($conversationTransfer, $entity);
 
         $entity->save();
     }

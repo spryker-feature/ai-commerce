@@ -14,7 +14,7 @@ use Orm\Zed\AiCommerce\Persistence\SpyBackofficeAssistantConversation;
 
 class BackofficeAssistantConversationMapper
 {
-    public function mapTransferToEntity(
+    public function mapBackofficeAssistantConversationTransferToBackofficeAssistantConversationEntity(
         BackofficeAssistantConversationTransfer $transfer,
         SpyBackofficeAssistantConversation $entity,
     ): SpyBackofficeAssistantConversation {
@@ -23,7 +23,7 @@ class BackofficeAssistantConversationMapper
         return $entity;
     }
 
-    public function mapEntityToTransfer(
+    public function mapBackofficeAssistantConversationEntityToBackofficeAssistantConversationTransfer(
         SpyBackofficeAssistantConversation $entity,
         BackofficeAssistantConversationTransfer $transfer,
     ): BackofficeAssistantConversationTransfer {

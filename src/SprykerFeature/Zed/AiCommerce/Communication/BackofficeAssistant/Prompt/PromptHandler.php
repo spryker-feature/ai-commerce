@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Prompt;
+namespace SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt;
 
 use ArrayObject;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCollectionRequestTransfer;
@@ -22,11 +22,9 @@ use Spryker\Shared\Log\LoggerTrait;
 use Spryker\Zed\AiFoundation\Business\AiFoundationFacadeInterface;
 use Spryker\Zed\Glossary\Business\GlossaryFacadeInterface;
 use SprykerFeature\Shared\AiCommerce\BackofficeAssistant\BackofficeAssistantEventType;
-use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Attachment\AttachmentBuilderInterface;
-use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Conversation\BackofficeAssistantConversationCreatorInterface;
-use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Conversation\BackofficeAssistantConversationReaderInterface;
-use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Conversation\BackofficeAssistantConversationUpdaterInterface;
-use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Emitter\SseEventEmitterInterface;
+use SprykerFeature\Zed\AiCommerce\Business\AiCommerceFacadeInterface;
+use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Attachment\AttachmentBuilderInterface;
+use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Emitter\SseEventEmitterInterface;
 use Throwable;
 
 class PromptHandler implements PromptHandlerInterface
@@ -49,9 +47,7 @@ class PromptHandler implements PromptHandlerInterface
      * @param array<\SprykerFeature\Zed\AiCommerce\Dependency\BackofficeAssistant\BackofficeAssistantAgentPluginInterface> $agentPlugins
      */
     public function __construct(
-        protected BackofficeAssistantConversationReaderInterface $conversationReader,
-        protected BackofficeAssistantConversationCreatorInterface $conversationCreator,
-        protected BackofficeAssistantConversationUpdaterInterface $conversationUpdater,
+        protected AiCommerceFacadeInterface $aiCommerceFacade,
         protected AiFoundationFacadeInterface $aiFoundationFacade,
         protected array $agentPlugins,
         protected AttachmentBuilderInterface $attachmentBuilder,
@@ -68,8 +64,8 @@ class PromptHandler implements PromptHandlerInterface
             $validationErrors = $this->promptRequestValidator->validate($promptRequestTransfer);
 
             if ($validationErrors !== []) {
-                foreach ($validationErrors as $errorKey) {
-                    $this->eventEmitter->emit(BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => $this->glossaryFacade->translate($errorKey)]);
+                foreach ($validationErrors as $errorTransfer) {
+                    $this->eventEmitter->emit(BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => $this->glossaryFacade->translate((string)$errorTransfer->getMessage())]);
                 }
 
                 return;
@@ -83,7 +79,7 @@ class PromptHandler implements PromptHandlerInterface
 
             $selectedAgent = (string)$promptRequestTransfer->getSelectedAgent();
 
-            $this->conversationUpdater->updateCollection(
+            $this->aiCommerceFacade->updateBackofficeAssistantConversationCollection(
                 (new BackofficeAssistantConversationCollectionRequestTransfer())
                     ->addBackofficeAssistantConversation(
                         (new BackofficeAssistantConversationTransfer())
@@ -117,7 +113,7 @@ class PromptHandler implements PromptHandlerInterface
         $previousAgent = $this->emitPreviousAgentEvent($conversationReference);
 
         if ($previousAgent !== $selectedAgent) {
-            $this->conversationUpdater->updateCollection(
+            $this->aiCommerceFacade->updateBackofficeAssistantConversationCollection(
                 (new BackofficeAssistantConversationCollectionRequestTransfer())
                     ->addBackofficeAssistantConversation(
                         (new BackofficeAssistantConversationTransfer())
@@ -159,7 +155,7 @@ class PromptHandler implements PromptHandlerInterface
         $selectedAgent = $intentRouterResponse->getAgent() ?: static::AGENT_GUARDRAIL;
 
         if ($selectedAgent !== static::AGENT_GUARDRAIL && $previousAgent !== $selectedAgent) {
-            $this->conversationUpdater->updateCollection(
+            $this->aiCommerceFacade->updateBackofficeAssistantConversationCollection(
                 (new BackofficeAssistantConversationCollectionRequestTransfer())
                     ->addBackofficeAssistantConversation(
                         (new BackofficeAssistantConversationTransfer())
@@ -203,7 +199,7 @@ class PromptHandler implements PromptHandlerInterface
 
     protected function createNewConversation(string $userUuid, string $prompt): string
     {
-        $response = $this->conversationCreator->createCollection(
+        $response = $this->aiCommerceFacade->createBackofficeAssistantConversationCollection(
             (new BackofficeAssistantConversationCollectionRequestTransfer())
                 ->addBackofficeAssistantConversation(
                     (new BackofficeAssistantConversationTransfer())
@@ -222,8 +218,8 @@ class PromptHandler implements PromptHandlerInterface
                 (new BackofficeAssistantConversationConditionsTransfer())->addConversationReference($conversationReference),
             );
 
-        $conversations = $this->conversationReader
-            ->getCollection($criteria)
+        $conversations = $this->aiCommerceFacade
+            ->getBackofficeAssistantConversationCollection($criteria)
             ->getBackofficeAssistantConversations();
 
         if ($conversations->count() === 0) {
@@ -242,8 +238,8 @@ class PromptHandler implements PromptHandlerInterface
                     ->addUserUuid($userUuid),
             );
 
-        return $this->conversationReader
-            ->getCollection($criteria)
+        return $this->aiCommerceFacade
+            ->getBackofficeAssistantConversationCollection($criteria)
             ->getBackofficeAssistantConversations()
             ->count() > 0;
     }

@@ -42,6 +42,7 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
         $container = $this->addUserFacade($container);
         $container = $this->addCsrfProviderService($container);
         $container = $this->addGlossaryFacade($container);
+        $container = $this->addAiFoundationFacade($container);
         $container = $this->addBackofficeAssistantAgentPlugins($container);
 
         return $container;
@@ -52,10 +53,8 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
         $container = parent::provideBusinessLayerDependencies($container);
 
         $container = $this->addAiFoundationFacade($container);
-        $container = $this->addGlossaryFacade($container);
         $container = $this->addOmsFacade($container);
         $container = $this->addSalesFacade($container);
-        $container = $this->addBackofficeAssistantAgentPlugins($container);
 
         return $container;
     }

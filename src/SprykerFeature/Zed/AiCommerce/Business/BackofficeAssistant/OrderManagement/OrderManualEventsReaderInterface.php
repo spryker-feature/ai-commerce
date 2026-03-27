@@ -11,8 +11,5 @@ namespace SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManage
 
 interface OrderManualEventsReaderInterface
 {
-    /**
-     * @api
-     */
     public function getOrderManualEvents(string $orderReference): string;
 }

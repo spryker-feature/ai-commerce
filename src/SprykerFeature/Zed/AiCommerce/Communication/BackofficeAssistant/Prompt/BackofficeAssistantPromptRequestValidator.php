@@ -7,9 +7,10 @@
 
 declare(strict_types=1);
 
-namespace SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Prompt;
+namespace SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt;
 
 use Generated\Shared\Transfer\BackofficeAssistantPromptRequestTransfer;
+use Generated\Shared\Transfer\ErrorTransfer;
 use SprykerFeature\Zed\AiCommerce\AiCommerceConfig;
 
 class BackofficeAssistantPromptRequestValidator implements BackofficeAssistantPromptRequestValidatorInterface
@@ -40,22 +41,20 @@ class BackofficeAssistantPromptRequestValidator implements BackofficeAssistantPr
         $errors = [];
 
         if (!$promptRequestTransfer->getPrompt()) {
-            $errors[] = static::MESSAGE_PROMPT_REQUIRED;
+            $errors[] = $this->createErrorTransfer(static::MESSAGE_PROMPT_REQUIRED);
         }
 
         if (!$promptRequestTransfer->getUserUuid()) {
-            $errors[] = static::MESSAGE_USER_UUID_REQUIRED;
+            $errors[] = $this->createErrorTransfer(static::MESSAGE_USER_UUID_REQUIRED);
         }
 
-        $attachmentErrors = $this->validateAttachments($promptRequestTransfer->getRawAttachments());
-
-        return array_merge($errors, $attachmentErrors);
+        return array_merge($errors, $this->validateAttachments($promptRequestTransfer->getRawAttachments()));
     }
 
     /**
      * @param array<int, array<string, string>> $rawAttachments
      *
-     * @return array<string>
+     * @return array<\Generated\Shared\Transfer\ErrorTransfer>
      */
     protected function validateAttachments(array $rawAttachments): array
     {
@@ -70,7 +69,7 @@ class BackofficeAssistantPromptRequestValidator implements BackofficeAssistantPr
         $allowedMediaTypes = $this->config->getBackofficeAssistantAttachmentAllowedMediaTypes();
 
         if (count($rawAttachments) > $maxCount) {
-            $errors[] = static::MESSAGE_ATTACHMENT_COUNT_EXCEEDED;
+            $errors[] = $this->createErrorTransfer(static::MESSAGE_ATTACHMENT_COUNT_EXCEEDED);
         }
 
         $totalSize = 0;
@@ -80,7 +79,7 @@ class BackofficeAssistantPromptRequestValidator implements BackofficeAssistantPr
             $content = $rawAttachment['content'] ?? '';
 
             if (!in_array($mediaType, $allowedMediaTypes, true)) {
-                $errors[] = static::MESSAGE_ATTACHMENT_UNSUPPORTED_MEDIA_TYPE;
+                $errors[] = $this->createErrorTransfer(static::MESSAGE_ATTACHMENT_UNSUPPORTED_MEDIA_TYPE);
 
                 continue;
             }
@@ -92,7 +91,7 @@ class BackofficeAssistantPromptRequestValidator implements BackofficeAssistantPr
             $decodedContent = base64_decode($content, true);
 
             if ($decodedContent === false) {
-                $errors[] = static::MESSAGE_ATTACHMENT_INVALID_CONTENT;
+                $errors[] = $this->createErrorTransfer(static::MESSAGE_ATTACHMENT_INVALID_CONTENT);
 
                 continue;
             }
@@ -100,7 +99,7 @@ class BackofficeAssistantPromptRequestValidator implements BackofficeAssistantPr
             $fileSize = strlen($decodedContent);
 
             if ($fileSize > $maxFileSize) {
-                $errors[] = static::MESSAGE_ATTACHMENT_FILE_TOO_LARGE;
+                $errors[] = $this->createErrorTransfer(static::MESSAGE_ATTACHMENT_FILE_TOO_LARGE);
 
                 continue;
             }
@@ -109,9 +108,14 @@ class BackofficeAssistantPromptRequestValidator implements BackofficeAssistantPr
         }
 
         if ($totalSize > $maxTotalSize) {
-            $errors[] = static::MESSAGE_ATTACHMENT_TOTAL_SIZE_EXCEEDED;
+            $errors[] = $this->createErrorTransfer(static::MESSAGE_ATTACHMENT_TOTAL_SIZE_EXCEEDED);
         }
 
         return $errors;
+    }
+
+    protected function createErrorTransfer(string $message): ErrorTransfer
+    {
+        return (new ErrorTransfer())->setMessage($message);
     }
 }

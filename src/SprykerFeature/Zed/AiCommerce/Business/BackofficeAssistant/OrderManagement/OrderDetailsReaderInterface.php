@@ -11,8 +11,5 @@ namespace SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManage
 
 interface OrderDetailsReaderInterface
 {
-    /**
-     * @api
-     */
     public function getOrderDetails(string $orderReference): string;
 }

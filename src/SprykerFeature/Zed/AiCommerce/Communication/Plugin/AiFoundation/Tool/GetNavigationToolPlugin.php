@@ -28,7 +28,7 @@ class GetNavigationToolPlugin extends AbstractPlugin implements ToolPluginInterf
 
     public function getDescription(): string
     {
-        return 'Search Backoffice navigation to find pages and their paths. Use this tool when the user asks where to find something, how to navigate, or which menu item to use. Returns matching navigation entries with their relative URL paths (e.g., /sales/order/index).';
+        return 'Use to get Spryker application navigation details with all available routes and pages. Returns all Backoffice navigation entries with their paths. Use this tool when the user asks where to find something, how to navigate, or which menu item to use.';
     }
 
     /**
@@ -52,29 +52,27 @@ class GetNavigationToolPlugin extends AbstractPlugin implements ToolPluginInterf
      */
     public function execute(...$arguments): mixed
     {
-        $query = strtolower((string)($arguments[0] ?? ''));
-        $navigation = json_decode((string)file_get_contents($this->getConfig()->getBackofficeNavigationCachePath()), true);
+        $cachePath = $this->getConfig()->getBackofficeNavigationCachePath();
+
+        if (!file_exists($cachePath)) {
+            return json_encode(['error' => 'Navigation not found.']);
+        }
+
+        $navigation = json_decode((string)file_get_contents($cachePath), true);
 
         if (!is_array($navigation)) {
-            return json_encode(['error' => 'Navigation cache could not be parsed.']);
+            return json_encode(['error' => 'Navigation could not be parsed.']);
         }
 
-        $matches = $this->searchNavigation($navigation, $query);
-
-        if ($matches === []) {
-            return json_encode(['message' => sprintf('No navigation entries found for "%s".', $query)]);
-        }
-
-        return json_encode($matches);
+        return json_encode($this->collectNavigation($navigation));
     }
 
     /**
      * @param array<mixed> $navigation
-     * @param string $query
      *
      * @return array<array<string, string>>
      */
-    protected function searchNavigation(array $navigation, string $query): array
+    protected function collectNavigation(array $navigation): array
     {
         $results = [];
 
@@ -91,7 +89,7 @@ class GetNavigationToolPlugin extends AbstractPlugin implements ToolPluginInterf
             $title = (string)($entry['title'] ?? '');
             $path = $this->buildPath($entry);
 
-            if ($path !== '' && $this->matchesQuery($label, $title, $query)) {
+            if ($path !== '') {
                 $results[] = [
                     'name' => $label ?: $title,
                     'path' => $path,
@@ -99,7 +97,7 @@ class GetNavigationToolPlugin extends AbstractPlugin implements ToolPluginInterf
             }
 
             if (!empty($entry['pages']) && is_array($entry['pages'])) {
-                $results = array_merge($results, $this->searchNavigation($entry['pages'], $query));
+                $results = array_merge($results, $this->collectNavigation($entry['pages']));
             }
         }
 
@@ -124,10 +122,5 @@ class GetNavigationToolPlugin extends AbstractPlugin implements ToolPluginInterf
         }
 
         return sprintf('/%s/%s/%s', $bundle, $controller, $action);
-    }
-
-    protected function matchesQuery(string $label, string $title, string $query): bool
-    {
-        return str_contains(strtolower($label), $query) || str_contains(strtolower($title), $query);
     }
 }

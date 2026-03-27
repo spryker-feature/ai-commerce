@@ -15,12 +15,8 @@ use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 use SprykerFeature\Shared\AiCommerce\BackofficeAssistant\BackofficeAssistantEventType;
 
 /**
- * {@inheritDoc}
- *
- * @api
- *
  * @method \SprykerFeature\Zed\AiCommerce\AiCommerceConfig getConfig()
- * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceBusinessFactory getBusinessFactory()
+ * @method \SprykerFeature\Zed\AiCommerce\Communication\AiCommerceCommunicationFactory getFactory()
  */
 class BackofficeAssistantSsePostToolCallPlugin extends AbstractPlugin implements PostToolCallPluginInterface
 {
@@ -28,6 +24,11 @@ class BackofficeAssistantSsePostToolCallPlugin extends AbstractPlugin implements
 
     protected const string KEY_RESULT = 'result';
 
+    /**
+     * {@inheritDoc}
+     *
+     * @api
+     */
     public function postToolCall(AiToolCallTransfer $aiToolCallTransfer): void
     {
         $configurationName = $aiToolCallTransfer->getPromptRequest()?->getAiConfigurationName();
@@ -36,7 +37,7 @@ class BackofficeAssistantSsePostToolCallPlugin extends AbstractPlugin implements
             return;
         }
 
-        $this->getBusinessFactory()->createSseEventEmitter()->emit(BackofficeAssistantEventType::ToolCallResult, [
+        $this->getFactory()->createSseEventEmitter()->emit(BackofficeAssistantEventType::ToolCallResult, [
             static::KEY_NAME => $aiToolCallTransfer->getToolName(),
             static::KEY_RESULT => $aiToolCallTransfer->getToolResult(),
         ]);

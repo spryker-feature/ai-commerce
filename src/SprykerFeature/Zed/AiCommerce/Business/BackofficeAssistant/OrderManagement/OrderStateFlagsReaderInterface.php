@@ -11,8 +11,5 @@ namespace SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManage
 
 interface OrderStateFlagsReaderInterface
 {
-    /**
-     * @api
-     */
     public function getOrderStateFlags(string $orderReference): string;
 }

@@ -14,19 +14,25 @@ use Spryker\Zed\AiFoundation\Dependency\Tools\ToolPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 
 /**
- * {@inheritDoc}
- *
- * @api
- *
  * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceFacadeInterface getFacade()
  */
 class GetOrderDetailsToolPlugin extends AbstractPlugin implements ToolPluginInterface
 {
+    /**
+     * {@inheritDoc}
+     *
+     * @api
+     */
     public function getName(): string
     {
         return 'get_order_details';
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @api
+     */
     public function getDescription(): string
     {
         return 'Get basic order details including items, amounts, dates, and customer information by order reference.';

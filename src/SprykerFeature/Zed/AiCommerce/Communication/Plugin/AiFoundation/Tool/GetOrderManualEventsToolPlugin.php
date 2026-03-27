@@ -22,11 +22,21 @@ use Spryker\Zed\Kernel\Communication\AbstractPlugin;
  */
 class GetOrderManualEventsToolPlugin extends AbstractPlugin implements ToolPluginInterface
 {
+    /**
+     * {@inheritDoc}
+     *
+     * @api
+     */
     public function getName(): string
     {
         return 'get_order_manual_events';
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @api
+     */
     public function getDescription(): string
     {
         return 'Get available manual events that can be triggered for an order. Shows which manual actions are available from the current state.';

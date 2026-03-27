@@ -81,7 +81,7 @@ class BackofficeAssistantPromptController extends AbstractController
                 ->setUserUuid($userUuid)
                 ->setRawAttachments($data[static::REQUEST_KEY_ATTACHMENTS] ?? []);
 
-            $this->getFacade()->handleBackofficeAssistantPrompt($promptRequestTransfer);
+            $this->getFactory()->createPromptHandler()->handle($promptRequestTransfer);
         }, 200, [
             static::HEADER_CONTENT_TYPE => static::HEADER_VALUE_CONTENT_TYPE,
             static::HEADER_CACHE_CONTROL => static::HEADER_VALUE_CACHE_CONTROL,

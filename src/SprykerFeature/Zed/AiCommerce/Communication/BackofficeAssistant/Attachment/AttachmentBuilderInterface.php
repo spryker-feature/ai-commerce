@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Attachment;
+namespace SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Attachment;
 
 interface AttachmentBuilderInterface
 {

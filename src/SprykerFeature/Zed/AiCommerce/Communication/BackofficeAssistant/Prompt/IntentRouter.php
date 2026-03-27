@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Prompt;
+namespace SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt;
 
 use Generated\Shared\Transfer\ConversationHistoryTransfer;
 use Generated\Shared\Transfer\IntentRouterResponseTransfer;

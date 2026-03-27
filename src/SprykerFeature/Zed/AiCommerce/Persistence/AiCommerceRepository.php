@@ -48,32 +48,11 @@ class AiCommerceRepository extends AbstractRepository implements AiCommerceRepos
         $conversations = [];
 
         foreach ($query->find() as $entity) {
-            $conversations[] = $mapper->mapEntityToTransfer($entity, new BackofficeAssistantConversationTransfer());
+            $conversations[] = $mapper->mapBackofficeAssistantConversationEntityToBackofficeAssistantConversationTransfer($entity, new BackofficeAssistantConversationTransfer());
         }
 
         return (new BackofficeAssistantConversationCollectionTransfer())
             ->setBackofficeAssistantConversations(new ArrayObject($conversations));
-    }
-
-    /**
-     * @module Sales
-     * @module Oms
-     */
-    public function findProcessNameByOrderReference(string $orderReference): ?string
-    {
-        /** @var string|null $result */
-        $result = $this->getFactory()->getSalesOrderPropelQuery()
-            ->filterByOrderReference($orderReference)
-            ->useItemQuery()
-                ->useProcessQuery()
-                    ->withColumn(SpyOmsOrderProcessTableMap::COL_NAME, static::PROCESS_NAME)
-                ->endUse()
-                ->groupBy(SpyOmsOrderProcessTableMap::COL_NAME)
-            ->endUse()
-            ->select([static::PROCESS_NAME])
-            ->findOne();
-
-        return $result;
     }
 
     /**
@@ -84,38 +63,39 @@ class AiCommerceRepository extends AbstractRepository implements AiCommerceRepos
      */
     public function findProcessAndStateNamesByOrderReference(string $orderReference): array
     {
-        /** @var array<string, string|null>|null $result */
-        $result = $this->getFactory()->getSalesOrderPropelQuery()
+        /** @var array<array<string, string|null>> $rows */
+        $rows = $this->getFactory()->getSalesOrderPropelQuery()
             ->filterByOrderReference($orderReference)
             ->withItemQuery(function (SpySalesOrderItemQuery $itemQuery): SpySalesOrderItemQuery {
-                $itemQuery
-                    ->useProcessQuery()
-                        ->withColumn(SpyOmsOrderProcessTableMap::COL_NAME, static::PROCESS_NAME)
-                    ->endUse();
-
-                /** @var \Orm\Zed\Sales\Persistence\SpySalesOrderItemQuery $itemQueryWithProcess */
-                $itemQueryWithProcess = $itemQuery;
-                $itemQueryWithProcess
-                    ->useStateQuery()
-                        ->withColumn(sprintf('GROUP_CONCAT(DISTINCT %s)', SpyOmsOrderItemStateTableMap::COL_NAME), static::STATE_NAMES)
-                    ->endUse()
-                    ->groupBy(SpyOmsOrderProcessTableMap::COL_NAME);
-
-                return $itemQuery;
+                return $this->applyProcessAndStateColumnsToItemQuery($itemQuery);
             })
             ->select([static::PROCESS_NAME, static::STATE_NAMES])
-            ->findOne();
+            ->find()
+            ->getData();
 
-        if ($result === null) {
+        if ($rows === []) {
             return ['processName' => null, 'stateNames' => []];
         }
 
-        $processName = $result[static::PROCESS_NAME];
-        $stateNamesRaw = $result[static::STATE_NAMES];
-        /** @var array<string> $stateNames */
-        $stateNames = $stateNamesRaw ? explode(',', $stateNamesRaw) : [];
+        $processName = $rows[0][static::PROCESS_NAME];
+        $stateNames = array_values(array_unique(array_filter(array_column($rows, static::STATE_NAMES))));
 
         return ['processName' => $processName, 'stateNames' => $stateNames];
+    }
+
+    protected function applyProcessAndStateColumnsToItemQuery(SpySalesOrderItemQuery $itemQuery): SpySalesOrderItemQuery
+    {
+        $itemQuery
+            ->useProcessQuery()
+                ->withColumn(SpyOmsOrderProcessTableMap::COL_NAME, static::PROCESS_NAME)
+            ->endUse();
+
+        $itemQuery
+            ->useStateQuery()
+                ->withColumn(SpyOmsOrderItemStateTableMap::COL_NAME, static::STATE_NAMES)
+            ->endUse();
+
+        return $itemQuery;
     }
 
     protected function applyConditionsToQuery(

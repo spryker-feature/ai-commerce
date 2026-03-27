@@ -14,19 +14,25 @@ use Spryker\Zed\AiFoundation\Dependency\Tools\ToolPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 
 /**
- * {@inheritDoc}
- *
- * @api
- *
  * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceFacadeInterface getFacade()
  */
 class GetOmsProcessDefinitionToolPlugin extends AbstractPlugin implements ToolPluginInterface
 {
+    /**
+     * {@inheritDoc}
+     *
+     * @api
+     */
     public function getName(): string
     {
         return 'get_oms_process_definition';
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @api
+     */
     public function getDescription(): string
     {
         return 'Get the full OMS process definition for an order including all states, transitions, events, and subprocesses.';

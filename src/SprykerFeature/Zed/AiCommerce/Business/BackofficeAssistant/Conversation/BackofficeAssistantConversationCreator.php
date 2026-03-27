@@ -11,14 +11,12 @@ namespace SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Conversatio
 
 use Generated\Shared\Transfer\BackofficeAssistantConversationCollectionRequestTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCollectionResponseTransfer;
-use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Generator\ConversationReferenceGeneratorInterface;
 use SprykerFeature\Zed\AiCommerce\Persistence\AiCommerceEntityManagerInterface;
 
 class BackofficeAssistantConversationCreator implements BackofficeAssistantConversationCreatorInterface
 {
     public function __construct(
         protected AiCommerceEntityManagerInterface $entityManager,
-        protected ConversationReferenceGeneratorInterface $conversationReferenceGenerator,
     ) {
     }
 
@@ -28,7 +26,7 @@ class BackofficeAssistantConversationCreator implements BackofficeAssistantConve
         $responseTransfer = new BackofficeAssistantConversationCollectionResponseTransfer();
 
         foreach ($collectionRequestTransfer->getBackofficeAssistantConversations() as $conversationTransfer) {
-            $conversationReference = $this->conversationReferenceGenerator->generate(
+            $conversationReference = $this->generateConversationReference(
                 $conversationTransfer->getUserUuidOrFail(),
             );
 
@@ -40,5 +38,10 @@ class BackofficeAssistantConversationCreator implements BackofficeAssistantConve
         }
 
         return $responseTransfer;
+    }
+
+    public function generateConversationReference(string $userReference): string
+    {
+        return sprintf('%s:%d:%s', $userReference, time(), bin2hex(random_bytes(8)));
     }
 }
