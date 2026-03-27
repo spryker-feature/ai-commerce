@@ -32,9 +32,12 @@ class DiscountListReader implements DiscountListReaderInterface
     {
     }
 
-    public function getDiscountList(?string $searchTerm): string
+    /**
+     * @param array<string, mixed> $filters
+     */
+    public function getDiscountList(array $filters): string
     {
-        $discounts = $this->repository->findDiscounts($searchTerm, static::DISCOUNT_LIST_LIMIT);
+        $discounts = $this->repository->findDiscounts($filters, static::DISCOUNT_LIST_LIMIT);
 
         return (string)json_encode(array_map($this->normalizeRow(...), $discounts), JSON_PRETTY_PRINT);
     }

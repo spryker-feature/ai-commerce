@@ -59,6 +59,40 @@ class DiscountManagementToolPluginsTest extends Unit
         $this->assertSame([], $decoded);
     }
 
+    public function testListDiscountsToolPluginFiltersByIsActive(): void
+    {
+        // Arrange
+        $activeDiscount = $this->tester->haveDiscount(['isActive' => true]);
+        $inactiveDiscount = $this->tester->haveDiscount(['isActive' => false]);
+
+        // Act
+        $result = (new ListDiscountsToolPlugin())->execute(isActive: true);
+
+        // Assert
+        $this->assertJson($result);
+        $decoded = json_decode($result, true);
+        $displayNames = array_column($decoded, static::DISCOUNT_COLUMN_DISPLAY_NAME);
+        $this->assertContains($activeDiscount->getDisplayName(), $displayNames);
+        $this->assertNotContains($inactiveDiscount->getDisplayName(), $displayNames);
+    }
+
+    public function testListDiscountsToolPluginFiltersByDiscountType(): void
+    {
+        // Arrange
+        $cartRuleDiscount = $this->tester->haveDiscount(['discountType' => 'cart_rule']);
+        $voucherDiscount = $this->tester->haveDiscount(['discountType' => 'voucher']);
+
+        // Act
+        $result = (new ListDiscountsToolPlugin())->execute(discountType: 'cart_rule');
+
+        // Assert
+        $this->assertJson($result);
+        $decoded = json_decode($result, true);
+        $displayNames = array_column($decoded, static::DISCOUNT_COLUMN_DISPLAY_NAME);
+        $this->assertContains($cartRuleDiscount->getDisplayName(), $displayNames);
+        $this->assertNotContains($voucherDiscount->getDisplayName(), $displayNames);
+    }
+
     public function testGetDiscountDetailsToolPluginReturnsJsonWithDiscountStructure(): void
     {
         // Arrange

@@ -49,6 +49,10 @@ class ListDiscountsToolPlugin extends AbstractPlugin implements ToolPluginInterf
     {
         return [
             new ToolParameter('searchTerm', 'string', 'Optional display name filter (partial match). Omit or pass empty string to list all discounts.', false),
+            new ToolParameter('isActive', 'boolean', 'Filter by status: true for active discounts, false for inactive.', false),
+            new ToolParameter('discountType', 'string', 'Filter by discount type: "cart_rule" or "voucher".', false),
+            new ToolParameter('validFrom', 'string', 'Show discounts still valid after this date (format: YYYY-MM-DD HH:MM:SS).', false),
+            new ToolParameter('validTo', 'string', 'Show discounts that started before this date (format: YYYY-MM-DD HH:MM:SS).', false),
         ];
     }
 
@@ -61,6 +65,7 @@ class ListDiscountsToolPlugin extends AbstractPlugin implements ToolPluginInterf
      */
     public function execute(...$arguments): mixed
     {
-        return $this->getBusinessFactory()->createDiscountListReader()->getDiscountList($arguments['searchTerm'] ?? null);
+        /** @var array<string, mixed> $arguments */
+        return $this->getBusinessFactory()->createDiscountListReader()->getDiscountList($arguments);
     }
 }

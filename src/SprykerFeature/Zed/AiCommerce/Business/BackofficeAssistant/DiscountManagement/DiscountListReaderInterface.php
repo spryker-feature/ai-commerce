@@ -13,8 +13,11 @@ interface DiscountListReaderInterface
 {
     /**
      * Specification:
-     * - Returns a JSON-encoded list of discounts, optionally filtered by display name.
+     * - Returns a JSON-encoded list of discounts filtered by the provided criteria.
+     * - Supported keys: searchTerm (string), isActive (bool), discountType (string), validFrom (string), validTo (string).
      * - Returns up to 50 discounts ordered by ID descending.
+     *
+     * @param array<string, mixed> $filters
      */
-    public function getDiscountList(?string $searchTerm): string;
+    public function getDiscountList(array $filters): string;
 }

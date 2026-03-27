@@ -35,10 +35,13 @@ interface AiCommerceRepositoryInterface
 
     /**
      * Specification:
-     * - Returns discount records optionally filtered by display name search term.
+     * - Returns discount records filtered by the provided criteria.
+     * - Supported keys: searchTerm (string), isActive (bool), discountType (string), validFrom (string), validTo (string).
      * - Limited to $limit results, ordered by ID descending.
+     *
+     * @param array<string, mixed> $filters
      *
      * @return array<int, array<string, mixed>>
      */
-    public function findDiscounts(?string $searchTerm, int $limit): array;
+    public function findDiscounts(array $filters, int $limit): array;
 }

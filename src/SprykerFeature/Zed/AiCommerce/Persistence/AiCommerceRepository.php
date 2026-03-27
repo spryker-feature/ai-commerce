@@ -88,9 +88,11 @@ class AiCommerceRepository extends AbstractRepository implements AiCommerceRepos
     /**
      * @module Discount
      *
+     * @param array<string, mixed> $filters
+     *
      * @return array<int, array<string, mixed>>
      */
-    public function findDiscounts(?string $searchTerm, int $limit): array
+    public function findDiscounts(array $filters, int $limit): array
     {
         $query = $this->getFactory()->getDiscountPropelQuery()
             ->select([
@@ -108,8 +110,26 @@ class AiCommerceRepository extends AbstractRepository implements AiCommerceRepos
             ->orderByIdDiscount('desc')
             ->limit($limit);
 
-        if ($searchTerm !== null) {
-            $query->filterByDisplayName('%' . $searchTerm . '%', PropelCriteria::LIKE);
+        if (isset($filters['searchTerm']) && $filters['searchTerm'] !== '') {
+            $query->filterByDisplayName('%' . $filters['searchTerm'] . '%', PropelCriteria::LIKE);
+        }
+
+        if (isset($filters['isActive'])) {
+            $query->filterByIsActive((bool)$filters['isActive']);
+        }
+
+        if (isset($filters['discountType'])) {
+            $query->filterByDiscountType((string)$filters['discountType']);
+        }
+
+        // Show discounts still valid on or after this date (validTo >= filters.validFrom)
+        if (isset($filters['validFrom'])) {
+            $query->filterByValidTo($filters['validFrom'], PropelCriteria::GREATER_EQUAL);
+        }
+
+        // Show discounts that started on or before this date (validFrom <= filters.validTo)
+        if (isset($filters['validTo'])) {
+            $query->filterByValidFrom($filters['validTo'], PropelCriteria::LESS_EQUAL);
         }
 
         return array_values($query->find()->getData());
