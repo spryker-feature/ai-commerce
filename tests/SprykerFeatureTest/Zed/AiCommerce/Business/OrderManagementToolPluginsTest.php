@@ -11,7 +11,6 @@ namespace SprykerFeatureTest\Zed\AiCommerce\Business;
 
 use Codeception\Test\Unit;
 use Generated\Shared\Transfer\OrderTransfer;
-use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOmsProcessDefinitionToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderDetailsToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderManualEventsToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderOmsTransitionsToolPlugin;
@@ -114,35 +113,6 @@ class OrderManagementToolPluginsTest extends Unit
     {
         // Act
         $result = (new GetOrderOmsTransitionsToolPlugin())->execute(orderReference: 'NONEXISTENT-ORDER-REF-' . uniqid());
-
-        // Assert
-        $this->assertSame('{}', $result);
-    }
-
-    public function testGetOmsProcessDefinitionToolPluginReturnsJsonWithDefinitionData(): void
-    {
-        // Arrange
-        $orderReference = uniqid('TEST-ORDER-', true);
-        $this->tester->configureTestStateMachine([static::PROCESS_NAME]);
-        $idSalesOrder = $this->tester->createOrder([OrderTransfer::ORDER_REFERENCE => $orderReference]);
-        $this->tester->createSalesOrderItemForOrder($idSalesOrder, ['process' => static::PROCESS_NAME, 'state' => static::ITEM_STATE]);
-
-        // Act
-        $result = (new GetOmsProcessDefinitionToolPlugin())->execute(orderReference: $orderReference);
-
-        // Assert
-        $this->assertJson($result);
-        $decoded = json_decode($result, true);
-        $this->assertSame(static::PROCESS_NAME, $decoded['processName']);
-        $this->assertArrayHasKey('states', $decoded);
-        $this->assertArrayHasKey('transitions', $decoded);
-        $this->assertArrayHasKey('subProcesses', $decoded);
-    }
-
-    public function testGetOmsProcessDefinitionToolPluginReturnsEmptyJsonForUnknownOrder(): void
-    {
-        // Act
-        $result = (new GetOmsProcessDefinitionToolPlugin())->execute(orderReference: 'NONEXISTENT-ORDER-REF-' . uniqid());
 
         // Assert
         $this->assertSame('{}', $result);

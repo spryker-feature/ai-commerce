@@ -29,8 +29,6 @@ use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\DiscountManagemen
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\DiscountManagement\DiscountListReaderInterface;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\DiscountManagement\DiscountWriter;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\DiscountManagement\DiscountWriterInterface;
-use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OmsProcessDefinitionReader;
-use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OmsProcessDefinitionReaderInterface;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OmsTransitionDataBuilder;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OmsTransitionDataBuilderInterface;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OrderDetailsReader;
@@ -105,15 +103,6 @@ class AiCommerceBusinessFactory extends AbstractBusinessFactory
     public function createOrderManualEventsReader(): OrderManualEventsReaderInterface
     {
         return new OrderManualEventsReader($this->getOmsFacade(), $this->getSalesFacade());
-    }
-
-    public function createOmsProcessDefinitionReader(): OmsProcessDefinitionReaderInterface
-    {
-        return new OmsProcessDefinitionReader(
-            $this->getRepository(),
-            $this->getOmsFacade(),
-            $this->createOmsTransitionDataBuilder(),
-        );
     }
 
     public function createOrderStateFlagsReader(): OrderStateFlagsReaderInterface

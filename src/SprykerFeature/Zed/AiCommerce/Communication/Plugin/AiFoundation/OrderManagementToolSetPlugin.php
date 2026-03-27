@@ -42,7 +42,6 @@ class OrderManagementToolSetPlugin extends AbstractPlugin implements ToolSetPlug
             $this->getFactory()->createGetOrderOmsTransitionsToolPlugin(),
             $this->getFactory()->createGetOrderDetailsToolPlugin(),
             $this->getFactory()->createGetOrderManualEventsToolPlugin(),
-            $this->getFactory()->createGetOmsProcessDefinitionToolPlugin(),
             $this->getFactory()->createGetOrderStateFlagsToolPlugin(),
         ];
     }

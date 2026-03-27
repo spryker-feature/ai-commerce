@@ -29,7 +29,6 @@ use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\CreateD
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetBackofficeCapabilities\GetBackofficeCapabilitiesToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetDiscountDetailsToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetNavigationToolPlugin;
-use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOmsProcessDefinitionToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderDetailsToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderManualEventsToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderOmsTransitionsToolPlugin;
@@ -133,11 +132,6 @@ class AiCommerceCommunicationFactory extends AbstractCommunicationFactory
     public function createGetOrderManualEventsToolPlugin(): ToolPluginInterface
     {
         return new GetOrderManualEventsToolPlugin();
-    }
-
-    public function createGetOmsProcessDefinitionToolPlugin(): ToolPluginInterface
-    {
-        return new GetOmsProcessDefinitionToolPlugin();
     }
 
     public function createGetOrderStateFlagsToolPlugin(): ToolPluginInterface
