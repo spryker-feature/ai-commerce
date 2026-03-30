@@ -16,6 +16,12 @@ class AiCommerceConfig extends AbstractBundleConfig
 {
     protected const string CONFIGURATION_KEY_AI_COMMERCE_BACKOFFICE_ASSISTANT_GENERAL_IS_ENABLED = 'ai_commerce:backoffice_assistant:general:is_enabled';
 
+    protected const string CONFIGURATION_KEY_ORDER_MANAGEMENT_AGENT_IS_ENABLED = 'ai_commerce:backoffice_assistant:general:is_order_management_agent_enabled';
+
+    protected const string CONFIGURATION_KEY_DISCOUNT_MANAGEMENT_AGENT_IS_ENABLED = 'ai_commerce:backoffice_assistant:general:is_discount_management_agent_enabled';
+
+    protected const string CONFIGURATION_KEY_PLACE_ORDER_AGENT_IS_ENABLED = 'ai_commerce:backoffice_assistant:general:is_place_order_agent_enabled';
+
     protected const bool BACKOFFICE_ASSISTANT_DEFAULT_IS_ENABLED = false;
 
     protected const int BACKOFFICE_ASSISTANT_ATTACHMENT_MAX_FILE_SIZE_BYTES = 5242880;
@@ -95,6 +101,39 @@ class AiCommerceConfig extends AbstractBundleConfig
 
     /**
      * Specification:
+     * - Returns true if the Order Management Agent is enabled.
+     *
+     * @api
+     */
+    public function isOrderManagementAgentEnabled(): bool
+    {
+        return (bool)filter_var($this->getModuleConfig(static::CONFIGURATION_KEY_ORDER_MANAGEMENT_AGENT_IS_ENABLED, true), FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * Specification:
+     * - Returns true if the Discount Management Agent is enabled.
+     *
+     * @api
+     */
+    public function isDiscountManagementAgentEnabled(): bool
+    {
+        return (bool)filter_var($this->getModuleConfig(static::CONFIGURATION_KEY_DISCOUNT_MANAGEMENT_AGENT_IS_ENABLED, true), FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * Specification:
+     * - Returns true if the Place Order Agent is enabled.
+     *
+     * @api
+     */
+    public function isPlaceOrderAgentEnabled(): bool
+    {
+        return (bool)filter_var($this->getModuleConfig(static::CONFIGURATION_KEY_PLACE_ORDER_AGENT_IS_ENABLED, true), FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * Specification:
      * - Returns the names of AI configurations that should be used for the Backoffice Assistant SSE event.
      *
      * @api
@@ -107,6 +146,7 @@ class AiCommerceConfig extends AbstractBundleConfig
             AiCommerceConstants::AI_CONFIGURATION_GENERAL_PURPOSE,
             AiCommerceConstants::AI_CONFIGURATION_ORDER_MANAGEMENT,
             AiCommerceConstants::AI_CONFIGURATION_DISCOUNT_MANAGEMENT,
+            AiCommerceConstants::AI_CONFIGURATION_PLACE_ORDER,
         ];
     }
 }

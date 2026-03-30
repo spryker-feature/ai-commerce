@@ -12,6 +12,7 @@ namespace SprykerFeature\Zed\AiCommerce\Communication\Controller;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCollectionDeleteCriteriaTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationConditionsTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCriteriaTransfer;
+use Generated\Shared\Transfer\BackofficeAssistantPromptRequestTransfer;
 use Spryker\Zed\Kernel\Communication\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -70,12 +71,17 @@ class BackofficeAssistantConversationController extends AbstractController
 
         $collection = $this->getFacade()->getBackofficeAssistantConversationCollection($criteria);
 
+        $emptyRequest = new BackofficeAssistantPromptRequestTransfer();
+
         $availableAgents = array_map(
             static fn ($plugin) => [
                 static::RESPONSE_KEY_NAME => $plugin->getName(),
                 static::RESPONSE_KEY_DESCRIPTION => $plugin->getDescription(),
             ],
-            $this->getFactory()->getBackofficeAssistantAgentPlugins(),
+            array_filter(
+                $this->getFactory()->getBackofficeAssistantAgentPlugins(),
+                static fn ($plugin) => $plugin->isApplicable($emptyRequest),
+            ),
         );
 
         return $this->jsonResponse([

@@ -17,7 +17,7 @@ use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
  * @method \SprykerFeature\Zed\AiCommerce\Communication\AiCommerceCommunicationFactory getFactory()
  * @method \SprykerFeature\Zed\AiCommerce\AiCommerceConfig getConfig()
  */
-class DiscountManagementToolSetPlugin extends AbstractPlugin implements ToolSetPluginInterface
+class OrderDetailsToolSetPlugin extends AbstractPlugin implements ToolSetPluginInterface
 {
     /**
      * {@inheritDoc}
@@ -26,7 +26,7 @@ class DiscountManagementToolSetPlugin extends AbstractPlugin implements ToolSetP
      */
     public function getName(): string
     {
-        return AiCommerceConstants::TOOL_SET_DISCOUNT_MANAGEMENT;
+        return AiCommerceConstants::TOOL_SET_ORDER_DETAILS;
     }
 
     /**
@@ -39,10 +39,8 @@ class DiscountManagementToolSetPlugin extends AbstractPlugin implements ToolSetP
     public function getTools(): array
     {
         return [
-            $this->getFactory()->createListDiscountsToolPlugin(),
-            $this->getFactory()->createGetDiscountDetailsToolPlugin(),
-            $this->getFactory()->createCreateDiscountToolPlugin(),
-            $this->getFactory()->createUpdateDiscountToolPlugin(),
+            $this->getFactory()->createGetOrderDetailsByIdToolPlugin(),
+            $this->getFactory()->createGetOrderDetailsToolPlugin(),
         ];
     }
 }

@@ -30,6 +30,26 @@ features:
                         storefront: false
                         scopes:
                             - global
+                      - key: is_order_management_agent_enabled
+                        name: Enable Order Management Agent
+                        description: When enabled, the Order Management Agent is available in the Backoffice Assistant.
+                        type: boolean
+                        default_value: 'true'
+                        enabled: true
+                        secret: false
+                        storefront: false
+                        scopes:
+                            - global
+                      - key: is_discount_management_agent_enabled
+                        name: Enable Discount Management Agent
+                        description: When enabled, the Discount Management Agent is available in the Backoffice Assistant.
+                        type: boolean
+                        default_value: 'true'
+                        enabled: true
+                        secret: false
+                        storefront: false
+                        scopes:
+                            - global
                 - key: system_prompts
                   name: System Prompts
                   description: System prompt configuration for Backoffice Assistant agents.
@@ -84,7 +104,7 @@ features:
                         type: text
                         default_value: '
                             You are the Discount Management Agent of the Spryker Backoffice Assistant.
-                            You help admin users create, update, list, and toggle discounts in the Backoffice.
+                            You help admin users create, update, and list discounts in the Backoffice.
                             Always be brief and concise.
                             Always answer in markdown format.
                             Never answer questions that are not related to discount management of the Spryker Backoffice!
@@ -95,9 +115,12 @@ features:
                             SUPPORTED OPERATIONS:
                             - list_discounts: List discounts, optionally filtered by name (returns up to 50 results).
                             - get_discount_details: Get full configuration of a discount by its ID.
-                            - create_discount: Create a new discount with full configuration.
-                            - update_discount: Update fields of an existing discount by ID.
-                            - toggle_discount_visibility: Activate or deactivate a discount by ID.
+                            - create_discount: Create a new discount with full configuration. Discounts are always created as inactive.
+                            - update_discount: Update fields of an existing discount by ID. Cannot change activation status.
+
+                            ACTIVATION POLICY:
+                            Discounts are always created as inactive. You cannot activate or deactivate discounts.
+                            After creating a discount, always suggest the user activate it manually via the Backoffice UI: [Edit Discount](/discount/index/edit?id-discount={idDiscount})
 
                             DISCOUNT TYPES:
                             - cart_rule: Applied automatically to the cart when conditions are met. No voucher codes required.

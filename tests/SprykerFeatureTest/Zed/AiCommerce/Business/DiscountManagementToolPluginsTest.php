@@ -13,7 +13,6 @@ use Codeception\Test\Unit;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\CreateDiscountToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetDiscountDetailsToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\ListDiscountsToolPlugin;
-use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\ToggleDiscountVisibilityToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\UpdateDiscountToolPlugin;
 use SprykerFeatureTest\Zed\AiCommerce\AiCommerceBusinessTester;
 
@@ -210,40 +209,5 @@ class DiscountManagementToolPluginsTest extends Unit
         $decoded = json_decode($result, true);
         $this->assertFalse($decoded['success']);
         $this->assertStringContainsString('not found', implode(' ', $decoded['errors']));
-    }
-
-    public function testToggleDiscountVisibilityToolPluginDeactivatesDiscount(): void
-    {
-        // Arrange
-        $discountGeneralTransfer = $this->tester->haveDiscount();
-        $idDiscount = $discountGeneralTransfer->getIdDiscountOrFail();
-
-        // Act
-        $result = (new ToggleDiscountVisibilityToolPlugin())->execute(idDiscount: $idDiscount, isActive: false);
-
-        // Assert
-        $this->assertJson($result);
-        $decoded = json_decode($result, true);
-        $this->assertTrue($decoded['success']);
-        $this->assertArrayHasKey('errors', $decoded);
-        $this->assertEmpty($decoded['errors']);
-    }
-
-    public function testToggleDiscountVisibilityToolPluginActivatesDiscount(): void
-    {
-        // Arrange
-        $discountGeneralTransfer = $this->tester->haveDiscount();
-        $idDiscount = $discountGeneralTransfer->getIdDiscountOrFail();
-        (new ToggleDiscountVisibilityToolPlugin())->execute(idDiscount: $idDiscount, isActive: false);
-
-        // Act
-        $result = (new ToggleDiscountVisibilityToolPlugin())->execute(idDiscount: $idDiscount, isActive: true);
-
-        // Assert
-        $this->assertJson($result);
-        $decoded = json_decode($result, true);
-        $this->assertTrue($decoded['success']);
-        $this->assertArrayHasKey('errors', $decoded);
-        $this->assertEmpty($decoded['errors']);
     }
 }
