@@ -5,6 +5,14 @@ export class BackofficeAssistantPageContext {
         { pathPrefix: '/discount/index/edit', parameterName: 'id-discount', labelTemplate: 'Discount #%s' },
     ];
 
+    static {
+        window.backofficeAssistantPageContext = {
+            addPagePattern(pattern) {
+                BackofficeAssistantPageContext.#PAGE_PATTERNS.push(pattern);
+            },
+        };
+    }
+
     #containerEl;
     #suggestionTemplate;
     #chipTemplate;
