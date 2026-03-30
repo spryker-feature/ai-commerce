@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<transfers xmlns="spryker:transfer-01"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="spryker:transfer-01 http://static.spryker.com/transfer-01.xsd">
+
+    <transfer name="PromptRequest" strict="true">
+        <property name="promptMessage" type="PromptMessage"/>
+        <property name="aiConfigurationName" type="string" description="The configuration name of ai configuration"/>
+    </transfer>
+
+    <transfer name="PromptResponse" strict="true">
+        <property name="message" type="PromptMessage"/>
+        <property name="isSuccessful" type="bool"/>
+        <property name="errors" type="Error[]" singular="error"/>
+    </transfer>
+
+    <transfer name="PromptMessage" strict="true">
+    </transfer>
+
+    <transfer name="Error">
+    </transfer>
+
+    <transfer name="ProductRecognition" strict="true">
+        <property name="name" type="string" description="Product name as recognized from the image by the AI model."/>
+        <property name="quantity" type="int" description="Quantity of the product as recognized from the image by the AI model."/>
+    </transfer>
+
+    <transfer name="ProductRecognitionCollection" strict="true">
+        <property name="productRecognitions" type="ProductRecognition[]" singular="productRecognition" description="List of products recognized from the image."/>
+        <property name="isSuccessful" type="bool" description="Indicates whether the AI recognition request completed successfully."/>
+        <property name="errorMessage" type="string" description="Glossary key of the error message to display when isSuccessful is false."/>
+    </transfer>
+
+    <transfer name="ProductValidationError" strict="true">
+        <property name="glossaryKey" type="string" description="Glossary key of the validation error message to be translated and displayed to the user."/>
+        <property name="parameters" type="array" singular="parameter" description="Key-value pairs used as placeholders in the translated error message."/>
+    </transfer>
+
+    <transfer name="ProductValidation" strict="true">
+        <property name="isValid" type="bool"/>
+        <property name="validationErrors" type="ProductValidationError[]" singular="validationError"/>
+    </transfer>
+
+    <transfer name="QuickOrderPageResponse" strict="true">
+        <property name="quickOrderItems" type="QuickOrderItem[]" singular="quickOrderItem"/>
+        <property name="notFoundProductNames" type="string[]" singular="notFoundProductName"/>
+    </transfer>
+
+    <transfer name="Item">
+        <property name="sku" type="string"/>
+        <property name="name" type="string"/>
+    </transfer>
+
+    <transfer name="Attachment" strict="true">
+        <property name="type" type="string"/>
+        <property name="content" type="string"/>
+        <property name="contentType" type="string"/>
+        <property name="mediaType" type="string"/>
+    </transfer>
+
+    <transfer name="QuickOrderItem">
+        <property name="sku" type="string"/>
+        <property name="quantity" type="int"/>
+    </transfer>
+
+</transfers>

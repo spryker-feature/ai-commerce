@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=../../../../Spryker/Configuration/resources/configuration/configuration-schema-v1.json
+features:
+    - key: ai_commerce
+      name: AI Commerce
+      description: AI-powered commerce features configuration.
+      enabled: true
+      order: 0
+      tabs:
+          - key: quick_order
+            name: Quick Order
+            description: Quick order configuration.
+            enabled: true
+            order: 0
+            groups:
+                - key: image_to_cart
+                  name: Image to Cart
+                  description: Controls how the AI processes uploaded images to recognise products for quick order.
+                  enabled: true
+                  order: 0
+                  scopes:
+                      - global
+                      - store
+                  settings:
+                      - key: enabled
+                        name: Enabled
+                        description: Enables or disables the image to cart feature for quick order.
+                        type: boolean
+                        default_value: false
+                        enabled: true
+                        secret: false
+                        storefront: true
+                        order: 0
+                        scopes:
+                            - global
+                            - store
