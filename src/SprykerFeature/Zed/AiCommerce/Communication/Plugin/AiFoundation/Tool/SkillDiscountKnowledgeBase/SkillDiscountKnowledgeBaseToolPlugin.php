@@ -12,13 +12,6 @@ namespace SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\S
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 
-/**
- * Provides a static knowledge base about how Spryker discounts work,
- * including field descriptions, allowed values, query string syntax,
- * discount types, calculator types, conditions, and voucher codes.
- * Call this tool when the user asks HOW to configure a discount,
- * what fields are available, or how query strings and conditions work.
- */
 class SkillDiscountKnowledgeBaseToolPlugin extends AbstractPlugin implements ToolPluginInterface
 {
     protected const string KNOWLEDGE_FILE_PATH = __DIR__ . '/discount_knowledge.md';

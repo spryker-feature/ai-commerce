@@ -12,13 +12,6 @@ namespace SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\S
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 
-/**
- * Provides a static knowledge base about how Spryker order management works,
- * including order detail sections, OMS states, manual events, shipments,
- * returns, refunds, and available actions in the Backoffice.
- * Call this tool when the user asks HOW order management works,
- * what sections are on the order detail page, or how to interpret order states.
- */
 class SkillOrderManagementKnowledgeBaseToolPlugin extends AbstractPlugin implements ToolPluginInterface
 {
     protected const string KNOWLEDGE_FILE_PATH = __DIR__ . '/order_management_knowledge.md';

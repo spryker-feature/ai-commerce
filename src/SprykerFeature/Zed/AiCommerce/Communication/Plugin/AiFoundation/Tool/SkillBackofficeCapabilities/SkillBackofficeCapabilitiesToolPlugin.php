@@ -12,9 +12,6 @@ namespace SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\S
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 
-/**
- * @method \SprykerFeature\Zed\AiCommerce\AiCommerceConfig getConfig()
- */
 class SkillBackofficeCapabilitiesToolPlugin extends AbstractPlugin implements ToolPluginInterface
 {
     protected const string KNOWLEDGE_FILE_PATH = __DIR__ . '/backoffice_knowledge.md';
