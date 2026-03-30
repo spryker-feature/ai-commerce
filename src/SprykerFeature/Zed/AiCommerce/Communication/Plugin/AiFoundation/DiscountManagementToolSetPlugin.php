@@ -43,7 +43,6 @@ class DiscountManagementToolSetPlugin extends AbstractPlugin implements ToolSetP
             $this->getFactory()->createGetDiscountDetailsToolPlugin(),
             $this->getFactory()->createCreateDiscountToolPlugin(),
             $this->getFactory()->createUpdateDiscountToolPlugin(),
-            $this->getFactory()->createToggleDiscountVisibilityToolPlugin(),
         ];
     }
 }

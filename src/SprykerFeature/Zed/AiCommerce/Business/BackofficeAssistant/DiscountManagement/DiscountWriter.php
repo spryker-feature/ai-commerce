@@ -14,11 +14,14 @@ use Generated\Shared\Transfer\DiscountConditionTransfer;
 use Generated\Shared\Transfer\DiscountConfiguratorTransfer;
 use Generated\Shared\Transfer\DiscountGeneralTransfer;
 use Spryker\Zed\Discount\Business\DiscountFacadeInterface;
+use SprykerFeature\Zed\AiCommerce\Persistence\AiCommerceRepositoryInterface;
 
 class DiscountWriter implements DiscountWriterInterface
 {
-    public function __construct(protected DiscountFacadeInterface $discountFacade)
-    {
+    public function __construct(
+        protected DiscountFacadeInterface $discountFacade,
+        protected AiCommerceRepositoryInterface $repository,
+    ) {
     }
 
     /**
@@ -26,6 +29,15 @@ class DiscountWriter implements DiscountWriterInterface
      */
     public function createDiscount(array $data): string
     {
+        $displayName = (string)($data['displayName'] ?? '');
+
+        if ($this->repository->existsDiscountByDisplayName($displayName)) {
+            return (string)json_encode([
+                'success' => false,
+                'errors' => [sprintf('A discount with the name "%s" already exists. Please use a unique name.', $displayName)],
+            ], JSON_PRETTY_PRINT);
+        }
+
         $configurator = $this->buildDiscountConfiguratorTransfer($data);
         $response = $this->discountFacade->createDiscount($configurator);
 
@@ -75,26 +87,6 @@ class DiscountWriter implements DiscountWriterInterface
         ], JSON_PRETTY_PRINT);
     }
 
-    public function toggleDiscountVisibility(int $idDiscount, bool $isActive): string
-    {
-        $result = $this->discountFacade->toggleDiscountVisibility($idDiscount, $isActive);
-
-        if (!$result) {
-            return (string)json_encode([
-                'success' => false,
-                'errors' => [sprintf('Discount with ID %d was not found or could not be updated.', $idDiscount)],
-            ], JSON_PRETTY_PRINT);
-        }
-
-        $action = $isActive ? 'activated' : 'deactivated';
-
-        return (string)json_encode([
-            'success' => true,
-            'message' => sprintf('Discount %d has been %s successfully.', $idDiscount, $action),
-            'errors' => [],
-        ], JSON_PRETTY_PRINT);
-    }
-
     /**
      * @param array<string, mixed> $data
      */
@@ -107,7 +99,8 @@ class DiscountWriter implements DiscountWriterInterface
             ->setValidFrom($data['validFrom'] ?? '')
             ->setValidTo($data['validTo'] ?? '')
             ->setIsExclusive((bool)($data['isExclusive'] ?? false))
-            ->setPriority(isset($data['priority']) ? (int)$data['priority'] : null);
+            ->setPriority(isset($data['priority']) ? (int)$data['priority'] : null)
+            ->setIsActive(false);
 
         $calculator = (new DiscountCalculatorTransfer())
             ->setCalculatorPlugin($data['calculatorPlugin'] ?? '')

@@ -35,7 +35,6 @@ use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrde
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderOmsTransitionsToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderStateFlagsToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\ListDiscountsToolPlugin;
-use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\ToggleDiscountVisibilityToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\UpdateDiscountToolPlugin;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
@@ -163,10 +162,5 @@ class AiCommerceCommunicationFactory extends AbstractCommunicationFactory
     public function createUpdateDiscountToolPlugin(): ToolPluginInterface
     {
         return new UpdateDiscountToolPlugin();
-    }
-
-    public function createToggleDiscountVisibilityToolPlugin(): ToolPluginInterface
-    {
-        return new ToggleDiscountVisibilityToolPlugin();
     }
 }

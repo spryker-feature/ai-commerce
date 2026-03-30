@@ -135,6 +135,19 @@ class AiCommerceRepository extends AbstractRepository implements AiCommerceRepos
         return array_values($query->find()->getData());
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @module Discount
+     */
+    public function existsDiscountByDisplayName(string $displayName): bool
+    {
+        return $this->getFactory()
+            ->getDiscountPropelQuery()
+            ->filterByDisplayName($displayName)
+            ->exists();
+    }
+
     protected function applyProcessAndStateColumnsToItemQuery(SpySalesOrderItemQuery $itemQuery): SpySalesOrderItemQuery
     {
         $itemQuery

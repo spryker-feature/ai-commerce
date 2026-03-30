@@ -35,7 +35,8 @@ class GetOrderDetailsToolPlugin extends AbstractPlugin implements ToolPluginInte
      */
     public function getDescription(): string
     {
-        return 'Get basic order details including items, amounts, dates, and customer information by order reference.';
+        return 'Get full order details by order reference. Returns customer with reference, billing and shipping addresses, '
+            . 'items with SKUs/quantities/prices/states, shipment method, payment method, totals, and expenses — enough to re-place a similar order.';
     }
 
     /**

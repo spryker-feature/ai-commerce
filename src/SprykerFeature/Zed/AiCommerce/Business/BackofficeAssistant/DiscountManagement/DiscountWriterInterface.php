@@ -29,11 +29,4 @@ interface DiscountWriterInterface
      * @param array<string, mixed> $data
      */
     public function updateDiscount(int $idDiscount, array $data): string;
-
-    /**
-     * Specification:
-     * - Activates or deactivates a discount by ID.
-     * - Returns JSON with 'success' (bool).
-     */
-    public function toggleDiscountVisibility(int $idDiscount, bool $isActive): string;
 }

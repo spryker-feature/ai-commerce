@@ -122,7 +122,7 @@ class AiCommerceBusinessFactory extends AbstractBusinessFactory
 
     public function createDiscountWriter(): DiscountWriterInterface
     {
-        return new DiscountWriter($this->getDiscountFacade());
+        return new DiscountWriter($this->getDiscountFacade(), $this->getRepository());
     }
 
     public function getDiscountFacade(): DiscountFacadeInterface

@@ -44,4 +44,10 @@ interface AiCommerceRepositoryInterface
      * @return array<int, array<string, mixed>>
      */
     public function findDiscounts(array $filters, int $limit): array;
+
+    /**
+     * Specification:
+     * - Returns true if a discount with the given display name already exists.
+     */
+    public function existsDiscountByDisplayName(string $displayName): bool;
 }

@@ -49,9 +49,15 @@ class OrderManagementToolPluginsTest extends Unit
         $this->assertJson($result);
         $decoded = json_decode($result, true);
         $this->assertSame($orderReference, $decoded['orderReference']);
+        $this->assertArrayHasKey('idSalesOrder', $decoded);
         $this->assertArrayHasKey('totals', $decoded);
         $this->assertArrayHasKey('items', $decoded);
         $this->assertArrayHasKey('itemCount', $decoded);
+        $this->assertArrayHasKey('customer', $decoded);
+        $this->assertArrayHasKey('customerReference', $decoded['customer']);
+        $this->assertArrayHasKey('billingAddress', $decoded);
+        $this->assertArrayHasKey('payments', $decoded);
+        $this->assertArrayHasKey('expenses', $decoded);
     }
 
     public function testGetOrderDetailsToolPluginReturnsEmptyJsonForUnknownOrder(): void
@@ -78,9 +84,15 @@ class OrderManagementToolPluginsTest extends Unit
         $this->assertJson($result);
         $decoded = json_decode($result, true);
         $this->assertSame($orderReference, $decoded['orderReference']);
+        $this->assertArrayHasKey('idSalesOrder', $decoded);
         $this->assertArrayHasKey('totals', $decoded);
         $this->assertArrayHasKey('items', $decoded);
         $this->assertArrayHasKey('itemCount', $decoded);
+        $this->assertArrayHasKey('customer', $decoded);
+        $this->assertArrayHasKey('customerReference', $decoded['customer']);
+        $this->assertArrayHasKey('billingAddress', $decoded);
+        $this->assertArrayHasKey('payments', $decoded);
+        $this->assertArrayHasKey('expenses', $decoded);
     }
 
     public function testGetOrderDetailsByIdToolPluginReturnsEmptyJsonForUnknownId(): void

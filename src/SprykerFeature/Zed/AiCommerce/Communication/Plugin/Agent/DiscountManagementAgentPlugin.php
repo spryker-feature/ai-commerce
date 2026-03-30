@@ -23,6 +23,7 @@ use SprykerFeature\Zed\AiCommerce\Dependency\BackofficeAssistant\BackofficeAssis
 /**
  * @method \SprykerFeature\Zed\AiCommerce\Communication\AiCommerceCommunicationFactory getFactory()
  * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceFacadeInterface getFacade()
+ * @method \SprykerFeature\Zed\AiCommerce\AiCommerceConfig getConfig()
  */
 class DiscountManagementAgentPlugin extends AbstractPlugin implements BackofficeAssistantAgentPluginInterface
 {
@@ -47,7 +48,18 @@ class DiscountManagementAgentPlugin extends AbstractPlugin implements Backoffice
      */
     public function getDescription(): string
     {
-        return 'Handles discount creation, updates, listing, and activation/deactivation. Examples: "Create a 10% discount on all items valid until end of year", "Show me all active discounts", "Deactivate discount #5", "What are the details of discount 12?"';
+        return 'Manages discount lifecycle operations including creation, updating, listing. Use for promotional rule configuration, discount portfolio review, and discount creating tasks.';
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @api
+     */
+    public function isApplicable(
+        BackofficeAssistantPromptRequestTransfer $backofficeAssistantPromptRequest,
+    ): bool {
+        return $this->getConfig()->isDiscountManagementAgentEnabled();
     }
 
     /**

@@ -91,19 +91,19 @@
 
     <transfer name="OrderManagementAgentResponse" strict="true">
         <property name="message" type="string" description="Response message to be displayed to the user."/>
-        <property name="reasoningMessage" type="string" description="Message to be displayed to the user as a reason why 'Guardrail' agent is selected."/>
+        <property name="reasoningMessage" type="string" description="Message to be displayed to the user as a reason why 'Guardrail' or 'Order Management' agent is selected."/>
         <property name="agent" type="string" description="Set 'Order Management' by default and answer to user is provided. Set 'Guardrail' if user's intent is not related supported agent functionality.."/>
     </transfer>
 
     <transfer name="DiscountManagementAgentResponse" strict="true">
         <property name="message" type="string" description="Response message to be displayed to the user."/>
-        <property name="reasoningMessage" type="string" description="Message to be displayed to the user as a reason why 'Guardrail' agent is selected."/>
+        <property name="reasoningMessage" type="string" description="Message to be displayed to the user as a reason why 'Guardrail' or 'Discount Management' agent is selected."/>
         <property name="agent" type="string" description="Set 'Discount Management' by default when answer to user is provided. Set 'Guardrail' if user's intent is not related to supported agent functionality."/>
     </transfer>
 
     <transfer name="GeneralPurposeAgentResponse" strict="true">
         <property name="message" type="string" description="Response message to be displayed to the user."/>
-        <property name="reasoningMessage" type="string" description="Message to be displayed to the user as a reason why 'Guardrail' agent is selected."/>
+        <property name="reasoningMessage" type="string" description="Message to be displayed to the user as a reason why 'Guardrail' or 'General Purpose' agent is selected."/>
         <property name="agent" type="string" description="Set 'General Purpose' by default and answer to user is provided. Set 'Guardrail' if user's intent is not related supported agent functionality."/>
     </transfer>
 
@@ -161,12 +161,20 @@
         <property name="currencyIsoCode" type="string"/>
         <property name="store" type="string"/>
         <property name="items" type="Item[]" singular="item"/>
+        <property name="payments" type="Payment[]" singular="payment"/>
+        <property name="expenses" type="Expense[]" singular="expense"/>
     </transfer>
 
     <transfer name="Totals">
         <property name="grandTotal" type="int"/>
         <property name="subtotal" type="int"/>
         <property name="discountTotal" type="int"/>
+        <property name="taxTotal" type="TaxTotal"/>
+        <property name="expenseTotal" type="int"/>
+    </transfer>
+
+    <transfer name="TaxTotal">
+        <property name="amount" type="int"/>
     </transfer>
 
     <transfer name="Customer">
@@ -181,6 +189,9 @@
         <property name="quantity" type="int"/>
         <property name="unitPrice" type="int"/>
         <property name="state" type="ItemState"/>
+        <property name="shipment" type="Shipment"/>
+        <property name="sumPrice" type="int"/>
+        <property name="unitTaxAmount" type="int"/>
     </transfer>
 
     <transfer name="ItemState">
@@ -232,6 +243,43 @@
     <transfer name="DiscountVoucher">
         <property name="fkDiscountVoucherPool" type="int"/>
         <property name="maxNumberOfUses" type="int"/>
+    </transfer>
+
+    <transfer name="Address">
+        <property name="salutation" type="string"/>
+        <property name="firstName" type="string"/>
+        <property name="lastName" type="string"/>
+        <property name="address1" type="string"/>
+        <property name="address2" type="string"/>
+        <property name="city" type="string"/>
+        <property name="zipCode" type="string"/>
+        <property name="iso2Code" type="string"/>
+        <property name="company" type="string"/>
+        <property name="phone" type="string"/>
+        <property name="email" type="string"/>
+    </transfer>
+
+    <transfer name="Expense">
+        <property name="type" type="string"/>
+        <property name="name" type="string"/>
+        <property name="sumPrice" type="int"/>
+        <property name="taxRate" type="float"/>
+    </transfer>
+
+    <transfer name="Payment">
+        <property name="paymentProvider" type="string"/>
+        <property name="paymentMethod" type="string"/>
+        <property name="amount" type="int"/>
+    </transfer>
+
+    <transfer name="Shipment">
+        <property name="shippingAddress" type="Address"/>
+        <property name="method" type="ShipmentMethod"/>
+    </transfer>
+
+    <transfer name="ShipmentMethod">
+        <property name="idShipmentMethod" type="int"/>
+        <property name="name" type="string"/>
     </transfer>
 
 </transfers>
