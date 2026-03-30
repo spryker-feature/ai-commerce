@@ -48,7 +48,7 @@ class OrderManagementAgentPlugin extends AbstractPlugin implements BackofficeAss
      */
     public function getDescription(): string
     {
-        return 'Provides order lifecycle visibility and management by analyzing Order Management System states, state transitions, available manual events, and process constraints. Use when investigating order status, determining possible state transitions, or checking operational capabilities for existing orders.';
+        return 'Provides order lifecycle visibility and answers questions about how order management works. Analyzes OMS states, state transitions, available manual events, shipments, returns, refunds, and process constraints. Use when investigating order status, understanding the order detail page, determining possible state transitions, or asking how-to questions about order management.';
     }
 
     /**

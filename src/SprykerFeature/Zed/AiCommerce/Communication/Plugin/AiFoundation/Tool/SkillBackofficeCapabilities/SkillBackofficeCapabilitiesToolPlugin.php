@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetBackofficeCapabilities;
+namespace SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\SkillBackofficeCapabilities;
 
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
@@ -15,7 +15,7 @@ use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 /**
  * @method \SprykerFeature\Zed\AiCommerce\AiCommerceConfig getConfig()
  */
-class GetBackofficeCapabilitiesToolPlugin extends AbstractPlugin implements ToolPluginInterface
+class SkillBackofficeCapabilitiesToolPlugin extends AbstractPlugin implements ToolPluginInterface
 {
     protected const string KNOWLEDGE_FILE_PATH = __DIR__ . '/backoffice_knowledge.md';
 
@@ -26,7 +26,7 @@ class GetBackofficeCapabilitiesToolPlugin extends AbstractPlugin implements Tool
      */
     public function getName(): string
     {
-        return 'get_backoffice_capabilities';
+        return 'skill_backoffice_capabilities';
     }
 
     /**

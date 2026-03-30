@@ -39,6 +39,7 @@ class OrderManagementToolSetPlugin extends AbstractPlugin implements ToolSetPlug
     public function getTools(): array
     {
         return [
+            $this->getFactory()->createSkillOrderManagementKnowledgeBaseToolPlugin(),
             $this->getFactory()->createGetOrderOmsTransitionsToolPlugin(),
             $this->getFactory()->createGetOrderManualEventsToolPlugin(),
             $this->getFactory()->createGetOrderStateFlagsToolPlugin(),

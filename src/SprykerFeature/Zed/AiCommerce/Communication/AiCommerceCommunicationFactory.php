@@ -26,7 +26,6 @@ use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\Inten
 use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\PromptProcessor;
 use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\PromptProcessorInterface;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\CreateDiscountToolPlugin;
-use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetBackofficeCapabilities\GetBackofficeCapabilitiesToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetDiscountDetailsToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetNavigationToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderDetailsByIdToolPlugin;
@@ -34,6 +33,9 @@ use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrde
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderManualEventsToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderOmsTransitionsToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderStateFlagsToolPlugin;
+use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\SkillBackofficeCapabilities\SkillBackofficeCapabilitiesToolPlugin;
+use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\SkillDiscountKnowledgeBase\SkillDiscountKnowledgeBaseToolPlugin;
+use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\SkillOrderManagementKnowledgeBase\SkillOrderManagementKnowledgeBaseToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\UpdateDiscountToolPlugin;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
@@ -113,9 +115,9 @@ class AiCommerceCommunicationFactory extends AbstractCommunicationFactory
         return new GetNavigationToolPlugin();
     }
 
-    public function createGetBackofficeCapabilitiesToolPlugin(): ToolPluginInterface
+    public function createSkillBackofficeCapabilitiesToolPlugin(): ToolPluginInterface
     {
-        return new GetBackofficeCapabilitiesToolPlugin();
+        return new SkillBackofficeCapabilitiesToolPlugin();
     }
 
     public function createGetOrderOmsTransitionsToolPlugin(): ToolPluginInterface
@@ -156,5 +158,15 @@ class AiCommerceCommunicationFactory extends AbstractCommunicationFactory
     public function createUpdateDiscountToolPlugin(): ToolPluginInterface
     {
         return new UpdateDiscountToolPlugin();
+    }
+
+    public function createSkillDiscountKnowledgeBaseToolPlugin(): ToolPluginInterface
+    {
+        return new SkillDiscountKnowledgeBaseToolPlugin();
+    }
+
+    public function createSkillOrderManagementKnowledgeBaseToolPlugin(): ToolPluginInterface
+    {
+        return new SkillOrderManagementKnowledgeBaseToolPlugin();
     }
 }

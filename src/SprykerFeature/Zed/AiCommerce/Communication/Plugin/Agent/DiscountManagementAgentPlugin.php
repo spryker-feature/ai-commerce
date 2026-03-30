@@ -48,7 +48,7 @@ class DiscountManagementAgentPlugin extends AbstractPlugin implements Backoffice
      */
     public function getDescription(): string
     {
-        return 'Manages discount lifecycle operations including creation, updating, and retrieving details. Use for promotional rule configuration and discount creating tasks.';
+        return 'Manages discount lifecycle operations including creation, updating, and retrieving details. Answers questions about how discounts work, how to configure query strings, conditions, calculator types, and voucher codes. Use for promotional rule configuration, discount creation, and how-to questions about discount setup.';
     }
 
     /**

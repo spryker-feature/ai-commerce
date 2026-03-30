@@ -40,7 +40,7 @@ class NavigationToolSetPlugin extends AbstractPlugin implements ToolSetPluginInt
     {
         return [
             $this->getFactory()->createGetNavigationToolPlugin(),
-            $this->getFactory()->createGetBackofficeCapabilitiesToolPlugin(),
+            $this->getFactory()->createSkillBackofficeCapabilitiesToolPlugin(),
         ];
     }
 }
