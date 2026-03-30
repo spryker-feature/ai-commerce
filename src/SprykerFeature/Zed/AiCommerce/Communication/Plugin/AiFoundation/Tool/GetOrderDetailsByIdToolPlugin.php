@@ -9,15 +9,19 @@ declare(strict_types=1);
 
 namespace SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool;
 
+use Spryker\Shared\Log\LoggerTrait;
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolParameter;
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
+use Throwable;
 
 /**
  * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceBusinessFactory getBusinessFactory()
  */
 class GetOrderDetailsByIdToolPlugin extends AbstractPlugin implements ToolPluginInterface
 {
+    use LoggerTrait;
+
     /**
      * {@inheritDoc}
      *
@@ -67,6 +71,12 @@ class GetOrderDetailsByIdToolPlugin extends AbstractPlugin implements ToolPlugin
      */
     public function execute(...$arguments): mixed
     {
-        return $this->getBusinessFactory()->createOrderDetailsReader()->getOrderDetailsById((int)$arguments['idSalesOrder']);
+        try {
+            return $this->getBusinessFactory()->createOrderDetailsReader()->getOrderDetailsById((int)$arguments['idSalesOrder']);
+        } catch (Throwable $throwable) {
+            $this->getLogger()->error(sprintf('GetOrderDetailsByIdToolPlugin::execute() failed: %s', $throwable->getMessage()), ['exception' => $throwable]);
+
+            return json_encode(['error' => 'An error occurred while retrieving order details.']);
+        }
     }
 }

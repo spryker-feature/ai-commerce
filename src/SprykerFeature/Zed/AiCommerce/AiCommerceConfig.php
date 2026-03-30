@@ -121,6 +121,44 @@ class AiCommerceConfig extends AbstractBundleConfig
 
     /**
      * Specification:
+     * - Returns the list of available discount types for AI tool parameters.
+     *
+     * @link \Spryker\Shared\Discount\DiscountConstants::TYPE_VOUCHER
+     * @link \Spryker\Shared\Discount\DiscountConstants::TYPE_CART_RULE
+     *
+     * @api
+     *
+     * @return array<string>
+     */
+    public function getDiscountTypes(): array
+    {
+        return [
+            'voucher',
+            'cart_rule',
+        ];
+    }
+
+    /**
+     * Specification:
+     * - Returns the list of available calculator plugin names for AI tool parameters.
+     *
+     * @link \Spryker\Zed\Discount\DiscountDependencyProvider::PLUGIN_CALCULATOR_PERCENTAGE
+     * @link \Spryker\Zed\Discount\DiscountDependencyProvider::PLUGIN_CALCULATOR_FIXED
+     *
+     * @api
+     *
+     * @return array<string>
+     */
+    public function getCalculatorPluginNames(): array
+    {
+        return [
+            'PLUGIN_CALCULATOR_PERCENTAGE',
+            'PLUGIN_CALCULATOR_FIXED',
+        ];
+    }
+
+    /**
+     * Specification:
      * - Returns the names of AI configurations that should be used for the Backoffice Assistant SSE event.
      *
      * @api

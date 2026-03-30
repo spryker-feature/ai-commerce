@@ -9,15 +9,19 @@ declare(strict_types=1);
 
 namespace SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool;
 
+use Spryker\Shared\Log\LoggerTrait;
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolParameter;
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
+use Throwable;
 
 /**
  * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceBusinessFactory getBusinessFactory()
  */
 class ListDiscountsToolPlugin extends AbstractPlugin implements ToolPluginInterface
 {
+    use LoggerTrait;
+
     /**
      * {@inheritDoc}
      *
@@ -65,7 +69,13 @@ class ListDiscountsToolPlugin extends AbstractPlugin implements ToolPluginInterf
      */
     public function execute(...$arguments): mixed
     {
-        /** @var array<string, mixed> $arguments */
-        return $this->getBusinessFactory()->createDiscountListReader()->getDiscountList($arguments);
+        try {
+            /** @var array<string, mixed> $arguments */
+            return $this->getBusinessFactory()->createDiscountListReader()->getDiscountList($arguments);
+        } catch (Throwable $throwable) {
+            $this->getLogger()->error(sprintf('ListDiscountsToolPlugin::execute() failed: %s', $throwable->getMessage()), ['exception' => $throwable]);
+
+            return json_encode(['error' => 'An error occurred while retrieving discounts.']);
+        }
     }
 }

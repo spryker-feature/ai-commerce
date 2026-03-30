@@ -9,15 +9,20 @@ declare(strict_types=1);
 
 namespace SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool;
 
+use Spryker\Shared\Log\LoggerTrait;
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolParameter;
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
+use Throwable;
 
 /**
  * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceBusinessFactory getBusinessFactory()
+ * @method \SprykerFeature\Zed\AiCommerce\AiCommerceConfig getConfig()
  */
 class UpdateDiscountToolPlugin extends AbstractPlugin implements ToolPluginInterface
 {
+    use LoggerTrait;
+
     /**
      * {@inheritDoc}
      *
@@ -50,18 +55,27 @@ class UpdateDiscountToolPlugin extends AbstractPlugin implements ToolPluginInter
         return [
             new ToolParameter('idDiscount', 'integer', 'The discount ID to update', true),
             new ToolParameter('displayName', 'string', 'New display name', false),
-            new ToolParameter('discountType', 'string', 'Discount type: "voucher" or "cart_rule"', false),
+            new ToolParameter('discountType', 'string', sprintf('Discount type: %s', $this->formatOptionsDescription($this->getConfig()->getDiscountTypes())), false),
             new ToolParameter('validFrom', 'string', 'Start date in format YYYY-MM-DD HH:MM:SS', false),
             new ToolParameter('validTo', 'string', 'End date in format YYYY-MM-DD HH:MM:SS', false),
             new ToolParameter('isExclusive', 'boolean', 'Whether this discount is exclusive', false),
-            new ToolParameter('calculatorPlugin', 'string', 'Calculator: "PLUGIN_CALCULATOR_PERCENTAGE" or "PLUGIN_CALCULATOR_FIXED"', false),
+            new ToolParameter('calculatorPlugin', 'string', sprintf('Calculator: %s', $this->formatOptionsDescription($this->getConfig()->getCalculatorPluginNames())), false),
             new ToolParameter('amount', 'integer', 'Amount: for percentage 1000 = 10.00%, for fixed amount in cents', false),
-            new ToolParameter('collectorQueryString', 'string', 'Query string for which items the discount applies to', false),
             new ToolParameter('minimumItemAmount', 'integer', 'Minimum number of items required in cart', false),
             new ToolParameter('description', 'string', 'Internal description', false),
-            new ToolParameter('decisionRuleQueryString', 'string', 'Additional condition query string', false),
             new ToolParameter('priority', 'integer', 'Priority — lower number means higher priority', false),
         ];
+    }
+
+    /**
+     * @param array<string> $options
+     */
+    protected function formatOptionsDescription(array $options): string
+    {
+        return implode(' or ', array_map(
+            static fn (string $option): string => sprintf('"%s"', $option),
+            $options,
+        ));
     }
 
     /**
@@ -73,7 +87,13 @@ class UpdateDiscountToolPlugin extends AbstractPlugin implements ToolPluginInter
      */
     public function execute(...$arguments): mixed
     {
-        /** @var array<string, mixed> $arguments */
-        return $this->getBusinessFactory()->createDiscountWriter()->updateDiscount((int)$arguments['idDiscount'], $arguments);
+        try {
+            /** @var array<string, mixed> $arguments */
+            return $this->getBusinessFactory()->createDiscountWriter()->updateDiscount((int)$arguments['idDiscount'], $arguments);
+        } catch (Throwable $throwable) {
+            $this->getLogger()->error(sprintf('UpdateDiscountToolPlugin::execute() failed: %s', $throwable->getMessage()), ['exception' => $throwable]);
+
+            return json_encode(['error' => 'An error occurred while updating the discount.']);
+        }
     }
 }

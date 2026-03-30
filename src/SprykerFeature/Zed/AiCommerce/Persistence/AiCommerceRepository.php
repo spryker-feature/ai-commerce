@@ -111,7 +111,8 @@ class AiCommerceRepository extends AbstractRepository implements AiCommerceRepos
             ->limit($limit);
 
         if (isset($filters['searchTerm']) && $filters['searchTerm'] !== '') {
-            $query->filterByDisplayName('%' . $filters['searchTerm'] . '%', PropelCriteria::LIKE);
+            $escapedSearchTerm = addcslashes((string)$filters['searchTerm'], '%_');
+            $query->filterByDisplayName('%' . $escapedSearchTerm . '%', PropelCriteria::LIKE);
         }
 
         if (isset($filters['isActive'])) {

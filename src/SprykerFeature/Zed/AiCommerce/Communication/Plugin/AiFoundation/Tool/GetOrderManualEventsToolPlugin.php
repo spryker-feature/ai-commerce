@@ -9,15 +9,19 @@ declare(strict_types=1);
 
 namespace SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool;
 
+use Spryker\Shared\Log\LoggerTrait;
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolParameter;
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
+use Throwable;
 
 /**
  * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceBusinessFactory getBusinessFactory()
  */
 class GetOrderManualEventsToolPlugin extends AbstractPlugin implements ToolPluginInterface
 {
+    use LoggerTrait;
+
     /**
      * {@inheritDoc}
      *
@@ -66,6 +70,12 @@ class GetOrderManualEventsToolPlugin extends AbstractPlugin implements ToolPlugi
      */
     public function execute(...$arguments): mixed
     {
-        return $this->getBusinessFactory()->createOrderManualEventsReader()->getOrderManualEvents((string)$arguments['orderReference']);
+        try {
+            return $this->getBusinessFactory()->createOrderManualEventsReader()->getOrderManualEvents((string)$arguments['orderReference']);
+        } catch (Throwable $throwable) {
+            $this->getLogger()->error(sprintf('GetOrderManualEventsToolPlugin::execute() failed: %s', $throwable->getMessage()), ['exception' => $throwable]);
+
+            return json_encode(['error' => 'An error occurred while retrieving order manual events.']);
+        }
     }
 }

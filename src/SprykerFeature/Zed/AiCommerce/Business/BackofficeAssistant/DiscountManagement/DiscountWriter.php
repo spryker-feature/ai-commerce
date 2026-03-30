@@ -105,11 +105,9 @@ class DiscountWriter implements DiscountWriterInterface
         $calculator = (new DiscountCalculatorTransfer())
             ->setCalculatorPlugin($data['calculatorPlugin'] ?? '')
             ->setAmount(isset($data['amount']) ? (string)(int)$data['amount'] : '0')
-            ->setCollectorQueryString($data['collectorQueryString'] ?? '')
             ->setCollectorStrategyType($data['collectorStrategyType'] ?? 'query-string');
 
         $condition = (new DiscountConditionTransfer())
-            ->setDecisionRuleQueryString($data['decisionRuleQueryString'] ?? null)
             ->setMinimumItemAmount((int)($data['minimumItemAmount'] ?? 1));
 
         return (new DiscountConfiguratorTransfer())
@@ -161,14 +159,6 @@ class DiscountWriter implements DiscountWriterInterface
 
         if (isset($data['amount'])) {
             $calculator->setAmount((string)(int)$data['amount']);
-        }
-
-        if (isset($data['collectorQueryString'])) {
-            $calculator->setCollectorQueryString($data['collectorQueryString']);
-        }
-
-        if (array_key_exists('decisionRuleQueryString', $data)) {
-            $condition->setDecisionRuleQueryString($data['decisionRuleQueryString']);
         }
 
         if (isset($data['minimumItemAmount'])) {
