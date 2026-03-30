@@ -47,18 +47,7 @@ class GeneralPurposeAgentPlugin extends AbstractPlugin implements BackofficeAssi
      */
     public function getDescription(): string
     {
-        return 'Assists with Spryker Backoffice system navigation, interface location guidance, and feature accessibility. Use as a fallback for informational queries about backoffice structure and navigation that do not require specialized business operations.';
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @api
-     */
-    public function isApplicable(
-        BackofficeAssistantPromptRequestTransfer $backofficeAssistantPromptRequest,
-    ): bool {
-        return true;
+        return 'Handles questions only about Spryker Backoffice navigation. Examples: "Where can I manage user roles?", "How do I access the CMS pages?"';
     }
 
     /**

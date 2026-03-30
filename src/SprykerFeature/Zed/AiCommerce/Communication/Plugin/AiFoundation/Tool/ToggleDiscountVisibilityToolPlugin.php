@@ -16,7 +16,7 @@ use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 /**
  * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceBusinessFactory getBusinessFactory()
  */
-class GetOrderDetailsToolPlugin extends AbstractPlugin implements ToolPluginInterface
+class ToggleDiscountVisibilityToolPlugin extends AbstractPlugin implements ToolPluginInterface
 {
     /**
      * {@inheritDoc}
@@ -25,7 +25,7 @@ class GetOrderDetailsToolPlugin extends AbstractPlugin implements ToolPluginInte
      */
     public function getName(): string
     {
-        return 'get_order_details';
+        return 'toggle_discount_visibility';
     }
 
     /**
@@ -35,7 +35,7 @@ class GetOrderDetailsToolPlugin extends AbstractPlugin implements ToolPluginInte
      */
     public function getDescription(): string
     {
-        return 'Get basic order details including items, amounts, dates, and customer information by order reference.';
+        return 'Activate or deactivate a discount by ID.';
     }
 
     /**
@@ -48,12 +48,8 @@ class GetOrderDetailsToolPlugin extends AbstractPlugin implements ToolPluginInte
     public function getParameters(): array
     {
         return [
-            new ToolParameter(
-                'orderReference',
-                'string',
-                'The order reference, for example DE--123',
-                true,
-            ),
+            new ToolParameter('idDiscount', 'integer', 'The discount ID', true),
+            new ToolParameter('isActive', 'boolean', 'Set to true to activate, false to deactivate', true),
         ];
     }
 
@@ -66,6 +62,9 @@ class GetOrderDetailsToolPlugin extends AbstractPlugin implements ToolPluginInte
      */
     public function execute(...$arguments): mixed
     {
-        return $this->getBusinessFactory()->createOrderDetailsReader()->getOrderDetails((string)$arguments['orderReference']);
+        return $this->getBusinessFactory()->createDiscountWriter()->toggleDiscountVisibility(
+            $arguments['idDiscount'],
+            $arguments['isActive'],
+        );
     }
 }

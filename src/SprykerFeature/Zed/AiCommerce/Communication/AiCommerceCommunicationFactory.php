@@ -164,4 +164,9 @@ class AiCommerceCommunicationFactory extends AbstractCommunicationFactory
     {
         return new UpdateDiscountToolPlugin();
     }
+
+    public function createToggleDiscountVisibilityToolPlugin(): ToolPluginInterface
+    {
+        return new ToggleDiscountVisibilityToolPlugin();
+    }
 }

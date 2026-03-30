@@ -23,7 +23,6 @@ use SprykerFeature\Zed\AiCommerce\Dependency\BackofficeAssistant\BackofficeAssis
 /**
  * @method \SprykerFeature\Zed\AiCommerce\Communication\AiCommerceCommunicationFactory getFactory()
  * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceFacadeInterface getFacade()
- * @method \SprykerFeature\Zed\AiCommerce\AiCommerceConfig getConfig()
  */
 class OrderManagementAgentPlugin extends AbstractPlugin implements BackofficeAssistantAgentPluginInterface
 {
@@ -48,18 +47,7 @@ class OrderManagementAgentPlugin extends AbstractPlugin implements BackofficeAss
      */
     public function getDescription(): string
     {
-        return 'Provides order lifecycle visibility and management by analyzing Order Management System states, state transitions, available manual events, and process constraints. Use when investigating order status, determining possible state transitions, or checking operational capabilities for existing orders.';
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @api
-     */
-    public function isApplicable(
-        BackofficeAssistantPromptRequestTransfer $backofficeAssistantPromptRequest,
-    ): bool {
-        return $this->getConfig()->isOrderManagementAgentEnabled();
+        return 'Handles questions about order OMS states, transitions, manual events, and process definitions. Examples: "Why is order DE--123 stuck?", "What events does order DE--123 expect?", "Is order DE--123 cancellable?"';
     }
 
     /**
@@ -75,7 +63,6 @@ class OrderManagementAgentPlugin extends AbstractPlugin implements BackofficeAss
             ->setConversationReference($backofficeAssistantPromptRequest->getConversationReference())
             ->setStructuredMessage(new OrderManagementAgentResponseTransfer())
             ->addToolSetName(AiCommerceConstants::TOOL_SET_ORDER_MANAGEMENT)
-            ->addToolSetName(AiCommerceConstants::TOOL_SET_ORDER_DETAILS)
             ->setPromptMessage(
                 (new PromptMessageTransfer())
                     ->setType(AiFoundationConstants::MESSAGE_TYPE_USER)

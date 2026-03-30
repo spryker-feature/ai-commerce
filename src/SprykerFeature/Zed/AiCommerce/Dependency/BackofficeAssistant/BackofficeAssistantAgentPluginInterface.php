@@ -34,17 +34,6 @@ interface BackofficeAssistantAgentPluginInterface
 
     /**
      * Specification:
-     * - Returns true if the agent is applicable and should be available for routing.
-     * - Used to filter agents based on configuration flags.
-     *
-     * @api
-     */
-    public function isApplicable(
-        BackofficeAssistantPromptRequestTransfer $backofficeAssistantPromptRequest,
-    ): bool;
-
-    /**
-     * Specification:
      * - The caller executes the request via AiFoundationFacade::prompt().
      *
      * @api

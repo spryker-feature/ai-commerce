@@ -298,14 +298,6 @@ class PromptProcessor implements PromptProcessorInterface
                 continue;
             }
 
-            if (!$agentPlugin->isApplicable($agentRequest)) {
-                $this->eventEmitter->emit(BackofficeAssistantEventType::Error, [
-                    static::KEY_MESSAGE => static::MESSAGE_AI_SERVICE_UNAVAILABLE,
-                ]);
-
-                return;
-            }
-
             $backofficeAssistantPromptResponse = $agentPlugin->executeAgent($agentRequest);
 
             if ($backofficeAssistantPromptResponse->getMessage() === null) {

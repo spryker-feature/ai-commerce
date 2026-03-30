@@ -43,13 +43,6 @@ interface AiCommerceConstants
     public const string TOOL_SET_ORDER_MANAGEMENT = 'order_management_tools';
 
     /**
-     * Tool set name that groups get order details tools available.
-     *
-     * @api
-     */
-    public const string TOOL_SET_ORDER_DETAILS = 'order_details_tools';
-
-    /**
      * Tool set name that groups all general-purpose tools available to the general-purpose agent.
      *
      * @api

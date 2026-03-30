@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt;
 
-use Generated\Shared\Transfer\BackofficeAssistantPromptRequestTransfer;
 use Generated\Shared\Transfer\ConversationHistoryTransfer;
 use Generated\Shared\Transfer\IntentRouterResponseTransfer;
 use Generated\Shared\Transfer\PromptMessageTransfer;
@@ -112,13 +111,7 @@ class IntentRouter implements IntentRouterInterface
         $agentLines = [];
         $agentNames = [];
 
-        $emptyRequest = new BackofficeAssistantPromptRequestTransfer();
-
         foreach ($this->agentPlugins as $agentPlugin) {
-            if (!$agentPlugin->isApplicable($emptyRequest)) {
-                continue;
-            }
-
             $agentLines[] = sprintf('- "%s": %s', $agentPlugin->getName(), $agentPlugin->getDescription());
             $agentNames[] = sprintf('"%s"', $agentPlugin->getName());
         }

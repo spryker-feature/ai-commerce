@@ -75,6 +75,26 @@ class DiscountWriter implements DiscountWriterInterface
         ], JSON_PRETTY_PRINT);
     }
 
+    public function toggleDiscountVisibility(int $idDiscount, bool $isActive): string
+    {
+        $result = $this->discountFacade->toggleDiscountVisibility($idDiscount, $isActive);
+
+        if (!$result) {
+            return (string)json_encode([
+                'success' => false,
+                'errors' => [sprintf('Discount with ID %d was not found or could not be updated.', $idDiscount)],
+            ], JSON_PRETTY_PRINT);
+        }
+
+        $action = $isActive ? 'activated' : 'deactivated';
+
+        return (string)json_encode([
+            'success' => true,
+            'message' => sprintf('Discount %d has been %s successfully.', $idDiscount, $action),
+            'errors' => [],
+        ], JSON_PRETTY_PRINT);
+    }
+
     /**
      * @param array<string, mixed> $data
      */
@@ -87,8 +107,7 @@ class DiscountWriter implements DiscountWriterInterface
             ->setValidFrom($data['validFrom'] ?? '')
             ->setValidTo($data['validTo'] ?? '')
             ->setIsExclusive((bool)($data['isExclusive'] ?? false))
-            ->setPriority(isset($data['priority']) ? (int)$data['priority'] : null)
-            ->setIsActive(false);
+            ->setPriority(isset($data['priority']) ? (int)$data['priority'] : null);
 
         $calculator = (new DiscountCalculatorTransfer())
             ->setCalculatorPlugin($data['calculatorPlugin'] ?? '')

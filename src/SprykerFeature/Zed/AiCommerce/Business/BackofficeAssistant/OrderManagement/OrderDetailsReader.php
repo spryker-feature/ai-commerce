@@ -9,14 +9,9 @@ declare(strict_types=1);
 
 namespace SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement;
 
-use Generated\Shared\Transfer\AddressTransfer;
-use Generated\Shared\Transfer\ExpenseTransfer;
-use Generated\Shared\Transfer\ItemTransfer;
 use Generated\Shared\Transfer\OrderConditionsTransfer;
 use Generated\Shared\Transfer\OrderCriteriaTransfer;
 use Generated\Shared\Transfer\OrderTransfer;
-use Generated\Shared\Transfer\PaymentTransfer;
-use Generated\Shared\Transfer\TotalsTransfer;
 use Spryker\Zed\Sales\Business\SalesFacadeInterface;
 
 class OrderDetailsReader implements OrderDetailsReaderInterface
@@ -49,14 +44,7 @@ class OrderDetailsReader implements OrderDetailsReaderInterface
             return '{}';
         }
 
-        // Use findOrderByIdSalesOrder to get a fully hydrated order
-        $orderId = $orderCollectionTransfer->getOrders()->getIterator()->current()->getIdSalesOrder();
-
-        $orderTransfer = $this->salesFacade->findOrderByIdSalesOrder($orderId);
-
-        if ($orderTransfer === null) {
-            return '{}';
-        }
+        $orderTransfer = $orderCollectionTransfer->getOrders()->getIterator()->current();
 
         return (string)json_encode($this->buildOrderDetailsData($orderTransfer), JSON_PRETTY_PRINT);
     }
@@ -66,149 +54,26 @@ class OrderDetailsReader implements OrderDetailsReaderInterface
      */
     protected function buildOrderDetailsData(OrderTransfer $orderTransfer): array
     {
+        $totalsTransfer = $orderTransfer->getTotals();
+        $customerTransfer = $orderTransfer->getCustomer();
+
         return [
-            'idSalesOrder' => $orderTransfer->getIdSalesOrder(),
             'orderReference' => $orderTransfer->getOrderReference(),
             'createdAt' => $orderTransfer->getCreatedAt(),
             'currency' => $orderTransfer->getCurrencyIsoCode(),
             'store' => $orderTransfer->getStore(),
-            'priceMode' => $orderTransfer->getPriceMode(),
-            'customer' => $this->buildCustomerData($orderTransfer),
-            'billingAddress' => $this->buildAddressData($orderTransfer->getBillingAddress()),
-            'shippingAddress' => $this->buildShippingAddressData($orderTransfer),
-            'totals' => $this->buildTotalsData($orderTransfer->getTotals()),
-            'payments' => $this->buildPaymentsData($orderTransfer),
-            'expenses' => $this->buildExpensesData($orderTransfer),
+            'totals' => [
+                'grandTotal' => $totalsTransfer?->getGrandTotal(),
+                'subtotal' => $totalsTransfer?->getSubtotal(),
+                'discountTotal' => $totalsTransfer?->getDiscountTotal(),
+            ],
+            'customer' => [
+                'firstName' => $customerTransfer?->getFirstName(),
+                'lastName' => $customerTransfer?->getLastName(),
+                'email' => $customerTransfer?->getEmail(),
+            ],
             'itemCount' => $orderTransfer->getItems()->count(),
             'items' => $this->buildItemsData($orderTransfer),
-        ];
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function buildCustomerData(OrderTransfer $orderTransfer): array
-    {
-        return [
-            'customerReference' => $orderTransfer->getCustomerReference(),
-            'salutation' => $orderTransfer->getSalutation(),
-            'firstName' => $orderTransfer->getFirstName(),
-            'lastName' => $orderTransfer->getLastName(),
-            'email' => $orderTransfer->getEmail(),
-        ];
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    protected function buildAddressData(?AddressTransfer $addressTransfer): ?array
-    {
-        if ($addressTransfer === null) {
-            return null;
-        }
-
-        return [
-            'salutation' => $addressTransfer->getSalutation(),
-            'firstName' => $addressTransfer->getFirstName(),
-            'lastName' => $addressTransfer->getLastName(),
-            'address1' => $addressTransfer->getAddress1(),
-            'address2' => $addressTransfer->getAddress2(),
-            'city' => $addressTransfer->getCity(),
-            'zipCode' => $addressTransfer->getZipCode(),
-            'iso2Code' => $addressTransfer->getIso2Code(),
-            'company' => $addressTransfer->getCompany(),
-            'phone' => $addressTransfer->getPhone(),
-            'email' => $addressTransfer->getEmail(),
-        ];
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    protected function buildShippingAddressData(OrderTransfer $orderTransfer): ?array
-    {
-        // Use item-level shipment address (modern approach, order.shippingAddress is deprecated)
-        foreach ($orderTransfer->getItems() as $itemTransfer) {
-            $shipment = $itemTransfer->getShipment();
-
-            if ($shipment === null || $shipment->getShippingAddress() === null) {
-                continue;
-            }
-
-            return $this->buildAddressData($shipment->getShippingAddress());
-        }
-
-        return null;
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    protected function buildTotalsData(?TotalsTransfer $totalsTransfer): ?array
-    {
-        if ($totalsTransfer === null) {
-            return null;
-        }
-
-        return [
-            'grandTotal' => $totalsTransfer->getGrandTotal(),
-            'subtotal' => $totalsTransfer->getSubtotal(),
-            'discountTotal' => $totalsTransfer->getDiscountTotal(),
-            'taxTotal' => $totalsTransfer->getTaxTotal()?->getAmount(),
-            'expenseTotal' => $totalsTransfer->getExpenseTotal(),
-        ];
-    }
-
-    /**
-     * @return array<int, array<string, mixed>>
-     */
-    protected function buildPaymentsData(OrderTransfer $orderTransfer): array
-    {
-        $payments = [];
-
-        foreach ($orderTransfer->getPayments() as $paymentTransfer) {
-            $payments[] = $this->buildPaymentData($paymentTransfer);
-        }
-
-        return $payments;
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function buildPaymentData(PaymentTransfer $paymentTransfer): array
-    {
-        return [
-            'paymentProvider' => $paymentTransfer->getPaymentProvider(),
-            'paymentMethod' => $paymentTransfer->getPaymentMethod(),
-            'amount' => $paymentTransfer->getAmount(),
-        ];
-    }
-
-    /**
-     * @return array<int, array<string, mixed>>
-     */
-    protected function buildExpensesData(OrderTransfer $orderTransfer): array
-    {
-        $expenses = [];
-
-        foreach ($orderTransfer->getExpenses() as $expenseTransfer) {
-            $expenses[] = $this->buildExpenseData($expenseTransfer);
-        }
-
-        return $expenses;
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function buildExpenseData(ExpenseTransfer $expenseTransfer): array
-    {
-        return [
-            'type' => $expenseTransfer->getType(),
-            'name' => $expenseTransfer->getName(),
-            'sumPrice' => $expenseTransfer->getSumPrice(),
-            'taxRate' => $expenseTransfer->getTaxRate(),
         ];
     }
 
@@ -220,29 +85,15 @@ class OrderDetailsReader implements OrderDetailsReaderInterface
         $items = [];
 
         foreach ($orderTransfer->getItems() as $itemTransfer) {
-            $items[] = $this->buildItemData($itemTransfer);
+            $items[] = [
+                'name' => $itemTransfer->getName(),
+                'sku' => $itemTransfer->getSku(),
+                'quantity' => $itemTransfer->getQuantity(),
+                'state' => $itemTransfer->getState()?->getName(),
+                'unitPrice' => $itemTransfer->getUnitPrice(),
+            ];
         }
 
         return $items;
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function buildItemData(ItemTransfer $itemTransfer): array
-    {
-        $shipment = $itemTransfer->getShipment();
-
-        return [
-            'name' => $itemTransfer->getName(),
-            'sku' => $itemTransfer->getSku(),
-            'quantity' => $itemTransfer->getQuantity(),
-            'unitPrice' => $itemTransfer->getUnitPrice(),
-            'sumPrice' => $itemTransfer->getSumPrice(),
-            'unitTaxAmount' => $itemTransfer->getUnitTaxAmount(),
-            'state' => $itemTransfer->getState()?->getName(),
-            'idShipmentMethod' => $shipment?->getMethod()?->getIdShipmentMethod(),
-            'shipmentMethodName' => $shipment?->getMethod()?->getName(),
-        ];
     }
 }

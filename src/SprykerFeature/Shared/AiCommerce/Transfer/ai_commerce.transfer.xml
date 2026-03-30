@@ -161,20 +161,12 @@
         <property name="currencyIsoCode" type="string"/>
         <property name="store" type="string"/>
         <property name="items" type="Item[]" singular="item"/>
-        <property name="payments" type="Payment[]" singular="payment"/>
-        <property name="expenses" type="Expense[]" singular="expense"/>
     </transfer>
 
     <transfer name="Totals">
         <property name="grandTotal" type="int"/>
         <property name="subtotal" type="int"/>
         <property name="discountTotal" type="int"/>
-        <property name="taxTotal" type="TaxTotal"/>
-        <property name="expenseTotal" type="int"/>
-    </transfer>
-
-    <transfer name="TaxTotal">
-        <property name="amount" type="int"/>
     </transfer>
 
     <transfer name="Customer">
