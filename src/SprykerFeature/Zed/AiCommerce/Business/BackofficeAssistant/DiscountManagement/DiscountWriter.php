@@ -11,6 +11,7 @@ namespace SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\DiscountMan
 
 use Generated\Shared\Transfer\DiscountCalculatorTransfer;
 use Generated\Shared\Transfer\DiscountConditionTransfer;
+use Generated\Shared\Transfer\DiscountConfiguratorResponseTransfer;
 use Generated\Shared\Transfer\DiscountConfiguratorTransfer;
 use Generated\Shared\Transfer\DiscountGeneralTransfer;
 use Spryker\Zed\Discount\Business\DiscountFacadeInterface;
@@ -35,7 +36,7 @@ class DiscountWriter implements DiscountWriterInterface
             return (string)json_encode([
                 'success' => false,
                 'errors' => [sprintf('A discount with the name "%s" already exists. Please use a unique name.', $displayName)],
-            ], JSON_PRETTY_PRINT);
+            ], JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
         }
 
         $configurator = $this->buildDiscountConfiguratorTransfer($data);
@@ -45,7 +46,7 @@ class DiscountWriter implements DiscountWriterInterface
             return (string)json_encode([
                 'success' => false,
                 'errors' => $this->extractErrorMessages($response),
-            ], JSON_PRETTY_PRINT);
+            ], JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
         }
 
         return (string)json_encode([
@@ -54,7 +55,7 @@ class DiscountWriter implements DiscountWriterInterface
                 ->getDiscountGeneralOrFail()
                 ->getIdDiscount(),
             'errors' => [],
-        ], JSON_PRETTY_PRINT);
+        ], JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
     }
 
     /**
@@ -62,29 +63,29 @@ class DiscountWriter implements DiscountWriterInterface
      */
     public function updateDiscount(int $idDiscount, array $data): string
     {
-        $existing = $this->discountFacade->findHydratedDiscountConfiguratorByIdDiscount($idDiscount);
+        $existingDiscount = $this->discountFacade->findHydratedDiscountConfiguratorByIdDiscount($idDiscount);
 
-        if ($existing === null) {
+        if ($existingDiscount === null) {
             return (string)json_encode([
                 'success' => false,
                 'errors' => [sprintf('Discount with ID %d not found.', $idDiscount)],
-            ], JSON_PRETTY_PRINT);
+            ], JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
         }
 
-        $configurator = $this->mergeDiscountData($existing, $data);
-        $response = $this->discountFacade->updateDiscountWithValidation($configurator);
+        $discountConfigurator = $this->mergeDiscountData($existingDiscount, $data);
+        $response = $this->discountFacade->updateDiscountWithValidation($discountConfigurator);
 
         if (!$response->getIsSuccessful()) {
             return (string)json_encode([
                 'success' => false,
                 'errors' => $this->extractErrorMessages($response),
-            ], JSON_PRETTY_PRINT);
+            ], JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
         }
 
         return (string)json_encode([
             'success' => true,
             'errors' => [],
-        ], JSON_PRETTY_PRINT);
+        ], JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
     }
 
     /**
@@ -105,6 +106,7 @@ class DiscountWriter implements DiscountWriterInterface
         $calculator = (new DiscountCalculatorTransfer())
             ->setCalculatorPlugin($data['calculatorPlugin'] ?? '')
             ->setAmount(isset($data['amount']) ? (string)(int)$data['amount'] : '0')
+            ->setCollectorQueryString($data['collectorQueryString'] ?? null)
             ->setCollectorStrategyType($data['collectorStrategyType'] ?? 'query-string');
 
         $condition = (new DiscountConditionTransfer())
@@ -119,11 +121,11 @@ class DiscountWriter implements DiscountWriterInterface
     /**
      * @param array<string, mixed> $data
      */
-    protected function mergeDiscountData(DiscountConfiguratorTransfer $existing, array $data): DiscountConfiguratorTransfer
+    protected function mergeDiscountData(DiscountConfiguratorTransfer $discountTransfer, array $data): DiscountConfiguratorTransfer
     {
-        $general = $existing->getDiscountGeneralOrFail();
-        $calculator = $existing->getDiscountCalculatorOrFail();
-        $condition = $existing->getDiscountConditionOrFail();
+        $general = $discountTransfer->getDiscountGeneralOrFail();
+        $calculator = $discountTransfer->getDiscountCalculatorOrFail();
+        $condition = $discountTransfer->getDiscountConditionOrFail();
 
         if (isset($data['displayName'])) {
             $general->setDisplayName($data['displayName']);
@@ -165,13 +167,13 @@ class DiscountWriter implements DiscountWriterInterface
             $condition->setMinimumItemAmount((int)$data['minimumItemAmount']);
         }
 
-        return $existing;
+        return $discountTransfer;
     }
 
     /**
      * @return array<string>
      */
-    protected function extractErrorMessages(mixed $response): array
+    protected function extractErrorMessages(DiscountConfiguratorResponseTransfer $response): array
     {
         $errors = [];
 

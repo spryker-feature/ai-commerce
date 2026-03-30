@@ -20,30 +20,30 @@ class DiscountDetailsReader implements DiscountDetailsReaderInterface
 
     public function getDiscountDetails(int $idDiscount): string
     {
-        $configurator = $this->discountFacade->findHydratedDiscountConfiguratorByIdDiscount($idDiscount);
+        $discountConfiguratorTransfer = $this->discountFacade->findHydratedDiscountConfiguratorByIdDiscount($idDiscount);
 
-        if ($configurator === null) {
+        if ($discountConfiguratorTransfer === null) {
             return (string)json_encode([
                 'found' => false,
                 'error' => sprintf('Discount with ID %d does not exist.', $idDiscount),
-            ], JSON_PRETTY_PRINT);
+            ], JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
         }
 
         return (string)json_encode(
-            array_merge(['found' => true], $this->buildDiscountData($configurator)),
-            JSON_PRETTY_PRINT,
+            array_merge(['found' => true], $this->buildDiscountData($discountConfiguratorTransfer)),
+            JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR,
         );
     }
 
     /**
      * @return array<string, mixed>
      */
-    protected function buildDiscountData(DiscountConfiguratorTransfer $configurator): array
+    protected function buildDiscountData(DiscountConfiguratorTransfer $discountConfiguratorTransfer): array
     {
-        $general = $configurator->getDiscountGeneral();
-        $calculator = $configurator->getDiscountCalculator();
-        $condition = $configurator->getDiscountCondition();
-        $voucher = $configurator->getDiscountVoucher();
+        $general = $discountConfiguratorTransfer->getDiscountGeneral();
+        $calculator = $discountConfiguratorTransfer->getDiscountCalculator();
+        $condition = $discountConfiguratorTransfer->getDiscountCondition();
+        $voucher = $discountConfiguratorTransfer->getDiscountVoucher();
 
         $data = [
             'general' => [

@@ -9,20 +9,11 @@ declare(strict_types=1);
 
 namespace SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool;
 
-use Spryker\Shared\Log\LoggerTrait;
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolParameter;
-use Spryker\Zed\AiFoundation\Dependency\Tools\ToolPluginInterface;
-use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 use Throwable;
 
-/**
- * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceBusinessFactory getBusinessFactory()
- * @method \SprykerFeature\Zed\AiCommerce\AiCommerceConfig getConfig()
- */
-class CreateDiscountToolPlugin extends AbstractPlugin implements ToolPluginInterface
+class CreateDiscountToolPlugin extends AbstractDiscountToolPlugin
 {
-    use LoggerTrait;
-
     /**
      * {@inheritDoc}
      *
@@ -64,17 +55,6 @@ class CreateDiscountToolPlugin extends AbstractPlugin implements ToolPluginInter
             new ToolParameter('description', 'string', 'Optional internal description', false),
             new ToolParameter('priority', 'integer', 'Optional priority — lower number means higher priority (default: 9999)', false),
         ];
-    }
-
-    /**
-     * @param array<string> $options
-     */
-    protected function formatOptionsDescription(array $options): string
-    {
-        return implode(' or ', array_map(
-            static fn (string $option): string => sprintf('"%s"', $option),
-            $options,
-        ));
     }
 
     /**

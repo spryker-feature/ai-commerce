@@ -210,4 +210,31 @@ class DiscountManagementToolPluginsTest extends Unit
         $this->assertFalse($decoded['success']);
         $this->assertStringContainsString('not found', implode(' ', $decoded['errors']));
     }
+
+    public function testCreateDiscountToolPluginReturnsErrorForDuplicateDisplayName(): void
+    {
+        // Arrange
+        $existingDiscount = $this->tester->haveDiscount();
+        $duplicateName = $existingDiscount->getDisplayNameOrFail();
+        $discountData = [
+            'displayName' => $duplicateName,
+            'discountType' => 'cart_rule',
+            'validFrom' => '2026-01-01 00:00:00',
+            'validTo' => '2026-12-31 23:59:59',
+            'isExclusive' => false,
+            'calculatorPlugin' => 'PLUGIN_CALCULATOR_PERCENTAGE',
+            'amount' => 1000,
+            'minimumItemAmount' => 1,
+        ];
+
+        // Act
+        $result = (new CreateDiscountToolPlugin())->execute(...$discountData);
+
+        // Assert
+        $this->assertJson($result);
+        $decoded = json_decode($result, true);
+        $this->assertFalse($decoded['success']);
+        $this->assertNotEmpty($decoded['errors']);
+        $this->assertStringContainsString($duplicateName, implode(' ', $decoded['errors']));
+    }
 }

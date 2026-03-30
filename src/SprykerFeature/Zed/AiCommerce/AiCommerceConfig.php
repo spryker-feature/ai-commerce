@@ -53,6 +53,9 @@ class AiCommerceConfig extends AbstractBundleConfig
     }
 
     /**
+     * Specification:
+     * - Returns the maximum allowed file size in bytes for a single Backoffice Assistant attachment.
+     *
      * @api
      */
     public function getBackofficeAssistantAttachmentMaxFileSizeBytes(): int
@@ -61,6 +64,9 @@ class AiCommerceConfig extends AbstractBundleConfig
     }
 
     /**
+     * Specification:
+     * - Returns the maximum allowed total size in bytes for all Backoffice Assistant attachments combined.
+     *
      * @api
      */
     public function getBackofficeAssistantAttachmentMaxTotalSizeBytes(): int
@@ -69,6 +75,9 @@ class AiCommerceConfig extends AbstractBundleConfig
     }
 
     /**
+     * Specification:
+     * - Returns the maximum number of attachments allowed per Backoffice Assistant message.
+     *
      * @api
      */
     public function getBackofficeAssistantAttachmentMaxCount(): int

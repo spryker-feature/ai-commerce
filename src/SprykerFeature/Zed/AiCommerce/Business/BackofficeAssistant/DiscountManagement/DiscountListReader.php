@@ -39,7 +39,7 @@ class DiscountListReader implements DiscountListReaderInterface
     {
         $discounts = $this->repository->findDiscounts($filters, static::DISCOUNT_LIST_LIMIT);
 
-        return (string)json_encode(array_map($this->normalizeRow(...), $discounts), JSON_PRETTY_PRINT);
+        return (string)json_encode(array_map($this->normalizeRow(...), $discounts), JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
     }
 
     /**

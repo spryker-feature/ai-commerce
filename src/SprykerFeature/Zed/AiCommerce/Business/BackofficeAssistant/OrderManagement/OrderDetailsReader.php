@@ -33,7 +33,7 @@ class OrderDetailsReader implements OrderDetailsReaderInterface
             return '{}';
         }
 
-        return (string)json_encode($this->buildOrderDetailsData($orderTransfer), JSON_PRETTY_PRINT);
+        return (string)json_encode($this->buildOrderDetailsData($orderTransfer), JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
     }
 
     public function getOrderDetails(string $orderReference): string
@@ -58,7 +58,7 @@ class OrderDetailsReader implements OrderDetailsReaderInterface
             return '{}';
         }
 
-        return (string)json_encode($this->buildOrderDetailsData($orderTransfer), JSON_PRETTY_PRINT);
+        return (string)json_encode($this->buildOrderDetailsData($orderTransfer), JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
     }
 
     /**
