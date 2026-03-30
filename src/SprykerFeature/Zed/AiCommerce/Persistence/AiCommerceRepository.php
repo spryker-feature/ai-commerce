@@ -15,11 +15,9 @@ use Generated\Shared\Transfer\BackofficeAssistantConversationConditionsTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCriteriaTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationTransfer;
 use Orm\Zed\AiCommerce\Persistence\SpyBackofficeAssistantConversationQuery;
-use Orm\Zed\Discount\Persistence\Map\SpyDiscountTableMap;
 use Orm\Zed\Oms\Persistence\Map\SpyOmsOrderItemStateTableMap;
 use Orm\Zed\Oms\Persistence\Map\SpyOmsOrderProcessTableMap;
 use Orm\Zed\Sales\Persistence\SpySalesOrderItemQuery;
-use Propel\Runtime\ActiveQuery\Criteria as PropelCriteria;
 use Spryker\Zed\Kernel\Persistence\AbstractRepository;
 use Spryker\Zed\PropelOrm\Business\Runtime\ActiveQuery\Criteria;
 
@@ -86,57 +84,6 @@ class AiCommerceRepository extends AbstractRepository implements AiCommerceRepos
     }
 
     /**
-     * @module Discount
-     *
-     * @param array<string, mixed> $filters
-     *
-     * @return array<int, array<string, mixed>>
-     */
-    public function findDiscounts(array $filters, int $limit): array
-    {
-        $query = $this->getFactory()->getDiscountPropelQuery()
-            ->select([
-                SpyDiscountTableMap::COL_ID_DISCOUNT,
-                SpyDiscountTableMap::COL_DISPLAY_NAME,
-                SpyDiscountTableMap::COL_DISCOUNT_TYPE,
-                SpyDiscountTableMap::COL_IS_ACTIVE,
-                SpyDiscountTableMap::COL_VALID_FROM,
-                SpyDiscountTableMap::COL_VALID_TO,
-                SpyDiscountTableMap::COL_AMOUNT,
-                SpyDiscountTableMap::COL_CALCULATOR_PLUGIN,
-                SpyDiscountTableMap::COL_IS_EXCLUSIVE,
-                SpyDiscountTableMap::COL_PRIORITY,
-            ])
-            ->orderByIdDiscount('desc')
-            ->limit($limit);
-
-        if (isset($filters['searchTerm']) && $filters['searchTerm'] !== '') {
-            $escapedSearchTerm = addcslashes((string)$filters['searchTerm'], '%_');
-            $query->filterByDisplayName('%' . $escapedSearchTerm . '%', PropelCriteria::LIKE);
-        }
-
-        if (isset($filters['isActive'])) {
-            $query->filterByIsActive((bool)$filters['isActive']);
-        }
-
-        if (isset($filters['discountType'])) {
-            $query->filterByDiscountType((string)$filters['discountType']);
-        }
-
-        // Show discounts still valid on or after this date (validTo >= filters.validFrom)
-        if (isset($filters['validFrom'])) {
-            $query->filterByValidTo($filters['validFrom'], PropelCriteria::GREATER_EQUAL);
-        }
-
-        // Show discounts that started on or before this date (validFrom <= filters.validTo)
-        if (isset($filters['validTo'])) {
-            $query->filterByValidFrom($filters['validTo'], PropelCriteria::LESS_EQUAL);
-        }
-
-        return array_values($query->find()->getData());
-    }
-
-    /**
      * {@inheritDoc}
      *
      * @module Discount
@@ -187,6 +134,10 @@ class AiCommerceRepository extends AbstractRepository implements AiCommerceRepos
         }
 
         $query->orderByIdBackofficeAssistantConversation(Criteria::DESC);
+
+        if ($conditions->getLimit() !== null) {
+            $query->limit($conditions->getLimit());
+        }
 
         return $query;
     }

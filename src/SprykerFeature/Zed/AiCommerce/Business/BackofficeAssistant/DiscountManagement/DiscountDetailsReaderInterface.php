@@ -11,10 +11,5 @@ namespace SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\DiscountMan
 
 interface DiscountDetailsReaderInterface
 {
-    /**
-     * Specification:
-     * - Returns a JSON-encoded full discount configuration for the given discount ID.
-     * - Returns empty JSON object '{}' when the discount is not found.
-     */
     public function getDiscountDetails(int $idDiscount): string;
 }

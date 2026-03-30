@@ -12,7 +12,6 @@ namespace SprykerFeatureTest\Zed\AiCommerce\Business;
 use Codeception\Test\Unit;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\CreateDiscountToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetDiscountDetailsToolPlugin;
-use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\ListDiscountsToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\UpdateDiscountToolPlugin;
 use SprykerFeatureTest\Zed\AiCommerce\AiCommerceBusinessTester;
 
@@ -26,71 +25,7 @@ use SprykerFeatureTest\Zed\AiCommerce\AiCommerceBusinessTester;
  */
 class DiscountManagementToolPluginsTest extends Unit
 {
-    protected const string DISCOUNT_COLUMN_DISPLAY_NAME = 'displayName';
-
     protected AiCommerceBusinessTester $tester;
-
-    public function testListDiscountsToolPluginReturnsJsonWithDiscountData(): void
-    {
-        // Arrange
-        $discountGeneralTransfer = $this->tester->haveDiscount();
-
-        // Act
-        $result = (new ListDiscountsToolPlugin())->execute();
-
-        // Assert
-        $this->assertJson($result);
-        $decoded = json_decode($result, true);
-        $this->assertIsArray($decoded);
-
-        $displayNames = array_column($decoded, static::DISCOUNT_COLUMN_DISPLAY_NAME);
-        $this->assertContains($discountGeneralTransfer->getDisplayName(), $displayNames);
-    }
-
-    public function testListDiscountsToolPluginReturnsEmptyArrayWhenNoMatchingDiscounts(): void
-    {
-        // Act
-        $result = (new ListDiscountsToolPlugin())->execute(searchTerm: 'NONEXISTENT_TERM_' . uniqid());
-
-        // Assert
-        $this->assertJson($result);
-        $decoded = json_decode($result, true);
-        $this->assertSame([], $decoded);
-    }
-
-    public function testListDiscountsToolPluginFiltersByIsActive(): void
-    {
-        // Arrange
-        $activeDiscount = $this->tester->haveDiscount(['isActive' => true]);
-        $inactiveDiscount = $this->tester->haveDiscount(['isActive' => false]);
-
-        // Act
-        $result = (new ListDiscountsToolPlugin())->execute(isActive: true);
-
-        // Assert
-        $this->assertJson($result);
-        $decoded = json_decode($result, true);
-        $displayNames = array_column($decoded, static::DISCOUNT_COLUMN_DISPLAY_NAME);
-        $this->assertContains($activeDiscount->getDisplayName(), $displayNames);
-        $this->assertNotContains($inactiveDiscount->getDisplayName(), $displayNames);
-    }
-
-    public function testListDiscountsToolPluginFiltersByDiscountType(): void
-    {
-        // Arrange
-        $cartRuleDiscount = $this->tester->haveDiscount(['discountType' => 'cart_rule']);
-        $voucherDiscount = $this->tester->haveDiscount(['discountType' => 'voucher']);
-
-        // Act
-        $result = (new ListDiscountsToolPlugin())->execute(discountType: 'cart_rule');
-
-        // Assert
-        $this->assertJson($result);
-        $decoded = json_decode($result, true);
-        $displayNames = array_column($decoded, static::DISCOUNT_COLUMN_DISPLAY_NAME);
-        $this->assertContains($cartRuleDiscount->getDisplayName(), $displayNames);
-        $this->assertNotContains($voucherDiscount->getDisplayName(), $displayNames);
-    }
 
     public function testGetDiscountDetailsToolPluginReturnsJsonWithDiscountStructure(): void
     {

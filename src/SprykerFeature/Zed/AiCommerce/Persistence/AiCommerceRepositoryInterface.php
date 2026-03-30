@@ -35,18 +35,6 @@ interface AiCommerceRepositoryInterface
 
     /**
      * Specification:
-     * - Returns discount records filtered by the provided criteria.
-     * - Supported keys: searchTerm (string), isActive (bool), discountType (string), validFrom (string), validTo (string).
-     * - Limited to $limit results, ordered by ID descending.
-     *
-     * @param array<string, mixed> $filters
-     *
-     * @return array<int, array<string, mixed>>
-     */
-    public function findDiscounts(array $filters, int $limit): array;
-
-    /**
-     * Specification:
      * - Returns true if a discount with the given display name already exists.
      */
     public function existsDiscountByDisplayName(string $displayName): bool;

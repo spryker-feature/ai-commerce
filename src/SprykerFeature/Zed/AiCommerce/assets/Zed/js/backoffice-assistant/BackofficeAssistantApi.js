@@ -6,10 +6,23 @@ export class BackofficeAssistantApi {
         delete: '/ai-commerce/backoffice-assistant-conversation/delete',
     };
 
+    static #loginPath = '/security-gui/login';
+
+    static #handleSessionRedirect(response) {
+        if (response.type === 'opaqueredirect') {
+            window.location.href = BackofficeAssistantApi.#loginPath;
+        }
+
+        return response;
+    }
+
     async fetchHistories() {
         const response = await fetch(BackofficeAssistantApi.#endpoints.histories, {
+            redirect: 'manual',
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
         });
+
+        BackofficeAssistantApi.#handleSessionRedirect(response);
 
         return await response.json();
     }
@@ -17,8 +30,11 @@ export class BackofficeAssistantApi {
     async fetchConversationDetail(conversationReference) {
         const url = `${BackofficeAssistantApi.#endpoints.detail}?conversationReference=${encodeURIComponent(conversationReference)}`;
         const response = await fetch(url, {
+            redirect: 'manual',
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
         });
+
+        BackofficeAssistantApi.#handleSessionRedirect(response);
 
         return await response.json();
     }
@@ -27,12 +43,15 @@ export class BackofficeAssistantApi {
         const csrfToken = window.BackofficeAssistantConfig?.csrfToken ?? '';
         const response = await fetch(BackofficeAssistantApi.#endpoints.delete, {
             method: 'POST',
+            redirect: 'manual',
             headers: {
                 'Content-Type': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
             },
             body: JSON.stringify({ conversation_reference: conversationReference, _token: csrfToken }),
         });
+
+        BackofficeAssistantApi.#handleSessionRedirect(response);
 
         if (!response.ok) {
             throw new Error('Delete failed');
@@ -43,6 +62,7 @@ export class BackofficeAssistantApi {
         const csrfToken = window.BackofficeAssistantConfig?.csrfToken ?? '';
         const options = {
             method: 'POST',
+            redirect: 'manual',
             headers: {
                 'Content-Type': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
@@ -54,6 +74,10 @@ export class BackofficeAssistantApi {
             options.signal = signal;
         }
 
-        return fetch(BackofficeAssistantApi.#endpoints.prompt, options);
+        const response = await fetch(BackofficeAssistantApi.#endpoints.prompt, options);
+
+        BackofficeAssistantApi.#handleSessionRedirect(response);
+
+        return response;
     }
 }

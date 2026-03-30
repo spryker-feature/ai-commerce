@@ -12,20 +12,11 @@ namespace SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\DiscountMan
 interface DiscountWriterInterface
 {
     /**
-     * Specification:
-     * - Creates a new discount from the provided data array.
-     * - Returns JSON with 'success' (bool), 'idDiscount' (int, on success), and 'errors' (string[]).
-     *
      * @param array<string, mixed> $data
      */
     public function createDiscount(array $data): string;
 
     /**
-     * Specification:
-     * - Updates an existing discount identified by $idDiscount with the provided fields.
-     * - Returns early with error JSON if the discount does not exist.
-     * - Returns JSON with 'success' (bool) and 'errors' (string[]).
-     *
      * @param array<string, mixed> $data
      */
     public function updateDiscount(int $idDiscount, array $data): string;

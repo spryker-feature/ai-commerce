@@ -53,6 +53,7 @@
         <property name="conversationReferences" type="string[]" singular="conversationReference"/>
         <property name="userUuids" type="string[]" singular="userUuid"/>
         <property name="backofficeAssistantConversationIds" type="int[]" singular="idBackofficeAssistantConversation"/>
+        <property name="limit" type="int"/>
     </transfer>
 
     <transfer name="BackofficeAssistantConversationCollectionRequest" strict="true">

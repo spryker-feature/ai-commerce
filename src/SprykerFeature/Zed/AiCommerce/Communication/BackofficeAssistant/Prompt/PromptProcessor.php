@@ -41,7 +41,7 @@ class PromptProcessor implements PromptProcessorInterface
 
     protected const string KEY_MESSAGE = 'message';
 
-    protected const string MESSAGE_AI_SERVICE_UNAVAILABLE = 'AI service unavailable';
+    protected const string MESSAGE_AI_SERVICE_UNAVAILABLE = 'backoffice_assistant.error.ai_service_unavailable';
 
     /**
      * @param array<\SprykerFeature\Zed\AiCommerce\Dependency\BackofficeAssistant\BackofficeAssistantAgentPluginInterface> $agentPlugins
@@ -101,7 +101,7 @@ class PromptProcessor implements PromptProcessorInterface
                 ['exception' => $throwable],
             );
 
-            $this->eventEmitter->emit(BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => static::MESSAGE_AI_SERVICE_UNAVAILABLE]);
+            $this->eventEmitter->emit(BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => $this->glossaryFacade->translate(static::MESSAGE_AI_SERVICE_UNAVAILABLE)]);
         }
     }
 
@@ -147,7 +147,7 @@ class PromptProcessor implements PromptProcessorInterface
         );
 
         if (!$intentRouterResponse) {
-            $this->eventEmitter->emit(BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => static::MESSAGE_AI_SERVICE_UNAVAILABLE]);
+            $this->eventEmitter->emit(BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => $this->glossaryFacade->translate(static::MESSAGE_AI_SERVICE_UNAVAILABLE)]);
 
             return;
         }
@@ -300,7 +300,7 @@ class PromptProcessor implements PromptProcessorInterface
 
             if (!$agentPlugin->isApplicable($agentRequest)) {
                 $this->eventEmitter->emit(BackofficeAssistantEventType::Error, [
-                    static::KEY_MESSAGE => static::MESSAGE_AI_SERVICE_UNAVAILABLE,
+                    static::KEY_MESSAGE => $this->glossaryFacade->translate(static::MESSAGE_AI_SERVICE_UNAVAILABLE),
                 ]);
 
                 return;
@@ -310,7 +310,7 @@ class PromptProcessor implements PromptProcessorInterface
 
             if ($backofficeAssistantPromptResponse->getMessage() === null) {
                 $this->eventEmitter->emit(BackofficeAssistantEventType::Error, [
-                    static::KEY_MESSAGE => static::MESSAGE_AI_SERVICE_UNAVAILABLE,
+                    static::KEY_MESSAGE => $this->glossaryFacade->translate(static::MESSAGE_AI_SERVICE_UNAVAILABLE),
                 ]);
 
                 break;

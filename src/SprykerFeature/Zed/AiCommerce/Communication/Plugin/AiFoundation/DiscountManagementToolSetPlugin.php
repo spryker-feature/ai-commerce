@@ -39,7 +39,6 @@ class DiscountManagementToolSetPlugin extends AbstractPlugin implements ToolSetP
     public function getTools(): array
     {
         return [
-            $this->getFactory()->createListDiscountsToolPlugin(),
             $this->getFactory()->createGetDiscountDetailsToolPlugin(),
             $this->getFactory()->createCreateDiscountToolPlugin(),
             $this->getFactory()->createUpdateDiscountToolPlugin(),

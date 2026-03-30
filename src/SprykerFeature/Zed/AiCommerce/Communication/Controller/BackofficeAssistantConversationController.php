@@ -56,6 +56,8 @@ class BackofficeAssistantConversationController extends AbstractController
 
     protected const string ERROR_INVALID_CSRF_TOKEN = 'backoffice_assistant.error.invalid_csrf_token';
 
+    protected const int CONVERSATION_LIST_LIMIT = 50;
+
     public function indexAction(): JsonResponse
     {
         if (!$this->getFactory()->getConfig()->isBackofficeAssistantEnabled()) {
@@ -66,7 +68,9 @@ class BackofficeAssistantConversationController extends AbstractController
 
         $criteria = (new BackofficeAssistantConversationCriteriaTransfer())
             ->setBackofficeAssistantConversationConditions(
-                (new BackofficeAssistantConversationConditionsTransfer())->addUserUuid($userUuid),
+                (new BackofficeAssistantConversationConditionsTransfer())
+                    ->addUserUuid($userUuid)
+                    ->setLimit(static::CONVERSATION_LIST_LIMIT),
             );
 
         $collection = $this->getFacade()->getBackofficeAssistantConversationCollection($criteria);
