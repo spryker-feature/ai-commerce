@@ -33,9 +33,5 @@ interface AiCommerceRepositoryInterface
      */
     public function findProcessAndStateNamesByOrderReference(string $orderReference): array;
 
-    /**
-     * Specification:
-     * - Returns true if a discount with the given display name already exists.
-     */
     public function existsDiscountByDisplayName(string $displayName): bool;
 }
