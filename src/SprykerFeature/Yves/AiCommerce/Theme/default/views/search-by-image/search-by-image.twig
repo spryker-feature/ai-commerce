@@ -1,0 +1,22 @@
+{% extends template('widget') %}
+
+{% define data = {
+    isEnabled: _widget.isEnabled,
+    form: _widget.form,
+    dataSearchId: '',
+} %}
+
+{% block template %}
+    {% if data.isVisible and data.isEnabled %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+    {% include molecule('search-by-image', 'AiCommerce') with {
+        data: {
+            form: data.form,
+            dataSearchId: data.dataSearchId,
+        },
+    } only %}
+{% endblock %}

@@ -19,21 +19,21 @@ interface AiCommerceConstants
      *
      * @api
      */
-    public const string AI_CONFIGURATION_INTENT_ROUTER = 'AI_CONFIGURATION_INTENT_ROUTER';
+    public const string AI_CONFIGURATION_INTENT_ROUTER = 'AI_COMMERCE:AI_CONFIGURATION_INTENT_ROUTER';
 
     /**
      * AI configuration name used by the general-purpose agent for handling broad Backoffice assistant queries.
      *
      * @api
      */
-    public const string AI_CONFIGURATION_GENERAL_PURPOSE = 'AI_CONFIGURATION_GENERAL_PURPOSE';
+    public const string AI_CONFIGURATION_GENERAL_PURPOSE = 'AI_COMMERCE:AI_CONFIGURATION_GENERAL_PURPOSE';
 
     /**
      * AI configuration name used by the order management agent for handling order-related queries and actions.
      *
      * @api
      */
-    public const string AI_CONFIGURATION_ORDER_MANAGEMENT = 'AI_CONFIGURATION_ORDER_MANAGEMENT';
+    public const string AI_CONFIGURATION_ORDER_MANAGEMENT = 'AI_COMMERCE:AI_CONFIGURATION_ORDER_MANAGEMENT';
 
     /**
      * Tool set name that groups all order management tools available to the order management agent.
@@ -62,4 +62,11 @@ interface AiCommerceConstants
      * @api
      */
     public const string CONFIGURATION_KEY_ORDER_MANAGEMENT_SYSTEM_PROMPT = 'ai_commerce:backoffice_assistant:system_prompts:order_management_system_prompt';
+
+    /**
+     * AI configuration name used by the search by image agent for handling image-related queries and actions.
+     *
+     * @api
+     */
+    public const string AI_CONFIGURATION_SEARCH_BY_IMAGE = 'AI_COMMERCE:AI_CONFIGURATION_SEARCH_BY_IMAGE';
 }

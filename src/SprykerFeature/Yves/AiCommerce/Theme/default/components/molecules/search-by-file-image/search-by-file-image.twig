@@ -1,0 +1,58 @@
+{% extends model('component') %}
+
+{% define config = {
+    name: 'search-by-file-image',
+    tag: 'search-by-file-image',
+} %}
+
+{% block body %}
+    <div class="{{ config.name }}__file-view {{ config.jsName }}__file-view">
+        {% block icon %}
+            <div class="text-center">
+                {% include atom('icon') with {
+                    class: config.name ~ '__icon',
+                    modifiers: ['biggest'],
+                    data: {
+                        name: 'upload-image',
+                    },
+                } only %}
+            </div>
+        {% endblock %}
+
+        {% block description %}
+            <p>{{ 'ai_commerce.search_by_image.upload_image_to_find_products' | trans }}</p>
+        {% endblock %}
+
+        {% block button %}
+            <button type="button" class="button button--expand {{ config.jsName }}__upload-file-button">
+                {{ 'ai_commerce.search_by_image.upload_image' | trans }}
+            </button>
+        {% endblock %}
+
+        {% block notes %}
+            <p><small>{{ 'ai_commerce.search_by_image.image.description' | trans({
+                '%size%': (attributes['max-file-size-bytes'] | default(0) / 1048576),
+                '%format%': attributes['allowed-file-types'],
+            }) }}</small></p>
+        {% endblock %}
+
+        {% block error %}
+            <div class="{{ config.name }}__error {{ config.jsName }}__error list list--alert spacing-top is-hidden" role="alert"></div>
+        {% endblock %}
+    </div>
+
+    {% block loader%}
+        {% include molecule('ajax-loader') with {
+            modifiers: ['big', 'dynamic'],
+            attributes: {
+                'provider-class-name': 'js-search-by-image__ajax-provider',
+            },
+        } only %}
+    {% endblock %}
+
+    {% block errorTemplate %}
+        <template class="{{ config.jsName }}__error-item-template" data-text-placeholder="{{ config.jsName }}__error-text">
+            <li class="list__item {{ config.jsName }}__error-text"></li>
+        </template>
+    {% endblock %}
+{% endblock %}

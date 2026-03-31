@@ -59,6 +59,14 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
         return $container;
     }
 
+    public function providePersistenceLayerDependencies(Container $container): Container
+    {
+        $container = parent::providePersistenceLayerDependencies($container);
+        $container = $this->addSalesOrderPropelQuery($container);
+
+        return $container;
+    }
+
     protected function addUserFacade(Container $container): Container
     {
         $container->set(static::FACADE_USER, function (Container $container) {
@@ -106,17 +114,9 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
 
     protected function addBackofficeAssistantAgentPlugins(Container $container): Container
     {
-        $container->set(static::PLUGINS_BACKOFFICE_ASSISTANT_AGENT, function (Container $container): array {
+        $container->set(static::PLUGINS_BACKOFFICE_ASSISTANT_AGENT, function (): array {
             return $this->getBackofficeAssistantAgentPlugins();
         });
-
-        return $container;
-    }
-
-    public function providePersistenceLayerDependencies(Container $container): Container
-    {
-        $container = parent::providePersistenceLayerDependencies($container);
-        $container = $this->addSalesOrderPropelQuery($container);
 
         return $container;
     }

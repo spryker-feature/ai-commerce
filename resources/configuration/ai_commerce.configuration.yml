@@ -2,7 +2,7 @@
 features:
     - key: ai_commerce
       name: AI Commerce
-      description: AI Commerce configuration.
+      description: AI-powered commerce features configuration.
       enabled: true
       order: 0
       tabs:
@@ -77,3 +77,73 @@ features:
                         storefront: false
                         scopes:
                             - global
+          - key: quick_order
+            name: Quick Order
+            description: Quick order configuration.
+            enabled: true
+            order: 0
+            groups:
+                - key: visual_add_to_cart
+                  name: Visual add to cart
+                  description: Controls how the AI processes uploaded images to recognise products for quick order.
+                  enabled: true
+                  order: 0
+                  scopes:
+                      - global
+                      - store
+                  settings:
+                      - key: enabled
+                        name: Enabled
+                        description: Enables or disables the image to cart feature for quick order.
+                        type: boolean
+                        default_value: false
+                        enabled: true
+                        secret: false
+                        storefront: true
+                        order: 0
+                        scopes:
+                            - global
+                            - store
+          - key: search_by_image
+            name: Search by Image
+            description: Search by Image configuration.
+            enabled: true
+            order: 0
+            groups:
+                - key: search_by_image
+                  name: Search by Image
+                  description: Controls the Search by Image feature availability and redirect behaviour.
+                  enabled: true
+                  order: 0
+                  scopes:
+                      - global
+                  settings:
+                      - key: enabled
+                        name: Enable Search by Image
+                        description: Enable or disable the Search by Image feature on the storefront.
+                        type: boolean
+                        default_value: false
+                        enabled: true
+                        secret: false
+                        storefront: true
+                        order: 0
+                        scopes:
+                            - global
+                      - key: redirect_type
+                        name: Redirect type
+                        description: Controls where customers are sent after a search by image.
+                        type: radio
+                        default_value: search_results
+                        enabled: true
+                        secret: false
+                        storefront: true
+                        order: 1
+                        scopes:
+                            - global
+                        options:
+                            - value: search_results
+                              label: Search results
+                              description: 'Redirect to the catalog search results page for the identified search term.'
+                            - value: first_product
+                              label: First result product detail page
+                              description: 'Redirect directly to the product detail page of the first matching result.'
