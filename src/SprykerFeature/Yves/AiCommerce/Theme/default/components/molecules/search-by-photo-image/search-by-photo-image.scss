@@ -1,0 +1,61 @@
+@mixin ai-commerce-search-by-photo-image($name: '.search-by-photo-image') {
+    #{$name} {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+
+        &__camera-stream {
+            display: block;
+            width: 100%;
+            flex-grow: 1;
+            object-fit: cover;
+            object-position: 50% 50%;
+            border-radius: 0.25rem;
+        }
+
+        &__camera-actions {
+            display: flex;
+            flex-direction: column;
+            flex-direction: row;
+            padding: 1rem;
+            align-items: center;
+            justify-content: center;
+            background: $setting-color-black;
+            width: 100%;
+            position: relative;
+        }
+
+        &__camera-capture-button {
+            width: 4.5rem;
+            height: 4.5rem;
+            border-radius: 100%;
+            border: 0.25rem solid $setting-color-white;
+            background: $setting-color-black;
+            font-size: 0;
+            position: relative;
+
+            &::before {
+                content: '';
+                position: absolute;
+                inset: 1rem;
+                border-radius: 100%;
+                background: $setting-color-white;
+            }
+        }
+
+        &__camera-use-file-button {
+            position: absolute;
+            right: 1rem;
+            background: none;
+            justify-self: flex-end;
+            width: 4rem;
+            height: 4rem;
+            text-align: center;
+            line-height: 4rem;
+            border: none;
+            color: $setting-color-white;
+        }
+
+        @content;
+    }
+}

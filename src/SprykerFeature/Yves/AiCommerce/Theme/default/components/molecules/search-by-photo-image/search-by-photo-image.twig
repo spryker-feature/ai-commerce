@@ -1,0 +1,55 @@
+{% extends model('component') %}
+
+{% define config = {
+    name: 'search-by-photo-image',
+    tag: 'search-by-photo-image',
+} %}
+
+{% block uploadFileButton %}
+    {% include atom('icon') with {
+        modifiers: ['bigger'],
+        data: {
+            name: 'file',
+        },
+    } only %}
+{% endblock %}
+
+{% block body %}
+    {% block video %}
+        <video
+            class="{{ config.name }}__camera-stream {{ config.jsName }}__camera-stream"
+            autoplay
+            playsinline
+            muted
+        ></video>
+        <canvas class="{{ config.jsName }}__camera-canvas is-hidden"></canvas>
+    {% endblock %}
+
+    {% block loader %}
+        {% include molecule('ajax-loader') with {
+            modifiers: ['big', 'dynamic'],
+            attributes: {
+                'provider-class-name': 'js-search-by-image__ajax-provider',
+            },
+        } only %}
+    {% endblock %}
+
+    {% block error %}
+        <div class="{{ config.name }}__error {{ config.jsName }}__error list list--alert spacing--inner is-hidden" role="alert"></div>
+    {% endblock %}
+    
+    {% block errorTemplate %}
+        <template class="{{ config.jsName }}__error-item-template" data-text-placeholder="{{ config.jsName }}__error-text">
+            <li class="list__item {{ config.jsName }}__error-text"></li>
+        </template>
+    {% endblock %}
+
+    {% block actions %}
+        <div class="{{ config.name }}__camera-actions">
+            <button type="button" class="button button--expand {{ config.name }}__camera-capture-button {{ config.jsName }}__camera-capture-button"></button>
+            <button type="button" class="button button--hollow {{ config.name }}__camera-use-file-button {{ config.jsName }}__camera-use-file-button">
+                {{ block('uploadFileButton') }}
+            </button>
+        </div>
+    {% endblock %}
+{% endblock %}

@@ -9,8 +9,11 @@ namespace SprykerFeature\Yves\AiCommerce;
 
 use Spryker\Client\AiFoundation\AiFoundationClientInterface;
 use Spryker\Client\Catalog\CatalogClientInterface;
+use Spryker\Client\GlossaryStorage\GlossaryStorageClientInterface;
 use Spryker\Client\Locale\LocaleClientInterface;
 use Spryker\Shared\Application\ApplicationConstants;
+use Spryker\Shared\Kernel\StrategyResolver;
+use Spryker\Shared\Kernel\StrategyResolverInterface;
 use Spryker\Yves\Kernel\AbstractFactory;
 use Spryker\Yves\Messenger\FlashMessenger\FlashMessengerInterface;
 use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Collector\QuickOrderItemCollector;
@@ -36,12 +39,21 @@ use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Product\Validator\Produ
 use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Product\Validator\Rule\NonEmptyProductCollectionProductValidationRule;
 use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Product\Validator\Rule\ProductLimitProductValidationRule;
 use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Product\Validator\Rule\ProductValidationRuleInterface;
+use SprykerFeature\Yves\AiCommerce\SearchByImage\Executor\SearchByImageExecutor;
+use SprykerFeature\Yves\AiCommerce\SearchByImage\Executor\SearchByImageExecutorInterface;
+use SprykerFeature\Yves\AiCommerce\SearchByImage\Form\DataTransformer\UploadedImageTransformer;
+use SprykerFeature\Yves\AiCommerce\SearchByImage\Form\SearchByImageForm;
+use SprykerFeature\Yves\AiCommerce\SearchByImage\Redirect\FirstProductRedirectResolver;
+use SprykerFeature\Yves\AiCommerce\SearchByImage\Redirect\RedirectResolverInterface;
+use SprykerFeature\Yves\AiCommerce\SearchByImage\Redirect\SearchResultsRedirectResolver;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @method \SprykerFeature\Yves\AiCommerce\AiCommerceConfig getConfig()
+ * @method \SprykerFeature\Client\AiCommerce\AiCommerceClientInterface getClient()
  */
 class AiCommerceFactory extends AbstractFactory
 {
@@ -145,6 +157,52 @@ class AiCommerceFactory extends AbstractFactory
         );
     }
 
+    public function getSearchByImageForm(): FormInterface
+    {
+        return $this->getFormFactory()->create(SearchByImageForm::class);
+    }
+
+    public function createUploadedImageTransformer(): UploadedImageTransformer
+    {
+        return new UploadedImageTransformer(SearchByImageForm::FIELD_IMAGE);
+    }
+
+    public function createSearchByImageExecutor(): SearchByImageExecutorInterface
+    {
+        return new SearchByImageExecutor(
+            $this->getClient(),
+            $this->createRedirectStrategyResolver(),
+            $this->getConfig(),
+        );
+    }
+
+    /**
+     * @return \Spryker\Shared\Kernel\StrategyResolverInterface<\SprykerFeature\Yves\AiCommerce\SearchByImage\Redirect\RedirectResolverInterface>
+     */
+    public function createRedirectStrategyResolver(): StrategyResolverInterface
+    {
+        return new StrategyResolver(
+            [
+                AiCommerceConfig::SEARCH_BY_IMAGE_REDIRECT_TYPE_SEARCH_RESULTS => $this->createSearchResultsRedirectResolver(),
+                AiCommerceConfig::SEARCH_BY_IMAGE_REDIRECT_TYPE_FIRST_PRODUCT => $this->createFirstProductRedirectResolver(),
+            ],
+            AiCommerceConfig::SEARCH_BY_IMAGE_REDIRECT_TYPE_SEARCH_RESULTS,
+        );
+    }
+
+    public function createSearchResultsRedirectResolver(): RedirectResolverInterface
+    {
+        return new SearchResultsRedirectResolver($this->getRouter());
+    }
+
+    public function createFirstProductRedirectResolver(): RedirectResolverInterface
+    {
+        return new FirstProductRedirectResolver(
+            $this->getCatalogClient(),
+            $this->createSearchResultsRedirectResolver(),
+        );
+    }
+
     /**
      * @return array<\SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Product\Validator\Rule\ProductValidationRuleInterface>
      */
@@ -179,5 +237,15 @@ class AiCommerceFactory extends AbstractFactory
     public function getTranslatorService(): TranslatorInterface
     {
         return $this->getProvidedDependency(AiCommerceDependencyProvider::SERVICE_TRANSLATOR);
+    }
+
+    public function getRouter(): UrlGeneratorInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::SERVICE_ROUTER);
+    }
+
+    public function getGlossaryStorageClient(): GlossaryStorageClientInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::CLIENT_GLOSSARY_STORAGE);
     }
 }

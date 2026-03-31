@@ -5,19 +5,25 @@
 
     <transfer name="PromptRequest" strict="true">
         <property name="promptMessage" type="PromptMessage"/>
+        <property name="structuredMessage" type="object" description="Transfer object that defines the schema for structured response from the LLM."/>
         <property name="aiConfigurationName" type="string" description="The configuration name of ai configuration"/>
     </transfer>
 
     <transfer name="PromptResponse" strict="true">
         <property name="message" type="PromptMessage"/>
+        <property name="structuredMessage" type="object" description="Transfer object containing the structured response data returned by the LLM."/>
         <property name="isSuccessful" type="bool"/>
         <property name="errors" type="Error[]" singular="error"/>
     </transfer>
 
     <transfer name="PromptMessage" strict="true">
+        <property name="type" type="string" description="Message type: user, assistant, tool_call, or tool_result"/>
+        <property name="content" type="string"/>
+        <property name="attachments" type="Attachment[]" singular="attachment"/>
     </transfer>
 
     <transfer name="Error">
+        <property name="message" type="string"/>
     </transfer>
 
     <transfer name="ProductRecognition" strict="true">
@@ -61,6 +67,23 @@
     <transfer name="QuickOrderItem">
         <property name="sku" type="string"/>
         <property name="quantity" type="int"/>
+    </transfer>
+
+    <transfer name="SearchByImageRequest" strict="true">
+        <property name="imageContent" type="string"/>
+        <property name="imageMediaType" type="string"/>
+        <property name="localeName" type="string"/>
+    </transfer>
+
+    <transfer name="SearchByImageResponse" strict="true">
+        <property name="redirectUrl" type="string"/>
+        <property name="searchTerm" type="string"/>
+        <property name="isSuccessful" type="bool"/>
+        <property name="errors" type="Error[]" singular="error"/>
+    </transfer>
+
+    <transfer name="SearchByImagePromptResponse" strict="true">
+        <property name="searchTerm" type="string" description="The term to search for in the image"/>
     </transfer>
 
 </transfers>

@@ -12,4 +12,10 @@ namespace SprykerFeature\Shared\AiCommerce;
  */
 interface AiCommerceConstants
 {
+    /**
+     * @api
+     *
+     * @var string
+     */
+    public const string AI_CONFIGURATION_SEARCH_BY_IMAGE = 'ai_commerce.search_by_image';
 }

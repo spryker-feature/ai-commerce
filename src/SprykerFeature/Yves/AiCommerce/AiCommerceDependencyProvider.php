@@ -7,6 +7,8 @@
 
 namespace SprykerFeature\Yves\AiCommerce;
 
+use Spryker\Client\Catalog\CatalogClientInterface;
+use Spryker\Client\GlossaryStorage\GlossaryStorageClientInterface;
 use Spryker\Shared\Kernel\ContainerInterface;
 use Spryker\Yves\Kernel\AbstractBundleDependencyProvider;
 use Spryker\Yves\Kernel\Container;
@@ -29,6 +31,18 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
      */
     public const string SERVICE_TRANSLATOR = 'translator';
 
+    /**
+     * @see \Spryker\Shared\Application\ApplicationConstants::FORM_FACTORY
+     */
+    public const string FORM_FACTORY = 'FORM_FACTORY';
+
+    /**
+     * @see \Spryker\Yves\Router\Plugin\Application\RouterApplicationPlugin::SERVICE_ROUTER
+     */
+    public const string SERVICE_ROUTER = 'routers';
+
+    public const string CLIENT_GLOSSARY_STORAGE = 'CLIENT_GLOSSARY_STORAGE';
+
     public function provideDependencies(Container $container): Container
     {
         $container = parent::provideDependencies($container);
@@ -37,6 +51,8 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
         $container = $this->addLocaleClient($container);
         $container = $this->addFlashMessengerService($container);
         $container = $this->addTranslatorService($container);
+        $container = $this->addGlossaryStorageClient($container);
+        $container = $this->addRouter($container);
 
         return $container;
     }
@@ -52,7 +68,7 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
 
     protected function addCatalogClient(Container $container): Container
     {
-        $container->set(static::CLIENT_CATALOG, function (Container $container) {
+        $container->set(static::CLIENT_CATALOG, function (Container $container): CatalogClientInterface {
             return $container->getLocator()->catalog()->client();
         });
 
@@ -81,6 +97,24 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
     {
         $container->set(static::SERVICE_TRANSLATOR, function (ContainerInterface $container) {
             return $container->getApplicationService(static::SERVICE_TRANSLATOR);
+        });
+
+        return $container;
+    }
+
+    protected function addGlossaryStorageClient(Container $container): Container
+    {
+        $container->set(static::CLIENT_GLOSSARY_STORAGE, function (Container $container): GlossaryStorageClientInterface {
+            return $container->getLocator()->glossaryStorage()->client();
+        });
+
+        return $container;
+    }
+
+    protected function addRouter(Container $container): Container
+    {
+        $container->set(static::SERVICE_ROUTER, function (Container $container): mixed {
+            return $container->getApplicationService(static::SERVICE_ROUTER);
         });
 
         return $container;

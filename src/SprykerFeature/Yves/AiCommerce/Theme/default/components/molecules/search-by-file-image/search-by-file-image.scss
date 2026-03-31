@@ -1,0 +1,10 @@
+@mixin ai-commerce-search-by-file-image($name: '.search-by-file-image') {
+    #{$name} {
+        &__icon {
+            width: 100px;
+            height: 100px;
+        }
+
+        @content;
+    }
+}
