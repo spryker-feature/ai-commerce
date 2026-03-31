@@ -7,6 +7,8 @@
 
 namespace SprykerFeature\Client\AiCommerce;
 
+use Generated\Shared\Transfer\SearchByImageRequestTransfer;
+use Generated\Shared\Transfer\SearchByImageResponseTransfer;
 use Spryker\Client\Kernel\AbstractClient;
 
 /**
@@ -14,4 +16,13 @@ use Spryker\Client\Kernel\AbstractClient;
  */
 class AiCommerceClient extends AbstractClient implements AiCommerceClientInterface
 {
+    /**
+     * {@inheritDoc}
+     *
+     * @api
+     */
+    public function getSearchTermFromImage(SearchByImageRequestTransfer $searchByImageRequestTransfer): SearchByImageResponseTransfer
+    {
+        return $this->getFactory()->createAiSearchByImageTermResolver()->getSearchTermFromImage($searchByImageRequestTransfer);
+    }
 }

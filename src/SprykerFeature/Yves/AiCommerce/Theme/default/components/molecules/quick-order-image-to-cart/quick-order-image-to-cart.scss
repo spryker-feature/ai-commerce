@@ -1,0 +1,13 @@
+@mixin ai-commerce-quick-order-image-to-cart($name: '.quick-order-image-to-cart') {
+    #{$name} {
+        &__file-select {
+            &--error {
+                color: map-get($setting-color-actions, 'alert');
+            }
+        }
+    }
+}
+
+@include helper-import(molecule, quick-order-image-to-cart) {
+    @include ai-commerce-quick-order-image-to-cart;
+}

@@ -1,0 +1,18 @@
+namespace: SprykerFeatureTest\Yves\AiCommerce
+
+paths:
+    tests: .
+    support: _support
+    output: ../../../_output
+    data: ../../../_data
+
+suites:
+    Yves:
+        path: .
+        actor: AiCommerceYvesTester
+        modules:
+            enabled:
+                - Asserts
+                - \SprykerTest\Shared\Testify\Helper\Environment
+                - \SprykerTest\Shared\Testify\Helper\LocatorHelper
+                - \SprykerTest\Shared\Testify\Helper\DependencyHelper

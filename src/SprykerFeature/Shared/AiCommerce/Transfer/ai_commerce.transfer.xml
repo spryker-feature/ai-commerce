@@ -5,18 +5,18 @@
 
     <transfer name="PromptRequest" strict="true">
         <property name="promptMessage" type="PromptMessage"/>
+        <property name="structuredMessage" type="object" description="Transfer object that defines the schema for structured response from the LLM."/>
         <property name="aiConfigurationName" type="string" description="The configuration name of ai configuration"/>
         <property name="conversationReference" type="string" description="Optional conversation identifier for chat history persistence. When provided, enables storage-backed conversation history."/>
-        <property name="structuredMessage" type="object" description="Transfer object that defines the schema for structured response from the LLM."/>
         <property name="maxRetries" type="int" description="Maximum number of retry attempts for the request in case of failures. Defaults to 1."/>
         <property name="toolSetNames" type="string[]" singular="toolSetName" description="List of AI tool set names."/>
     </transfer>
 
     <transfer name="PromptResponse" strict="true">
         <property name="message" type="PromptMessage"/>
+        <property name="structuredMessage" type="object" description="Transfer object containing the structured response data returned by the LLM."/>
         <property name="isSuccessful" type="bool"/>
         <property name="errors" type="Error[]" singular="error"/>
-        <property name="structuredMessage" type="object" description="Transfer object containing the structured response data returned by the LLM."/>
     </transfer>
 
     <transfer name="PromptMessage" strict="true">
@@ -108,13 +108,6 @@
         <property name="agent" type="string" description="Set 'General Purpose' by default and answer to user is provided. Set 'Guardrail' if user's intent is not related supported agent functionality."/>
     </transfer>
 
-    <transfer name="Attachment" strict="true">
-        <property name="type" type="string"/>
-        <property name="content" type="string"/>
-        <property name="contentType" type="string"/>
-        <property name="mediaType" type="string"/>
-    </transfer>
-
     <transfer name="ConversationHistoryCriteria" strict="true">
         <property name="conversationHistoryConditions" type="ConversationHistoryConditions" description="Filtering conditions for conversation histories."/>
     </transfer>
@@ -164,6 +157,10 @@
         <property name="items" type="Item[]" singular="item"/>
         <property name="payments" type="Payment[]" singular="payment"/>
         <property name="expenses" type="Expense[]" singular="expense"/>
+        <property name="salutation" type="string"/>
+        <property name="firstName" type="string"/>
+        <property name="lastName" type="string"/>
+        <property name="email" type="string"/>
     </transfer>
 
     <transfer name="Totals">
@@ -182,17 +179,6 @@
         <property name="firstName" type="string"/>
         <property name="lastName" type="string"/>
         <property name="email" type="string"/>
-    </transfer>
-
-    <transfer name="Item">
-        <property name="name" type="string"/>
-        <property name="sku" type="string"/>
-        <property name="quantity" type="int"/>
-        <property name="unitPrice" type="int"/>
-        <property name="state" type="ItemState"/>
-        <property name="shipment" type="Shipment"/>
-        <property name="sumPrice" type="int"/>
-        <property name="unitTaxAmount" type="int"/>
     </transfer>
 
     <transfer name="ItemState">
@@ -281,6 +267,72 @@
     <transfer name="ShipmentMethod">
         <property name="idShipmentMethod" type="int"/>
         <property name="name" type="string"/>
+    </transfer>
+
+    <transfer name="ProductRecognition" strict="true">
+        <property name="name" type="string" description="Product name as recognized from the image by the AI model."/>
+        <property name="quantity" type="int" description="Quantity of the product as recognized from the image by the AI model."/>
+    </transfer>
+
+    <transfer name="ProductRecognitionCollection" strict="true">
+        <property name="productRecognitions" type="ProductRecognition[]" singular="productRecognition" description="List of products recognized from the image."/>
+        <property name="isSuccessful" type="bool" description="Indicates whether the AI recognition request completed successfully."/>
+        <property name="errorMessage" type="string" description="Glossary key of the error message to display when isSuccessful is false."/>
+    </transfer>
+
+    <transfer name="ProductValidationError" strict="true">
+        <property name="glossaryKey" type="string" description="Glossary key of the validation error message to be translated and displayed to the user."/>
+        <property name="parameters" type="array" singular="parameter" description="Key-value pairs used as placeholders in the translated error message."/>
+    </transfer>
+
+    <transfer name="ProductValidation" strict="true">
+        <property name="isValid" type="bool"/>
+        <property name="validationErrors" type="ProductValidationError[]" singular="validationError"/>
+    </transfer>
+
+    <transfer name="QuickOrderPageResponse" strict="true">
+        <property name="quickOrderItems" type="QuickOrderItem[]" singular="quickOrderItem"/>
+        <property name="notFoundProductNames" type="string[]" singular="notFoundProductName"/>
+    </transfer>
+
+    <transfer name="Item">
+        <property name="sku" type="string"/>
+        <property name="name" type="string"/>
+        <property name="quantity" type="int"/>
+        <property name="unitPrice" type="int"/>
+        <property name="state" type="ItemState"/>
+        <property name="shipment" type="Shipment"/>
+        <property name="sumPrice" type="int"/>
+        <property name="unitTaxAmount" type="int"/>
+    </transfer>
+
+    <transfer name="Attachment" strict="true">
+        <property name="type" type="string"/>
+        <property name="content" type="string"/>
+        <property name="contentType" type="string"/>
+        <property name="mediaType" type="string"/>
+    </transfer>
+
+    <transfer name="QuickOrderItem">
+        <property name="sku" type="string"/>
+        <property name="quantity" type="int"/>
+    </transfer>
+
+    <transfer name="SearchByImageRequest" strict="true">
+        <property name="imageContent" type="string"/>
+        <property name="imageMediaType" type="string"/>
+        <property name="localeName" type="string"/>
+    </transfer>
+
+    <transfer name="SearchByImageResponse" strict="true">
+        <property name="redirectUrl" type="string"/>
+        <property name="searchTerm" type="string"/>
+        <property name="isSuccessful" type="bool"/>
+        <property name="errors" type="Error[]" singular="error"/>
+    </transfer>
+
+    <transfer name="SearchByImagePromptResponse" strict="true">
+        <property name="searchTerm" type="string" description="The term to search for in the image"/>
     </transfer>
 
 </transfers>

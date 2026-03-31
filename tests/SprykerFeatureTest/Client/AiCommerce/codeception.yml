@@ -1,0 +1,16 @@
+namespace: SprykerFeatureTest\Client\AiCommerce
+
+paths:
+    tests: .
+    support: _support
+    output: ../../../_output
+    data: ../../../_data
+
+suites:
+    Client:
+        path: .
+        actor: AiCommerceClientTester
+        modules:
+            enabled:
+                - Asserts
+                - \SprykerTest\Shared\Testify\Helper\Environment
