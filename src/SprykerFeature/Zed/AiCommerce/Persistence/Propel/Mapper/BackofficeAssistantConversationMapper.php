@@ -19,7 +19,9 @@ class BackofficeAssistantConversationMapper
         SpyBackofficeAssistantConversation $entity,
     ): SpyBackofficeAssistantConversation {
         $entity->fromArray($transfer->modifiedToArray());
-        $entity->setFkUser($transfer->getIdUser());
+        if ($entity->isNew()) {
+            $entity->setFkUser($transfer->getIdUser());
+        }
 
         return $entity;
     }
