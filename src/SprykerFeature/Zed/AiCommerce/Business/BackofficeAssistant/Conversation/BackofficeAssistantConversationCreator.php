@@ -27,7 +27,7 @@ class BackofficeAssistantConversationCreator implements BackofficeAssistantConve
 
         foreach ($collectionRequestTransfer->getBackofficeAssistantConversations() as $conversationTransfer) {
             $conversationReference = $this->generateConversationReference(
-                $conversationTransfer->getUserUuidOrFail(),
+                $conversationTransfer->getIdUserOrFail(),
             );
 
             $conversationTransfer->setConversationReference($conversationReference);
@@ -40,8 +40,8 @@ class BackofficeAssistantConversationCreator implements BackofficeAssistantConve
         return $responseTransfer;
     }
 
-    public function generateConversationReference(string $userReference): string
+    public function generateConversationReference(int $idUser): string
     {
-        return sprintf('%s:%d:%s', $userReference, time(), bin2hex(random_bytes(8)));
+        return sprintf('%d:%d:%s', $idUser, time(), bin2hex(random_bytes(8)));
     }
 }

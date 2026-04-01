@@ -19,6 +19,7 @@ class BackofficeAssistantConversationMapper
         SpyBackofficeAssistantConversation $entity,
     ): SpyBackofficeAssistantConversation {
         $entity->fromArray($transfer->modifiedToArray());
+        $entity->setFkUser($transfer->getIdUser());
 
         return $entity;
     }
@@ -27,6 +28,9 @@ class BackofficeAssistantConversationMapper
         SpyBackofficeAssistantConversation $entity,
         BackofficeAssistantConversationTransfer $transfer,
     ): BackofficeAssistantConversationTransfer {
-        return $transfer->fromArray($entity->toArray(), true);
+        $transfer->fromArray($entity->toArray(), true);
+        $transfer->setIdUser($entity->getFkUser());
+
+        return $transfer;
     }
 }

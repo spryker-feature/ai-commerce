@@ -36,7 +36,7 @@
         <property name="agent" type="string"/>
         <property name="name" type="string"/>
         <property name="conversationReference" type="string"/>
-        <property name="userUuid" type="string"/>
+        <property name="idUser" type="int"/>
         <property name="idBackofficeAssistantConversation" type="int"/>
     </transfer>
 
@@ -51,7 +51,7 @@
     <transfer name="BackofficeAssistantConversationConditions" strict="true">
         <property name="withMessages" type="bool"/>
         <property name="conversationReferences" type="string[]" singular="conversationReference"/>
-        <property name="userUuids" type="string[]" singular="userUuid"/>
+        <property name="idUsers" type="int[]" singular="idUser"/>
         <property name="backofficeAssistantConversationIds" type="int[]" singular="idBackofficeAssistantConversation"/>
         <property name="limit" type="int"/>
     </transfer>
@@ -70,7 +70,7 @@
     </transfer>
 
     <transfer name="BackofficeAssistantPromptRequest" strict="true">
-        <property name="userUuid" type="string"/>
+        <property name="idUser" type="int"/>
         <property name="selectedAgent" type="string"/>
         <property name="context" type="array" singular="contextItem"/>
         <property name="rawAttachments" type="array" singular="rawAttachment"/>

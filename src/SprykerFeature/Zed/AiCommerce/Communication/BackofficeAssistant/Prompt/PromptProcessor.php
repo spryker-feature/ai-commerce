@@ -74,7 +74,7 @@ class PromptProcessor implements PromptProcessorInterface
             $conversationReference = $this->resolveConversationReference(
                 $promptRequestTransfer->getPromptOrFail(),
                 (string)$promptRequestTransfer->getConversationReference(),
-                $promptRequestTransfer->getUserUuidOrFail(),
+                $promptRequestTransfer->getIdUserOrFail(),
             );
 
             $selectedAgent = (string)$promptRequestTransfer->getSelectedAgent();
@@ -188,22 +188,22 @@ class PromptProcessor implements PromptProcessorInterface
         $this->executeSelectedAgent($promptRequestTransfer, $selectedAgent, $conversationReference);
     }
 
-    protected function resolveConversationReference(string $prompt, string $requestedConversationReference, string $userUuid): string
+    protected function resolveConversationReference(string $prompt, string $requestedConversationReference, int $idUser): string
     {
-        if ($requestedConversationReference && $this->hasBackofficeAssistantConversationForUser($userUuid, $requestedConversationReference)) {
+        if ($requestedConversationReference && $this->hasBackofficeAssistantConversationForUser($idUser, $requestedConversationReference)) {
             return $requestedConversationReference;
         }
 
-        return $this->createNewConversation($userUuid, $prompt);
+        return $this->createNewConversation($idUser, $prompt);
     }
 
-    protected function createNewConversation(string $userUuid, string $prompt): string
+    protected function createNewConversation(int $idUser, string $prompt): string
     {
         $response = $this->aiCommerceFacade->createBackofficeAssistantConversationCollection(
             (new BackofficeAssistantConversationCollectionRequestTransfer())
                 ->addBackofficeAssistantConversation(
                     (new BackofficeAssistantConversationTransfer())
-                        ->setUserUuid($userUuid)
+                        ->setIdUser($idUser)
                         ->setName(mb_substr($prompt, 0, 150)),
                 ),
         );
@@ -229,13 +229,13 @@ class PromptProcessor implements PromptProcessorInterface
         return $conversations->offsetGet(0)->getAgent();
     }
 
-    protected function hasBackofficeAssistantConversationForUser(string $userUuid, string $conversationReference): bool
+    protected function hasBackofficeAssistantConversationForUser(int $idUser, string $conversationReference): bool
     {
         $criteria = (new BackofficeAssistantConversationCriteriaTransfer())
             ->setBackofficeAssistantConversationConditions(
                 (new BackofficeAssistantConversationConditionsTransfer())
                     ->addConversationReference($conversationReference)
-                    ->addUserUuid($userUuid),
+                    ->addIdUser($idUser),
             );
 
         return $this->aiCommerceFacade

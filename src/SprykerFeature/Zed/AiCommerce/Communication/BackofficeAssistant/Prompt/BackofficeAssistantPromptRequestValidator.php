@@ -17,7 +17,7 @@ class BackofficeAssistantPromptRequestValidator implements BackofficeAssistantPr
 {
     protected const string MESSAGE_PROMPT_REQUIRED = 'backoffice_assistant.validation.prompt_required';
 
-    protected const string MESSAGE_USER_UUID_REQUIRED = 'backoffice_assistant.validation.user_uuid_required';
+    protected const string MESSAGE_USER_ID_REQUIRED = 'backoffice_assistant.validation.user_id_required';
 
     protected const string MESSAGE_ATTACHMENT_UNSUPPORTED_MEDIA_TYPE = 'backoffice_assistant.validation.attachment_unsupported_media_type';
 
@@ -44,8 +44,8 @@ class BackofficeAssistantPromptRequestValidator implements BackofficeAssistantPr
             $errors[] = $this->createErrorTransfer(static::MESSAGE_PROMPT_REQUIRED);
         }
 
-        if (!$promptRequestTransfer->getUserUuid()) {
-            $errors[] = $this->createErrorTransfer(static::MESSAGE_USER_UUID_REQUIRED);
+        if (!$promptRequestTransfer->getIdUser()) {
+            $errors[] = $this->createErrorTransfer(static::MESSAGE_USER_ID_REQUIRED);
         }
 
         return array_merge($errors, $this->validateAttachments($promptRequestTransfer->getRawAttachments()));

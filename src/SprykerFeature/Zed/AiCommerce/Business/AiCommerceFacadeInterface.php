@@ -20,7 +20,7 @@ interface AiCommerceFacadeInterface
     /**
      * Specification:
      * - Returns conversation records matching the given criteria conditions.
-     * - Filters by userUuids, conversationReferences, or backofficeAssistantConversationIds when provided.
+     * - Filters by idUsers, conversationReferences, or backofficeAssistantConversationIds when provided.
      * - When conditions.withMessages is true, fetches and sets conversation messages from AiFoundation.
      * - Filters out messages with empty content when fetching messages.
      * - Supports sorting and pagination.

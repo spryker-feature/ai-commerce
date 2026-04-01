@@ -62,12 +62,12 @@ class BackofficeAssistantConversationController extends AbstractController
             return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getGlossaryFacade()->translate(static::ERROR_BACKOFFICE_ASSISTANT_DISABLED)], 403);
         }
 
-        $userUuid = $this->getFactory()->getUserFacade()->getCurrentUser()->getUuidOrFail();
+        $idUser = $this->getFactory()->getUserFacade()->getCurrentUser()->getIdUserOrFail();
 
         $criteria = (new BackofficeAssistantConversationCriteriaTransfer())
             ->setBackofficeAssistantConversationConditions(
                 (new BackofficeAssistantConversationConditionsTransfer())
-                    ->addUserUuid($userUuid)
+                    ->addIdUser($idUser)
                     ->setLimit($this->getFactory()->getConfig()->getConversationListLimit()),
             );
 
@@ -112,12 +112,12 @@ class BackofficeAssistantConversationController extends AbstractController
             return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getGlossaryFacade()->translate(static::ERROR_MISSING_CONVERSATION_REFERENCE)], 400);
         }
 
-        $userUuid = $this->getFactory()->getUserFacade()->getCurrentUser()->getUuidOrFail();
+        $idUser = $this->getFactory()->getUserFacade()->getCurrentUser()->getIdUserOrFail();
 
         $criteria = (new BackofficeAssistantConversationCriteriaTransfer())
             ->setBackofficeAssistantConversationConditions(
                 (new BackofficeAssistantConversationConditionsTransfer())
-                    ->addUserUuid($userUuid)
+                    ->addIdUser($idUser)
                     ->addConversationReference($conversationReference)
                     ->setWithMessages(true),
             );
@@ -162,12 +162,12 @@ class BackofficeAssistantConversationController extends AbstractController
             return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getGlossaryFacade()->translate(static::ERROR_MISSING_CONVERSATION_REFERENCE)], 400);
         }
 
-        $userUuid = $this->getFactory()->getUserFacade()->getCurrentUser()->getUuidOrFail();
+        $idUser = $this->getFactory()->getUserFacade()->getCurrentUser()->getIdUserOrFail();
 
         $ownershipCriteria = (new BackofficeAssistantConversationCriteriaTransfer())
             ->setBackofficeAssistantConversationConditions(
                 (new BackofficeAssistantConversationConditionsTransfer())
-                    ->addUserUuid($userUuid)
+                    ->addIdUser($idUser)
                     ->addConversationReference($conversationReference),
             );
 

@@ -8,7 +8,7 @@
 
     <table name="spy_backoffice_assistant_conversation" idMethod="native" phpName="SpyBackofficeAssistantConversation">
         <column name="id_backoffice_assistant_conversation" type="INTEGER" required="true" primaryKey="true" autoIncrement="true"/>
-        <column name="user_uuid" type="VARCHAR" size="64" required="true"/>
+        <column name="fk_user" type="INTEGER" required="false"/>
         <column name="conversation_reference" type="VARCHAR" size="128" required="true"/>
         <column name="name" type="VARCHAR" size="255" required="true"/>
         <column name="agent" type="VARCHAR" size="255" required="false"/>
@@ -18,9 +18,13 @@
             <unique-column name="conversation_reference"/>
         </unique>
 
-        <index name="spy_backoffice_assistant_conversation-index-user_uuid">
-            <index-column name="user_uuid"/>
+        <index name="spy_backoffice_assistant_conversation-index-fk_user">
+            <index-column name="fk_user"/>
         </index>
+
+        <foreign-key name="spy_backoffice_assistant_conversation-fk_user" foreignTable="spy_user" phpName="User" refPhpName="BackofficeAssistantConversation" onDelete="SET NULL">
+            <reference local="fk_user" foreign="id_user"/>
+        </foreign-key>
 
         <behavior name="timestampable"/>
     </table>

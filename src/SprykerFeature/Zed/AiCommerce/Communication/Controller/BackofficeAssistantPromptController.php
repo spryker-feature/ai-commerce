@@ -71,14 +71,14 @@ class BackofficeAssistantPromptController extends AbstractController
         return new StreamedResponse(function () use ($data): void {
             set_time_limit(120);
 
-            $userUuid = $this->getFactory()->getUserFacade()->getCurrentUser()->getUuidOrFail();
+            $idUser = $this->getFactory()->getUserFacade()->getCurrentUser()->getIdUserOrFail();
 
             $promptRequestTransfer = (new BackofficeAssistantPromptRequestTransfer())
                 ->setPrompt($data[static::REQUEST_KEY_PROMPT] ?? '')
                 ->setConversationReference($data[static::REQUEST_KEY_CONVERSATION_REFERENCE] ?? '')
                 ->setSelectedAgent($data[static::REQUEST_KEY_SELECTED_AGENT] ?? '')
                 ->setContext($data[static::REQUEST_KEY_CONTEXT] ?? [])
-                ->setUserUuid($userUuid)
+                ->setIdUser($idUser)
                 ->setRawAttachments($data[static::REQUEST_KEY_ATTACHMENTS] ?? []);
 
             $this->getFactory()->createPromptHandler()->handle($promptRequestTransfer);

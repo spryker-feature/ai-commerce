@@ -35,11 +35,11 @@ class BackofficeAssistantConversationCrudTest extends Unit
     public function testCreateBackofficeAssistantConversationCollectionCreatesConversation(): void
     {
         // Arrange
-        $userUuid = uniqid('user-uuid-', true);
+        $idUser = $this->tester->haveUser()->getIdUserOrFail();
         $conversationName = uniqid('Conversation ', true);
 
         $conversationTransfer = (new BackofficeAssistantConversationTransfer())
-            ->setUserUuid($userUuid)
+            ->setIdUser($idUser)
             ->setName($conversationName);
 
         $collectionRequestTransfer = (new BackofficeAssistantConversationCollectionRequestTransfer())
@@ -55,7 +55,7 @@ class BackofficeAssistantConversationCrudTest extends Unit
         $createdConversation = $responseTransfer->getBackofficeAssistantConversations()->getIterator()->current();
         $this->assertNotNull($createdConversation->getIdBackofficeAssistantConversation());
         $this->assertNotEmpty($createdConversation->getConversationReference());
-        $this->assertSame($userUuid, $createdConversation->getUserUuid());
+        $this->assertSame($idUser, $createdConversation->getIdUser());
         $this->assertSame($conversationName, $createdConversation->getName());
 
         // Cleanup
@@ -69,7 +69,7 @@ class BackofficeAssistantConversationCrudTest extends Unit
     {
         // Arrange
         $conversationTransfer = $this->tester->haveConversation([
-            BackofficeAssistantConversationTransfer::USER_UUID => uniqid('user-uuid-', true),
+            BackofficeAssistantConversationTransfer::ID_USER => $this->tester->haveUser()->getIdUserOrFail(),
             BackofficeAssistantConversationTransfer::NAME => uniqid('Conversation ', true),
         ]);
 
@@ -87,28 +87,28 @@ class BackofficeAssistantConversationCrudTest extends Unit
 
         $foundConversation = $collectionTransfer->getBackofficeAssistantConversations()->getIterator()->current();
         $this->assertSame($conversationTransfer->getConversationReference(), $foundConversation->getConversationReference());
-        $this->assertSame($conversationTransfer->getUserUuid(), $foundConversation->getUserUuid());
+        $this->assertSame($conversationTransfer->getIdUser(), $foundConversation->getIdUser());
         $this->assertSame($conversationTransfer->getName(), $foundConversation->getName());
     }
 
-    public function testGetBackofficeAssistantConversationCollectionFiltersByUserUuid(): void
+    public function testGetBackofficeAssistantConversationCollectionFiltersByIdUser(): void
     {
         // Arrange
-        $userUuidFirst = uniqid('user-uuid-first-', true);
-        $userUuidSecond = uniqid('user-uuid-second-', true);
+        $idUserFirst = $this->tester->haveUser()->getIdUserOrFail();
+        $idUserSecond = $this->tester->haveUser()->getIdUserOrFail();
 
         $firstConversation = $this->tester->haveConversation([
-            BackofficeAssistantConversationTransfer::USER_UUID => $userUuidFirst,
+            BackofficeAssistantConversationTransfer::ID_USER => $idUserFirst,
             BackofficeAssistantConversationTransfer::NAME => 'First User Conversation',
         ]);
 
         $this->tester->haveConversation([
-            BackofficeAssistantConversationTransfer::USER_UUID => $userUuidSecond,
+            BackofficeAssistantConversationTransfer::ID_USER => $idUserSecond,
             BackofficeAssistantConversationTransfer::NAME => 'Second User Conversation',
         ]);
 
         $conditionsTransfer = (new BackofficeAssistantConversationConditionsTransfer())
-            ->addUserUuid($userUuidFirst);
+            ->addIdUser($idUserFirst);
 
         $criteriaTransfer = (new BackofficeAssistantConversationCriteriaTransfer())
             ->setBackofficeAssistantConversationConditions($conditionsTransfer);
@@ -121,14 +121,14 @@ class BackofficeAssistantConversationCrudTest extends Unit
 
         $foundConversation = $collectionTransfer->getBackofficeAssistantConversations()->getIterator()->current();
         $this->assertSame($firstConversation->getConversationReference(), $foundConversation->getConversationReference());
-        $this->assertSame($userUuidFirst, $foundConversation->getUserUuid());
+        $this->assertSame($idUserFirst, $foundConversation->getIdUser());
     }
 
     public function testUpdateBackofficeAssistantConversationCollectionUpdatesAgentField(): void
     {
         // Arrange
         $conversationTransfer = $this->tester->haveConversation([
-            BackofficeAssistantConversationTransfer::USER_UUID => uniqid('user-uuid-', true),
+            BackofficeAssistantConversationTransfer::ID_USER => $this->tester->haveUser()->getIdUserOrFail(),
             BackofficeAssistantConversationTransfer::NAME => uniqid('Conversation ', true),
         ]);
 
@@ -164,9 +164,9 @@ class BackofficeAssistantConversationCrudTest extends Unit
     public function testDeleteBackofficeAssistantConversationCollectionDeletesConversation(): void
     {
         // Arrange
-        $userUuid = uniqid('user-uuid-', true);
+        $idUser = $this->tester->haveUser()->getIdUserOrFail();
         $conversationTransfer = (new BackofficeAssistantConversationTransfer())
-            ->setUserUuid($userUuid)
+            ->setIdUser($idUser)
             ->setName(uniqid('Conversation ', true));
 
         $collectionRequestTransfer = (new BackofficeAssistantConversationCollectionRequestTransfer())

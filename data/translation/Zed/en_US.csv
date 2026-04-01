@@ -29,7 +29,7 @@ Arguments,Arguments
 "Failed to load conversation history.","Failed to load conversation history."
 "Tool Result","Tool Result"
 backoffice_assistant.validation.prompt_required,"Prompt is required."
-backoffice_assistant.validation.user_uuid_required,"User is not identified."
+backoffice_assistant.validation.user_id_required,"User is not identified."
 backoffice_assistant.validation.attachment_unsupported_media_type,"One or more attachments have an unsupported file type."
 backoffice_assistant.validation.attachment_file_too_large,"One or more attachments exceed the maximum allowed file size."
 backoffice_assistant.validation.attachment_count_exceeded,"Too many attachments. Please reduce the number of files."

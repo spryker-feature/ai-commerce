@@ -17,7 +17,7 @@ interface AiCommerceRepositoryInterface
     /**
      * Specification:
      * - Returns conversation records matching the given criteria conditions.
-     * - Filters by userUuids, conversationReferences, or backofficeAssistantConversationIds when provided.
+     * - Filters by idUsers, conversationReferences, or backofficeAssistantConversationIds when provided.
      * - Results are ordered by ID descending.
      */
     public function getBackofficeAssistantConversationCollection(

@@ -15,6 +15,7 @@ use Generated\Shared\Transfer\BackofficeAssistantConversationCollectionRequestTr
 use Generated\Shared\Transfer\BackofficeAssistantConversationTransfer;
 use SprykerTest\Shared\Testify\Helper\DataCleanupHelperTrait;
 use SprykerTest\Shared\Testify\Helper\LocatorHelperTrait;
+use SprykerTest\Shared\User\Helper\UserDataHelper;
 
 class AiCommerceHelper extends Module
 {
@@ -27,7 +28,7 @@ class AiCommerceHelper extends Module
     public function haveConversation(array $seed = []): BackofficeAssistantConversationTransfer
     {
         $conversationTransfer = (new BackofficeAssistantConversationTransfer())
-            ->fromArray(array_merge($this->getDefaultConversationSeed(), $seed));
+            ->fromArray(array_merge($this->getDefaultConversationSeed(), $seed), true);
 
         $collectionRequestTransfer = (new BackofficeAssistantConversationCollectionRequestTransfer())
             ->addBackofficeAssistantConversation($conversationTransfer);
@@ -58,12 +59,15 @@ class AiCommerceHelper extends Module
     }
 
     /**
-     * @return array<string, string>
+     * @return array<string, mixed>
      */
     protected function getDefaultConversationSeed(): array
     {
+        /** @var \SprykerTest\Shared\User\Helper\UserDataHelper $userDataHelper */
+        $userDataHelper = $this->getModule('\\' . UserDataHelper::class);
+
         return [
-            BackofficeAssistantConversationTransfer::USER_UUID => uniqid('user-uuid-', true),
+            BackofficeAssistantConversationTransfer::ID_USER => $userDataHelper->haveUser()->getIdUserOrFail(),
             BackofficeAssistantConversationTransfer::NAME => uniqid('Test Conversation ', true),
         ];
     }

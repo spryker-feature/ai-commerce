@@ -115,10 +115,10 @@ class AiCommerceRepository extends AbstractRepository implements AiCommerceRepos
         SpyBackofficeAssistantConversationQuery $query,
         BackofficeAssistantConversationConditionsTransfer $conditions,
     ): SpyBackofficeAssistantConversationQuery {
-        $userUuids = $conditions->getUserUuids();
+        $idUsers = $conditions->getIdUsers();
 
-        if ($userUuids !== []) {
-            $query->filterByUserUuid_In($userUuids);
+        if ($idUsers !== []) {
+            $query->filterByFkUser_In($idUsers);
         }
 
         $conversationReferences = $conditions->getConversationReferences();

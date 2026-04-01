@@ -26,6 +26,7 @@ use Codeception\Actor;
  * @method void pause($vars = [])
  * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceFacadeInterface getFacade()
  * @method \Generated\Shared\Transfer\BackofficeAssistantConversationTransfer haveConversation(array $seed = [])
+ * @method \Generated\Shared\Transfer\UserTransfer haveUser(array $override = [])
  * @SuppressWarnings(PHPMD)
  */
 class AiCommerceBusinessTester extends Actor
