@@ -11,7 +11,6 @@ namespace SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation;
 
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolSetPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
-use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
 
 /**
  * @method \SprykerFeature\Zed\AiCommerce\Communication\AiCommerceCommunicationFactory getFactory()
@@ -19,6 +18,8 @@ use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
  */
 class OrderDetailsToolSetPlugin extends AbstractPlugin implements ToolSetPluginInterface
 {
+    public const string TOOL_SET_ORDER_DETAILS = 'order_details_tools';
+
     /**
      * {@inheritDoc}
      *
@@ -26,7 +27,7 @@ class OrderDetailsToolSetPlugin extends AbstractPlugin implements ToolSetPluginI
      */
     public function getName(): string
     {
-        return AiCommerceConstants::TOOL_SET_ORDER_DETAILS;
+        return static::TOOL_SET_ORDER_DETAILS;
     }
 
     /**

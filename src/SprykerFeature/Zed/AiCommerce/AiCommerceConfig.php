@@ -28,6 +28,8 @@ class AiCommerceConfig extends AbstractBundleConfig
 
     protected const int BACKOFFICE_ASSISTANT_ATTACHMENT_MAX_COUNT = 5;
 
+    protected const int CONVERSATION_LIST_LIMIT = 50;
+
     /**
      * @var array<string>
      */
@@ -126,6 +128,17 @@ class AiCommerceConfig extends AbstractBundleConfig
     public function isDiscountManagementAgentEnabled(): bool
     {
         return (bool)filter_var($this->getModuleConfig(static::CONFIGURATION_KEY_DISCOUNT_MANAGEMENT_AGENT_IS_ENABLED, true), FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * Specification:
+     * - Returns the conversation list limit for the Backoffice Assistant.
+     *
+     * @api
+     */
+    public function getConversationListLimit(): int
+    {
+        return static::CONVERSATION_LIST_LIMIT;
     }
 
     /**

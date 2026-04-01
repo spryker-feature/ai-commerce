@@ -36,27 +36,6 @@ interface AiCommerceConstants
     public const string AI_CONFIGURATION_ORDER_MANAGEMENT = 'AI_COMMERCE:AI_CONFIGURATION_ORDER_MANAGEMENT';
 
     /**
-     * Tool set name that groups all order management tools available to the order management agent.
-     *
-     * @api
-     */
-    public const string TOOL_SET_ORDER_MANAGEMENT = 'order_management_tools';
-
-    /**
-     * Tool set name that groups get order details tools available.
-     *
-     * @api
-     */
-    public const string TOOL_SET_ORDER_DETAILS = 'order_details_tools';
-
-    /**
-     * Tool set name that groups all general-purpose tools available to the general-purpose agent.
-     *
-     * @api
-     */
-    public const string TOOL_SET_GENERAL_PURPOSE = 'general_purpose_tools';
-
-    /**
      * Configuration key for the general-purpose agent system prompt.
      *
      * @api
@@ -83,13 +62,6 @@ interface AiCommerceConstants
      * @api
      */
     public const string AI_CONFIGURATION_DISCOUNT_MANAGEMENT = 'AI_COMMERCE:AI_CONFIGURATION_DISCOUNT_MANAGEMENT';
-
-    /**
-     * Tool set name that groups all discount management tools available to the discount management agent.
-     *
-     * @api
-     */
-    public const string TOOL_SET_DISCOUNT_MANAGEMENT = 'discount_management_tools';
 
     /**
      * Configuration key for the discount management agent system prompt.

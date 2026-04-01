@@ -32,6 +32,16 @@ class OrderManagementAgentPlugin extends AbstractPlugin implements BackofficeAss
     protected const string NAME = 'Order Management';
 
     /**
+     * @link \SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\OrderDetailsToolSetPlugin::TOOL_SET_ORDER_DETAILS
+     */
+    protected const string TOOL_SET_ORDER_DETAILS = 'order_details_tools';
+
+    /**
+     * @link \SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\OrderManagementToolSetPlugin::TOOL_SET_ORDER_MANAGEMENT
+     */
+    protected const string TOOL_SET_ORDER_MANAGEMENT = 'order_management_tools';
+
+    /**
      * {@inheritDoc}
      *
      * @api
@@ -74,8 +84,8 @@ class OrderManagementAgentPlugin extends AbstractPlugin implements BackofficeAss
             ->setAiConfigurationName(AiCommerceConstants::AI_CONFIGURATION_ORDER_MANAGEMENT)
             ->setConversationReference($backofficeAssistantPromptRequest->getConversationReference())
             ->setStructuredMessage(new OrderManagementAgentResponseTransfer())
-            ->addToolSetName(AiCommerceConstants::TOOL_SET_ORDER_MANAGEMENT)
-            ->addToolSetName(AiCommerceConstants::TOOL_SET_ORDER_DETAILS)
+            ->addToolSetName(static::TOOL_SET_ORDER_MANAGEMENT)
+            ->addToolSetName(static::TOOL_SET_ORDER_DETAILS)
             ->setPromptMessage(
                 (new PromptMessageTransfer())
                     ->setType(AiFoundationConstants::MESSAGE_TYPE_USER)

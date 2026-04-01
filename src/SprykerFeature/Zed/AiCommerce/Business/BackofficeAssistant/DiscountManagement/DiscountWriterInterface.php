@@ -19,5 +19,5 @@ interface DiscountWriterInterface
     /**
      * @param array<string, mixed> $data
      */
-    public function updateDiscount(int $idDiscount, array $data): string;
+    public function updateDiscount(array $data): string;
 }

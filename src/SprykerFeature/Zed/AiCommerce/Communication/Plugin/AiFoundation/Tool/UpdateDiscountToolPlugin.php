@@ -69,7 +69,7 @@ class UpdateDiscountToolPlugin extends AbstractDiscountToolPlugin
     {
         try {
             /** @var array<string, mixed> $arguments */
-            return $this->getBusinessFactory()->createDiscountWriter()->updateDiscount((int)$arguments['idDiscount'], $arguments);
+            return $this->getBusinessFactory()->createDiscountWriter()->updateDiscount($arguments);
         } catch (Throwable $throwable) {
             $this->getLogger()->error(sprintf('UpdateDiscountToolPlugin::execute() failed: %s', $throwable->getMessage()), ['exception' => $throwable]);
 

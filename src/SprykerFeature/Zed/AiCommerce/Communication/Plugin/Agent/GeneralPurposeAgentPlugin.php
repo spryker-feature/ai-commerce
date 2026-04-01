@@ -31,6 +31,11 @@ class GeneralPurposeAgentPlugin extends AbstractPlugin implements BackofficeAssi
     protected const string NAME = 'General Purpose Agent';
 
     /**
+     * @link \SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\NavigationToolSetPlugin::TOOL_SET_NAVIGATION
+     */
+    protected const string TOOL_SET_GENERAL_PURPOSE = 'navigation_tools';
+
+    /**
      * {@inheritDoc}
      *
      * @api
@@ -73,7 +78,7 @@ class GeneralPurposeAgentPlugin extends AbstractPlugin implements BackofficeAssi
             ->setAiConfigurationName(AiCommerceConstants::AI_CONFIGURATION_GENERAL_PURPOSE)
             ->setConversationReference($backofficeAssistantPromptRequest->getConversationReference())
             ->setStructuredMessage(new GeneralPurposeAgentResponseTransfer())
-            ->addToolSetName(AiCommerceConstants::TOOL_SET_GENERAL_PURPOSE)
+            ->addToolSetName(static::TOOL_SET_GENERAL_PURPOSE)
             ->setPromptMessage(
                 (new PromptMessageTransfer())
                     ->setType(AiFoundationConstants::MESSAGE_TYPE_USER)

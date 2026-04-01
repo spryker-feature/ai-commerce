@@ -220,7 +220,7 @@ class OrderDetailsReader implements OrderDetailsReaderInterface
         $items = [];
 
         foreach ($orderTransfer->getItems() as $itemTransfer) {
-            $items[] = $this->buildItemData($itemTransfer);
+            $items[] = $this->buildItemData($itemTransfer, $orderTransfer);
         }
 
         return $items;
@@ -229,7 +229,7 @@ class OrderDetailsReader implements OrderDetailsReaderInterface
     /**
      * @return array<string, mixed>
      */
-    protected function buildItemData(ItemTransfer $itemTransfer): array
+    protected function buildItemData(ItemTransfer $itemTransfer, OrderTransfer $orderTransfer): array
     {
         $shipment = $itemTransfer->getShipment();
 
@@ -243,6 +243,8 @@ class OrderDetailsReader implements OrderDetailsReaderInterface
             'state' => $itemTransfer->getState()?->getName(),
             'idShipmentMethod' => $shipment?->getMethod()?->getIdShipmentMethod(),
             'shipmentMethodName' => $shipment?->getMethod()?->getName(),
+            'billingAddress' => $this->buildAddressData($orderTransfer->getBillingAddress()),
+            'shippingAddress' => $this->buildAddressData($shipment?->getShippingAddress() ?? $orderTransfer->getShippingAddress()),
         ];
     }
 }

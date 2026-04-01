@@ -32,6 +32,11 @@ class DiscountManagementAgentPlugin extends AbstractPlugin implements Backoffice
     protected const string NAME = 'Discount Management';
 
     /**
+     * @link \SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\DiscountManagementToolSetPlugin::TOOL_SET_DISCOUNT_MANAGEMENT
+     */
+    protected const string TOOL_SET_DISCOUNT_MANAGEMENT = 'discount_management_tools';
+
+    /**
      * {@inheritDoc}
      *
      * @api
@@ -74,7 +79,7 @@ class DiscountManagementAgentPlugin extends AbstractPlugin implements Backoffice
             ->setAiConfigurationName(AiCommerceConstants::AI_CONFIGURATION_DISCOUNT_MANAGEMENT)
             ->setConversationReference($backofficeAssistantPromptRequest->getConversationReference())
             ->setStructuredMessage(new DiscountManagementAgentResponseTransfer())
-            ->addToolSetName(AiCommerceConstants::TOOL_SET_DISCOUNT_MANAGEMENT)
+            ->addToolSetName(static::TOOL_SET_DISCOUNT_MANAGEMENT)
             ->setPromptMessage(
                 (new PromptMessageTransfer())
                     ->setType(AiFoundationConstants::MESSAGE_TYPE_USER)

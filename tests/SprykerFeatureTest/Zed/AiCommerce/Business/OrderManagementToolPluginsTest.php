@@ -58,6 +58,8 @@ class OrderManagementToolPluginsTest extends Unit
         $this->assertArrayHasKey('billingAddress', $decoded);
         $this->assertArrayHasKey('payments', $decoded);
         $this->assertArrayHasKey('expenses', $decoded);
+        $this->assertArrayHasKey('billingAddress', $decoded['items'][0]);
+        $this->assertArrayHasKey('shippingAddress', $decoded['items'][0]);
     }
 
     public function testGetOrderDetailsToolPluginReturnsEmptyJsonForUnknownOrder(): void
@@ -93,6 +95,8 @@ class OrderManagementToolPluginsTest extends Unit
         $this->assertArrayHasKey('billingAddress', $decoded);
         $this->assertArrayHasKey('payments', $decoded);
         $this->assertArrayHasKey('expenses', $decoded);
+        $this->assertArrayHasKey('billingAddress', $decoded['items'][0]);
+        $this->assertArrayHasKey('shippingAddress', $decoded['items'][0]);
     }
 
     public function testGetOrderDetailsByIdToolPluginReturnsEmptyJsonForUnknownId(): void

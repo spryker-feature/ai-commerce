@@ -11,7 +11,6 @@ namespace SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation;
 
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolSetPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
-use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
 
 /**
  * @method \SprykerFeature\Zed\AiCommerce\Communication\AiCommerceCommunicationFactory getFactory()
@@ -19,6 +18,8 @@ use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
  */
 class DiscountManagementToolSetPlugin extends AbstractPlugin implements ToolSetPluginInterface
 {
+    public const string TOOL_SET_DISCOUNT_MANAGEMENT = 'discount_management_tools';
+
     /**
      * {@inheritDoc}
      *
@@ -26,7 +27,7 @@ class DiscountManagementToolSetPlugin extends AbstractPlugin implements ToolSetP
      */
     public function getName(): string
     {
-        return AiCommerceConstants::TOOL_SET_DISCOUNT_MANAGEMENT;
+        return static::TOOL_SET_DISCOUNT_MANAGEMENT;
     }
 
     /**
