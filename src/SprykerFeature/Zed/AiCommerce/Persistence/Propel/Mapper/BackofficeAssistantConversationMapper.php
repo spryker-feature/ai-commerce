@@ -15,24 +15,24 @@ use Orm\Zed\AiCommerce\Persistence\SpyBackofficeAssistantConversation;
 class BackofficeAssistantConversationMapper
 {
     public function mapBackofficeAssistantConversationTransferToBackofficeAssistantConversationEntity(
-        BackofficeAssistantConversationTransfer $transfer,
-        SpyBackofficeAssistantConversation $entity,
+        BackofficeAssistantConversationTransfer $conversationTransfer,
+        SpyBackofficeAssistantConversation $conversationEntity,
     ): SpyBackofficeAssistantConversation {
-        $entity->fromArray($transfer->modifiedToArray());
-        if ($entity->isNew()) {
-            $entity->setFkUser($transfer->getIdUser());
+        $conversationEntity->fromArray($conversationTransfer->modifiedToArray());
+        if ($conversationTransfer->getIdUser() !== null) {
+            $conversationEntity->setFkUser($conversationTransfer->getIdUser());
         }
 
-        return $entity;
+        return $conversationEntity;
     }
 
     public function mapBackofficeAssistantConversationEntityToBackofficeAssistantConversationTransfer(
-        SpyBackofficeAssistantConversation $entity,
-        BackofficeAssistantConversationTransfer $transfer,
+        SpyBackofficeAssistantConversation $conversationEntity,
+        BackofficeAssistantConversationTransfer $conversationTransfer,
     ): BackofficeAssistantConversationTransfer {
-        $transfer->fromArray($entity->toArray(), true);
-        $transfer->setIdUser($entity->getFkUser());
+        $conversationTransfer->fromArray($conversationEntity->toArray(), true);
+        $conversationTransfer->setIdUser($conversationEntity->getFkUser());
 
-        return $transfer;
+        return $conversationTransfer;
     }
 }
