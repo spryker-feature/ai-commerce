@@ -32,12 +32,12 @@ class OrderManagementAgentPlugin extends AbstractPlugin implements BackofficeAss
     protected const string NAME = 'Order Management';
 
     /**
-     * @link \SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\OrderDetailsToolSetPlugin::TOOL_SET_ORDER_DETAILS
+     * @uses \SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\OrderDetailsToolSetPlugin::TOOL_SET_ORDER_DETAILS
      */
     protected const string TOOL_SET_ORDER_DETAILS = 'order_details_tools';
 
     /**
-     * @link \SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\OrderManagementToolSetPlugin::TOOL_SET_ORDER_MANAGEMENT
+     * @uses \SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\OrderManagementToolSetPlugin::TOOL_SET_ORDER_MANAGEMENT
      */
     protected const string TOOL_SET_ORDER_MANAGEMENT = 'order_management_tools';
 

@@ -18,7 +18,7 @@ use Spryker\Zed\Kernel\Communication\AbstractPlugin;
  */
 class NavigationToolSetPlugin extends AbstractPlugin implements ToolSetPluginInterface
 {
-    public const string TOOL_SET_NAVIGATION = 'navigation_tools';
+    protected const string TOOL_SET_NAVIGATION = 'navigation_tools';
 
     /**
      * {@inheritDoc}

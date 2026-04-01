@@ -18,7 +18,7 @@ use Spryker\Zed\Kernel\Communication\AbstractPlugin;
  */
 class OrderDetailsToolSetPlugin extends AbstractPlugin implements ToolSetPluginInterface
 {
-    public const string TOOL_SET_ORDER_DETAILS = 'order_details_tools';
+    protected const string TOOL_SET_ORDER_DETAILS = 'order_details_tools';
 
     /**
      * {@inheritDoc}

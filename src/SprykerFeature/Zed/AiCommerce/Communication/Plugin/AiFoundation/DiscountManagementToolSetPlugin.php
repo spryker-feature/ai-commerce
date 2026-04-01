@@ -18,7 +18,7 @@ use Spryker\Zed\Kernel\Communication\AbstractPlugin;
  */
 class DiscountManagementToolSetPlugin extends AbstractPlugin implements ToolSetPluginInterface
 {
-    public const string TOOL_SET_DISCOUNT_MANAGEMENT = 'discount_management_tools';
+    protected const string TOOL_SET_DISCOUNT_MANAGEMENT = 'discount_management_tools';
 
     /**
      * {@inheritDoc}
