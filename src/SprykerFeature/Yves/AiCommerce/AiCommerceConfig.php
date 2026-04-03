@@ -11,8 +11,20 @@ use Spryker\Yves\Kernel\AbstractBundleConfig;
 
 class AiCommerceConfig extends AbstractBundleConfig
 {
+    /**
+     * Specification:
+     * - Defines the redirect type that navigates to search results page after search by image.
+     *
+     * @api
+     */
     public const string SEARCH_BY_IMAGE_REDIRECT_TYPE_SEARCH_RESULTS = 'search_results';
 
+    /**
+     * Specification:
+     * - Defines the redirect type that navigates to the first matched product page after search by image.
+     *
+     * @api
+     */
     public const string SEARCH_BY_IMAGE_REDIRECT_TYPE_FIRST_PRODUCT = 'first_product';
 
     protected const int SEARCH_BY_IMAGE_MAX_IMAGE_SIZE_BYTES = 5_242_880;

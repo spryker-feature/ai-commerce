@@ -1,0 +1,192 @@
+{% if isBackofficeAssistantEnabled() %}
+    <link rel="stylesheet" href="{{ assetsPath('css/spryker-zed-ai-commerce.css') }}" />
+
+    <button type="button"
+            class="backoffice-assistant__toggle js-backoffice-assistant__toggle"
+            aria-label="{{ 'AI Assistant' | trans }}">
+        <span class="backoffice-assistant__toggle-icon">&#x1F916;</span>
+        <span class="backoffice-assistant__toggle-text">{{ 'Assistant' | trans }}</span>
+    </button>
+
+    <div class="backoffice-assistant__panel js-backoffice-assistant__panel"
+         role="dialog"
+         aria-label="{{ 'AI Assistant' | trans }}"
+         data-class-panel-open="backoffice-assistant__panel--open"
+         data-class-send-stop="backoffice-assistant__send--stop"
+         data-class-badge-animate="backoffice-assistant__agent-badge--animate"
+         data-class-messages-hidden="backoffice-assistant__messages--hidden"
+         data-class-item-deleting="backoffice-assistant__histories-item--deleting"
+         data-class-item-deleted="backoffice-assistant__histories-item--deleted"
+         data-i18n-retry="{{ 'Retry' | trans | e('html_attr') }}"
+         data-i18n-arguments="{{ 'Arguments' | trans | e('html_attr') }}"
+         data-i18n-show-result="{{ 'Show result' | trans | e('html_attr') }}"
+         data-i18n-hide-result="{{ 'Hide result' | trans | e('html_attr') }}"
+         data-i18n-unsupported-file-type="{{ 'Unsupported file type: ' | trans | e('html_attr') }}"
+         data-i18n-file-too-large="{{ 'File too large (max 5 MB): ' | trans | e('html_attr') }}"
+         data-i18n-failed-load-conversations="{{ 'Failed to load conversations.' | trans | e('html_attr') }}"
+         data-i18n-delete-conversation="{{ 'Delete conversation' | trans | e('html_attr') }}"
+         data-i18n-greeting="{{ 'Hello, %userName%! How can I help you today?' | trans({'%userName%': '__USERNAME__'}) | e('html_attr') }}"
+         data-i18n-request-failed="{{ 'Request failed with status ' | trans | e('html_attr') }}"
+         data-i18n-request-interrupted="{{ 'Request interrupted.' | trans | e('html_attr') }}"
+         data-i18n-connection-error="{{ 'Connection error. Please try again.' | trans | e('html_attr') }}"
+         data-i18n-no-response="{{ 'No response received.' | trans | e('html_attr') }}"
+         data-i18n-error-prefix="{{ 'Error: ' | trans | e('html_attr') }}"
+         data-i18n-failed-load-history="{{ 'Failed to load conversation history.' | trans | e('html_attr') }}"
+         data-i18n-tool-result="{{ 'Tool Result' | trans | e('html_attr') }}"
+         data-i18n-page-context-label="{{ 'Page context' | trans | e('html_attr') }}">
+        <div class="backoffice-assistant__header">
+            <div class="backoffice-assistant__header-actions">
+                <button type="button"
+                        class="backoffice-assistant__header-btn js-backoffice-assistant__history-btn"
+                        title="{{ 'Chat history' | trans }}"
+                        aria-label="{{ 'Chat history' | trans }}">
+                    <span class="fa fa-history"></span>
+                </button>
+                <button type="button"
+                        class="backoffice-assistant__header-btn js-backoffice-assistant__new-chat"
+                        title="{{ 'New conversation' | trans }}"
+                        aria-label="{{ 'New conversation' | trans }}">
+                    <span class="fa fa-plus"></span>
+                </button>
+            </div>
+            <div class="backoffice-assistant__header-center">
+                <strong class="backoffice-assistant__header-title">{{ 'Backoffice Assistant' | trans }}</strong>
+                <div class="backoffice-assistant__agent-row">
+                    <span class="backoffice-assistant__agent-badge js-backoffice-assistant__agent-badge"></span>
+                    <select class="backoffice-assistant__agent-select js-backoffice-assistant__agent-select"
+                            aria-label="{{ 'Select agent' | trans }}">
+                        <option value="">{{ 'Auto' | trans }}</option>
+                    </select>
+                </div>
+            </div>
+            <button type="button"
+                    class="backoffice-assistant__close js-backoffice-assistant__close"
+                    aria-label="{{ 'Close AI Assistant' | trans }}">
+                <span class="fa fa-times"></span>
+            </button>
+        </div>
+
+        <div class="backoffice-assistant__histories js-backoffice-assistant__histories" hidden>
+            <ul class="backoffice-assistant__histories-list js-backoffice-assistant__histories-list"></ul>
+            <p class="backoffice-assistant__histories-empty js-backoffice-assistant__histories-empty" hidden>
+                {{ 'No conversations yet. Start a new one!' | trans }}
+            </p>
+        </div>
+
+        <div class="backoffice-assistant__messages js-backoffice-assistant__messages"></div>
+
+        <div class="backoffice-assistant__footer js-backoffice-assistant__footer">
+            <div class="backoffice-assistant__attachments-preview js-backoffice-assistant__attachments-preview"></div>
+            <div class="backoffice-assistant__page-context-suggestions js-backoffice-assistant__page-context-suggestions"></div>
+            <div class="backoffice-assistant__footer-row">
+                <button type="button"
+                        class="backoffice-assistant__attach js-backoffice-assistant__attach"
+                        aria-label="{{ 'Attach file' | trans }}"
+                        title="{{ 'Attach file' | trans }}">
+                    <span class="fa fa-paperclip"></span>
+                </button>
+                <input type="file"
+                       class="backoffice-assistant__file-input js-backoffice-assistant__file-input"
+                       accept="image/png,image/jpeg,image/gif,image/webp,application/pdf,text/plain,text/csv,.csv"
+                       multiple
+                       hidden />
+                <textarea class="backoffice-assistant__input js-backoffice-assistant__input"
+                          rows="1"
+                          placeholder="{{ 'Ask me anything...' | trans }}"
+                          aria-label="{{ 'Message input' | trans }}"></textarea>
+                <button type="button"
+                        class="backoffice-assistant__send js-backoffice-assistant__send"
+                        aria-label="{{ 'Send message' | trans }}"
+                        data-icon-send="fa-paper-plane"
+                        data-icon-stop="fa-stop">
+                    <span class="fa fa-paper-plane"></span>
+                </button>
+            </div>
+        </div>
+
+        <template data-id="backoffice-assistant-message">
+            <div class="backoffice-assistant__message"></div>
+        </template>
+
+        <template data-id="backoffice-assistant-loading">
+            <div class="backoffice-assistant__message backoffice-assistant__message--ai backoffice-assistant__message--loading">
+                <span class="backoffice-assistant__typing-dot"></span>
+                <span class="backoffice-assistant__typing-dot"></span>
+                <span class="backoffice-assistant__typing-dot"></span>
+            </div>
+        </template>
+
+        <template data-id="backoffice-assistant-retry">
+            <button type="button" class="backoffice-assistant__retry-btn"></button>
+        </template>
+
+        <template data-id="backoffice-assistant-reasoning">
+            <div class="backoffice-assistant__message backoffice-assistant__message--reasoning"></div>
+        </template>
+
+        <template data-id="backoffice-assistant-attachments-container">
+            <div class="backoffice-assistant__message-attachments"></div>
+        </template>
+
+        <template data-id="backoffice-assistant-tool-call">
+            <div class="backoffice-assistant__tool-call-label">
+                <i class="fa fa-cog"></i>
+                <span class="backoffice-assistant__tool-call-name"></span>
+            </div>
+            <div class="backoffice-assistant__tool-call-section" data-section="args">
+                <span class="backoffice-assistant__tool-call-section-label"></span>
+                <pre class="backoffice-assistant__tool-call-code"></pre>
+            </div>
+            <div class="backoffice-assistant__tool-call-section" data-section="result">
+                <button type="button" class="backoffice-assistant__tool-call-toggle"></button>
+                <pre class="backoffice-assistant__tool-call-code backoffice-assistant__tool-call-code--collapsed"></pre>
+            </div>
+        </template>
+
+        <template data-id="backoffice-assistant-attachment-chip">
+            <div class="backoffice-assistant__attachment-chip">
+                <span class="backoffice-assistant__attachment-chip-name"></span>
+                <button type="button" class="backoffice-assistant__attachment-chip-remove"><i class="fa fa-times"></i></button>
+            </div>
+        </template>
+
+        <template data-id="backoffice-assistant-attachment-pill">
+            <span class="backoffice-assistant__message-attachment-pill">
+                <i class="fa fa-file"></i>
+                <span class="backoffice-assistant__message-attachment-pill-name"></span>
+            </span>
+        </template>
+
+        <template data-id="backoffice-assistant-page-context-suggestion">
+            <button type="button" class="backoffice-assistant__page-context-suggestion">
+                <i class="fa fa-map-marker"></i>
+                <span class="backoffice-assistant__page-context-suggestion-label"></span>
+                <i class="fa fa-plus-circle"></i>
+            </button>
+        </template>
+
+        <template data-id="backoffice-assistant-page-context-chip">
+            <div class="backoffice-assistant__context-chip">
+                <i class="fa fa-map-marker"></i>
+                <span class="backoffice-assistant__context-chip-name"></span>
+                <button type="button" class="backoffice-assistant__context-chip-remove"><i class="fa fa-times"></i></button>
+            </div>
+        </template>
+
+        <template data-id="backoffice-assistant-history-item">
+            <li class="backoffice-assistant__histories-item">
+                <span class="backoffice-assistant__histories-item-name"></span>
+                <span class="backoffice-assistant__histories-item-agent"></span>
+                <button type="button" class="backoffice-assistant__histories-item-delete"><i class="fa fa-trash"></i></button>
+            </li>
+        </template>
+    </div>
+
+    <script>
+        window.BackofficeAssistantConfig = {
+            userName: '{{ username is defined ? username | e('js') : '' }}',
+            csrfToken: '{{ csrf_token('backoffice-assistant') | e('js') }}'
+        };
+    </script>
+    <script src="{{ assetsPath('js/spryker-zed-ai-commerce.js') }}"></script>
+{% endif %}

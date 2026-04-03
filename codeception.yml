@@ -1,5 +1,6 @@
 namespace: SprykerFeatureTest
 include:
+    - tests/SprykerFeatureTest/Zed/AiCommerce
     - tests/SprykerFeatureTest/Client/AiCommerce
     - tests/SprykerFeatureTest/Yves/AiCommerce
 

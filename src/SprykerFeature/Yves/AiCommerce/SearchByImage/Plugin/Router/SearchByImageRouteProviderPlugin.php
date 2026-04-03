@@ -12,7 +12,7 @@ use Spryker\Yves\Router\Route\RouteCollection;
 
 class SearchByImageRouteProviderPlugin extends AbstractRouteProviderPlugin
 {
-    public const string ROUTE_SEARCH_BY_IMAGE = 'search-by-image';
+    protected const string ROUTE_SEARCH_BY_IMAGE = 'search-by-image';
 
     protected const string PATTERN_SEARCH_BY_IMAGE = '/search-by-image';
 

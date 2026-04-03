@@ -7,6 +7,9 @@
         <property name="promptMessage" type="PromptMessage"/>
         <property name="structuredMessage" type="object" description="Transfer object that defines the schema for structured response from the LLM."/>
         <property name="aiConfigurationName" type="string" description="The configuration name of ai configuration"/>
+        <property name="conversationReference" type="string" description="Optional conversation identifier for chat history persistence. When provided, enables storage-backed conversation history."/>
+        <property name="maxRetries" type="int" description="Maximum number of retry attempts for the request in case of failures. Defaults to 1."/>
+        <property name="toolSetNames" type="string[]" singular="toolSetName" description="List of AI tool set names."/>
     </transfer>
 
     <transfer name="PromptResponse" strict="true">
@@ -20,10 +23,250 @@
         <property name="type" type="string" description="Message type: user, assistant, tool_call, or tool_result"/>
         <property name="content" type="string"/>
         <property name="attachments" type="Attachment[]" singular="attachment"/>
+        <property name="toolInvocations" type="ToolInvocation[]" singular="toolInvocation" description="Tool invocations associated with this message (for tool_call and tool_result types)"/>
     </transfer>
 
     <transfer name="Error">
         <property name="message" type="string"/>
+    </transfer>
+
+    <transfer name="BackofficeAssistantConversation" strict="true">
+        <property name="messages" type="PromptMessage[]" singular="message"/>
+        <property name="userSelectedAgent" type="string"/>
+        <property name="agent" type="string"/>
+        <property name="name" type="string"/>
+        <property name="conversationReference" type="string"/>
+        <property name="idUser" type="int"/>
+        <property name="idBackofficeAssistantConversation" type="int"/>
+    </transfer>
+
+    <transfer name="BackofficeAssistantConversationCollection" strict="true">
+        <property name="backofficeAssistantConversations" type="BackofficeAssistantConversation[]" singular="backofficeAssistantConversation"/>
+    </transfer>
+
+    <transfer name="BackofficeAssistantConversationCriteria" strict="true">
+        <property name="backofficeAssistantConversationConditions" type="BackofficeAssistantConversationConditions"/>
+    </transfer>
+
+    <transfer name="BackofficeAssistantConversationConditions" strict="true">
+        <property name="withMessages" type="bool"/>
+        <property name="conversationReferences" type="string[]" singular="conversationReference"/>
+        <property name="idUsers" type="int[]" singular="idUser"/>
+        <property name="backofficeAssistantConversationIds" type="int[]" singular="idBackofficeAssistantConversation"/>
+        <property name="limit" type="int"/>
+    </transfer>
+
+    <transfer name="BackofficeAssistantConversationCollectionRequest" strict="true">
+        <property name="backofficeAssistantConversations" type="BackofficeAssistantConversation[]" singular="backofficeAssistantConversation"/>
+    </transfer>
+
+    <transfer name="BackofficeAssistantConversationCollectionResponse" strict="true">
+        <property name="errors" type="Error[]" singular="error"/>
+        <property name="backofficeAssistantConversations" type="BackofficeAssistantConversation[]" singular="backofficeAssistantConversation"/>
+    </transfer>
+
+    <transfer name="BackofficeAssistantConversationCollectionDeleteCriteria" strict="true">
+        <property name="conversationReferences" type="string[]" singular="conversationReference"/>
+    </transfer>
+
+    <transfer name="BackofficeAssistantPromptRequest" strict="true">
+        <property name="idUser" type="int"/>
+        <property name="selectedAgent" type="string"/>
+        <property name="context" type="array" singular="contextItem"/>
+        <property name="rawAttachments" type="array" singular="rawAttachment"/>
+        <property name="attachments" type="Attachment[]" singular="attachment"/>
+        <property name="conversationReference" type="string"/>
+        <property name="prompt" type="string"/>
+    </transfer>
+
+    <transfer name="BackofficeAssistantPromptResponse" strict="true">
+        <property name="message" type="string"/>
+        <property name="reasoningMessage" type="string"/>
+        <property name="agent" type="string"/>
+    </transfer>
+
+    <transfer name="IntentRouterResponse" strict="true">
+        <property name="reasoningMessage" type="string" description="Message to be displayed to the user about the decision taken."/>
+        <property name="agent" type="string" description="The next agent to be called for the given intent. Select agent among provided agents with description. If no agent is selected, the agent will be 'Guardrail'."/>
+    </transfer>
+
+    <transfer name="OrderManagementAgentResponse" strict="true">
+        <property name="message" type="string" description="Response message to be displayed to the user."/>
+        <property name="reasoningMessage" type="string" description="Message to be displayed to the user as a reason why 'Guardrail' or 'Order Management' agent is selected."/>
+        <property name="agent" type="string" description="Set 'Order Management' by default and answer to user is provided. Set 'Guardrail' if user's intent is not related supported agent functionality.."/>
+    </transfer>
+
+    <transfer name="DiscountManagementAgentResponse" strict="true">
+        <property name="message" type="string" description="Response message to be displayed to the user."/>
+        <property name="reasoningMessage" type="string" description="Message to be displayed to the user as a reason why 'Guardrail' or 'Discount Management' agent is selected."/>
+        <property name="agent" type="string" description="Set 'Discount Management' by default when answer to user is provided. Set 'Guardrail' if user's intent is not related to supported agent functionality."/>
+    </transfer>
+
+    <transfer name="GeneralAgentResponse" strict="true">
+        <property name="message" type="string" description="Response message to be displayed to the user."/>
+        <property name="reasoningMessage" type="string" description="Message to be displayed to the user as a reason why 'Guardrail' or 'General Purpose' agent is selected."/>
+        <property name="agent" type="string" description="Set 'General Purpose' by default and answer to user is provided. Set 'Guardrail' if user's intent is not related supported agent functionality."/>
+    </transfer>
+
+    <transfer name="ConversationHistoryCriteria" strict="true">
+        <property name="conversationHistoryConditions" type="ConversationHistoryConditions" description="Filtering conditions for conversation histories."/>
+    </transfer>
+
+    <transfer name="ConversationHistoryConditions" strict="true">
+        <property name="conversationReferences" type="string[]" singular="conversationReference" description="Conversation references to retrieve history for. Uses IN operation - each reference retrieves one conversation."/>
+    </transfer>
+
+    <transfer name="ConversationHistory" strict="true">
+        <property name="messages" type="PromptMessage[]" singular="message" description="Collection of conversation messages in PromptMessage format."/>
+        <property name="conversationReference" type="string" description="Unique identifier for a conversation thread."/>
+    </transfer>
+
+    <transfer name="ConversationHistoryCollection" strict="true">
+        <property name="conversationHistories" type="ConversationHistory[]" singular="conversationHistory" description="Collection of conversation histories."/>
+    </transfer>
+
+    <transfer name="ToolInvocation" strict="true">
+        <property name="name" type="string" description="The unique identifier of the tool that was called."/>
+        <property name="arguments" type="array" singular="argument" description="The parameters passed to the tool during execution."/>
+        <property name="result" type="string" description="The result returned after executing the tool."/>
+    </transfer>
+
+    <transfer name="User">
+        <property name="uuid" type="string" strict="true"/>
+    </transfer>
+
+    <transfer name="OrderCriteria" strict="true">
+        <property name="orderConditions" type="OrderConditions"/>
+    </transfer>
+
+    <transfer name="OrderConditions" strict="true">
+        <property name="orderReferences" type="string[]" singular="orderReference"/>
+    </transfer>
+
+    <transfer name="OrderCollection">
+        <property name="orders" type="Order[]" singular="order"/>
+    </transfer>
+
+    <transfer name="Order">
+        <property name="totals" type="Totals"/>
+        <property name="customer" type="Customer"/>
+        <property name="orderReference" type="string"/>
+        <property name="createdAt" type="string"/>
+        <property name="currencyIsoCode" type="string"/>
+        <property name="store" type="string"/>
+        <property name="items" type="Item[]" singular="item"/>
+        <property name="payments" type="Payment[]" singular="payment"/>
+        <property name="expenses" type="Expense[]" singular="expense"/>
+        <property name="salutation" type="string"/>
+        <property name="firstName" type="string"/>
+        <property name="lastName" type="string"/>
+        <property name="email" type="string"/>
+    </transfer>
+
+    <transfer name="Totals">
+        <property name="grandTotal" type="int"/>
+        <property name="subtotal" type="int"/>
+        <property name="discountTotal" type="int"/>
+        <property name="taxTotal" type="TaxTotal"/>
+        <property name="expenseTotal" type="int"/>
+    </transfer>
+
+    <transfer name="TaxTotal">
+        <property name="amount" type="int"/>
+    </transfer>
+
+    <transfer name="Customer">
+        <property name="firstName" type="string"/>
+        <property name="lastName" type="string"/>
+        <property name="email" type="string"/>
+    </transfer>
+
+    <transfer name="ItemState">
+        <property name="name" type="string"/>
+    </transfer>
+
+    <transfer name="AiToolCall" strict="true">
+        <property name="promptRequest" type="PromptRequest"/>
+        <property name="toolName" type="string"/>
+        <property name="toolResult" type="string"/>
+        <property name="toolArguments" type="array" singular="toolArgument"/>
+    </transfer>
+
+    <transfer name="DiscountConfigurator">
+        <property name="discountVoucher" type="DiscountVoucher"/>
+        <property name="discountGeneral" type="DiscountGeneral"/>
+        <property name="discountCalculator" type="DiscountCalculator"/>
+        <property name="discountCondition" type="DiscountCondition"/>
+    </transfer>
+
+    <transfer name="DiscountCalculator">
+        <property name="calculatorPlugin" type="string"/>
+        <property name="amount" type="string"/>
+        <property name="collectorQueryString" type="string"/>
+        <property name="collectorStrategyType" type="string"/>
+    </transfer>
+
+    <transfer name="DiscountCondition">
+        <property name="decisionRuleQueryString" type="string"/>
+        <property name="minimumItemAmount" type="int"/>
+    </transfer>
+
+    <transfer name="DiscountGeneral">
+        <property name="displayName" type="string"/>
+        <property name="idDiscount" type="int"/>
+        <property name="discountType" type="string"/>
+        <property name="description" type="string"/>
+        <property name="validFrom" type="string"/>
+        <property name="validTo" type="string"/>
+        <property name="isExclusive" type="bool"/>
+        <property name="priority" type="int"/>
+    </transfer>
+
+    <transfer name="DiscountConfiguratorResponse">
+        <property name="isSuccessful" type="bool"/>
+        <property name="discountConfigurator" type="DiscountConfigurator"/>
+    </transfer>
+
+    <transfer name="DiscountVoucher">
+        <property name="fkDiscountVoucherPool" type="int"/>
+        <property name="maxNumberOfUses" type="int"/>
+    </transfer>
+
+    <transfer name="Address">
+        <property name="salutation" type="string"/>
+        <property name="firstName" type="string"/>
+        <property name="lastName" type="string"/>
+        <property name="address1" type="string"/>
+        <property name="address2" type="string"/>
+        <property name="city" type="string"/>
+        <property name="zipCode" type="string"/>
+        <property name="iso2Code" type="string"/>
+        <property name="company" type="string"/>
+        <property name="phone" type="string"/>
+        <property name="email" type="string"/>
+    </transfer>
+
+    <transfer name="Expense">
+        <property name="type" type="string"/>
+        <property name="name" type="string"/>
+        <property name="sumPrice" type="int"/>
+        <property name="taxRate" type="float"/>
+    </transfer>
+
+    <transfer name="Payment">
+        <property name="paymentProvider" type="string"/>
+        <property name="paymentMethod" type="string"/>
+        <property name="amount" type="int"/>
+    </transfer>
+
+    <transfer name="Shipment">
+        <property name="shippingAddress" type="Address"/>
+        <property name="method" type="ShipmentMethod"/>
+    </transfer>
+
+    <transfer name="ShipmentMethod">
+        <property name="idShipmentMethod" type="int"/>
+        <property name="name" type="string"/>
     </transfer>
 
     <transfer name="ProductRecognition" strict="true">
@@ -55,6 +298,12 @@
     <transfer name="Item">
         <property name="sku" type="string"/>
         <property name="name" type="string"/>
+        <property name="quantity" type="int"/>
+        <property name="unitPrice" type="int"/>
+        <property name="state" type="ItemState"/>
+        <property name="shipment" type="Shipment"/>
+        <property name="sumPrice" type="int"/>
+        <property name="unitTaxAmount" type="int"/>
     </transfer>
 
     <transfer name="Attachment" strict="true">

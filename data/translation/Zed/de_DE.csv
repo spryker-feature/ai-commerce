@@ -1,0 +1,42 @@
+"Open AI Assistant","KI-Assistenten öffnen"
+Assistant,Assistent
+"AI Assistant",KI-Assistent
+"Chat history",Chatverlauf
+"New conversation","Neues Gespräch"
+"Backoffice Assistant",Backoffice-Assistent
+"Select agent","Agent auswählen"
+Auto,Automatisch
+"Close AI Assistant","KI-Assistent schließen"
+"No conversations yet. Start a new one!","Noch keine Unterhaltungen. Starten Sie eine neue!"
+"Attach file","Datei anhängen"
+"Ask me anything...","Fragen Sie mich alles..."
+"Message input",Nachrichteneingabe
+"Send message","Nachricht senden"
+Retry,"Erneut versuchen"
+Arguments,Argumente
+"Show result","Ergebnis anzeigen"
+"Hide result","Ergebnis ausblenden"
+"Unsupported file type: ","Nicht unterstützter Dateityp: "
+"File too large (max 5 MB): ","Datei zu groß (max. 5 MB): "
+"Failed to load conversations.","Unterhaltungen konnten nicht geladen werden."
+"Delete conversation","Unterhaltung löschen"
+"Hello, %userName%! How can I help you today?","Hallo, %userName%! Wie kann ich Ihnen heute helfen?"
+"Request failed with status ","Anfrage fehlgeschlagen mit Status "
+"Request interrupted.","Anfrage unterbrochen."
+"Connection error. Please try again.","Verbindungsfehler. Bitte versuchen Sie es erneut."
+"No response received.","Keine Antwort erhalten."
+"Error: ","Fehler: "
+"Failed to load conversation history.","Unterhaltungsverlauf konnte nicht geladen werden."
+"Tool Result",Werkzeugergebnis
+backoffice_assistant.validation.prompt_required,"Eingabe ist erforderlich."
+backoffice_assistant.validation.user_id_required,"Benutzer ist nicht identifiziert."
+backoffice_assistant.validation.attachment_unsupported_media_type,"Ein oder mehrere Anhänge haben einen nicht unterstützten Dateityp."
+backoffice_assistant.validation.attachment_file_too_large,"Ein oder mehrere Anhänge überschreiten die maximal zulässige Dateigröße."
+backoffice_assistant.validation.attachment_count_exceeded,"Zu viele Anhänge. Bitte reduzieren Sie die Anzahl der Dateien."
+backoffice_assistant.validation.attachment_total_size_exceeded,"Die Gesamtgröße der Anhänge überschreitet das zulässige Limit."
+backoffice_assistant.validation.attachment_invalid_content,"Ein oder mehrere Anhänge haben ungültige Inhalte."
+backoffice_assistant.error.disabled,"Backoffice-Assistent ist deaktiviert."
+backoffice_assistant.error.invalid_csrf_token,"Ungültiges oder fehlendes CSRF-Token."
+backoffice_assistant.error.missing_conversation_reference,"Gesprächsreferenz fehlt."
+backoffice_assistant.error.conversation_not_found,"Gespräch nicht gefunden."
+backoffice_assistant.error.ai_service_unavailable,"KI-Dienst nicht verfügbar."
