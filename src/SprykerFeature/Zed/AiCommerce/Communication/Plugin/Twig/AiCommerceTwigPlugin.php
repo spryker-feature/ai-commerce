@@ -22,15 +22,19 @@ class AiCommerceTwigPlugin extends AbstractPlugin implements TwigPluginInterface
 {
     protected const string FUNCTION_NAME_IS_BACKOFFICE_ASSISTANT_ENABLED = 'isBackofficeAssistantEnabled';
 
+    protected const string GLOBAL_VARIABLE_IS_BACKOFFICE_ASSISTANT_CONNECTED = 'isBackofficeAssistantConnected';
+
     /**
      * {@inheritDoc}
      * - Adds isBackofficeAssistantEnabled Twig function.
+     * - Adds isBackofficeAssistantConnected Twig global variable.
      *
      * @api
      */
     public function extend(Environment $twig, ContainerInterface $container): Environment
     {
         $twig->addFunction($this->createIsBackofficeAssistantEnabledFunction());
+        $twig->addGlobal(static::GLOBAL_VARIABLE_IS_BACKOFFICE_ASSISTANT_CONNECTED, true);
 
         return $twig;
     }
