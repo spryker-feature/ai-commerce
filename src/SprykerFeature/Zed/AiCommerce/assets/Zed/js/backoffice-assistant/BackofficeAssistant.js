@@ -6,6 +6,8 @@ import { BackofficeAssistantAttachmentManager } from './BackofficeAssistantAttac
 import { BackofficeAssistantAgentBadge } from './BackofficeAssistantAgentBadge';
 import { BackofficeAssistantHistories } from './BackofficeAssistantHistories';
 import { BackofficeAssistantPageContext } from './BackofficeAssistantPageContext';
+import { BackofficeAssistantFormContext } from './BackofficeAssistantFormContext';
+import { BackofficeAssistantFormFiller } from './BackofficeAssistantFormFiller';
 
 export class BackofficeAssistant {
     static #selectors = {
@@ -38,6 +40,8 @@ export class BackofficeAssistant {
     #attachments;
     #histories;
     #pageContext;
+    #formContext;
+    #formFiller;
     #cssClasses;
     #iconClasses;
 
@@ -96,6 +100,13 @@ export class BackofficeAssistant {
             this.#elements.panel,
             this.#i18n,
         );
+        this.#formContext = new BackofficeAssistantFormContext(
+            this.#elements.pageContextSuggestions,
+            this.#elements.panel,
+            this.#i18n,
+            this.#parseExcludedFormNames(),
+        );
+        this.#formFiller = new BackofficeAssistantFormFiller();
 
         this.#init();
     }
@@ -151,7 +162,16 @@ export class BackofficeAssistant {
             failedLoadHistory: dataset.i18nFailedLoadHistory || 'Failed to load conversation history.',
             toolResult: dataset.i18nToolResult || 'Tool Result',
             pageContextLabel: dataset.i18nPageContextLabel || 'Page context',
+            formContextLabel: dataset.i18nFormContextLabel || 'Form',
         };
+    }
+
+    #parseExcludedFormNames() {
+        try {
+            return JSON.parse(this.#elements.panel.dataset.formFillExcludedForms || '[]');
+        } catch {
+            return [];
+        }
     }
 
     #init() {
@@ -170,6 +190,7 @@ export class BackofficeAssistant {
         this.#loadAvailableAgents();
         this.#state.save(true);
         this.#pageContext.showSuggestion();
+        this.#formContext.showSuggestion();
 
         if (this.#state.conversationReference && !this.#state.greetingShown) {
             this.#loadConversationDetail(this.#state.conversationReference);
@@ -209,6 +230,7 @@ export class BackofficeAssistant {
         this.#renderer.clear();
         this.#histories.hide();
         this.#pageContext.reset();
+        this.#formContext.reset();
         this.#elements.input.value = '';
         this.#elements.input.focus();
         this.#showGreeting();
@@ -285,8 +307,9 @@ export class BackofficeAssistant {
 
         this.#setWaiting(true);
 
-        const contextPrefix = this.#pageContext.getContextPrefix();
+        const contextPrefix = this.#pageContext.getContextPrefix() + this.#formContext.getContextPrefix();
         this.#pageContext.clear();
+        this.#formContext.clear();
         const loadingEl = this.#renderer.addLoadingIndicator();
         const body = {
             prompt: contextPrefix + prompt,
@@ -400,6 +423,12 @@ export class BackofficeAssistant {
                 if (data.conversation_reference) {
                     this.#state.conversationReference = data.conversation_reference;
                     this.#state.save(true);
+                }
+
+                break;
+            case 'form_fill':
+                if (data.fields && typeof data.fields === 'object') {
+                    this.#formFiller.fill(data.fields);
                 }
 
                 break;
@@ -525,6 +554,7 @@ export class BackofficeAssistant {
         this.#elements.toggle.hidden = true;
         this.#state.greetingShown = true;
         this.#pageContext.showSuggestion();
+        this.#formContext.showSuggestion();
 
         if (this.#state.conversationReference) {
             this.#loadConversationDetail(this.#state.conversationReference);

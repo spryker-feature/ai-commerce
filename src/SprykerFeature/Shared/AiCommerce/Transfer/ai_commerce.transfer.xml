@@ -335,4 +335,10 @@
         <property name="searchTerm" type="string" description="The term to search for in the image"/>
     </transfer>
 
+    <transfer name="FormFillAgentResponse" strict="true">
+        <property name="message" type="string" description="Response message to be displayed to the user."/>
+        <property name="reasoningMessage" type="string" description="Message to be displayed to the user as a reason why 'Guardrail' or 'Form Fill' agent is selected."/>
+        <property name="agent" type="string" description="Set 'Form Fill' by default when answer to user is provided. Set 'Guardrail' if user's intent is not related to supported agent functionality."/>
+    </transfer>
+
 </transfers>

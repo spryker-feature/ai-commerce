@@ -20,6 +20,8 @@ class AiCommerceConfig extends AbstractBundleConfig
 
     protected const string CONFIGURATION_KEY_DISCOUNT_MANAGEMENT_AGENT_IS_ENABLED = 'ai_commerce:backoffice_assistant:general:is_discount_management_agent_enabled';
 
+    protected const string CONFIGURATION_KEY_FORM_FILL_AGENT_IS_ENABLED = 'ai_commerce:backoffice_assistant:general:is_form_fill_agent_enabled';
+
     protected const bool BACKOFFICE_ASSISTANT_DEFAULT_IS_ENABLED = false;
 
     protected const int BACKOFFICE_ASSISTANT_ATTACHMENT_MAX_FILE_SIZE_BYTES = 5242880;
@@ -180,6 +182,43 @@ class AiCommerceConfig extends AbstractBundleConfig
     }
 
     /**
+     * @var array<string>
+     */
+    protected const array FORM_FILL_EXCLUDED_FORM_NAMES = [
+        'user',
+        'customer',
+        'api-key',
+        'merchant',
+        'address',
+        'shipment_group_form',
+    ];
+
+    /**
+     * Specification:
+     * - Returns true if the Form Fill Agent is enabled.
+     *
+     * @api
+     */
+    public function isFormFillAgentEnabled(): bool
+    {
+        return (bool)filter_var($this->getModuleConfig(static::CONFIGURATION_KEY_FORM_FILL_AGENT_IS_ENABLED, false), FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * Specification:
+     * - Returns form names whose field values must not be captured into the assistant context.
+     * - Protects personal and sensitive data from being sent to the LLM.
+     *
+     * @api
+     *
+     * @return array<string>
+     */
+    public function getFormFillExcludedFormNames(): array
+    {
+        return static::FORM_FILL_EXCLUDED_FORM_NAMES;
+    }
+
+    /**
      * Specification:
      * - Returns the names of AI configurations that should be used for the Backoffice Assistant SSE event.
      *
@@ -193,6 +232,7 @@ class AiCommerceConfig extends AbstractBundleConfig
             AiCommerceConstants::AI_CONFIGURATION_GENERAL_AGENT,
             AiCommerceConstants::AI_CONFIGURATION_ORDER_MANAGEMENT,
             AiCommerceConstants::AI_CONFIGURATION_DISCOUNT_MANAGEMENT,
+            AiCommerceConstants::AI_CONFIGURATION_FORM_FILL,
         ];
     }
 }

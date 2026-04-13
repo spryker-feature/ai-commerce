@@ -24,10 +24,13 @@ class AiCommerceTwigPlugin extends AbstractPlugin implements TwigPluginInterface
 
     protected const string GLOBAL_VARIABLE_IS_BACKOFFICE_ASSISTANT_CONNECTED = 'isBackofficeAssistantConnected';
 
+    protected const string FUNCTION_NAME_GET_FORM_FILL_EXCLUDED_FORM_NAMES = 'getFormFillExcludedFormNames';
+
     /**
      * {@inheritDoc}
      * - Adds isBackofficeAssistantEnabled Twig function.
      * - Adds isBackofficeAssistantConnected Twig global variable.
+     * - Adds getFormFillExcludedFormNames Twig function.
      *
      * @api
      */
@@ -35,6 +38,7 @@ class AiCommerceTwigPlugin extends AbstractPlugin implements TwigPluginInterface
     {
         $twig->addFunction($this->createIsBackofficeAssistantEnabledFunction());
         $twig->addGlobal(static::GLOBAL_VARIABLE_IS_BACKOFFICE_ASSISTANT_CONNECTED, true);
+        $twig->addFunction($this->createGetFormFillExcludedFormNamesFunction());
 
         return $twig;
     }
@@ -44,6 +48,14 @@ class AiCommerceTwigPlugin extends AbstractPlugin implements TwigPluginInterface
         return new TwigFunction(
             static::FUNCTION_NAME_IS_BACKOFFICE_ASSISTANT_ENABLED,
             fn (): bool => $this->getConfig()->isBackofficeAssistantEnabled(),
+        );
+    }
+
+    protected function createGetFormFillExcludedFormNamesFunction(): TwigFunction
+    {
+        return new TwigFunction(
+            static::FUNCTION_NAME_GET_FORM_FILL_EXCLUDED_FORM_NAMES,
+            fn (): array => $this->getConfig()->getFormFillExcludedFormNames(),
         );
     }
 }

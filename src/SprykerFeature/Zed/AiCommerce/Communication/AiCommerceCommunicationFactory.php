@@ -26,6 +26,7 @@ use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\Inten
 use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\PromptProcessor;
 use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\PromptProcessorInterface;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\CreateDiscountToolPlugin;
+use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\FillFormToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetDiscountDetailsToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetNavigationToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderDetailsByIdToolPlugin;
@@ -168,5 +169,10 @@ class AiCommerceCommunicationFactory extends AbstractCommunicationFactory
     public function createSkillOrderManagementKnowledgeBaseToolPlugin(): ToolPluginInterface
     {
         return new SkillOrderManagementKnowledgeBaseToolPlugin();
+    }
+
+    public function createFillFormToolPlugin(): ToolPluginInterface
+    {
+        return new FillFormToolPlugin();
     }
 }

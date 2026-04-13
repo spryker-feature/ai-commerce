@@ -69,4 +69,18 @@ interface AiCommerceConstants
      * @api
      */
     public const string CONFIGURATION_KEY_DISCOUNT_MANAGEMENT_SYSTEM_PROMPT = 'ai_commerce:backoffice_assistant:system_prompts:discount_management_system_prompt';
+
+    /**
+     * AI configuration name used by the form fill agent for filling backoffice forms based on natural language instructions.
+     *
+     * @api
+     */
+    public const string AI_CONFIGURATION_FORM_FILL = 'AI_COMMERCE:AI_CONFIGURATION_FORM_FILL';
+
+    /**
+     * Configuration key for the form fill agent system prompt.
+     *
+     * @api
+     */
+    public const string CONFIGURATION_KEY_FORM_FILL_SYSTEM_PROMPT = 'ai_commerce:backoffice_assistant:system_prompts:form_fill_system_prompt';
 }
