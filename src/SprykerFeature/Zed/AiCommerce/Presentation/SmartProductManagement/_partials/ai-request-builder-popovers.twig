@@ -1,0 +1,139 @@
+{% set languageIcon = '<svg class="btn__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="m476-80 182-480h84L924-80h-84l-43-122H603L560-80h-84ZM160-200l-56-56 202-202q-35-35-63.5-80T190-640h84q20 39 40 68t48 58q33-33 68.5-92.5T484-720H40v-80h280v-80h80v80h280v80H564q-21 72-63 148t-83 116l96 98-30 82-122-125-202 201Zm468-72h144l-72-204-72 204Z"/></svg>' %}
+
+{% set improveIcon = '<svg class="btn__icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M740-160v-488l-44 44-56-56 140-140 140 140-57 56-43-43v487h-80Zm-620-80v-163l295-294q24-24 57.5-23t56.5 25l48 50q23 23 22.5 56T576-533L283-240H120Zm80-80h50l162-162-25-25-25-25-162 162v50Zm269-219-50-50 50 50Z"/></svg>' %}
+
+<div class="all-ai-actions-popover modal-popover" popover="manual" data-ai-popover>
+    <div class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">{{ 'ai_commerce.smart_pim.ai_assistant' | trans }}</h4>
+                    <button type="button" class="btn-close" data-close-popover data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body js-modal-body">
+                    <div class="ai-product-management-modal__content">
+                        <h3 class="ai-query-builder__subtitle">{{ 'ai_commerce.smart_pim.please_select_option' | trans }}</h3>
+
+                        <button type="button" class="ai-query-builder__button"
+                                data-target-popover=".locale-selector-popover">
+                            {{ languageIcon | raw }}
+                            {{ 'ai_commerce.smart_pim.translate_to' | trans }}
+                        </button>
+                        <button type="button"
+                            class="ai-query-builder__button"
+                            data-request-action="improve-description"
+                            data-request-url="/ai-commerce/content-improver"
+                            data-request-ready>
+                            {{ improveIcon | raw }}
+                            {{ 'ai_commerce.smart_pim.improve_content' | trans }}
+                        </button>
+                    </div>
+                </div>
+
+                <div class="modal-footer ai-product-management-modal__actions">
+                    <div class="modal-actions">
+                        <button type="button" class="js-ai-product-management-again btn btn-outline btn-view">{{ 'ai_commerce.smart_pim.try_again' | trans }}</button>
+                        <button type="button" class="js-ai-product-management-apply btn">{{ 'ai_commerce.smart_pim.apply' | trans }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" tabindex="-1" class="modal-backdrop"></button>
+    </div>
+</div>
+
+<div class="loading-popover modal-popover ai-product-management-modal is-loading" popover="manual" data-ai-popover>
+    <div class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">{{ 'ai_commerce.smart_pim.ai_assistant' | trans }}</h4>
+                    <button type="button" class="btn-close" data-close-popover data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body js-modal-body">
+                    <div class="ai-product-management-modal__loading">
+                        <span>{{ 'ai_commerce.smart_pim.ai_is_processing' | trans }}</span>
+                        <span class="fa fa-spinner fa-spin"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" tabindex="-1" class="modal-backdrop"></button>
+    </div>
+</div>
+
+<div class="locale-selector-popover modal-popover" popover="manual" data-ai-popover>
+    <div class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">{{ 'ai_commerce.smart_pim.ai_assistant' | trans }}</h4>
+                    <button type="button" class="btn-close" data-close-popover data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body js-modal-body">
+                    <div class="ai-product-management-modal__content">
+                        <h3 class="ai-query-builder__subtitle">{{ 'ai_commerce.smart_pim.select_target_locale' | trans }}</h3>
+
+                        {% for locale in localeCollection %}
+                            <button type="button"
+                                    class="ai-query-builder__button"
+                                    data-request-action="translate-to"
+                                    data-request-url="/ai-commerce/translate"
+                                    data-locale="{{ locale.localeName }}"
+                                    data-request-ready>
+                                {{ locale.localeName }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" tabindex="-1" class="modal-backdrop"></button>
+    </div>
+</div>
+
+<div class="response-popover modal-popover" popover="manual" data-ai-popover>
+    <div class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">{{ 'ai_commerce.smart_pim.ai_assistant' | trans }}</h4>
+                    <button type="button" class="btn-close" data-close-popover data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body js-modal-body">
+                    <div class="ai-product-management-modal__error-block js-ai-product-management-modal__error-block alert alert-warning mb-2"></div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <h3 class="ai-query-builder__subtitle">{{ 'ai_commerce.smart_pim.original' | trans }}</h3>
+                            <textarea id="original-field" class="form-control" cols="30" rows="10"></textarea>
+                        </div>
+                        <div class="col-6">
+                            <h3 class="ai-query-builder__subtitle">{{ 'ai_commerce.smart_pim.suggestion' | trans }}</h3>
+                            <textarea id="response-field" class="form-control" cols="30" rows="10"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer ai-product-management-modal__actions">
+                    <div class="modal-actions">
+                        <button type="button" class="js-ai-builder-again btn btn-outline btn-view">{{ 'ai_commerce.smart_pim.try_again' | trans }}</button>
+                        <button type="button" class="js-ai-builder-apply btn">{{ 'ai_commerce.smart_pim.apply' | trans }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" tabindex="-1" class="modal-backdrop"></button>
+    </div>
+</div>
+
+<script src="{{ assetsPath('js/spryker-ai-commerce-request-builder.js') }}"></script>
+<link rel="stylesheet" href="{{ assetsPath('css/spryker-ai-commerce-request-builder.css') }}" />

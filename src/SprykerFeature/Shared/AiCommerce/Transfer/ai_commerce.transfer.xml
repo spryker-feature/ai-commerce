@@ -22,12 +22,14 @@
     <transfer name="PromptMessage" strict="true">
         <property name="type" type="string" description="Message type: user, assistant, tool_call, or tool_result"/>
         <property name="content" type="string"/>
+        <property name="contentData" type="array" singular="contentData"/>
         <property name="attachments" type="Attachment[]" singular="attachment"/>
         <property name="toolInvocations" type="ToolInvocation[]" singular="toolInvocation" description="Tool invocations associated with this message (for tool_call and tool_result types)"/>
     </transfer>
 
     <transfer name="Error">
         <property name="message" type="string"/>
+        <property name="parameters" type="array" singular="parameter"/>
     </transfer>
 
     <transfer name="BackofficeAssistantConversation" strict="true">
@@ -335,10 +337,103 @@
         <property name="searchTerm" type="string" description="The term to search for in the image"/>
     </transfer>
 
+    <transfer name="AiTranslationResponse" strict="true">
+        <property name="originalText" type="string"/>
+        <property name="sourceLocale" type="string"/>
+        <property name="targetLocale" type="string"/>
+        <property name="translation" type="string"/>
+        <property name="isSuccessful" type="bool"/>
+        <property name="errors" type="Error[]" singular="error"/>
+    </transfer>
+
+    <transfer name="AiTranslationRequest" strict="true">
+        <property name="text" type="string"/>
+        <property name="sourceLocale" type="string"/>
+        <property name="targetLocale" type="string"/>
+    </transfer>
+
+    <transfer name="CategorySuggestionRequest" strict="true">
+        <property name="productName" type="string"/>
+        <property name="productDescription" type="string"/>
+    </transfer>
+
+    <transfer name="CategorySuggestionResponse" strict="true">
+        <property name="suggestions" type="CategorySuggestion[]" singular="suggestion"/>
+        <property name="isSuccessful" type="bool"/>
+        <property name="errors" type="Error[]" singular="error"/>
+    </transfer>
+
+    <transfer name="CategorySuggestion" strict="true">
+        <property name="idCategory" type="int" description="The unique identifier of the category from the existing category list"/>
+        <property name="categoryName" type="string" description="The name of the category that matches the product"/>
+    </transfer>
+
+    <transfer name="CategorySuggestionStructured" strict="true">
+        <property name="categories" type="CategorySuggestion[]" singular="category" description="List of suggested categories that best fit the product based on its name and description"/>
+    </transfer>
+
+    <transfer name="AiTranslationStructured" strict="true">
+        <property name="translation" type="string" description="The translated text in the target locale"/>
+    </transfer>
+
+    <transfer name="AiTranslation" strict="true">
+        <property name="locale" type="string" description="The target locale code, for example de_DE"/>
+        <property name="translation" type="string" description="The translated text for this locale"/>
+    </transfer>
+
+    <transfer name="AiTranslationCollectionStructured" strict="true">
+        <property name="translations" type="AiTranslation[]" singular="translation" description="List of translations per locale"/>
+    </transfer>
+
+    <transfer name="AiTranslationCollectionRequest" strict="true">
+        <property name="text" type="string"/>
+        <property name="sourceLocale" type="string"/>
+        <property name="targetLocales" type="string[]" singular="targetLocale"/>
+    </transfer>
+
+    <transfer name="AiTranslationCollectionResponse" strict="true">
+        <property name="translations" type="array" singular="translation"/>
+        <property name="isSuccessful" type="bool"/>
+        <property name="errors" type="Error[]" singular="error"/>
+    </transfer>
+
+    <transfer name="ImageAltTextRequest" strict="true">
+        <property name="imageUrl" type="string"/>
+        <property name="targetLocale" type="string"/>
+    </transfer>
+
+    <transfer name="ImageAltTextResponse" strict="true">
+        <property name="altText" type="string"/>
+        <property name="isSuccessful" type="bool"/>
+        <property name="errors" type="Error[]" singular="error"/>
+    </transfer>
+
+    <transfer name="ImageAltTextStructured" strict="true">
+        <property name="altText" type="string" description="The generated alt text for the image optimized for SEO"/>
+    </transfer>
+
+    <transfer name="ContentImprovementRequest" strict="true">
+        <property name="text" type="string"/>
+    </transfer>
+
+    <transfer name="ContentImprovementResponse" strict="true">
+        <property name="originalText" type="string"/>
+        <property name="improvedText" type="string"/>
+        <property name="isSuccessful" type="bool"/>
+        <property name="errors" type="Error[]" singular="error"/>
+    </transfer>
+
+    <transfer name="ContentImprovementStructured" strict="true">
+        <property name="improvedText" type="string" description="The improved and enhanced version of the original text with better clarity, grammar, and structure"/>
+    </transfer>
+
     <transfer name="FormFillAgentResponse" strict="true">
         <property name="message" type="string" description="Response message to be displayed to the user."/>
         <property name="reasoningMessage" type="string" description="Message to be displayed to the user as a reason why 'Guardrail' or 'Form Fill' agent is selected."/>
         <property name="agent" type="string" description="Set 'Form Fill' by default when answer to user is provided. Set 'Guardrail' if user's intent is not related to supported agent functionality."/>
+    </transfer>
+
+    <transfer name="ProductAbstract">
     </transfer>
 
 </transfers>

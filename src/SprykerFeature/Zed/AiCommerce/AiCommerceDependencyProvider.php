@@ -33,6 +33,12 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
 
     public const string PROPEL_QUERY_DISCOUNT = 'PROPEL_QUERY_DISCOUNT';
 
+    public const string FACADE_CATEGORY = 'FACADE_CATEGORY';
+
+    public const string FACADE_LOCALE = 'FACADE_LOCALE';
+
+    public const string SERVICE_UTIL_ENCODING = 'SERVICE_UTIL_ENCODING';
+
     public const string PROPEL_QUERY_SALES_ORDER = 'PROPEL_QUERY_SALES_ORDER';
 
     /**
@@ -43,7 +49,6 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
     public function provideCommunicationLayerDependencies(Container $container): Container
     {
         $container = parent::provideCommunicationLayerDependencies($container);
-
         $container = $this->addUserFacade($container);
         $container = $this->addCsrfProviderService($container);
         $container = $this->addGlossaryFacade($container);
@@ -61,6 +66,9 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
         $container = $this->addDiscountFacade($container);
         $container = $this->addOmsFacade($container);
         $container = $this->addSalesFacade($container);
+        $container = $this->addCategoryFacade($container);
+        $container = $this->addLocaleFacade($container);
+        $container = $this->addUtilEncodingService($container);
 
         return $container;
     }
@@ -151,6 +159,33 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
         $container->set(static::PROPEL_QUERY_SALES_ORDER, $container->factory(function (): SpySalesOrderQuery {
             return SpySalesOrderQuery::create();
         }));
+
+        return $container;
+    }
+
+    protected function addCategoryFacade(Container $container): Container
+    {
+        $container->set(static::FACADE_CATEGORY, function (Container $container) {
+            return $container->getLocator()->category()->facade();
+        });
+
+        return $container;
+    }
+
+    protected function addLocaleFacade(Container $container): Container
+    {
+        $container->set(static::FACADE_LOCALE, function (Container $container) {
+            return $container->getLocator()->locale()->facade();
+        });
+
+        return $container;
+    }
+
+    protected function addUtilEncodingService(Container $container): Container
+    {
+        $container->set(static::SERVICE_UTIL_ENCODING, function (Container $container) {
+            return $container->getLocator()->utilEncoding()->service();
+        });
 
         return $container;
     }

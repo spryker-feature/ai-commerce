@@ -1,0 +1,14 @@
+{% if isSmartProductManagementEnabled is defined and isSmartProductManagementEnabled %}
+    <template id="ai-alt-text-trigger-template">
+        <button
+            type="button"
+            data-url="/ai-commerce/image-alt-text"
+            data-field-selector="input"
+            popovertarget="ai-alt-text-modal"
+            class="form-wrapper-clickable-affix__trigger js-ai-alt-image-trigger btn-naked"
+            title="{{ 'AI assistant' | trans }}"
+        >
+            <img width="24" src="{{ assetsPath('img/ai-action-icon.svg') }}" >
+        </button>
+    </template>
+{% endif %}

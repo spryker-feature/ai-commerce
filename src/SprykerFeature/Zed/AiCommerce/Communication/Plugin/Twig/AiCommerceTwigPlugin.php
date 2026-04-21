@@ -24,6 +24,8 @@ class AiCommerceTwigPlugin extends AbstractPlugin implements TwigPluginInterface
 
     protected const string GLOBAL_VARIABLE_IS_BACKOFFICE_ASSISTANT_CONNECTED = 'isBackofficeAssistantConnected';
 
+    protected const string GLOBAL_VARIABLE_IS_SMART_PRODUCT_MANAGEMENT_ENABLED = 'isSmartProductManagementEnabled';
+
     protected const string FUNCTION_NAME_GET_FORM_FILL_EXCLUDED_FORM_NAMES = 'getFormFillExcludedFormNames';
 
     /**
@@ -38,6 +40,7 @@ class AiCommerceTwigPlugin extends AbstractPlugin implements TwigPluginInterface
     {
         $twig->addFunction($this->createIsBackofficeAssistantEnabledFunction());
         $twig->addGlobal(static::GLOBAL_VARIABLE_IS_BACKOFFICE_ASSISTANT_CONNECTED, true);
+        $twig->addGlobal(static::GLOBAL_VARIABLE_IS_SMART_PRODUCT_MANAGEMENT_ENABLED, $this->getConfig()->isSmartProductManagementEnabled());
         $twig->addFunction($this->createGetFormFillExcludedFormNamesFunction());
 
         return $twig;

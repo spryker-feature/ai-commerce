@@ -40,3 +40,14 @@ backoffice_assistant.error.invalid_csrf_token,"Invalid or missing CSRF token."
 backoffice_assistant.error.missing_conversation_reference,"Missing conversation reference."
 backoffice_assistant.error.conversation_not_found,"Conversation not found."
 backoffice_assistant.error.ai_service_unavailable,"AI service unavailable."
+ai_commerce.smart_pim.ai_assistant,"AI assistant"
+ai_commerce.smart_pim.please_select_option,"Please select one of the following options."
+ai_commerce.smart_pim.translate_content,"Translate content"
+ai_commerce.smart_pim.improve_content,"Improve content"
+ai_commerce.smart_pim.try_again,"Try again"
+ai_commerce.smart_pim.apply,Apply
+ai_commerce.smart_pim.ai_is_processing,"AI is processing your request"
+ai_commerce.smart_pim.select_target_locale,"Select a locale to translate to."
+ai_commerce.smart_pim.original,Original
+ai_commerce.smart_pim.suggestion,Suggestion
+ai_commerce.smart_pim.translate_to,"Translate to selected locale"

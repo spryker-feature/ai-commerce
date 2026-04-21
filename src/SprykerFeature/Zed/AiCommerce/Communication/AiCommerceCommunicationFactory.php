@@ -83,34 +83,6 @@ class AiCommerceCommunicationFactory extends AbstractCommunicationFactory
         return new BackofficeAssistantPromptRequestValidator($this->getConfig());
     }
 
-    public function getAiFoundationFacade(): AiFoundationFacadeInterface
-    {
-        return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_AI_FOUNDATION);
-    }
-
-    public function getUserFacade(): UserFacadeInterface
-    {
-        return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_USER);
-    }
-
-    /**
-     * @return array<\SprykerFeature\Zed\AiCommerce\Dependency\BackofficeAssistant\BackofficeAssistantAgentPluginInterface>
-     */
-    public function getBackofficeAssistantAgentPlugins(): array
-    {
-        return $this->getProvidedDependency(AiCommerceDependencyProvider::PLUGINS_BACKOFFICE_ASSISTANT_AGENT);
-    }
-
-    public function getCsrfTokenManager(): CsrfTokenManagerInterface
-    {
-        return $this->getProvidedDependency(AiCommerceDependencyProvider::SERVICE_FORM_CSRF_PROVIDER);
-    }
-
-    public function getGlossaryFacade(): GlossaryFacadeInterface
-    {
-        return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_GLOSSARY);
-    }
-
     public function createGetNavigationToolPlugin(): ToolPluginInterface
     {
         return new GetNavigationToolPlugin();
@@ -174,5 +146,33 @@ class AiCommerceCommunicationFactory extends AbstractCommunicationFactory
     public function createFillFormToolPlugin(): ToolPluginInterface
     {
         return new FillFormToolPlugin();
+    }
+
+    public function getAiFoundationFacade(): AiFoundationFacadeInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_AI_FOUNDATION);
+    }
+
+    public function getUserFacade(): UserFacadeInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_USER);
+    }
+
+    /**
+     * @return array<\SprykerFeature\Zed\AiCommerce\Dependency\BackofficeAssistant\BackofficeAssistantAgentPluginInterface>
+     */
+    public function getBackofficeAssistantAgentPlugins(): array
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::PLUGINS_BACKOFFICE_ASSISTANT_AGENT);
+    }
+
+    public function getCsrfTokenManager(): CsrfTokenManagerInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::SERVICE_FORM_CSRF_PROVIDER);
+    }
+
+    public function getGlossaryFacade(): GlossaryFacadeInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_GLOSSARY);
     }
 }

@@ -9,9 +9,12 @@ declare(strict_types=1);
 
 namespace SprykerFeature\Zed\AiCommerce\Business;
 
+use Spryker\Service\UtilEncoding\UtilEncodingServiceInterface;
 use Spryker\Zed\AiFoundation\Business\AiFoundationFacadeInterface;
+use Spryker\Zed\Category\Business\CategoryFacadeInterface;
 use Spryker\Zed\Discount\Business\DiscountFacadeInterface;
 use Spryker\Zed\Kernel\Business\AbstractBusinessFactory;
+use Spryker\Zed\Locale\Business\LocaleFacadeInterface;
 use Spryker\Zed\Oms\Business\OmsFacadeInterface;
 use Spryker\Zed\Sales\Business\SalesFacadeInterface;
 use SprykerFeature\Zed\AiCommerce\AiCommerceDependencyProvider;
@@ -37,6 +40,18 @@ use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\O
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OrderOmsTransitionsReaderInterface;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OrderStateFlagsReader;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OrderStateFlagsReaderInterface;
+use SprykerFeature\Zed\AiCommerce\Business\SmartProductManagement\Executor\SmartProductManagementPromptExecutor;
+use SprykerFeature\Zed\AiCommerce\Business\SmartProductManagement\Executor\SmartProductManagementPromptExecutorInterface;
+use SprykerFeature\Zed\AiCommerce\Business\SmartProductManagement\Generator\SmartProductManagementImageAltTextGenerator;
+use SprykerFeature\Zed\AiCommerce\Business\SmartProductManagement\Generator\SmartProductManagementImageAltTextGeneratorInterface;
+use SprykerFeature\Zed\AiCommerce\Business\SmartProductManagement\Improver\SmartProductManagementContentImprover;
+use SprykerFeature\Zed\AiCommerce\Business\SmartProductManagement\Improver\SmartProductManagementContentImproverInterface;
+use SprykerFeature\Zed\AiCommerce\Business\SmartProductManagement\Proposer\SmartProductManagementCategoryProposer;
+use SprykerFeature\Zed\AiCommerce\Business\SmartProductManagement\Proposer\SmartProductManagementCategoryProposerInterface;
+use SprykerFeature\Zed\AiCommerce\Business\SmartProductManagement\Reader\SmartProductManagementCategoryReader;
+use SprykerFeature\Zed\AiCommerce\Business\SmartProductManagement\Reader\SmartProductManagementCategoryReaderInterface;
+use SprykerFeature\Zed\AiCommerce\Business\SmartProductManagement\Translator\SmartProductManagementCollectionTranslator;
+use SprykerFeature\Zed\AiCommerce\Business\SmartProductManagement\Translator\SmartProductManagementCollectionTranslatorInterface;
 
 /**
  * @method \SprykerFeature\Zed\AiCommerce\AiCommerceConfig getConfig()
@@ -72,11 +87,6 @@ class AiCommerceBusinessFactory extends AbstractBusinessFactory
         return new BackofficeAssistantConversationDeleter(
             $this->getEntityManager(),
         );
-    }
-
-    public function getAiFoundationFacade(): AiFoundationFacadeInterface
-    {
-        return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_AI_FOUNDATION);
     }
 
     public function createOrderOmsTransitionsReader(): OrderOmsTransitionsReaderInterface
@@ -118,6 +128,61 @@ class AiCommerceBusinessFactory extends AbstractBusinessFactory
         return new DiscountWriter($this->getDiscountFacade(), $this->getRepository());
     }
 
+    public function createSmartProductManagementCategoryReader(): SmartProductManagementCategoryReaderInterface
+    {
+        return new SmartProductManagementCategoryReader(
+            $this->getCategoryFacade(),
+            $this->getLocaleFacade(),
+        );
+    }
+
+    public function createSmartProductManagementCategoryProposer(): SmartProductManagementCategoryProposerInterface
+    {
+        return new SmartProductManagementCategoryProposer(
+            $this->getUtilEncodingService(),
+            $this->createSmartProductManagementCategoryReader(),
+            $this->getConfig(),
+            $this->createSmartProductManagementPromptExecutor(),
+        );
+    }
+
+    public function createSmartProductManagementImageAltTextGenerator(): SmartProductManagementImageAltTextGeneratorInterface
+    {
+        return new SmartProductManagementImageAltTextGenerator(
+            $this->getConfig(),
+            $this->createSmartProductManagementPromptExecutor(),
+        );
+    }
+
+    public function createSmartProductManagementCollectionTranslator(): SmartProductManagementCollectionTranslatorInterface
+    {
+        return new SmartProductManagementCollectionTranslator(
+            $this->getConfig(),
+            $this->createSmartProductManagementPromptExecutor(),
+        );
+    }
+
+    public function createSmartProductManagementContentImprover(): SmartProductManagementContentImproverInterface
+    {
+        return new SmartProductManagementContentImprover(
+            $this->getConfig(),
+            $this->createSmartProductManagementPromptExecutor(),
+        );
+    }
+
+    public function createSmartProductManagementPromptExecutor(): SmartProductManagementPromptExecutorInterface
+    {
+        return new SmartProductManagementPromptExecutor(
+            $this->getAiFoundationFacade(),
+            $this->getConfig(),
+        );
+    }
+
+    public function getAiFoundationFacade(): AiFoundationFacadeInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_AI_FOUNDATION);
+    }
+
     public function getDiscountFacade(): DiscountFacadeInterface
     {
         return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_DISCOUNT);
@@ -131,5 +196,20 @@ class AiCommerceBusinessFactory extends AbstractBusinessFactory
     public function getSalesFacade(): SalesFacadeInterface
     {
         return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_SALES);
+    }
+
+    public function getCategoryFacade(): CategoryFacadeInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_CATEGORY);
+    }
+
+    public function getLocaleFacade(): LocaleFacadeInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_LOCALE);
+    }
+
+    public function getUtilEncodingService(): UtilEncodingServiceInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::SERVICE_UTIL_ENCODING);
     }
 }

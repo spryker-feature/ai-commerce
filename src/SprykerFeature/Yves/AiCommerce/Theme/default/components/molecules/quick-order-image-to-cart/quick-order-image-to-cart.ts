@@ -28,6 +28,8 @@ export default class QuickOrderImageToCart extends Component {
 
     protected inputFileHandler(inputFile: HTMLInputElement): void {
         if (!inputFile.files || inputFile.files.length === 0) {
+            this.fileUploadMessage.innerText = this.uploadMessage;
+
             return;
         }
 
@@ -56,7 +58,7 @@ export default class QuickOrderImageToCart extends Component {
         this.fileUploadMessage.classList.remove(this.fileSelectErrorClass);
         this.removeIcon.classList.add(this.hiddenClass);
         if (this.inputFileId) {
-            this.browseFileLabel.setAttribute('for', this.inputFileId.substring(1));
+            this.browseFileLabel.setAttribute('for', this.inputFileId);
         }
     }
 

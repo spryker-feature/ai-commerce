@@ -40,3 +40,14 @@ backoffice_assistant.error.invalid_csrf_token,"Ungültiges oder fehlendes CSRF-T
 backoffice_assistant.error.missing_conversation_reference,"Gesprächsreferenz fehlt."
 backoffice_assistant.error.conversation_not_found,"Gespräch nicht gefunden."
 backoffice_assistant.error.ai_service_unavailable,"KI-Dienst nicht verfügbar."
+ai_commerce.smart_pim.ai_assistant,KI-Assistent
+ai_commerce.smart_pim.please_select_option,"Bitte wählen Sie eine der folgenden Optionen."
+ai_commerce.smart_pim.translate_content,"Inhalt übersetzen"
+ai_commerce.smart_pim.improve_content,"Inhalt verbessern"
+ai_commerce.smart_pim.try_again,"Erneut versuchen"
+ai_commerce.smart_pim.apply,Übernehmen
+ai_commerce.smart_pim.ai_is_processing,"KI verarbeitet Ihre Anfrage"
+ai_commerce.smart_pim.select_target_locale,"Wählen Sie ein Zielgebietsschema für die Übersetzung aus."
+ai_commerce.smart_pim.original,Original
+ai_commerce.smart_pim.suggestion,Vorschlag
+ai_commerce.smart_pim.translate_to,"In ausgewählte Sprache übersetzen"

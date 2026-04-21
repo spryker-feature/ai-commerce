@@ -9,11 +9,19 @@ declare(strict_types=1);
 
 namespace SprykerFeature\Zed\AiCommerce\Business;
 
+use Generated\Shared\Transfer\AiTranslationCollectionRequestTransfer;
+use Generated\Shared\Transfer\AiTranslationCollectionResponseTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCollectionDeleteCriteriaTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCollectionRequestTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCollectionResponseTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCollectionTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCriteriaTransfer;
+use Generated\Shared\Transfer\CategorySuggestionRequestTransfer;
+use Generated\Shared\Transfer\CategorySuggestionResponseTransfer;
+use Generated\Shared\Transfer\ContentImprovementRequestTransfer;
+use Generated\Shared\Transfer\ContentImprovementResponseTransfer;
+use Generated\Shared\Transfer\ImageAltTextRequestTransfer;
+use Generated\Shared\Transfer\ImageAltTextResponseTransfer;
 
 interface AiCommerceFacadeInterface
 {
@@ -73,4 +81,42 @@ interface AiCommerceFacadeInterface
     public function deleteBackofficeAssistantConversationCollection(
         BackofficeAssistantConversationCollectionDeleteCriteriaTransfer $deleteCriteriaTransfer,
     ): BackofficeAssistantConversationCollectionResponseTransfer;
+
+    /**
+     * Specification:
+     * - Proposes product category suggestions based on product name and description using AI.
+     *
+     * @api
+     */
+    public function proposeCategorySuggestions(
+        CategorySuggestionRequestTransfer $categorySuggestionRequestTransfer,
+    ): CategorySuggestionResponseTransfer;
+
+    /**
+     * Specification:
+     * - Generates an SEO-optimized alt text for a product image using AI.
+     *
+     * @api
+     */
+    public function generateImageAltText(
+        ImageAltTextRequestTransfer $imageAltTextRequestTransfer,
+    ): ImageAltTextResponseTransfer;
+
+    /**
+     * Specification:
+     * - Translates product content from a source locale to all target locales in a single AI request.
+     *
+     * @api
+     */
+    public function translateCollection(
+        AiTranslationCollectionRequestTransfer $aiTranslationCollectionRequestTransfer,
+    ): AiTranslationCollectionResponseTransfer;
+
+    /**
+     * Specification:
+     * - Improves product content clarity, grammar, and readability using AI.
+     *
+     * @api
+     */
+    public function improveContent(ContentImprovementRequestTransfer $contentImprovementRequestTransfer): ContentImprovementResponseTransfer;
 }

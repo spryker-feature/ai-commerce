@@ -1,0 +1,27 @@
+{% set fieldSelector = '.js-ai-categories select' %}
+
+{% block body %}
+    <div class="form-wrapper-clickable-affix">
+        {% block input %}
+            {{ form_row(form.categoryIds, {
+                row_attr: { class: 'js-ai-categories' }
+            }) }}
+        {% endblock %}
+
+        {% block trigger %}
+            {% if isSmartProductManagementEnabled is defined and isSmartProductManagementEnabled %}
+                <button
+                    type="button"
+                    data-url="/ai-commerce/category-suggestion"
+                    data-product-info-field=".js-infomational-field"
+                    data-field-selector="{{ fieldSelector }}"
+                    popovertarget="ai-category-modal"
+                    class="form-wrapper-clickable-affix__trigger js-ai-category-trigger btn-naked"
+                    title="{{ 'AI assistant' | trans }}"
+                >
+                    <img src="{{ assetsPath('img/ai-action-icon.svg') }}" >
+                </button>
+            {% endif %}
+        {% endblock %}
+    </div>
+{% endblock %}
