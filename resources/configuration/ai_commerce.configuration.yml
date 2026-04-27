@@ -9,7 +9,7 @@ features:
           - key: backoffice_assistant
             name: Backoffice Assistant
             description: Backoffice Assistant configuration.
-            enabled: true
+            enabled: false
             order: 0
             groups:
                 - key: general
@@ -248,7 +248,7 @@ features:
           - key: quick_order
             name: Quick Order
             description: Quick order configuration.
-            enabled: true
+            enabled: false
             order: 0
             groups:
                 - key: visual_add_to_cart
@@ -275,7 +275,7 @@ features:
           - key: search_by_image
             name: Search by Image
             description: Search by Image configuration.
-            enabled: true
+            enabled: false
             order: 0
             groups:
                 - key: search_by_image
