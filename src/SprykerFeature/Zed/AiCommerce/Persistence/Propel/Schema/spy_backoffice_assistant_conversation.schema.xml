@@ -14,7 +14,7 @@
         <column name="agent" type="VARCHAR" size="255" required="false"/>
         <column name="user_selected_agent" type="VARCHAR" size="255" required="false"/>
 
-        <unique name="spy_backoffice_assistant_conversation-unique-conversation_reference">
+        <unique name="spy_backoffice_assistant_conversation-unique-conversation_ref">
             <unique-column name="conversation_reference"/>
         </unique>
 
@@ -27,6 +27,8 @@
         </foreign-key>
 
         <behavior name="timestampable"/>
+
+        <id-method-parameter value="spy_backoffice_assistant_conversation_pk_seq"/>
     </table>
 
 </database>
