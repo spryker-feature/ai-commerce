@@ -15,11 +15,14 @@ use Generated\Shared\Transfer\IntentRouterResponseTransfer;
 use Generated\Shared\Transfer\PromptMessageTransfer;
 use Generated\Shared\Transfer\PromptRequestTransfer;
 use Spryker\Shared\AiFoundation\AiFoundationConstants;
+use Spryker\Shared\Log\LoggerTrait;
 use Spryker\Zed\AiFoundation\Business\AiFoundationFacadeInterface;
 use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
 
 class IntentRouter implements IntentRouterInterface
 {
+    use LoggerTrait;
+
     protected const string AGENT_GUARDRAIL = 'Guardrail';
 
     protected const string CONTEXT_KEY_CURRENT_PAGE = 'current_page';
@@ -150,6 +153,19 @@ class IntentRouter implements IntentRouterInterface
         $intentResponse = $this->aiFoundationFacade->prompt($intentRouterRequest);
 
         if (!$intentResponse->getIsSuccessful()) {
+            $this->getLogger()->error(
+                'IntentRouter: AI prompt failed',
+                [
+                    'errors' => array_map(
+                        static fn ($errorTransfer) => $errorTransfer->getMessage(),
+                        $intentResponse->getErrors()->getArrayCopy(),
+                    ),
+                    'ai_configuration_name' => $intentRouterRequest->getAiConfigurationName(),
+                    'max_retries' => $intentRouterRequest->getMaxRetries(),
+                    'is_successful' => $intentResponse->getIsSuccessful(),
+                ],
+            );
+
             return null;
         }
 

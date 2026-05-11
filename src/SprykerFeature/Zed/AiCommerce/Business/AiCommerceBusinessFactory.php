@@ -40,6 +40,8 @@ use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\O
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OrderOmsTransitionsReaderInterface;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OrderStateFlagsReader;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OrderStateFlagsReaderInterface;
+use SprykerFeature\Zed\AiCommerce\Business\SmartProductManagement\Downloader\ImageDownloader;
+use SprykerFeature\Zed\AiCommerce\Business\SmartProductManagement\Downloader\ImageDownloaderInterface;
 use SprykerFeature\Zed\AiCommerce\Business\SmartProductManagement\Executor\SmartProductManagementPromptExecutor;
 use SprykerFeature\Zed\AiCommerce\Business\SmartProductManagement\Executor\SmartProductManagementPromptExecutorInterface;
 use SprykerFeature\Zed\AiCommerce\Business\SmartProductManagement\Generator\SmartProductManagementImageAltTextGenerator;
@@ -151,7 +153,13 @@ class AiCommerceBusinessFactory extends AbstractBusinessFactory
         return new SmartProductManagementImageAltTextGenerator(
             $this->getConfig(),
             $this->createSmartProductManagementPromptExecutor(),
+            $this->createImageDownloader(),
         );
+    }
+
+    public function createImageDownloader(): ImageDownloaderInterface
+    {
+        return new ImageDownloader($this->getConfig());
     }
 
     public function createSmartProductManagementCollectionTranslator(): SmartProductManagementCollectionTranslatorInterface

@@ -65,6 +65,24 @@ class AiCommerceConfig extends AbstractBundleConfig
 
     protected const int PROMPT_MAX_RETRIES = 2;
 
+    /**
+     * @var array<string>
+     */
+    protected const array ALLOWED_IMAGE_URL_SCHEMES = [
+        'http',
+        'https',
+    ];
+
+    /**
+     * @var array<string>
+     */
+    protected const array IMAGE_FETCH_ALLOWED_MEDIA_TYPES = [
+        'image/png',
+        'image/jpeg',
+        'image/gif',
+        'image/webp',
+    ];
+
     protected const string ERROR_CODE_AI_PROVIDER_REQUEST_ERROR = 'AI_PROVIDER_REQUEST_ERROR';
 
     protected const string ERROR_MESSAGE_AI_PROVIDER_REQUEST_ERROR_TEMPLATE = 'AI %s is not available because an error occurred while trying to reach out to the AI provider.';
@@ -404,5 +422,31 @@ class AiCommerceConfig extends AbstractBundleConfig
     public function isSmartProductManagementEnabled(): bool
     {
         return true;
+    }
+
+    /**
+     * Specification:
+     * - Returns the URL schemes accepted when downloading an image. All other schemes are rejected to prevent SSRF via wrappers like file:// or phar://.
+     *
+     * @api
+     *
+     * @return array<string>
+     */
+    public function getAllowedImageUrlSchemes(): array
+    {
+        return static::ALLOWED_IMAGE_URL_SCHEMES;
+    }
+
+    /**
+     * Specification:
+     * - Returns the media types accepted when downloading an image. The downloaded bytes must match one of these types.
+     *
+     * @api
+     *
+     * @return array<string>
+     */
+    public function getImageFetchAllowedMediaTypes(): array
+    {
+        return static::IMAGE_FETCH_ALLOWED_MEDIA_TYPES;
     }
 }

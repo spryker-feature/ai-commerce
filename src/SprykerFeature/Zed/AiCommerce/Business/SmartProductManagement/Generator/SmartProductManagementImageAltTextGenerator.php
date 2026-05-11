@@ -18,6 +18,7 @@ use Generated\Shared\Transfer\PromptRequestTransfer;
 use Generated\Shared\Transfer\PromptResponseTransfer;
 use Spryker\Shared\AiFoundation\AiFoundationConstants;
 use SprykerFeature\Zed\AiCommerce\AiCommerceConfig;
+use SprykerFeature\Zed\AiCommerce\Business\SmartProductManagement\Downloader\ImageDownloaderInterface;
 use SprykerFeature\Zed\AiCommerce\Business\SmartProductManagement\Executor\SmartProductManagementPromptExecutorInterface;
 
 class SmartProductManagementImageAltTextGenerator implements SmartProductManagementImageAltTextGeneratorInterface
@@ -27,6 +28,7 @@ class SmartProductManagementImageAltTextGenerator implements SmartProductManagem
     public function __construct(
         protected readonly AiCommerceConfig $aiCommerceConfig,
         protected readonly SmartProductManagementPromptExecutorInterface $promptExecutor,
+        protected readonly ImageDownloaderInterface $imageDownloader,
     ) {
     }
 
@@ -58,12 +60,7 @@ class SmartProductManagementImageAltTextGenerator implements SmartProductManagem
             ->setPromptMessage(
                 (new PromptMessageTransfer())
                     ->setContent($promptContent)
-                    ->addAttachment(
-                        (new AttachmentTransfer())
-                            ->setType(AiFoundationConstants::ATTACHMENT_TYPE_IMAGE)
-                            ->setContentType(AiFoundationConstants::ATTACHMENT_CONTENT_TYPE_URL)
-                            ->setContent($imageAltTextRequestTransfer->getImageUrlOrFail()),
-                    ),
+                    ->addAttachment($this->buildImageAttachment($imageAltTextRequestTransfer->getImageUrlOrFail())),
             )
             ->setStructuredMessage($structuredSchema)
             ->setMaxRetries($this->aiCommerceConfig->getPromptMaxRetries());
@@ -74,6 +71,24 @@ class SmartProductManagementImageAltTextGenerator implements SmartProductManagem
         }
 
         return $promptRequestTransfer;
+    }
+
+    protected function buildImageAttachment(string $imageUrl): AttachmentTransfer
+    {
+        $downloadedImage = $this->imageDownloader->download($imageUrl);
+
+        if ($downloadedImage === null) {
+            return (new AttachmentTransfer())
+                ->setType(AiFoundationConstants::ATTACHMENT_TYPE_IMAGE)
+                ->setContentType(AiFoundationConstants::ATTACHMENT_CONTENT_TYPE_URL)
+                ->setContent($imageUrl);
+        }
+
+        return (new AttachmentTransfer())
+            ->setType(AiFoundationConstants::ATTACHMENT_TYPE_IMAGE)
+            ->setContentType(AiFoundationConstants::ATTACHMENT_CONTENT_TYPE_BASE64)
+            ->setMediaType($downloadedImage['mediaType'])
+            ->setContent(base64_encode($downloadedImage['bytes']));
     }
 
     protected function mapPromptResponseToImageAltTextResponse(
