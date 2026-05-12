@@ -15,9 +15,6 @@ use Generated\Shared\Transfer\BackofficeAssistantConversationConditionsTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCriteriaTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationTransfer;
 use Orm\Zed\AiCommerce\Persistence\SpyBackofficeAssistantConversationQuery;
-use Orm\Zed\Oms\Persistence\Map\SpyOmsOrderItemStateTableMap;
-use Orm\Zed\Oms\Persistence\Map\SpyOmsOrderProcessTableMap;
-use Orm\Zed\Sales\Persistence\SpySalesOrderItemQuery;
 use Spryker\Zed\Kernel\Persistence\AbstractRepository;
 use Spryker\Zed\PropelOrm\Business\Runtime\ActiveQuery\Criteria;
 
@@ -26,10 +23,6 @@ use Spryker\Zed\PropelOrm\Business\Runtime\ActiveQuery\Criteria;
  */
 class AiCommerceRepository extends AbstractRepository implements AiCommerceRepositoryInterface
 {
-    protected const string PROCESS_NAME = 'processName';
-
-    protected const string STATE_NAMES = 'stateNames';
-
     public function getBackofficeAssistantConversationCollection(
         BackofficeAssistantConversationCriteriaTransfer $criteriaTransfer,
     ): BackofficeAssistantConversationCollectionTransfer {
@@ -63,22 +56,32 @@ class AiCommerceRepository extends AbstractRepository implements AiCommerceRepos
      */
     public function findProcessAndStateNamesByOrderReference(string $orderReference): array
     {
-        /** @var array<array<string, string|null>> $rows */
-        $rows = $this->getFactory()->getSalesOrderPropelQuery()
-            ->filterByOrderReference($orderReference)
-            ->withItemQuery(function (SpySalesOrderItemQuery $itemQuery): SpySalesOrderItemQuery {
-                return $this->applyProcessAndStateColumnsToItemQuery($itemQuery);
-            })
-            ->select([static::PROCESS_NAME, static::STATE_NAMES])
-            ->find()
-            ->getData();
+        $salesOrderItemQuery = $this->getFactory()->getSalesOrderItemPropelQuery();
+        $salesOrderItemQuery
+            ->joinWithProcess()
+            ->joinWithState()
+            ->useOrderQuery()
+                ->filterByOrderReference($orderReference)
+            ->endUse();
 
-        if ($rows === []) {
+        $salesOrderItemEntities = $salesOrderItemQuery->find();
+
+        if ($salesOrderItemEntities->count() === 0) {
             return ['processName' => null, 'stateNames' => []];
         }
 
-        $processName = $rows[0][static::PROCESS_NAME];
-        $stateNames = array_values(array_unique(array_filter(array_column($rows, static::STATE_NAMES))));
+        $processName = null;
+        $stateNames = [];
+
+        foreach ($salesOrderItemEntities as $salesOrderItemEntity) {
+            /** @var \Orm\Zed\Sales\Persistence\SpySalesOrderItem $salesOrderItemEntity */
+            $processName = $processName ?? $salesOrderItemEntity->getProcess()?->getName();
+            $stateName = (string)$salesOrderItemEntity->getState()->getName();
+
+            if (!in_array($stateName, $stateNames, true)) {
+                $stateNames[] = $stateName;
+            }
+        }
 
         return ['processName' => $processName, 'stateNames' => $stateNames];
     }
@@ -94,21 +97,6 @@ class AiCommerceRepository extends AbstractRepository implements AiCommerceRepos
             ->getDiscountPropelQuery()
             ->filterByDisplayName($displayName)
             ->exists();
-    }
-
-    protected function applyProcessAndStateColumnsToItemQuery(SpySalesOrderItemQuery $itemQuery): SpySalesOrderItemQuery
-    {
-        $itemQuery
-            ->useProcessQuery()
-                ->withColumn(SpyOmsOrderProcessTableMap::COL_NAME, static::PROCESS_NAME)
-            ->endUse();
-
-        $itemQuery
-            ->useStateQuery()
-                ->withColumn(SpyOmsOrderItemStateTableMap::COL_NAME, static::STATE_NAMES)
-            ->endUse();
-
-        return $itemQuery;
     }
 
     protected function applyConditionsToQuery(

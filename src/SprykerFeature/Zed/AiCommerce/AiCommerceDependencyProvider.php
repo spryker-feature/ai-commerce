@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace SprykerFeature\Zed\AiCommerce;
 
 use Orm\Zed\Discount\Persistence\SpyDiscountQuery;
-use Orm\Zed\Sales\Persistence\SpySalesOrderQuery;
+use Orm\Zed\Sales\Persistence\SpySalesOrderItemQuery;
 use Spryker\Zed\Kernel\AbstractBundleDependencyProvider;
 use Spryker\Zed\Kernel\Container;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
@@ -39,7 +39,7 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
 
     public const string SERVICE_UTIL_ENCODING = 'SERVICE_UTIL_ENCODING';
 
-    public const string PROPEL_QUERY_SALES_ORDER = 'PROPEL_QUERY_SALES_ORDER';
+    public const string PROPEL_QUERY_SALES_ORDER_ITEM = 'PROPEL_QUERY_SALES_ORDER_ITEM';
 
     /**
      * @uses \Spryker\Zed\Form\Communication\Plugin\Application\FormApplicationPlugin::SERVICE_FORM_CSRF_PROVIDER
@@ -76,7 +76,7 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
     public function providePersistenceLayerDependencies(Container $container): Container
     {
         $container = parent::providePersistenceLayerDependencies($container);
-        $container = $this->addSalesOrderPropelQuery($container);
+        $container = $this->addSalesOrderItemPropelQuery($container);
         $container = $this->addDiscountPropelQuery($container);
 
         return $container;
@@ -154,10 +154,10 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
         return $container;
     }
 
-    protected function addSalesOrderPropelQuery(Container $container): Container
+    protected function addSalesOrderItemPropelQuery(Container $container): Container
     {
-        $container->set(static::PROPEL_QUERY_SALES_ORDER, $container->factory(function (): SpySalesOrderQuery {
-            return SpySalesOrderQuery::create();
+        $container->set(static::PROPEL_QUERY_SALES_ORDER_ITEM, $container->factory(function (): SpySalesOrderItemQuery {
+            return SpySalesOrderItemQuery::create();
         }));
 
         return $container;

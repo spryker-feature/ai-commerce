@@ -11,7 +11,7 @@ namespace SprykerFeature\Zed\AiCommerce\Persistence;
 
 use Orm\Zed\AiCommerce\Persistence\SpyBackofficeAssistantConversationQuery;
 use Orm\Zed\Discount\Persistence\SpyDiscountQuery;
-use Orm\Zed\Sales\Persistence\SpySalesOrderQuery;
+use Orm\Zed\Sales\Persistence\SpySalesOrderItemQuery;
 use Spryker\Zed\Kernel\Persistence\AbstractPersistenceFactory;
 use SprykerFeature\Zed\AiCommerce\AiCommerceDependencyProvider;
 use SprykerFeature\Zed\AiCommerce\Persistence\Propel\Mapper\BackofficeAssistantConversationMapper;
@@ -33,9 +33,9 @@ class AiCommercePersistenceFactory extends AbstractPersistenceFactory
         return $this->getProvidedDependency(AiCommerceDependencyProvider::PROPEL_QUERY_DISCOUNT);
     }
 
-    public function getSalesOrderPropelQuery(): SpySalesOrderQuery
+    public function getSalesOrderItemPropelQuery(): SpySalesOrderItemQuery
     {
-        return $this->getProvidedDependency(AiCommerceDependencyProvider::PROPEL_QUERY_SALES_ORDER);
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::PROPEL_QUERY_SALES_ORDER_ITEM);
     }
 
     public function createBackofficeAssistantConversationMapper(): BackofficeAssistantConversationMapper
