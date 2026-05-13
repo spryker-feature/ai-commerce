@@ -17,7 +17,6 @@ use Generated\Shared\Transfer\PromptRequestTransfer;
 use Spryker\Shared\AiFoundation\AiFoundationConstants;
 use Spryker\Shared\Log\LoggerTrait;
 use Spryker\Zed\AiFoundation\Business\AiFoundationFacadeInterface;
-use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
 
 class IntentRouter implements IntentRouterInterface
 {
@@ -65,6 +64,7 @@ class IntentRouter implements IntentRouterInterface
     public function __construct(
         protected AiFoundationFacadeInterface $aiFoundationFacade,
         protected array $agentPlugins,
+        protected ?string $aiConfigurationName = null,
     ) {
     }
 
@@ -141,7 +141,6 @@ class IntentRouter implements IntentRouterInterface
     protected function sendPrompt(string $promptContent): ?IntentRouterResponseTransfer
     {
         $intentRouterRequest = (new PromptRequestTransfer())
-            ->setAiConfigurationName(AiCommerceConstants::AI_CONFIGURATION_INTENT_ROUTER)
             ->setStructuredMessage(new IntentRouterResponseTransfer())
             ->setMaxRetries(2)
             ->setPromptMessage(
@@ -149,6 +148,10 @@ class IntentRouter implements IntentRouterInterface
                     ->setType(AiFoundationConstants::MESSAGE_TYPE_USER)
                     ->setContent($promptContent),
             );
+
+        if ($this->aiConfigurationName !== null) {
+            $intentRouterRequest->setAiConfigurationName($this->aiConfigurationName);
+        }
 
         $intentResponse = $this->aiFoundationFacade->prompt($intentRouterRequest);
 

@@ -17,12 +17,12 @@ use Generated\Shared\Transfer\PromptRequestTransfer;
 use Spryker\Shared\AiFoundation\AiFoundationConstants;
 use Spryker\Shared\Log\LoggerTrait;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
-use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
 use SprykerFeature\Zed\AiCommerce\Dependency\BackofficeAssistant\BackofficeAssistantAgentPluginInterface;
 
 /**
  * @method \SprykerFeature\Zed\AiCommerce\Communication\AiCommerceCommunicationFactory getFactory()
  * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceFacadeInterface getFacade()
+ * @method \SprykerFeature\Zed\AiCommerce\AiCommerceConfig getConfig()
  */
 class GeneralAgentPlugin extends AbstractPlugin implements BackofficeAssistantAgentPluginInterface
 {
@@ -75,7 +75,7 @@ class GeneralAgentPlugin extends AbstractPlugin implements BackofficeAssistantAg
         BackofficeAssistantPromptRequestTransfer $backofficeAssistantPromptRequest,
     ): BackofficeAssistantPromptResponseTransfer {
         $promptRequest = (new PromptRequestTransfer())
-            ->setAiConfigurationName(AiCommerceConstants::AI_CONFIGURATION_GENERAL_AGENT)
+            ->setAiConfigurationName($this->getConfig()->getGeneralAgentAiConfigurationName())
             ->setConversationReference($backofficeAssistantPromptRequest->getConversationReference())
             ->setStructuredMessage(new GeneralAgentResponseTransfer())
             ->addToolSetName(static::TOOL_SET_NAVIGATION)

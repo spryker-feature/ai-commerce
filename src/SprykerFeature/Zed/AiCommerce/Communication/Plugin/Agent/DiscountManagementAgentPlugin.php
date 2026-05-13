@@ -17,7 +17,6 @@ use Generated\Shared\Transfer\PromptRequestTransfer;
 use Spryker\Shared\AiFoundation\AiFoundationConstants;
 use Spryker\Shared\Log\LoggerTrait;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
-use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
 use SprykerFeature\Zed\AiCommerce\Dependency\BackofficeAssistant\BackofficeAssistantAgentPluginInterface;
 
 /**
@@ -76,7 +75,7 @@ class DiscountManagementAgentPlugin extends AbstractPlugin implements Backoffice
         BackofficeAssistantPromptRequestTransfer $backofficeAssistantPromptRequest,
     ): BackofficeAssistantPromptResponseTransfer {
         $promptRequest = (new PromptRequestTransfer())
-            ->setAiConfigurationName(AiCommerceConstants::AI_CONFIGURATION_DISCOUNT_MANAGEMENT)
+            ->setAiConfigurationName($this->getConfig()->getDiscountManagementAgentAiConfigurationName())
             ->setConversationReference($backofficeAssistantPromptRequest->getConversationReference())
             ->setStructuredMessage(new DiscountManagementAgentResponseTransfer())
             ->addToolSetName(static::TOOL_SET_DISCOUNT_MANAGEMENT)

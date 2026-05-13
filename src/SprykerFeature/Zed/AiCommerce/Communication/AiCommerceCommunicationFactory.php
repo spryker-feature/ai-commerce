@@ -75,6 +75,7 @@ class AiCommerceCommunicationFactory extends AbstractCommunicationFactory
         return new IntentRouter(
             $this->getAiFoundationFacade(),
             $this->getBackofficeAssistantAgentPlugins(),
+            $this->getConfig()->getIntentRouterAiConfigurationName(),
         );
     }
 

@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace SprykerFeature\Zed\AiCommerce;
 
 use Spryker\Zed\Kernel\AbstractBundleConfig;
-use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
 
 class AiCommerceConfig extends AbstractBundleConfig
 {
@@ -270,12 +269,67 @@ class AiCommerceConfig extends AbstractBundleConfig
      */
     public function getBackofficeAssistantSseAiConfigurationNames(): array
     {
-        return [
-            AiCommerceConstants::AI_CONFIGURATION_GENERAL_AGENT,
-            AiCommerceConstants::AI_CONFIGURATION_ORDER_MANAGEMENT,
-            AiCommerceConstants::AI_CONFIGURATION_DISCOUNT_MANAGEMENT,
-            AiCommerceConstants::AI_CONFIGURATION_FORM_FILL,
-        ];
+        return array_values(array_filter([
+            $this->getGeneralAgentAiConfigurationName(),
+            $this->getOrderManagementAgentAiConfigurationName(),
+            $this->getDiscountManagementAgentAiConfigurationName(),
+            $this->getFormFillAgentAiConfigurationName(),
+        ]));
+    }
+
+    /**
+     * Specification:
+     * - Returns the AI configuration name used by the Intent Router, or null to use the default.
+     *
+     * @api
+     */
+    public function getIntentRouterAiConfigurationName(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * Specification:
+     * - Returns the AI configuration name used by the General agent, or null to use the default.
+     *
+     * @api
+     */
+    public function getGeneralAgentAiConfigurationName(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * Specification:
+     * - Returns the AI configuration name used by the Order Management agent, or null to use the default.
+     *
+     * @api
+     */
+    public function getOrderManagementAgentAiConfigurationName(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * Specification:
+     * - Returns the AI configuration name used by the Discount Management agent, or null to use the default.
+     *
+     * @api
+     */
+    public function getDiscountManagementAgentAiConfigurationName(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * Specification:
+     * - Returns the AI configuration name used by the Form Fill agent, or null to use the default.
+     *
+     * @api
+     */
+    public function getFormFillAgentAiConfigurationName(): ?string
+    {
+        return null;
     }
 
     /**
