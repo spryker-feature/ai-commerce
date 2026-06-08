@@ -43,6 +43,8 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
 
     public const string CLIENT_GLOSSARY_STORAGE = 'CLIENT_GLOSSARY_STORAGE';
 
+    public const string CLIENT_PRODUCT_STORAGE = 'CLIENT_PRODUCT_STORAGE';
+
     public function provideDependencies(Container $container): Container
     {
         $container = parent::provideDependencies($container);
@@ -53,6 +55,7 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
         $container = $this->addTranslatorService($container);
         $container = $this->addGlossaryStorageClient($container);
         $container = $this->addRouter($container);
+        $container = $this->addProductStorageClient($container);
 
         return $container;
     }
@@ -115,6 +118,15 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
     {
         $container->set(static::SERVICE_ROUTER, function (Container $container): mixed {
             return $container->getApplicationService(static::SERVICE_ROUTER);
+        });
+
+        return $container;
+    }
+
+    protected function addProductStorageClient(Container $container): Container
+    {
+        $container->set(static::CLIENT_PRODUCT_STORAGE, function (Container $container) {
+            return $container->getLocator()->productStorage()->client();
         });
 
         return $container;

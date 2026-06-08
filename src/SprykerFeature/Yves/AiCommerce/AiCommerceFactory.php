@@ -11,6 +11,7 @@ use Spryker\Client\AiFoundation\AiFoundationClientInterface;
 use Spryker\Client\Catalog\CatalogClientInterface;
 use Spryker\Client\GlossaryStorage\GlossaryStorageClientInterface;
 use Spryker\Client\Locale\LocaleClientInterface;
+use Spryker\Client\ProductStorage\ProductStorageClientInterface;
 use Spryker\Shared\Application\ApplicationConstants;
 use Spryker\Shared\Kernel\StrategyResolver;
 use Spryker\Shared\Kernel\StrategyResolverInterface;
@@ -104,6 +105,8 @@ class AiCommerceFactory extends AbstractFactory
     {
         return new CatalogProductFinder(
             $this->getCatalogClient(),
+            $this->getProductStorageClient(),
+            $this->getLocaleClient(),
         );
     }
 
@@ -247,5 +250,10 @@ class AiCommerceFactory extends AbstractFactory
     public function getGlossaryStorageClient(): GlossaryStorageClientInterface
     {
         return $this->getProvidedDependency(AiCommerceDependencyProvider::CLIENT_GLOSSARY_STORAGE);
+    }
+
+    public function getProductStorageClient(): ProductStorageClientInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::CLIENT_PRODUCT_STORAGE);
     }
 }
