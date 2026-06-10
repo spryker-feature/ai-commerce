@@ -41,4 +41,11 @@ interface AiCommerceConstants
      * @api
      */
     public const string CONFIGURATION_KEY_FORM_FILL_SYSTEM_PROMPT = 'ai_commerce:backoffice_assistant:system_prompts:form_fill_system_prompt';
+
+    /**
+     * Configuration key for the Smart CMS system prompt.
+     *
+     * @api
+     */
+    public const string CONFIGURATION_KEY_SMART_CMS_SYSTEM_PROMPT = 'ai_commerce:smart_cms:system_prompts:system_prompt';
 }

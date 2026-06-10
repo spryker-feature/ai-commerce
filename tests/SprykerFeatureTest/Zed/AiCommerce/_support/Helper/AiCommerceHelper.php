@@ -13,6 +13,10 @@ use Codeception\Module;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCollectionDeleteCriteriaTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCollectionRequestTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationTransfer;
+use Generated\Shared\Transfer\ContentTransfer;
+use Generated\Shared\Transfer\LocalizedContentTransfer;
+use Generated\Shared\Transfer\SmartCmsContentItemCollectionTransfer;
+use Generated\Shared\Transfer\SmartCmsContentItemTransfer;
 use SprykerTest\Shared\Testify\Helper\DataCleanupHelperTrait;
 use SprykerTest\Shared\Testify\Helper\LocatorHelperTrait;
 use SprykerTest\Shared\User\Helper\UserDataHelper;
@@ -45,6 +49,31 @@ class AiCommerceHelper extends Module
         });
 
         return $createdConversation;
+    }
+
+    public function haveSmartCmsContentItem(string $name, string $contentTypeKey): ContentTransfer
+    {
+        $contentTransfer = (new ContentTransfer())
+            ->setKey(uniqid('ai-content-item-', true))
+            ->setName($name)
+            ->setContentTermKey($contentTypeKey)
+            ->setContentTypeKey($contentTypeKey)
+            ->addLocalizedContent((new LocalizedContentTransfer())->setParameters('{}'));
+
+        return $this->getLocator()->content()->facade()->create($contentTransfer);
+    }
+
+    public function findSmartCmsContentItemByKey(
+        SmartCmsContentItemCollectionTransfer $smartCmsContentItemCollectionTransfer,
+        ?string $key,
+    ): ?SmartCmsContentItemTransfer {
+        foreach ($smartCmsContentItemCollectionTransfer->getContentItems() as $smartCmsContentItemTransfer) {
+            if ($smartCmsContentItemTransfer->getKey() === $key) {
+                return $smartCmsContentItemTransfer;
+            }
+        }
+
+        return null;
     }
 
     protected function deleteConversation(string $conversationReference): void

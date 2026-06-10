@@ -22,9 +22,39 @@ use Generated\Shared\Transfer\ContentImprovementRequestTransfer;
 use Generated\Shared\Transfer\ContentImprovementResponseTransfer;
 use Generated\Shared\Transfer\ImageAltTextRequestTransfer;
 use Generated\Shared\Transfer\ImageAltTextResponseTransfer;
+use Generated\Shared\Transfer\SmartCmsContentItemCollectionTransfer;
+use Generated\Shared\Transfer\SmartCmsContentItemCriteriaTransfer;
+use Generated\Shared\Transfer\SmartCmsContentRequestTransfer;
+use Generated\Shared\Transfer\SmartCmsContentResponseTransfer;
 
 interface AiCommerceFacadeInterface
 {
+    /**
+     * Specification:
+     * - Generates or rewrites CMS glossary title and content for the requested placeholders and locales using AI.
+     * - Builds a prompt from the configurable CMS system prompt, the editor instruction, the current content of all placeholders across all locales, and the read-only page/block entity context.
+     * - Resolves the AI provider/model via the configured Smart CMS AI configuration name.
+     * - Requests a structured response and maps it to SmartCmsContentResponseTransfer.placeholders per locale plus a short explanation.
+     * - Sets SmartCmsContentResponseTransfer.isSuccessful to false and fills errors when the AI call fails.
+     * - Does not persist anything; the generated content is returned for the editor to review and save.
+     *
+     * @api
+     */
+    public function generateCmsContent(SmartCmsContentRequestTransfer $smartCmsContentRequestTransfer): SmartCmsContentResponseTransfer;
+
+    /**
+     * Specification:
+     * - Returns existing CMS content items for the AI to reference when generating content.
+     * - Filters by content type keys from the criteria conditions when provided; otherwise returns all types.
+     * - Enriches each item with the available template identifiers and Twig function template resolved from the registered content editor plugins.
+     * - Applies the limit from the criteria conditions when provided.
+     *
+     * @api
+     */
+    public function getSmartCmsContentItemCollection(
+        SmartCmsContentItemCriteriaTransfer $smartCmsContentItemCriteriaTransfer,
+    ): SmartCmsContentItemCollectionTransfer;
+
     /**
      * Specification:
      * - Returns conversation records matching the given criteria conditions.

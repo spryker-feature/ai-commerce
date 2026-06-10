@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace SprykerFeature\Zed\AiCommerce;
 
+use Orm\Zed\Content\Persistence\SpyContentQuery;
 use Orm\Zed\Discount\Persistence\SpyDiscountQuery;
 use Orm\Zed\Sales\Persistence\SpySalesOrderItemQuery;
 use Spryker\Zed\Kernel\AbstractBundleDependencyProvider;
@@ -18,6 +19,8 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
 {
     public const string FACADE_AI_FOUNDATION = 'FACADE_AI_FOUNDATION';
+
+    public const string FACADE_CONTENT_GUI = 'FACADE_CONTENT_GUI';
 
     public const string FACADE_DISCOUNT = 'FACADE_DISCOUNT';
 
@@ -41,6 +44,10 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
 
     public const string PROPEL_QUERY_SALES_ORDER_ITEM = 'PROPEL_QUERY_SALES_ORDER_ITEM';
 
+    public const string PROPEL_QUERY_CONTENT = 'PROPEL_QUERY_CONTENT';
+
+    public const string PLUGINS_CONTENT_GUI_EDITOR = 'PLUGINS_CONTENT_GUI_EDITOR';
+
     /**
      * @uses \Spryker\Zed\Form\Communication\Plugin\Application\FormApplicationPlugin::SERVICE_FORM_CSRF_PROVIDER
      */
@@ -63,12 +70,14 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
         $container = parent::provideBusinessLayerDependencies($container);
 
         $container = $this->addAiFoundationFacade($container);
+        $container = $this->addContentGuiFacade($container);
         $container = $this->addDiscountFacade($container);
         $container = $this->addOmsFacade($container);
         $container = $this->addSalesFacade($container);
         $container = $this->addCategoryFacade($container);
         $container = $this->addLocaleFacade($container);
         $container = $this->addUtilEncodingService($container);
+        $container = $this->addContentGuiEditorPlugins($container);
 
         return $container;
     }
@@ -78,6 +87,7 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
         $container = parent::providePersistenceLayerDependencies($container);
         $container = $this->addSalesOrderItemPropelQuery($container);
         $container = $this->addDiscountPropelQuery($container);
+        $container = $this->addContentPropelQuery($container);
 
         return $container;
     }
@@ -104,6 +114,15 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
     {
         $container->set(static::FACADE_GLOSSARY, function (Container $container) {
             return $container->getLocator()->glossary()->facade();
+        });
+
+        return $container;
+    }
+
+    protected function addContentGuiFacade(Container $container): Container
+    {
+        $container->set(static::FACADE_CONTENT_GUI, function (Container $container) {
+            return $container->getLocator()->contentGui()->facade();
         });
 
         return $container;
@@ -163,6 +182,24 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
         return $container;
     }
 
+    protected function addContentPropelQuery(Container $container): Container
+    {
+        $container->set(static::PROPEL_QUERY_CONTENT, $container->factory(function (): SpyContentQuery {
+            return SpyContentQuery::create();
+        }));
+
+        return $container;
+    }
+
+    protected function addContentGuiEditorPlugins(Container $container): Container
+    {
+        $container->set(static::PLUGINS_CONTENT_GUI_EDITOR, function (): array {
+            return $this->getContentGuiEditorPlugins();
+        });
+
+        return $container;
+    }
+
     protected function addCategoryFacade(Container $container): Container
     {
         $container->set(static::FACADE_CATEGORY, function (Container $container) {
@@ -203,6 +240,14 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
      * @return array<\SprykerFeature\Zed\AiCommerce\Dependency\BackofficeAssistant\BackofficeAssistantAgentPluginInterface>
      */
     protected function getBackofficeAssistantAgentPlugins(): array
+    {
+        return [];
+    }
+
+    /**
+     * @return array<\Spryker\Zed\ContentGuiExtension\Dependency\Plugin\ContentGuiEditorPluginInterface>
+     */
+    protected function getContentGuiEditorPlugins(): array
     {
         return [];
     }

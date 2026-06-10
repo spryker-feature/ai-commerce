@@ -10,11 +10,13 @@ declare(strict_types=1);
 namespace SprykerFeature\Zed\AiCommerce\Persistence;
 
 use Orm\Zed\AiCommerce\Persistence\SpyBackofficeAssistantConversationQuery;
+use Orm\Zed\Content\Persistence\SpyContentQuery;
 use Orm\Zed\Discount\Persistence\SpyDiscountQuery;
 use Orm\Zed\Sales\Persistence\SpySalesOrderItemQuery;
 use Spryker\Zed\Kernel\Persistence\AbstractPersistenceFactory;
 use SprykerFeature\Zed\AiCommerce\AiCommerceDependencyProvider;
 use SprykerFeature\Zed\AiCommerce\Persistence\Propel\Mapper\BackofficeAssistantConversationMapper;
+use SprykerFeature\Zed\AiCommerce\Persistence\Propel\Mapper\SmartCmsContentItemMapper;
 
 /**
  * @method \SprykerFeature\Zed\AiCommerce\AiCommerceConfig getConfig()
@@ -38,8 +40,18 @@ class AiCommercePersistenceFactory extends AbstractPersistenceFactory
         return $this->getProvidedDependency(AiCommerceDependencyProvider::PROPEL_QUERY_SALES_ORDER_ITEM);
     }
 
+    public function getContentPropelQuery(): SpyContentQuery
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::PROPEL_QUERY_CONTENT);
+    }
+
     public function createBackofficeAssistantConversationMapper(): BackofficeAssistantConversationMapper
     {
         return new BackofficeAssistantConversationMapper();
+    }
+
+    public function createSmartCmsContentItemMapper(): SmartCmsContentItemMapper
+    {
+        return new SmartCmsContentItemMapper();
     }
 }

@@ -23,7 +23,7 @@ use Spryker\Zed\AiFoundation\Business\AiFoundationFacadeInterface;
 use Spryker\Zed\Glossary\Business\GlossaryFacadeInterface;
 use SprykerFeature\Shared\AiCommerce\BackofficeAssistant\BackofficeAssistantEventType;
 use SprykerFeature\Zed\AiCommerce\Business\AiCommerceFacadeInterface;
-use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Attachment\AttachmentBuilderInterface;
+use SprykerFeature\Zed\AiCommerce\Communication\Attachment\AttachmentBuilderInterface;
 use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Emitter\SseEventEmitterInterface;
 use Throwable;
 

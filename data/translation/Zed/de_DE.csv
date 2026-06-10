@@ -51,3 +51,20 @@ ai_commerce.smart_pim.select_target_locale,"Wählen Sie ein Zielgebietsschema f�
 ai_commerce.smart_pim.original,Original
 ai_commerce.smart_pim.suggestion,Vorschlag
 ai_commerce.smart_pim.translate_to,"In ausgewählte Sprache übersetzen"
+"Smart CMS Content Assistant","Smart CMS Content Assistant"
+"Toggle Smart CMS panel","Smart-CMS-Panel umschalten"
+"Ask AI","KI fragen"
+"AI request",KI-Anfrage
+"Ask AI to generate or edit the title and content…","Bitten Sie die KI, den Titel und den Inhalt zu generieren oder zu bearbeiten…"
+"AI updated the content.","Die KI hat den Inhalt aktualisiert."
+"The AI request could not be completed. Please try again.","Die KI-Anfrage konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut."
+smart_cms_content.error.disabled,"Smart CMS ist nicht aktiviert."
+smart_cms_content.error.invalid_csrf_token,"Ungültiges CSRF-Token."
+Generating…,"Wird generiert…"
+"Attach files","Dateien anhängen"
+"A file exceeds the allowed size and was not attached.","Eine Datei überschreitet die zulässige Größe und wurde nicht angehängt."
+"A file type is not allowed and was not attached.","Ein Dateityp ist nicht zulässig und wurde nicht angehängt."
+"Too many files attached.","Zu viele Dateien angehängt."
+"The attachments are too large in total.","Die Anhänge sind insgesamt zu groß."
+"A file could not be read and was not attached.","Eine Datei konnte nicht gelesen werden und wurde nicht angehängt."
+"Remove attachment","Anhang entfernen"

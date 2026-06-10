@@ -15,8 +15,10 @@ use Spryker\Zed\Glossary\Business\GlossaryFacadeInterface;
 use Spryker\Zed\Kernel\Communication\AbstractCommunicationFactory;
 use Spryker\Zed\User\Business\UserFacadeInterface;
 use SprykerFeature\Zed\AiCommerce\AiCommerceDependencyProvider;
-use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Attachment\AttachmentBuilder;
-use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Attachment\AttachmentBuilderInterface;
+use SprykerFeature\Zed\AiCommerce\Communication\Attachment\AttachmentBuilder;
+use SprykerFeature\Zed\AiCommerce\Communication\Attachment\AttachmentBuilderInterface;
+use SprykerFeature\Zed\AiCommerce\Communication\Attachment\AttachmentValidator;
+use SprykerFeature\Zed\AiCommerce\Communication\Attachment\AttachmentValidatorInterface;
 use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Emitter\SseEventEmitter;
 use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Emitter\SseEventEmitterInterface;
 use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\BackofficeAssistantPromptRequestValidator;
@@ -27,6 +29,7 @@ use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\Promp
 use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\PromptProcessorInterface;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\CreateDiscountToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\FillFormToolPlugin;
+use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetContentItemsToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetDiscountDetailsToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetNavigationToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\GetOrderDetailsByIdToolPlugin;
@@ -38,6 +41,10 @@ use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\SkillBa
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\SkillDiscountKnowledgeBase\SkillDiscountKnowledgeBaseToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\SkillOrderManagementKnowledgeBase\SkillOrderManagementKnowledgeBaseToolPlugin;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\UpdateDiscountToolPlugin;
+use SprykerFeature\Zed\AiCommerce\Communication\SmartCmsContent\Mapper\SmartCmsContentRequestMapper;
+use SprykerFeature\Zed\AiCommerce\Communication\SmartCmsContent\Mapper\SmartCmsContentRequestMapperInterface;
+use SprykerFeature\Zed\AiCommerce\Communication\SmartCmsContent\Mapper\SmartCmsContentResponseMapper;
+use SprykerFeature\Zed\AiCommerce\Communication\SmartCmsContent\Mapper\SmartCmsContentResponseMapperInterface;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 /**
@@ -65,6 +72,11 @@ class AiCommerceCommunicationFactory extends AbstractCommunicationFactory
         return new AttachmentBuilder();
     }
 
+    public function createAttachmentValidator(): AttachmentValidatorInterface
+    {
+        return new AttachmentValidator($this->getConfig());
+    }
+
     public function createSseEventEmitter(): SseEventEmitterInterface
     {
         return new SseEventEmitter();
@@ -81,7 +93,7 @@ class AiCommerceCommunicationFactory extends AbstractCommunicationFactory
 
     public function createBackofficeAssistantPromptRequestValidator(): BackofficeAssistantPromptRequestValidatorInterface
     {
-        return new BackofficeAssistantPromptRequestValidator($this->getConfig());
+        return new BackofficeAssistantPromptRequestValidator($this->createAttachmentValidator());
     }
 
     public function createGetNavigationToolPlugin(): ToolPluginInterface
@@ -149,6 +161,11 @@ class AiCommerceCommunicationFactory extends AbstractCommunicationFactory
         return new FillFormToolPlugin();
     }
 
+    public function createGetContentItemsToolPlugin(): ToolPluginInterface
+    {
+        return new GetContentItemsToolPlugin();
+    }
+
     public function getAiFoundationFacade(): AiFoundationFacadeInterface
     {
         return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_AI_FOUNDATION);
@@ -170,6 +187,16 @@ class AiCommerceCommunicationFactory extends AbstractCommunicationFactory
     public function getCsrfTokenManager(): CsrfTokenManagerInterface
     {
         return $this->getProvidedDependency(AiCommerceDependencyProvider::SERVICE_FORM_CSRF_PROVIDER);
+    }
+
+    public function createSmartCmsContentRequestMapper(): SmartCmsContentRequestMapperInterface
+    {
+        return new SmartCmsContentRequestMapper();
+    }
+
+    public function createSmartCmsContentResponseMapper(): SmartCmsContentResponseMapperInterface
+    {
+        return new SmartCmsContentResponseMapper();
     }
 
     public function getGlossaryFacade(): GlossaryFacadeInterface

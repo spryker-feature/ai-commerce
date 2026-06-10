@@ -21,6 +21,10 @@ class AiCommerceConfig extends AbstractBundleConfig
 
     protected const string CONFIGURATION_KEY_FORM_FILL_AGENT_IS_ENABLED = 'ai_commerce:backoffice_assistant:general:is_form_fill_agent_enabled';
 
+    protected const string CONFIGURATION_KEY_SMART_CMS_GENERAL_IS_ENABLED = 'ai_commerce:smart_cms:general:is_enabled';
+
+    protected const bool SMART_CMS_DEFAULT_IS_ENABLED = false;
+
     protected const bool BACKOFFICE_ASSISTANT_DEFAULT_IS_ENABLED = false;
 
     protected const int BACKOFFICE_ASSISTANT_ATTACHMENT_MAX_FILE_SIZE_BYTES = 5242880;
@@ -64,6 +68,17 @@ class AiCommerceConfig extends AbstractBundleConfig
 
     protected const int PROMPT_MAX_RETRIES = 2;
 
+    protected const int SMART_CMS_CONTENT_ITEM_LOOKUP_LIMIT = 100;
+
+    /**
+     * @uses \SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\SmartCmsContentToolSetPlugin::TOOL_SET_SMART_CMS_CONTENT
+     *
+     * @var array<string>
+     */
+    protected const array SMART_CMS_TOOL_SET_NAMES = [
+        'smart_cms_content_tools',
+    ];
+
     /**
      * @var array<string>
      */
@@ -95,6 +110,28 @@ class AiCommerceConfig extends AbstractBundleConfig
     public function isBackofficeAssistantEnabled(): bool
     {
         return (bool)filter_var($this->getModuleConfig(static::CONFIGURATION_KEY_AI_COMMERCE_BACKOFFICE_ASSISTANT_GENERAL_IS_ENABLED, static::BACKOFFICE_ASSISTANT_DEFAULT_IS_ENABLED), FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * Specification:
+     * - Returns true if the Smart CMS content editing panel is enabled on the CMS Page and CMS Block glossary editors.
+     *
+     * @api
+     */
+    public function isSmartCmsEnabled(): bool
+    {
+        return (bool)filter_var($this->getModuleConfig(static::CONFIGURATION_KEY_SMART_CMS_GENERAL_IS_ENABLED, static::SMART_CMS_DEFAULT_IS_ENABLED), FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * Specification:
+     * - Returns the AI configuration name used for the Smart CMS feature, or null to use the default.
+     *
+     * @api
+     */
+    public function getSmartCmsAiConfigurationName(): ?string
+    {
+        return null;
     }
 
     /**
@@ -443,6 +480,32 @@ class AiCommerceConfig extends AbstractBundleConfig
     public function getPromptMaxRetries(): int
     {
         return static::PROMPT_MAX_RETRIES;
+    }
+
+    /**
+     * Specification:
+     * - Returns the maximum number of existing content items returned to the AI when it looks them up by type.
+     * - Projects with large content-item catalogues should lower this or filter by type.
+     *
+     * @api
+     */
+    public function getSmartCmsContentItemLookupLimit(): int
+    {
+        return static::SMART_CMS_CONTENT_ITEM_LOOKUP_LIMIT;
+    }
+
+    /**
+     * Specification:
+     * - Returns the AiFoundation tool set names enabled for the Smart CMS prompt.
+     * - These let the AI look up existing content items on demand while generating content.
+     *
+     * @api
+     *
+     * @return array<string>
+     */
+    public function getSmartCmsToolSetNames(): array
+    {
+        return static::SMART_CMS_TOOL_SET_NAMES;
     }
 
     /**

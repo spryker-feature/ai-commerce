@@ -11,9 +11,21 @@ namespace SprykerFeature\Zed\AiCommerce\Persistence;
 
 use Generated\Shared\Transfer\BackofficeAssistantConversationCollectionTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCriteriaTransfer;
+use Generated\Shared\Transfer\SmartCmsContentItemCollectionTransfer;
+use Generated\Shared\Transfer\SmartCmsContentItemCriteriaTransfer;
 
 interface AiCommerceRepositoryInterface
 {
+    /**
+     * Specification:
+     * - Returns existing CMS content items matching the given criteria.
+     * - Filters by contentTypeKeys when provided; otherwise returns all types.
+     * - Applies the limit from conditions when provided. Results are ordered by name ascending.
+     */
+    public function getSmartCmsContentItemCollection(
+        SmartCmsContentItemCriteriaTransfer $smartCmsContentItemCriteriaTransfer,
+    ): SmartCmsContentItemCollectionTransfer;
+
     /**
      * Specification:
      * - Returns conversation records matching the given criteria conditions.

@@ -28,11 +28,16 @@ class AiCommerceTwigPlugin extends AbstractPlugin implements TwigPluginInterface
 
     protected const string FUNCTION_NAME_GET_FORM_FILL_EXCLUDED_FORM_NAMES = 'getFormFillExcludedFormNames';
 
+    protected const string FUNCTION_NAME_IS_SMART_CMS_ENABLED = 'isSmartCmsEnabled';
+
+    protected const string FUNCTION_NAME_GET_CMS_AI_ATTACHMENT_CONFIG = 'getSmartCmsAttachmentConfig';
+
     /**
      * {@inheritDoc}
      * - Adds isBackofficeAssistantEnabled Twig function.
      * - Adds isBackofficeAssistantConnected Twig global variable.
      * - Adds getFormFillExcludedFormNames Twig function.
+     * - Adds isSmartCmsEnabled Twig function.
      *
      * @api
      */
@@ -42,8 +47,31 @@ class AiCommerceTwigPlugin extends AbstractPlugin implements TwigPluginInterface
         $twig->addGlobal(static::GLOBAL_VARIABLE_IS_BACKOFFICE_ASSISTANT_CONNECTED, true);
         $twig->addGlobal(static::GLOBAL_VARIABLE_IS_SMART_PRODUCT_MANAGEMENT_ENABLED, $this->getConfig()->isSmartProductManagementEnabled());
         $twig->addFunction($this->createGetFormFillExcludedFormNamesFunction());
+        $twig->addFunction($this->createIsSmartCmsEnabledFunction());
+        $twig->addFunction($this->createGetSmartCmsAttachmentConfigFunction());
 
         return $twig;
+    }
+
+    protected function createIsSmartCmsEnabledFunction(): TwigFunction
+    {
+        return new TwigFunction(
+            static::FUNCTION_NAME_IS_SMART_CMS_ENABLED,
+            fn (): bool => $this->getConfig()->isSmartCmsEnabled(),
+        );
+    }
+
+    protected function createGetSmartCmsAttachmentConfigFunction(): TwigFunction
+    {
+        return new TwigFunction(
+            static::FUNCTION_NAME_GET_CMS_AI_ATTACHMENT_CONFIG,
+            fn (): array => [
+                'maxCount' => $this->getConfig()->getBackofficeAssistantAttachmentMaxCount(),
+                'maxFileSizeBytes' => $this->getConfig()->getBackofficeAssistantAttachmentMaxFileSizeBytes(),
+                'maxTotalSizeBytes' => $this->getConfig()->getBackofficeAssistantAttachmentMaxTotalSizeBytes(),
+                'allowedMediaTypes' => $this->getConfig()->getBackofficeAssistantAttachmentAllowedMediaTypes(),
+            ],
+        );
     }
 
     protected function createIsBackofficeAssistantEnabledFunction(): TwigFunction

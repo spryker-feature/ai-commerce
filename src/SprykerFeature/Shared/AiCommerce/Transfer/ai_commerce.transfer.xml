@@ -135,6 +135,7 @@
 
     <transfer name="User">
         <property name="uuid" type="string" strict="true"/>
+        <property name="idUser" type="int"/>
     </transfer>
 
     <transfer name="OrderCriteria" strict="true">
@@ -163,6 +164,8 @@
         <property name="firstName" type="string"/>
         <property name="lastName" type="string"/>
         <property name="email" type="string"/>
+        <property name="idSalesOrder" type="int"/>
+        <property name="priceMode" type="string"/>
     </transfer>
 
     <transfer name="Totals">
@@ -222,11 +225,13 @@
         <property name="validTo" type="string"/>
         <property name="isExclusive" type="bool"/>
         <property name="priority" type="int"/>
+        <property name="isActive" type="bool"/>
     </transfer>
 
     <transfer name="DiscountConfiguratorResponse">
         <property name="isSuccessful" type="bool"/>
         <property name="discountConfigurator" type="DiscountConfigurator"/>
+        <property name="messages" type="Message[]" singular="message"/>
     </transfer>
 
     <transfer name="DiscountVoucher">
@@ -433,7 +438,123 @@
         <property name="agent" type="string" description="Set 'Form Fill' by default when answer to user is provided. Set 'Guardrail' if user's intent is not related to supported agent functionality."/>
     </transfer>
 
+    <transfer name="SmartCmsContentRequest" strict="true">
+        <property name="userPrompt" type="string" description="The free-text instruction the editor typed in the AI panel."/>
+        <property name="entityType" type="string" description="Either 'cms_page' or 'cms_block'."/>
+        <property name="idEntity" type="int" description="The id-cms-page or id-cms-block of the edited entity."/>
+        <property name="entityContext" type="SmartCmsContentEntityContext" description="Read-only page/block metadata used as context for generation."/>
+        <property name="placeholders" type="SmartCmsContentPlaceholder[]" singular="placeholder" description="Current content of all placeholders across all locales."/>
+        <property name="availableContentWidgets" type="SmartCmsContentWidget[]" singular="availableContentWidget" description="CMS content widgets available on the page, collected client-side from the editor."/>
+        <property name="attachments" type="Attachment[]" singular="attachment" description="Validated file attachments (base64) the AI may use as source input."/>
+    </transfer>
+
+    <transfer name="SmartCmsContentEntityContext" strict="true">
+        <property name="name" type="string"/>
+        <property name="templateName" type="string"/>
+        <property name="urlSlug" type="string" description="URL slug for CMS pages. Null for CMS blocks."/>
+        <property name="key" type="string" description="Stable key for CMS blocks. Null for CMS pages."/>
+        <property name="attributes" type="string" description="Additional serialized read-only entity attributes (SEO meta, validity, stores, isActive) as collected from the editor."/>
+    </transfer>
+
+    <transfer name="SmartCmsContentPlaceholder" strict="true">
+        <property name="placeholder" type="string" description="The placeholder name, e.g. 'title' or 'content'."/>
+        <property name="translations" type="SmartCmsContentTranslation[]" singular="translation"/>
+    </transfer>
+
+    <transfer name="SmartCmsContentTranslation" strict="true">
+        <property name="localeName" type="string"/>
+        <property name="content" type="string"/>
+    </transfer>
+
+    <transfer name="SmartCmsContentResponse" strict="true">
+        <property name="isSuccessful" type="bool"/>
+        <property name="explanation" type="string" description="A brief explanation of what the AI generated or changed."/>
+        <property name="placeholders" type="SmartCmsContentPlaceholder[]" singular="placeholder" description="Generated content per placeholder and locale."/>
+        <property name="errors" type="Error[]" singular="error"/>
+    </transfer>
+
+    <transfer name="SmartCmsContentStructured" strict="true">
+        <property name="explanation" type="string" description="A brief, one or two sentence explanation of what was generated or changed, shown to the editor."/>
+        <property name="placeholders" type="SmartCmsContentStructuredPlaceholder[]" singular="placeholder" description="The generated content for each requested placeholder and locale."/>
+    </transfer>
+
+    <transfer name="SmartCmsContentStructuredPlaceholder" strict="true">
+        <property name="placeholder" type="string" description="The placeholder name this content belongs to, matching one of the requested placeholders, e.g. 'title' or 'content'."/>
+        <property name="translations" type="SmartCmsContentStructuredTranslation[]" singular="translation" description="Generated content for each locale of this placeholder."/>
+    </transfer>
+
+    <transfer name="SmartCmsContentStructuredTranslation" strict="true">
+        <property name="localeName" type="string" description="The locale this content is for, e.g. 'en_US' or 'de_DE', matching one of the requested locales."/>
+        <property name="content" type="string" description="The generated HTML content for this placeholder and locale, reusing valid CMS markup where appropriate."/>
+    </transfer>
+
+    <transfer name="SmartCmsContentWidget" strict="true">
+        <property name="functionName" type="string" description="The Twig function name of the content widget, e.g. 'product' or 'cms_block'."/>
+        <property name="usageInformation" type="string" description="Human-readable usage syntax for the widget function, e.g. the product widget call snippet."/>
+        <property name="templates" type="string[]" singular="template" description="The template identifiers available for this content widget."/>
+    </transfer>
+
+    <transfer name="SmartCmsContentItemCriteria" strict="true">
+        <property name="smartCmsContentItemConditions" type="SmartCmsContentItemConditions"/>
+        <property name="pagination" type="Pagination"/>
+    </transfer>
+
+    <transfer name="SmartCmsContentItemConditions" strict="true">
+        <property name="contentTypeKeys" type="string[]" singular="contentTypeKey" description="Filter content items by their content type key, e.g. 'Banner'. Empty returns all types."/>
+    </transfer>
+
+    <transfer name="SmartCmsContentItemCollection" strict="true">
+        <property name="contentItems" type="SmartCmsContentItem[]" singular="contentItem"/>
+    </transfer>
+
+    <transfer name="SmartCmsContentItem" strict="true">
+        <property name="key" type="string" description="The stable content item key referenced in Twig, e.g. 'ssp-br-1'."/>
+        <property name="name" type="string" description="The human-readable content item name."/>
+        <property name="contentTypeKey" type="string" description="The content type key, e.g. 'Banner' or 'Product Set'."/>
+        <property name="availableTemplates" type="string[]" singular="availableTemplate" description="Template identifiers usable when embedding this content item."/>
+        <property name="twigFunctionTemplate" type="string" description="The Twig function template for this content type, with key and template placeholders to be filled in."/>
+    </transfer>
+
     <transfer name="ProductAbstract">
+    </transfer>
+
+    <transfer name="CategoryCollection">
+        <property name="categories" type="Category[]" singular="category" description="A collection of product categories."/>
+    </transfer>
+
+    <transfer name="Pagination">
+        <property name="limit" type="int"/>
+    </transfer>
+
+    <transfer name="ContentWidgetTemplate">
+        <property name="identifier" type="string"/>
+    </transfer>
+
+    <transfer name="Category">
+        <property name="idCategory" type="int"/>
+        <property name="name" type="string"/>
+    </transfer>
+
+    <transfer name="Message">
+        <property name="message" type="string"/>
+    </transfer>
+
+    <transfer name="CmsBlockGlossaryPlaceholder">
+    </transfer>
+
+    <transfer name="CmsBlockGlossaryPlaceholderTranslation">
+    </transfer>
+
+    <transfer name="CmsBlockGlossary">
+    </transfer>
+
+    <transfer name="CmsGlossaryAttributes">
+    </transfer>
+
+    <transfer name="CmsGlossary">
+    </transfer>
+
+    <transfer name="CmsPlaceholderTranslation">
     </transfer>
 
 </transfers>

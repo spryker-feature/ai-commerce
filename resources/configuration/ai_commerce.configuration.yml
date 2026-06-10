@@ -245,6 +245,61 @@ features:
                         storefront: false
                         scopes:
                             - global
+          - key: smart_cms
+            name: Smart CMS
+            description: Smart CMS Page and CMS Block glossary content editing configuration.
+            enabled: false
+            order: 1
+            groups:
+                - key: general
+                  name: General
+                  description: General settings for the Smart CMS panel.
+                  enabled: true
+                  order: 0
+                  scopes:
+                      - global
+                  settings:
+                      - key: is_enabled
+                        name: Enable Smart CMS
+                        description: When enabled, the Smart CMS panel is available on the CMS Page and CMS Block glossary editors in the Backoffice.
+                        type: boolean
+                        default_value: 'false'
+                        enabled: true
+                        secret: false
+                        storefront: false
+                        scopes:
+                            - global
+                - key: system_prompts
+                  name: System Prompts
+                  description: System prompt configuration for Smart CMS content generation.
+                  enabled: true
+                  order: 1
+                  scopes:
+                      - global
+                  settings:
+                      - key: system_prompt
+                        name: Smart CMS System Prompt
+                        description: System prompt that instructs the AI how to generate and edit CMS glossary title and content.
+                        type: text
+                        default_value: '
+                            You are a CMS content authoring assistant for a Spryker Backoffice.
+                            ALWAYS call the "get_content_items" tool at the start of every request, before generating any content, to retrieve the list of existing content items. Do this on every request without exception, even if the request does not obviously mention content items - it tells you which Banners, Product Sets, File Lists and Navigations exist and their keys and templates. Never skip this tool call and never assume which content items exist.
+                            You generate and edit CMS glossary content (titles and rich HTML content) for the page or block the editor is working on.
+                            You receive the editor''s instruction, the current content of every placeholder across every locale, and read-only metadata about the page or block (name, template, URL slug, SEO meta, validity, stores) as context. Never change that metadata.
+                            Use "entityContext.templateName" to understand which page or block template the content is rendered in, and produce content whose structure, sections and length suit that template.
+                            Generate content for every requested placeholder and locale. Preserve the original locale of each translation - write German content for de_DE, English content for en_US, and so on.
+                            Return clean, valid HTML suitable for a WYSIWYG editor. Keep any existing, valid CMS content widget calls and content item calls intact unless the instruction asks to change them.
+                            There are two distinct kinds of embeddable CMS markup; never mix up their syntax:
+                            1) Content WIDGETS, listed in the request data under "availableContentWidgets". Embed these using the EXACT Twig function name and usage syntax provided for that widget. These functions take an ARRAY argument, not a single key, and an optional second template argument - for example {{ product([''sku1'', ''sku2'']) }} or {{ product([''sku1''], ''default'') }}, and {{ cms_block([''Block Name'']) }} or {{ cms_block([''Block Name''], ''default'') }}. Only use widget functions that appear in "availableContentWidgets", copy the array signature shown in their usage syntax exactly, and never substitute placeholder tokens into a widget call.
+                            2) Content ITEMS, returned by the "get_content_items" tool (Banner, Product Set, File List, Navigation, etc.). Each returned item has a real "key", a list of "availableTemplates", and a "twigFunctionTemplate" containing the literal placeholder tokens %KEY% and %TEMPLATE% (for example {{ content_banner(''%KEY%'', ''%TEMPLATE%'') }}). To embed an item, take its twigFunctionTemplate and replace %KEY% with that item''s real key and %TEMPLATE% with one of its availableTemplates - for example {{ content_banner(''the-real-key'', ''a-listed-template'') }}. These calls take a single quoted string key plus a quoted template, NOT an array. Only reference content item keys returned by the tool - never invent or guess a key, and never leave the %KEY% or %TEMPLATE% tokens unreplaced. If the tool returns no suitable item, generate plain HTML instead.
+                            You cannot create images. Never embed <img> tags, base64 data URIs or invented image URLs. If the editor asks for a visual, either reuse an existing image-related CMS content widget or content item if one is available, or insert a short [IMAGE: brief description] note describing what the editor should add manually.
+                            Be concise and professional. Always provide a short explanation of what you generated or changed.
+                            '
+                        enabled: true
+                        secret: false
+                        storefront: false
+                        scopes:
+                            - global
           - key: quick_order
             name: Quick Order
             description: Quick order configuration.

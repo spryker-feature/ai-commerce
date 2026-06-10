@@ -31,3 +31,13 @@ suites:
                 - \SprykerTest\Shared\Discount\Helper\DiscountDataHelper
                 - \SprykerTest\Shared\User\Helper\UserDataHelper
                 - \SprykerFeatureTest\Zed\AiCommerce\Helper\AiCommerceHelper
+    Communication:
+        path: Communication
+        actor: AiCommerceCommunicationTester
+        modules:
+            enabled:
+                - Asserts
+                - \SprykerTest\Shared\Testify\Helper\Environment
+                - \SprykerTest\Shared\Testify\Helper\ConfigHelper
+                - \SprykerTest\Shared\Testify\Helper\LocatorHelper
+                - \SprykerTest\Shared\Testify\Helper\DependencyHelper

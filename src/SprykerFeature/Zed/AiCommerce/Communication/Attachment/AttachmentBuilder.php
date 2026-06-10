@@ -7,13 +7,17 @@
 
 declare(strict_types=1);
 
-namespace SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Attachment;
+namespace SprykerFeature\Zed\AiCommerce\Communication\Attachment;
 
 use Generated\Shared\Transfer\AttachmentTransfer;
 use Spryker\Shared\AiFoundation\AiFoundationConstants;
 
 class AttachmentBuilder implements AttachmentBuilderInterface
 {
+    protected const string KEY_MEDIA_TYPE = 'mediaType';
+
+    protected const string KEY_CONTENT = 'content';
+
     /**
      * {@inheritDoc}
      */
@@ -22,8 +26,8 @@ class AttachmentBuilder implements AttachmentBuilderInterface
         $attachments = [];
 
         foreach ($rawAttachments as $rawAttachment) {
-            $mediaType = $rawAttachment['mediaType'] ?? '';
-            $content = $rawAttachment['content'] ?? '';
+            $mediaType = $rawAttachment[static::KEY_MEDIA_TYPE] ?? '';
+            $content = $rawAttachment[static::KEY_CONTENT] ?? '';
 
             if (!$content || !$mediaType) {
                 continue;

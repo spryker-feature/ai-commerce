@@ -12,6 +12,7 @@ namespace SprykerFeature\Zed\AiCommerce\Business;
 use Spryker\Service\UtilEncoding\UtilEncodingServiceInterface;
 use Spryker\Zed\AiFoundation\Business\AiFoundationFacadeInterface;
 use Spryker\Zed\Category\Business\CategoryFacadeInterface;
+use Spryker\Zed\ContentGui\Business\ContentGuiFacadeInterface;
 use Spryker\Zed\Discount\Business\DiscountFacadeInterface;
 use Spryker\Zed\Kernel\Business\AbstractBusinessFactory;
 use Spryker\Zed\Locale\Business\LocaleFacadeInterface;
@@ -40,6 +41,12 @@ use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\O
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OrderOmsTransitionsReaderInterface;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OrderStateFlagsReader;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OrderStateFlagsReaderInterface;
+use SprykerFeature\Zed\AiCommerce\Business\SmartCmsContent\Expander\SmartCmsContentItemHtmlExpander;
+use SprykerFeature\Zed\AiCommerce\Business\SmartCmsContent\Expander\SmartCmsContentItemHtmlExpanderInterface;
+use SprykerFeature\Zed\AiCommerce\Business\SmartCmsContent\Generator\SmartCmsContentGenerator;
+use SprykerFeature\Zed\AiCommerce\Business\SmartCmsContent\Generator\SmartCmsContentGeneratorInterface;
+use SprykerFeature\Zed\AiCommerce\Business\SmartCmsContent\Reader\SmartCmsContentItemReader;
+use SprykerFeature\Zed\AiCommerce\Business\SmartCmsContent\Reader\SmartCmsContentItemReaderInterface;
 use SprykerFeature\Zed\AiCommerce\Business\SmartProductManagement\Downloader\ImageDownloader;
 use SprykerFeature\Zed\AiCommerce\Business\SmartProductManagement\Downloader\ImageDownloaderInterface;
 use SprykerFeature\Zed\AiCommerce\Business\SmartProductManagement\Executor\SmartProductManagementPromptExecutor;
@@ -178,6 +185,31 @@ class AiCommerceBusinessFactory extends AbstractBusinessFactory
         );
     }
 
+    public function createSmartCmsContentGenerator(): SmartCmsContentGeneratorInterface
+    {
+        return new SmartCmsContentGenerator(
+            $this->getConfig(),
+            $this->createSmartProductManagementPromptExecutor(),
+            $this->createSmartCmsContentItemHtmlExpander(),
+        );
+    }
+
+    public function createSmartCmsContentItemHtmlExpander(): SmartCmsContentItemHtmlExpanderInterface
+    {
+        return new SmartCmsContentItemHtmlExpander(
+            $this->getContentGuiFacade(),
+        );
+    }
+
+    public function createSmartCmsContentItemReader(): SmartCmsContentItemReaderInterface
+    {
+        return new SmartCmsContentItemReader(
+            $this->getRepository(),
+            $this->getConfig(),
+            $this->getContentGuiEditorPlugins(),
+        );
+    }
+
     public function createSmartProductManagementPromptExecutor(): SmartProductManagementPromptExecutorInterface
     {
         return new SmartProductManagementPromptExecutor(
@@ -189,6 +221,11 @@ class AiCommerceBusinessFactory extends AbstractBusinessFactory
     public function getAiFoundationFacade(): AiFoundationFacadeInterface
     {
         return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_AI_FOUNDATION);
+    }
+
+    public function getContentGuiFacade(): ContentGuiFacadeInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_CONTENT_GUI);
     }
 
     public function getDiscountFacade(): DiscountFacadeInterface
@@ -219,5 +256,13 @@ class AiCommerceBusinessFactory extends AbstractBusinessFactory
     public function getUtilEncodingService(): UtilEncodingServiceInterface
     {
         return $this->getProvidedDependency(AiCommerceDependencyProvider::SERVICE_UTIL_ENCODING);
+    }
+
+    /**
+     * @return array<\Spryker\Zed\ContentGuiExtension\Dependency\Plugin\ContentGuiEditorPluginInterface>
+     */
+    public function getContentGuiEditorPlugins(): array
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::PLUGINS_CONTENT_GUI_EDITOR);
     }
 }

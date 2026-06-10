@@ -14,7 +14,12 @@ use Generated\Shared\Transfer\BackofficeAssistantConversationCollectionTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationConditionsTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCriteriaTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationTransfer;
+use Generated\Shared\Transfer\SmartCmsContentItemCollectionTransfer;
+use Generated\Shared\Transfer\SmartCmsContentItemConditionsTransfer;
+use Generated\Shared\Transfer\SmartCmsContentItemCriteriaTransfer;
+use Generated\Shared\Transfer\SmartCmsContentItemTransfer;
 use Orm\Zed\AiCommerce\Persistence\SpyBackofficeAssistantConversationQuery;
+use Orm\Zed\Content\Persistence\SpyContentQuery;
 use Spryker\Zed\Kernel\Persistence\AbstractRepository;
 use Spryker\Zed\PropelOrm\Business\Runtime\ActiveQuery\Criteria;
 
@@ -23,6 +28,11 @@ use Spryker\Zed\PropelOrm\Business\Runtime\ActiveQuery\Criteria;
  */
 class AiCommerceRepository extends AbstractRepository implements AiCommerceRepositoryInterface
 {
+    /**
+     * Generic persistence safety cap, applied only when a caller provides no pagination limit, to avoid loading the entire content table. The feature-level content-item lookup limit is owned by AiCommerceConfig::getSmartCmsContentItemLookupLimit() and is always set on the criteria by the business layer.
+     */
+    protected const int CONTENT_ITEM_SAFETY_LIMIT = 1000;
+
     public function getBackofficeAssistantConversationCollection(
         BackofficeAssistantConversationCriteriaTransfer $criteriaTransfer,
     ): BackofficeAssistantConversationCollectionTransfer {
@@ -46,6 +56,56 @@ class AiCommerceRepository extends AbstractRepository implements AiCommerceRepos
 
         return (new BackofficeAssistantConversationCollectionTransfer())
             ->setBackofficeAssistantConversations(new ArrayObject($conversations));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @module Content
+     */
+    public function getSmartCmsContentItemCollection(
+        SmartCmsContentItemCriteriaTransfer $smartCmsContentItemCriteriaTransfer,
+    ): SmartCmsContentItemCollectionTransfer {
+        $query = $this->getFactory()->getContentPropelQuery();
+        $smartCmsContentItemConditionsTransfer = $smartCmsContentItemCriteriaTransfer->getSmartCmsContentItemConditions();
+
+        if ($smartCmsContentItemConditionsTransfer !== null) {
+            $query = $this->applyContentItemConditionsToQuery($query, $smartCmsContentItemConditionsTransfer);
+        }
+
+        $limit = $smartCmsContentItemCriteriaTransfer->getPagination()?->getLimit() ?? static::CONTENT_ITEM_SAFETY_LIMIT;
+        $query->limit($limit);
+
+        $query->orderByName(Criteria::ASC);
+
+        $mapper = $this->getFactory()->createSmartCmsContentItemMapper();
+        $smartCmsContentItemTransfers = [];
+
+        foreach ($query->find() as $contentEntity) {
+            $smartCmsContentItemTransfers[] = $mapper->mapContentEntityToSmartCmsContentItemTransfer(
+                $contentEntity,
+                new SmartCmsContentItemTransfer(),
+            );
+        }
+
+        return (new SmartCmsContentItemCollectionTransfer())
+            ->setContentItems(new ArrayObject($smartCmsContentItemTransfers));
+    }
+
+    /**
+     * @module Content
+     */
+    protected function applyContentItemConditionsToQuery(
+        SpyContentQuery $query,
+        SmartCmsContentItemConditionsTransfer $smartCmsContentItemConditionsTransfer,
+    ): SpyContentQuery {
+        $contentTypeKeys = $smartCmsContentItemConditionsTransfer->getContentTypeKeys();
+
+        if ($contentTypeKeys !== []) {
+            $query->filterByContentTypeKey_In($contentTypeKeys);
+        }
+
+        return $query;
     }
 
     /**

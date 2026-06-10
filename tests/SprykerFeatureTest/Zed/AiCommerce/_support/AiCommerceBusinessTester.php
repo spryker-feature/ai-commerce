@@ -27,6 +27,8 @@ use Codeception\Actor;
  * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceFacadeInterface getFacade()
  * @method \Generated\Shared\Transfer\BackofficeAssistantConversationTransfer haveConversation(array $seed = [])
  * @method \Generated\Shared\Transfer\UserTransfer haveUser(array $override = [])
+ * @method \Generated\Shared\Transfer\ContentTransfer haveSmartCmsContentItem(string $name, string $contentTypeKey)
+ * @method \Generated\Shared\Transfer\SmartCmsContentItemTransfer|null findSmartCmsContentItemByKey(\Generated\Shared\Transfer\SmartCmsContentItemCollectionTransfer $smartCmsContentItemCollectionTransfer, ?string $key)
  * @SuppressWarnings(PHPMD)
  */
 class AiCommerceBusinessTester extends Actor

@@ -22,6 +22,10 @@ use Generated\Shared\Transfer\ContentImprovementRequestTransfer;
 use Generated\Shared\Transfer\ContentImprovementResponseTransfer;
 use Generated\Shared\Transfer\ImageAltTextRequestTransfer;
 use Generated\Shared\Transfer\ImageAltTextResponseTransfer;
+use Generated\Shared\Transfer\SmartCmsContentItemCollectionTransfer;
+use Generated\Shared\Transfer\SmartCmsContentItemCriteriaTransfer;
+use Generated\Shared\Transfer\SmartCmsContentRequestTransfer;
+use Generated\Shared\Transfer\SmartCmsContentResponseTransfer;
 use Spryker\Zed\Kernel\Business\AbstractFacade;
 
 /**
@@ -121,5 +125,30 @@ class AiCommerceFacade extends AbstractFacade implements AiCommerceFacadeInterfa
         return $this->getFactory()
             ->createSmartProductManagementContentImprover()
             ->improveContent($contentImprovementRequestTransfer);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @api
+     */
+    public function generateCmsContent(SmartCmsContentRequestTransfer $smartCmsContentRequestTransfer): SmartCmsContentResponseTransfer
+    {
+        return $this->getFactory()
+            ->createSmartCmsContentGenerator()
+            ->generateCmsContent($smartCmsContentRequestTransfer);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @api
+     */
+    public function getSmartCmsContentItemCollection(
+        SmartCmsContentItemCriteriaTransfer $smartCmsContentItemCriteriaTransfer,
+    ): SmartCmsContentItemCollectionTransfer {
+        return $this->getFactory()
+            ->createSmartCmsContentItemReader()
+            ->getContentItems($smartCmsContentItemCriteriaTransfer);
     }
 }
