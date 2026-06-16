@@ -36,7 +36,7 @@
     "require-dev": {
         "spryker/code-sniffer": "*",
         "spryker/container": "*",
-        "spryker/content-banner-gui": "^1.0.0",
+        "spryker/content-banner-gui": "*",
         "spryker/propel": "*",
         "spryker/router": "*",
         "spryker/shipment": "*",
