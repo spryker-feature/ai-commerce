@@ -8,6 +8,7 @@
 namespace SprykerFeature\Yves\AiCommerce;
 
 use Spryker\Yves\Kernel\AbstractBundleConfig;
+use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
 
 class AiCommerceConfig extends AbstractBundleConfig
 {
@@ -60,6 +61,8 @@ class AiCommerceConfig extends AbstractBundleConfig
     protected const int QUICK_ORDER_IMAGE_TO_CART_TEXT_SIMILARITY_THRESHOLD_PERCENT = 30;
 
     protected const string AI_COMMERCE_QUICK_ORDER_VISUAL_ADD_TO_CART_ENABLED = 'ai_commerce:quick_order:visual_add_to_cart:enabled';
+
+    protected const string QUICK_ORDER_IMAGE_TO_CART_PROMPT_TEMPLATE = 'I want you to support me for a quick add to cart functionality by identifying from a picture what the customer want to buy and provide me only with a JSON containing a list of products and quantities. If the user asks for a product to be compatible with any other product include it as part of each product name. Important! Your response must only contain the valid JSON object without any special or additional chars. Important! The image may contain SKU instead of product name, so use SKU as product name if it is recognized. Important! Current store locale is %s — translate recognized product names into the corresponding store locale if necessary.';
 
     /**
      * Specification:
@@ -147,6 +150,27 @@ class AiCommerceConfig extends AbstractBundleConfig
     public function getQuickOrderImageToCartAiConfigurationName(): ?string
     {
         return null;
+    }
+
+    /**
+     * Specification:
+     * - Returns the prompt used to recognize products from an uploaded image on the Quick Order page.
+     * - Resolves the value from Configuration Management; falls back to the module default when unset or blank.
+     * - Contains a single `%s` placeholder for the current store locale, substituted by the caller.
+     *
+     * @api
+     */
+    public function getQuickOrderImageToCartPromptTemplate(): string
+    {
+        $systemPrompt = (string)$this->getModuleConfig(
+            AiCommerceConstants::CONFIGURATION_KEY_QUICK_ORDER_IMAGE_RECOGNITION_PROMPT,
+            static::QUICK_ORDER_IMAGE_TO_CART_PROMPT_TEMPLATE,
+        );
+        if (trim($systemPrompt) === '') {
+            return static::QUICK_ORDER_IMAGE_TO_CART_PROMPT_TEMPLATE;
+        }
+
+        return $systemPrompt;
     }
 
     /**

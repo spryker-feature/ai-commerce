@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace SprykerFeatureTest\Client\AiCommerce\SearchByImage;
 
+use Codeception\Stub;
 use Codeception\Test\Unit;
 use Generated\Shared\Transfer\PromptResponseTransfer;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -73,7 +74,14 @@ class AiSearchByImageTermResolverTest extends Unit
 
     protected function createResolver(AiFoundationClientInterface $aiFoundationClient): AiSearchByImageTermResolver
     {
-        return new AiSearchByImageTermResolver($aiFoundationClient, new AiCommerceConfig());
+        return new AiSearchByImageTermResolver($aiFoundationClient, $this->createConfig());
+    }
+
+    protected function createConfig(): AiCommerceConfig
+    {
+        return Stub::make(AiCommerceConfig::class, [
+            'getModuleConfig' => fn (string $key, mixed $default = null): mixed => $default,
+        ]);
     }
 
     protected function createAiClientMock(PromptResponseTransfer $response): AiFoundationClientInterface|MockObject

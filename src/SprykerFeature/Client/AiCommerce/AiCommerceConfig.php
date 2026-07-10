@@ -8,17 +8,27 @@
 namespace SprykerFeature\Client\AiCommerce;
 
 use Spryker\Client\Kernel\AbstractBundleConfig;
+use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
 
 class AiCommerceConfig extends AbstractBundleConfig
 {
     protected const string SEARCH_BY_IMAGE_PROMPT_TEMPLATE = 'Identify the main product in this image and respond with only the most relevant product search term. One to three words maximum.';
 
     /**
+     * Specification:
+     * - Returns the prompt used to turn an uploaded image into a product search term.
+     * - Resolves the value from Configuration Management; falls back to the module default when unset or blank.
+     *
      * @api
      */
     public function getSearchByImagePromptTemplate(): string
     {
-        return static::SEARCH_BY_IMAGE_PROMPT_TEMPLATE;
+        $systemPrompt = (string)$this->getModuleConfig(AiCommerceConstants::CONFIGURATION_KEY_SEARCH_BY_IMAGE_PROMPT, static::SEARCH_BY_IMAGE_PROMPT_TEMPLATE);
+        if (trim($systemPrompt) === '') {
+            return static::SEARCH_BY_IMAGE_PROMPT_TEMPLATE;
+        }
+
+        return $systemPrompt;
     }
 
     /**

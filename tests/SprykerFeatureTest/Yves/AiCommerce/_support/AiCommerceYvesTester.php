@@ -10,12 +10,17 @@ declare(strict_types=1);
 namespace SprykerFeatureTest\Yves\AiCommerce;
 
 use Codeception\Actor;
+use Codeception\Stub;
 use Generated\Shared\Transfer\PromptResponseTransfer;
 use Generated\Shared\Transfer\SearchByImagePromptResponseTransfer;
 use Generated\Shared\Transfer\SearchByImageRequestTransfer;
 use Spryker\Client\AiFoundation\AiFoundationClientInterface;
+use Spryker\Client\Kernel\Container;
+use SprykerFeature\Client\AiCommerce\AiCommerceClient;
 use SprykerFeature\Client\AiCommerce\AiCommerceClientInterface;
+use SprykerFeature\Client\AiCommerce\AiCommerceConfig;
 use SprykerFeature\Client\AiCommerce\AiCommerceDependencyProvider;
+use SprykerFeature\Client\AiCommerce\AiCommerceFactory;
 
 /**
  * @method void wantTo($text)
@@ -43,9 +48,24 @@ class AiCommerceYvesTester extends Actor
 
     public function createAiCommerceClient(AiFoundationClientInterface $aiFoundationClient): AiCommerceClientInterface
     {
-        $this->setDependency(AiCommerceDependencyProvider::CLIENT_AI_FOUNDATION, $aiFoundationClient);
+        $container = new Container();
+        $container->set(AiCommerceDependencyProvider::CLIENT_AI_FOUNDATION, $aiFoundationClient);
 
-        return $this->getLocator()->aiCommerce()->client();
+        $factory = new AiCommerceFactory();
+        $factory->setConfig($this->createStubbedAiCommerceConfig());
+        $factory->setContainer($container);
+
+        $client = new AiCommerceClient();
+        $client->setFactory($factory);
+
+        return $client;
+    }
+
+    protected function createStubbedAiCommerceConfig(): AiCommerceConfig
+    {
+        return Stub::make(AiCommerceConfig::class, [
+            'getModuleConfig' => fn (string $key, mixed $default = null): mixed => $default,
+        ]);
     }
 
     public function createSearchByImageRequest(string $localeName = self::DEFAULT_LOCALE_NAME): SearchByImageRequestTransfer

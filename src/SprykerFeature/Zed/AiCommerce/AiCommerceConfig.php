@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace SprykerFeature\Zed\AiCommerce;
 
 use Spryker\Zed\Kernel\AbstractBundleConfig;
+use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
 
 class AiCommerceConfig extends AbstractBundleConfig
 {
@@ -65,6 +66,8 @@ class AiCommerceConfig extends AbstractBundleConfig
     protected const string CONTENT_IMPROVER_PROMPT_TEMPLATE = 'Improve the following text for an e-commerce product by enhancing clarity, grammar, structure, and readability while maintaining the original meaning and tone.
         Make it more professional and engaging for potential customers.
         Text to improve: %s';
+
+    protected const string IMAGE_ALT_TEXT_PROMPT_TEMPLATE = 'Describe the most important characteristics of the main object you can identify in the image e.g. manufacturer, model, color, part number or any identification number that help me to define the HTML alt text for best SEO using the language from locale %s.';
 
     protected const int PROMPT_MAX_RETRIES = 2;
 
@@ -377,10 +380,12 @@ class AiCommerceConfig extends AbstractBundleConfig
      */
     public function getImageAltTextPrompt(string $locale): string
     {
-        return sprintf(
-            'Describe the most important characteristics of the main object you can identify in the image e.g. manufacturer, model, color, part number or any identification number that help me to define the HTML alt text for best SEO using the language from locale %s.',
-            $locale,
-        );
+        $systemPrompt = (string)$this->getModuleConfig(AiCommerceConstants::CONFIGURATION_KEY_SMART_PIM_IMAGE_ALT_TEXT_PROMPT, static::IMAGE_ALT_TEXT_PROMPT_TEMPLATE);
+        if (trim($systemPrompt) === '') {
+            $systemPrompt = static::IMAGE_ALT_TEXT_PROMPT_TEMPLATE;
+        }
+
+        return sprintf($systemPrompt, $locale);
     }
 
     /**
@@ -391,7 +396,12 @@ class AiCommerceConfig extends AbstractBundleConfig
      */
     public function getAiTranslationPromptTemplate(): string
     {
-        return static::AI_TRANSLATION_PROMPT_TEMPLATE;
+        $systemPrompt = (string)$this->getModuleConfig(AiCommerceConstants::CONFIGURATION_KEY_SMART_PIM_TRANSLATION_PROMPT, static::AI_TRANSLATION_PROMPT_TEMPLATE);
+        if (trim($systemPrompt) === '') {
+            return static::AI_TRANSLATION_PROMPT_TEMPLATE;
+        }
+
+        return $systemPrompt;
     }
 
     /**
@@ -402,7 +412,12 @@ class AiCommerceConfig extends AbstractBundleConfig
      */
     public function getAiTranslationCollectionPromptTemplate(): string
     {
-        return static::AI_TRANSLATION_COLLECTION_PROMPT_TEMPLATE;
+        $systemPrompt = (string)$this->getModuleConfig(AiCommerceConstants::CONFIGURATION_KEY_SMART_PIM_TRANSLATION_COLLECTION_PROMPT, static::AI_TRANSLATION_COLLECTION_PROMPT_TEMPLATE);
+        if (trim($systemPrompt) === '') {
+            return static::AI_TRANSLATION_COLLECTION_PROMPT_TEMPLATE;
+        }
+
+        return $systemPrompt;
     }
 
     /**
@@ -413,7 +428,12 @@ class AiCommerceConfig extends AbstractBundleConfig
      */
     public function getProductCategorySuggestionPromptTemplate(): string
     {
-        return static::PRODUCT_CATEGORY_SUGGESTION_PROMPT_TEMPLATE;
+        $systemPrompt = (string)$this->getModuleConfig(AiCommerceConstants::CONFIGURATION_KEY_SMART_PIM_CATEGORY_SUGGESTION_PROMPT, static::PRODUCT_CATEGORY_SUGGESTION_PROMPT_TEMPLATE);
+        if (trim($systemPrompt) === '') {
+            return static::PRODUCT_CATEGORY_SUGGESTION_PROMPT_TEMPLATE;
+        }
+
+        return $systemPrompt;
     }
 
     /**
@@ -457,7 +477,12 @@ class AiCommerceConfig extends AbstractBundleConfig
      */
     public function getContentImproverPromptTemplate(): string
     {
-        return static::CONTENT_IMPROVER_PROMPT_TEMPLATE;
+        $systemPrompt = (string)$this->getModuleConfig(AiCommerceConstants::CONFIGURATION_KEY_SMART_PIM_CONTENT_IMPROVER_PROMPT, static::CONTENT_IMPROVER_PROMPT_TEMPLATE);
+        if (trim($systemPrompt) === '') {
+            return static::CONTENT_IMPROVER_PROMPT_TEMPLATE;
+        }
+
+        return $systemPrompt;
     }
 
     /**

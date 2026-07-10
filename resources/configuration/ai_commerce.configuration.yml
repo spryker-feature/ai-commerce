@@ -327,6 +327,25 @@ features:
                         scopes:
                             - global
                             - store
+                - key: system_prompts
+                  name: System Prompts
+                  description: Prompt configuration for the Quick Order Image-to-Cart feature.
+                  enabled: true
+                  order: 1
+                  scopes:
+                      - global
+                  settings:
+                      - key: image_recognition_prompt
+                        name: Image Recognition Prompt
+                        description: Prompt used to recognise products from an uploaded image for quick order. Keep the %s placeholder for the current store locale.
+                        type: text
+                        default_value: 'I want you to support me for a quick add to cart functionality by identifying from a picture what the customer want to buy and provide me only with a JSON containing a list of products and quantities. If the user asks for a product to be compatible with any other product include it as part of each product name. Important! Your response must only contain the valid JSON object without any special or additional chars. Important! The image may contain SKU instead of product name, so use SKU as product name if it is recognized. Important! Current store locale is %s — translate recognized product names into the corresponding store locale if necessary.'
+                        enabled: true
+                        secret: false
+                        storefront: true
+                        order: 0
+                        scopes:
+                            - global
           - key: search_by_image
             name: Search by Image
             description: Search by Image configuration.
@@ -370,3 +389,85 @@ features:
                             - value: first_product
                               label: First result product detail page
                               description: 'Redirect directly to the product detail page of the first matching result.'
+                - key: system_prompts
+                  name: System Prompts
+                  description: Prompt configuration for the Search by Image feature.
+                  enabled: true
+                  order: 1
+                  scopes:
+                      - global
+                  settings:
+                      - key: search_term_prompt
+                        name: Search Term Prompt
+                        description: Prompt used to identify the main product in an uploaded image and return a relevant search term.
+                        type: text
+                        default_value: 'Identify the main product in this image and respond with only the most relevant product search term. One to three words maximum.'
+                        enabled: true
+                        secret: false
+                        storefront: false
+                        scopes:
+                            - global
+          - key: smart_pim
+            name: Smart PIM
+            description: Smart PIM AI prompt configuration.
+            enabled: false
+            order: 3
+            groups:
+                - key: system_prompts
+                  name: System Prompts
+                  description: Prompt configuration for Smart PIM AI features.
+                  enabled: true
+                  order: 0
+                  scopes:
+                      - global
+                  settings:
+                      - key: content_improver_prompt
+                        name: Content Improver Prompt
+                        description: Prompt used to improve product content. Keep the %s placeholder for the text to improve.
+                        type: text
+                        default_value: "Improve the following text for an e-commerce product by enhancing clarity, grammar, structure, and readability while maintaining the original meaning and tone.\n        Make it more professional and engaging for potential customers.\n        Text to improve: %s"
+                        enabled: true
+                        secret: false
+                        storefront: false
+                        scopes:
+                            - global
+                      - key: translation_prompt
+                        name: Translation Prompt
+                        description: Prompt used to translate product content. Keep the %s placeholders for the text, source locale, and target locale(s).
+                        type: text
+                        default_value: "Support me in translating the following text `%s` from %s to %s locale(s) for an online shop, ensuring native speaker fluency.\n        Generate accurate and contextually fitting translations to enhance the user experience.\n        The texts to be translated may contain URLs, URL paths, HTML, unicode characters or some word enclosed by the character \"%%\", please don't translate them."
+                        enabled: true
+                        secret: false
+                        storefront: false
+                        scopes:
+                            - global
+                      - key: translation_collection_prompt
+                        name: Translation Collection Prompt
+                        description: Prompt used to translate product content into a collection of locales in a single request. Keep the %s placeholders for the text, source locale, and target locales.
+                        type: text
+                        default_value: "Support me in translating the following text `%s` from %s to each of the following locales: %s, for an online shop, ensuring native speaker fluency.\n        Generate accurate and contextually fitting translations for each locale to enhance the user experience. Return one translation item per requested locale.\n        The texts to be translated may contain URLs, URL paths, HTML, unicode characters or some word enclosed by the character \"%%\", please don't translate them."
+                        enabled: true
+                        secret: false
+                        storefront: false
+                        scopes:
+                            - global
+                      - key: category_suggestion_prompt
+                        name: Category Suggestion Prompt
+                        description: Prompt used to suggest product categories. Keep the %s placeholders for the product name, description, and existing categories.
+                        type: text
+                        default_value: "Based on the provided product name and description, suggest the most fitting product categories from the existing categories list for optimal placement in an e-commerce store.\n        Product name: %s\n        Product description: %s\n        Existing categories in format {\"categoryName\": \"categoryId\", ...}:\n        %s"
+                        enabled: true
+                        secret: false
+                        storefront: false
+                        scopes:
+                            - global
+                      - key: image_alt_text_prompt
+                        name: Image Alt Text Prompt
+                        description: Prompt used to generate an HTML alt text for a product image. Keep the %s placeholder for the locale.
+                        type: text
+                        default_value: 'Describe the most important characteristics of the main object you can identify in the image e.g. manufacturer, model, color, part number or any identification number that help me to define the HTML alt text for best SEO using the language from locale %s.'
+                        enabled: true
+                        secret: false
+                        storefront: false
+                        scopes:
+                            - global

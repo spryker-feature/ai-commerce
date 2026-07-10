@@ -18,8 +18,6 @@ use SprykerFeature\Yves\AiCommerce\AiCommerceConfig;
 
 class ProductImageRecognizer implements ProductImageRecognizerInterface
 {
-    protected const string PROMPT_TEMPLATE = 'I want you to support me for a quick add to cart functionality by identifying from a picture what the customer want to buy and provide me only with a JSON containing a list of products and quantities. If the user asks for a product to be compatible with any other product include it as part of each product name. Important! Your response must only contain the valid JSON object without any special or additional chars. Important! The image may contain SKU instead of product name, so use SKU as product name if it is recognized. Important! Current store locale is %s — translate recognized product names into the corresponding store locale if necessary.';
-
     protected const string GLOSSARY_KEY_AI_REQUEST_FAILED = 'ai-commerce.quick-order-image-to-cart.image-order.errors.ai-request-failed';
 
     protected const string GLOSSARY_KEY_AI_RESPONSE_INVALID = 'ai-commerce.quick-order-image-to-cart.image-order.errors.ai-response-invalid';
@@ -31,9 +29,6 @@ class ProductImageRecognizer implements ProductImageRecognizerInterface
     ) {
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function recognizeProducts(string $base64Image, string $mimeType): ProductRecognitionCollectionTransfer
     {
         $promptRequestTransfer = $this->buildPromptRequestTransfer($base64Image, $mimeType);
@@ -80,6 +75,6 @@ class ProductImageRecognizer implements ProductImageRecognizerInterface
 
     protected function buildPromptContent(string $locale): string
     {
-        return sprintf(static::PROMPT_TEMPLATE, $locale);
+        return sprintf($this->config->getQuickOrderImageToCartPromptTemplate(), $locale);
     }
 }
