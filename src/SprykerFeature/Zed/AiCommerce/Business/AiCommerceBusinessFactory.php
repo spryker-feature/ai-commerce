@@ -41,6 +41,8 @@ use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\O
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OrderOmsTransitionsReaderInterface;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OrderStateFlagsReader;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OrderStateFlagsReaderInterface;
+use SprykerFeature\Zed\AiCommerce\Business\SmartCmsContent\Collapser\SmartCmsContentItemHtmlCollapser;
+use SprykerFeature\Zed\AiCommerce\Business\SmartCmsContent\Collapser\SmartCmsContentItemHtmlCollapserInterface;
 use SprykerFeature\Zed\AiCommerce\Business\SmartCmsContent\Expander\SmartCmsContentItemHtmlExpander;
 use SprykerFeature\Zed\AiCommerce\Business\SmartCmsContent\Expander\SmartCmsContentItemHtmlExpanderInterface;
 use SprykerFeature\Zed\AiCommerce\Business\SmartCmsContent\Generator\SmartCmsContentGenerator;
@@ -190,7 +192,15 @@ class AiCommerceBusinessFactory extends AbstractBusinessFactory
         return new SmartCmsContentGenerator(
             $this->getConfig(),
             $this->createSmartProductManagementPromptExecutor(),
+            $this->createSmartCmsContentItemHtmlCollapser(),
             $this->createSmartCmsContentItemHtmlExpander(),
+        );
+    }
+
+    public function createSmartCmsContentItemHtmlCollapser(): SmartCmsContentItemHtmlCollapserInterface
+    {
+        return new SmartCmsContentItemHtmlCollapser(
+            $this->getContentGuiFacade(),
         );
     }
 

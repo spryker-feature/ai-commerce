@@ -19,6 +19,7 @@ use Generated\Shared\Transfer\SmartCmsContentStructuredPlaceholderTransfer;
 use Generated\Shared\Transfer\SmartCmsContentStructuredTransfer;
 use Generated\Shared\Transfer\SmartCmsContentTranslationTransfer;
 use SprykerFeature\Zed\AiCommerce\AiCommerceConfig;
+use SprykerFeature\Zed\AiCommerce\Business\SmartCmsContent\Collapser\SmartCmsContentItemHtmlCollapserInterface;
 use SprykerFeature\Zed\AiCommerce\Business\SmartCmsContent\Expander\SmartCmsContentItemHtmlExpanderInterface;
 use SprykerFeature\Zed\AiCommerce\Business\SmartProductManagement\Executor\SmartProductManagementPromptExecutorInterface;
 
@@ -29,12 +30,17 @@ class SmartCmsContentGenerator implements SmartCmsContentGeneratorInterface
     public function __construct(
         protected readonly AiCommerceConfig $aiCommerceConfig,
         protected readonly SmartProductManagementPromptExecutorInterface $promptExecutor,
+        protected readonly SmartCmsContentItemHtmlCollapserInterface $smartCmsContentItemHtmlCollapser,
         protected readonly SmartCmsContentItemHtmlExpanderInterface $smartCmsContentItemHtmlExpander,
     ) {
     }
 
     public function generateCmsContent(SmartCmsContentRequestTransfer $smartCmsContentRequestTransfer): SmartCmsContentResponseTransfer
     {
+        $smartCmsContentRequestTransfer = $this->smartCmsContentItemHtmlCollapser->collapsePlaceholderContent(
+            $smartCmsContentRequestTransfer,
+        );
+
         $promptRequestTransfer = $this->buildPromptRequest($smartCmsContentRequestTransfer);
 
         $promptResponseTransfer = $this->promptExecutor->executePrompt(
