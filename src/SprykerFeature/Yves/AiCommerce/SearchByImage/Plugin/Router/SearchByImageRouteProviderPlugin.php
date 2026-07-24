@@ -16,6 +16,11 @@ class SearchByImageRouteProviderPlugin extends AbstractRouteProviderPlugin
 
     protected const string PATTERN_SEARCH_BY_IMAGE = '/search-by-image';
 
+    /**
+     * {@inheritDoc}
+     *
+     * @api
+     */
     public function addRoutes(RouteCollection $routeCollection): RouteCollection
     {
         $routeCollection = $this->addSearchByImageRoute($routeCollection);
