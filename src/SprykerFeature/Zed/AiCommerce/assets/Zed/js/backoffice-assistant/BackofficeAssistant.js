@@ -54,6 +54,9 @@ export class BackofficeAssistant {
 
         this.#cssClasses = {
             panelOpen: this.#elements.panel.dataset.classPanelOpen,
+            bodyDocked: this.#elements.panel.dataset.classBodyDocked,
+            panelNoTransition: this.#elements.panel.dataset.classPanelNoTransition,
+            bodyNoTransition: this.#elements.panel.dataset.classBodyNoTransition,
             sendStop: this.#elements.panel.dataset.classSendStop,
             badgeAnimate: this.#elements.panel.dataset.classBadgeAnimate,
             messagesHidden: this.#elements.panel.dataset.classMessagesHidden,
@@ -146,7 +149,6 @@ export class BackofficeAssistant {
 
         return {
             retry: dataset.i18nRetry || 'Retry',
-            arguments: dataset.i18nArguments || 'Arguments',
             showResult: dataset.i18nShowResult || 'Show result',
             hideResult: dataset.i18nHideResult || 'Hide result',
             unsupportedFileType: dataset.i18nUnsupportedFileType || 'Unsupported file type: ',
@@ -161,6 +163,7 @@ export class BackofficeAssistant {
             errorPrefix: dataset.i18nErrorPrefix || 'Error: ',
             failedLoadHistory: dataset.i18nFailedLoadHistory || 'Failed to load conversation history.',
             toolResult: dataset.i18nToolResult || 'Tool Result',
+            runningTool: dataset.i18nRunningTool || 'Running __TOOL__…',
             pageContextLabel: dataset.i18nPageContextLabel || 'Page context',
             formContextLabel: dataset.i18nFormContextLabel || 'Form',
         };
@@ -184,8 +187,25 @@ export class BackofficeAssistant {
         return this.#elements.panel.classList.contains(this.#cssClasses.panelOpen);
     }
 
+    #setDockedState(isDocked) {
+        document.body.classList.toggle(this.#cssClasses.bodyDocked, isDocked);
+    }
+
+    #suppressTransitions() {
+        this.#elements.panel.classList.add(this.#cssClasses.panelNoTransition);
+        document.body.classList.add(this.#cssClasses.bodyNoTransition);
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                this.#elements.panel.classList.remove(this.#cssClasses.panelNoTransition);
+                document.body.classList.remove(this.#cssClasses.bodyNoTransition);
+            });
+        });
+    }
+
     #openPanel() {
         this.#elements.panel.classList.add(this.#cssClasses.panelOpen);
+        this.#setDockedState(true);
         this.#elements.toggle.hidden = true;
         this.#loadAvailableAgents();
         this.#state.save(true);
@@ -205,6 +225,7 @@ export class BackofficeAssistant {
 
     #closePanel() {
         this.#elements.panel.classList.remove(this.#cssClasses.panelOpen);
+        this.#setDockedState(false);
         this.#elements.toggle.hidden = false;
         this.#state.save(false);
     }
@@ -407,12 +428,13 @@ export class BackofficeAssistant {
 
                 break;
             case 'tool_call':
-                this.#renderer.addToolCallMessage(data.name, data.arguments, null);
+                this.#renderer.setLoadingIndicatorLabel(loadingEl, data.name);
                 this.#renderer.keepLoadingIndicatorAtBottom(loadingEl);
 
                 break;
             case 'tool_call_result':
-                this.#renderer.addToolCallMessage(data.name, null, data.result);
+                this.#renderer.addToolCallMessage(data.name, data.result);
+                this.#renderer.clearLoadingIndicatorLabel(loadingEl);
                 this.#renderer.keepLoadingIndicatorAtBottom(loadingEl);
 
                 break;
@@ -497,28 +519,21 @@ export class BackofficeAssistant {
 
                     break;
                 case 'tool_call':
-                    if (msg.tool_invocations && msg.tool_invocations.length > 0) {
-                        for (let j = 0; j < msg.tool_invocations.length; j++) {
-                            const inv = msg.tool_invocations[j];
-                            this.#renderer.addToolCallMessage(inv.name || 'tool', inv.arguments || null, null);
-                        }
-                    } else {
-                        this.#renderer.addToolCallMessage(msg.content || 'tool', null, null);
-                    }
+                    // Intentional no-op: tool requests are not replayed, only their results.
+                    // The case must stay explicit so these messages never fall through to `default:`
+                    // and get rendered as assistant prose.
 
                     break;
                 case 'tool_result':
                     if (msg.tool_invocations && msg.tool_invocations.length > 0) {
-                        for (let k = 0; k < msg.tool_invocations.length; k++) {
-                            const invResult = msg.tool_invocations[k];
+                        for (const invResult of msg.tool_invocations) {
                             this.#renderer.addToolCallMessage(
                                 invResult.name || this.#i18n.toolResult,
-                                invResult.arguments || null,
                                 invResult.result || null,
                             );
                         }
                     } else {
-                        this.#renderer.addToolCallMessage(this.#i18n.toolResult, null, msg.content || '');
+                        this.#renderer.addToolCallMessage(this.#i18n.toolResult, msg.content || '');
                     }
 
                     break;
@@ -550,7 +565,9 @@ export class BackofficeAssistant {
             return;
         }
 
+        this.#suppressTransitions();
         this.#elements.panel.classList.add(this.#cssClasses.panelOpen);
+        this.#setDockedState(true);
         this.#elements.toggle.hidden = true;
         this.#state.greetingShown = true;
         this.#pageContext.showSuggestion();

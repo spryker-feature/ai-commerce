@@ -12,13 +12,15 @@
          role="dialog"
          aria-label="{{ 'AI Assistant' | trans }}"
          data-class-panel-open="backoffice-assistant__panel--open"
+         data-class-body-docked="backoffice-assistant-docked"
+         data-class-panel-no-transition="backoffice-assistant__panel--no-transition"
+         data-class-body-no-transition="backoffice-assistant-no-transition"
          data-class-send-stop="backoffice-assistant__send--stop"
          data-class-badge-animate="backoffice-assistant__agent-badge--animate"
          data-class-messages-hidden="backoffice-assistant__messages--hidden"
          data-class-item-deleting="backoffice-assistant__histories-item--deleting"
          data-class-item-deleted="backoffice-assistant__histories-item--deleted"
          data-i18n-retry="{{ 'Retry' | trans | e('html_attr') }}"
-         data-i18n-arguments="{{ 'Arguments' | trans | e('html_attr') }}"
          data-i18n-show-result="{{ 'Show result' | trans | e('html_attr') }}"
          data-i18n-hide-result="{{ 'Hide result' | trans | e('html_attr') }}"
          data-i18n-unsupported-file-type="{{ 'Unsupported file type: ' | trans | e('html_attr') }}"
@@ -33,6 +35,7 @@
          data-i18n-error-prefix="{{ 'Error: ' | trans | e('html_attr') }}"
          data-i18n-failed-load-history="{{ 'Failed to load conversation history.' | trans | e('html_attr') }}"
          data-i18n-tool-result="{{ 'Tool Result' | trans | e('html_attr') }}"
+         data-i18n-running-tool="{{ 'Running %toolName%…' | trans({'%toolName%': '__TOOL__'}) | e('html_attr') }}"
          data-i18n-page-context-label="{{ 'Page context' | trans | e('html_attr') }}"
          data-i18n-form-context-label="{{ 'Form' | trans | e('html_attr') }}"
          data-form-fill-excluded-forms="{{ getFormFillExcludedFormNames() | json_encode | e('html_attr') }}">
@@ -115,6 +118,7 @@
                 <span class="backoffice-assistant__typing-dot"></span>
                 <span class="backoffice-assistant__typing-dot"></span>
                 <span class="backoffice-assistant__typing-dot"></span>
+                <span class="backoffice-assistant__loading-label js-backoffice-assistant__loading-label" hidden></span>
             </div>
         </template>
 
@@ -134,10 +138,6 @@
             <div class="backoffice-assistant__tool-call-label">
                 <i class="fa fa-cog"></i>
                 <span class="backoffice-assistant__tool-call-name"></span>
-            </div>
-            <div class="backoffice-assistant__tool-call-section" data-section="args">
-                <span class="backoffice-assistant__tool-call-section-label"></span>
-                <pre class="backoffice-assistant__tool-call-code"></pre>
             </div>
             <div class="backoffice-assistant__tool-call-section" data-section="result">
                 <button type="button" class="backoffice-assistant__tool-call-toggle"></button>

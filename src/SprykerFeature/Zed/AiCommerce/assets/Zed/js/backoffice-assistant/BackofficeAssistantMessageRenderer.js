@@ -1,6 +1,10 @@
 import { BackofficeAssistantMarkdownParser } from './BackofficeAssistantMarkdownParser';
 
 export class BackofficeAssistantMessageRenderer {
+    static #selectors = {
+        loadingLabel: '.js-backoffice-assistant__loading-label',
+    };
+
     #messagesEl;
     #markdownParser;
     #i18n;
@@ -53,6 +57,32 @@ export class BackofficeAssistantMessageRenderer {
         return el;
     }
 
+    setLoadingIndicatorLabel(loadingEl, toolName) {
+        const label = this.#resolveLoadingLabel(loadingEl);
+
+        if (!label) {
+            return;
+        }
+
+        label.textContent = this.#i18n.runningTool.replace('__TOOL__', toolName ?? '');
+        label.hidden = false;
+    }
+
+    clearLoadingIndicatorLabel(loadingEl) {
+        const label = this.#resolveLoadingLabel(loadingEl);
+
+        if (!label) {
+            return;
+        }
+
+        label.textContent = '';
+        label.hidden = true;
+    }
+
+    #resolveLoadingLabel(loadingEl) {
+        return loadingEl?.querySelector(BackofficeAssistantMessageRenderer.#selectors.loadingLabel) ?? null;
+    }
+
     keepLoadingIndicatorAtBottom(loadingEl) {
         if (loadingEl && loadingEl.isConnected && this.#messagesEl.lastElementChild !== loadingEl) {
             this.#messagesEl.appendChild(loadingEl);
@@ -84,15 +114,11 @@ export class BackofficeAssistantMessageRenderer {
         return bubble;
     }
 
-    addToolCallMessage(name, args, result) {
+    addToolCallMessage(name, result) {
         const bubble = document.createElement('div');
         bubble.classList.add('backoffice-assistant__message', 'backoffice-assistant__message--tool-call');
 
         bubble.appendChild(this.#createToolCallLabel(name));
-
-        if (args && Object.keys(args).length > 0) {
-            bubble.appendChild(this.#createToolCallArgs(args));
-        }
 
         if (result) {
             bubble.appendChild(this.#createToolCallResult(result));
@@ -111,16 +137,6 @@ export class BackofficeAssistantMessageRenderer {
         label.querySelector('.backoffice-assistant__tool-call-name').textContent = name;
 
         return label;
-    }
-
-    #createToolCallArgs(args) {
-        const fragment = this.#templates.toolCall.content.cloneNode(true);
-        const section = fragment.querySelector('[data-section="args"]');
-
-        section.querySelector('.backoffice-assistant__tool-call-section-label').textContent = this.#i18n.arguments;
-        section.querySelector('.backoffice-assistant__tool-call-code').textContent = JSON.stringify(args, null, 2);
-
-        return section;
     }
 
     #createToolCallResult(result) {

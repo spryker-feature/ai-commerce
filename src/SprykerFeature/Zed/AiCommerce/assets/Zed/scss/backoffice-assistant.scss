@@ -1,7 +1,6 @@
 @use 'sass:color';
 
 $backoffice-assistant-toggle-gradient: linear-gradient(135.87deg, #11856e 14.97%, #01d1a7 97.08%);
-$backoffice-assistant-panel-width: 450px;
 $backoffice-assistant-panel-transition: 200ms ease-out;
 $backoffice-assistant-z-index: 1050;
 $backoffice-assistant-bg: #fff;
@@ -15,6 +14,57 @@ $backoffice-assistant-input-bg: #fff;
 $backoffice-assistant-send-bg: #11856e;
 $backoffice-assistant-send-color: #fff;
 $backoffice-assistant-retry-color: #11856e;
+
+// Matches the core Back Office `md` breakpoint (Inspinia2/scss/_variables.scss:539),
+// the width at which the core sidebar switches to offcanvas.
+$backoffice-assistant-mobile-max-width: 767.98px;
+
+:root {
+    --backoffice-assistant-panel-width: min(clamp(320px, 30vw, 560px), 50%);
+}
+
+@media (max-width: $backoffice-assistant-mobile-max-width) {
+    :root {
+        --backoffice-assistant-panel-width: 100%;
+    }
+}
+
+// Docked reflow couples to the core Back Office layout selectors:
+// src/Spryker/Gui/assets/Inspinia2/scss/structure/_layout.scss:12 (.content-page)
+// src/Spryker/Gui/assets/Inspinia2/scss/structure/_topbar.scss:6 (.app-topbar)
+body.backoffice-assistant-docked {
+    .content-page,
+    .app-topbar {
+        margin-right: var(--backoffice-assistant-panel-width);
+    }
+
+    @media (max-width: $backoffice-assistant-mobile-max-width) {
+        .content-page,
+        .app-topbar {
+            margin-right: 0;
+        }
+    }
+
+    &:not(.backoffice-assistant-no-transition) {
+        .content-page,
+        .app-topbar {
+            transition:
+                margin-left $backoffice-assistant-panel-transition,
+                margin-right $backoffice-assistant-panel-transition;
+        }
+    }
+
+    &.backoffice-assistant-no-transition {
+        .content-page,
+        .app-topbar {
+            transition: none;
+        }
+    }
+
+    .wrapper-content {
+        overflow-x: auto;
+    }
+}
 
 .backoffice-assistant {
     &__toggle {
@@ -56,19 +106,25 @@ $backoffice-assistant-retry-color: #11856e;
     &__panel {
         position: fixed;
         top: 0;
-        right: -$backoffice-assistant-panel-width;
-        width: $backoffice-assistant-panel-width;
-        height: 100vh;
+        bottom: 0;
+        right: 0;
+        width: var(--backoffice-assistant-panel-width);
         z-index: $backoffice-assistant-z-index - 1;
         display: flex;
         flex-direction: column;
         background: $backoffice-assistant-bg;
         border-left: 1px solid $backoffice-assistant-border;
         box-shadow: -4px 0 24px rgba(0, 0, 0, 0.1);
-        transition: right $backoffice-assistant-panel-transition;
+        transform: translateX(100%);
+        will-change: transform;
+        transition: transform $backoffice-assistant-panel-transition;
 
         &--open {
-            right: 0;
+            transform: translateX(0);
+        }
+
+        &--no-transition {
+            transition: none;
         }
     }
 
@@ -466,6 +522,12 @@ $backoffice-assistant-retry-color: #11856e;
             font-size: 12px;
             color: #333;
         }
+    }
+
+    &__loading-label {
+        margin-left: 4px;
+        color: #888;
+        font-size: 13px;
     }
 
     &__typing-dot {

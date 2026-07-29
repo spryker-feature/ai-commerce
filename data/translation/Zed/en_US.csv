@@ -13,7 +13,6 @@ Auto,Auto
 "Message input","Message input"
 "Send message","Send message"
 Retry,Retry
-Arguments,Arguments
 "Show result","Show result"
 "Hide result","Hide result"
 "Unsupported file type: ","Unsupported file type: "
@@ -28,6 +27,7 @@ Arguments,Arguments
 "Error: ","Error: "
 "Failed to load conversation history.","Failed to load conversation history."
 "Tool Result","Tool Result"
+"Running %toolName%…","Running %toolName%…"
 backoffice_assistant.validation.prompt_required,"Prompt is required."
 backoffice_assistant.validation.user_id_required,"User is not identified."
 backoffice_assistant.validation.attachment_unsupported_media_type,"One or more attachments have an unsupported file type."
