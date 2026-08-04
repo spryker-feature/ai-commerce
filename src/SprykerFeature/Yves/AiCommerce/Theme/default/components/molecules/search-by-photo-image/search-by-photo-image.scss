@@ -1,8 +1,14 @@
+@use 'sass:meta';
+
 @mixin ai-commerce-search-by-photo-image($name: '.search-by-photo-image') {
     #{$name} {
         height: 100%;
         display: flex;
         flex-direction: column;
+
+        @if meta.mixin-exists(ai-commerce-search-by-photo-image-base-hook) {
+            @include ai-commerce-search-by-photo-image-base-hook;
+        }
 
         &__camera-stream {
             display: block;

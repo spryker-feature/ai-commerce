@@ -20,8 +20,6 @@ export default class SearchByPhotoImage extends Component {
     protected parent: HTMLElement | null = null;
     protected popup: MainPopup | null = null;
 
-    protected readyCallback(): void {}
-
     protected init(): void {
         if (this.closest('main-popup')) {
             return;

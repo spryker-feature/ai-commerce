@@ -25,8 +25,6 @@ export default class SearchByImage extends Component {
     protected ajaxProvider: AjaxProvider | null = null;
     protected lastActiveSource: Element | null = null;
 
-    protected readyCallback(): void {}
-
     protected init(): void {
         if (this.closest('main-popup')) {
             return;

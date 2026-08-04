@@ -1,5 +1,12 @@
+@use 'sass:meta';
+@use 'sass:map';
+
 @mixin ai-commerce-search-by-image($name: '.search-by-image') {
     #{$name} {
+        @if meta.mixin-exists(ai-commerce-search-by-image-base-hook) {
+            @include ai-commerce-search-by-image-base-hook;
+        }
+
         &__file-input {
             position: absolute;
             left: -200vw;
@@ -16,7 +23,7 @@
         }
 
         &__error {
-            color: map-get($setting-color-actions, 'alert');
+            color: map.get($setting-color-actions, 'alert');
             padding: 0.5rem 0;
         }
 

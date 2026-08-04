@@ -9,8 +9,6 @@ export default class SearchByFileImage extends Component {
     protected parent: HTMLElement | null = null;
     protected popup: MainPopup | null = null;
 
-    protected readyCallback(): void {}
-
     protected init(): void {
         this.popup = this.closest('main-popup');
 

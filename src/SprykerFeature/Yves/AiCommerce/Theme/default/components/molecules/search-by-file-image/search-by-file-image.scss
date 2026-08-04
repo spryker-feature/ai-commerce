@@ -1,5 +1,11 @@
+@use 'sass:meta';
+
 @mixin ai-commerce-search-by-file-image($name: '.search-by-file-image') {
     #{$name} {
+        @if meta.mixin-exists(ai-commerce-search-by-file-image-base-hook) {
+            @include ai-commerce-search-by-file-image-base-hook;
+        }
+
         &__icon {
             width: 100px;
             height: 100px;

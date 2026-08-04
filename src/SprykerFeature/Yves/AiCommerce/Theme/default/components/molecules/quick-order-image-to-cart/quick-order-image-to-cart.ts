@@ -10,8 +10,6 @@ export default class QuickOrderImageToCart extends Component {
     protected readonly browseFileLabelToggleClass: string = 'label--browse-file-cursor-default';
     protected readonly fileSelectErrorClass: string = `${this.name}__file-select--error`;
 
-    protected readyCallback(): void {}
-
     protected init(): void {
         this.inputFile = <HTMLInputElement>this.querySelector(`input[type="file"]`);
         this.fileUploadMessage = <HTMLElement>this.getElementsByClassName(`${this.jsName}__file-select`)[0];
