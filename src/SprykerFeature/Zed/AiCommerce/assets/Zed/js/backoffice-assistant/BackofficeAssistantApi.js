@@ -24,7 +24,7 @@ export class BackofficeAssistantApi {
 
         BackofficeAssistantApi.#handleSessionRedirect(response);
 
-        return await response.json();
+        return response.json();
     }
 
     async fetchConversationDetail(conversationReference) {
@@ -36,7 +36,7 @@ export class BackofficeAssistantApi {
 
         BackofficeAssistantApi.#handleSessionRedirect(response);
 
-        return await response.json();
+        return response.json();
     }
 
     async deleteConversation(conversationReference) {

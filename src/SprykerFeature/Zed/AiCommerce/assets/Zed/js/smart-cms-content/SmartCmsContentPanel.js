@@ -168,7 +168,7 @@ export class SmartCmsContentPanel {
 
             this.#applyPlaceholders(data.placeholders ?? []);
             this.#showMessage(data.explanation || this.#messages.done, SmartCmsContentPanel.#messageType.success);
-        } catch (error) {
+        } catch {
             this.#showMessage(this.#messages.connectionError, SmartCmsContentPanel.#messageType.error);
         } finally {
             this.#setBusy(false);

@@ -83,13 +83,13 @@ body.backoffice-assistant-docked {
         font-size: 14px;
         font-weight: 600;
         cursor: pointer;
-        box-shadow: 0 4px 16px rgba(17, 133, 110, 0.35);
+        box-shadow: 0 4px 16px rgb(17 133 110 / 35%);
         transition:
             box-shadow 150ms ease,
             transform 150ms ease;
 
         &:hover {
-            box-shadow: 0 6px 20px rgba(17, 133, 110, 0.5);
+            box-shadow: 0 6px 20px rgb(17 133 110 / 50%);
             transform: translateY(-1px);
         }
 
@@ -114,7 +114,7 @@ body.backoffice-assistant-docked {
         flex-direction: column;
         background: $backoffice-assistant-bg;
         border-left: 1px solid $backoffice-assistant-border;
-        box-shadow: -4px 0 24px rgba(0, 0, 0, 0.1);
+        box-shadow: -4px 0 24px rgb(0 0 0 / 10%);
         transform: translateX(100%);
         will-change: transform;
         transition: transform $backoffice-assistant-panel-transition;
@@ -201,7 +201,6 @@ body.backoffice-assistant-docked {
 
     &__agent-select {
         appearance: none;
-        -webkit-appearance: none;
         background-color: #f0faf7;
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2311856e'/%3E%3C/svg%3E");
         background-repeat: no-repeat;
@@ -227,7 +226,7 @@ body.backoffice-assistant-docked {
         &:focus {
             outline: none;
             border-color: #11856e;
-            box-shadow: 0 0 0 2px rgba(17, 133, 110, 0.15);
+            box-shadow: 0 0 0 2px rgb(17 133 110 / 15%);
         }
     }
 
@@ -370,7 +369,7 @@ body.backoffice-assistant-docked {
         border-radius: 12px;
         font-size: 13px;
         line-height: 1.5;
-        word-wrap: break-word;
+        overflow-wrap: break-word;
         animation: backoffice-assistant-message-appear 200ms ease-out;
 
         &--user {
@@ -404,18 +403,23 @@ body.backoffice-assistant-docked {
             h1 {
                 font-size: 18px;
             }
+
             h2 {
                 font-size: 16px;
             }
+
             h3 {
                 font-size: 15px;
             }
+
             h4 {
                 font-size: 14px;
             }
+
             h5 {
                 font-size: 13px;
             }
+
             h6 {
                 font-size: 12px;
             }
@@ -440,7 +444,7 @@ body.backoffice-assistant-docked {
                 background: #e2e6ea;
                 padding: 1px 4px;
                 border-radius: 3px;
-                font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+                font-family: SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
                 font-size: 12px;
             }
 
@@ -743,7 +747,7 @@ body.backoffice-assistant-docked {
         align-items: center;
         gap: 3px;
         font-size: 11px;
-        background: rgba(255, 255, 255, 0.2);
+        background: rgb(255 255 255 / 20%);
         padding: 2px 6px;
         border-radius: 8px;
         opacity: 0.85;
@@ -806,7 +810,7 @@ body.backoffice-assistant-docked {
             background: #d32f2f;
 
             &:hover {
-                background: darken(#d32f2f, 8%);
+                background: color.adjust(#d32f2f, $lightness: -8%);
             }
         }
     }
@@ -842,7 +846,7 @@ body.backoffice-assistant-docked {
         background: #f8fafc;
         border: 1px solid #e2e8f0;
         border-radius: 4px;
-        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        font-family: SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
         font-size: 11px;
         line-height: 1.4;
         color: #334155;

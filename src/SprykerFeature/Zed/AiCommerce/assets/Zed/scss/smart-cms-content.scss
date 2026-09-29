@@ -6,11 +6,7 @@ $smart-cms-panel-gradient: linear-gradient(
     #{$smart-cms-panel-accent} 14.97%,
     #{$smart-cms-panel-accent-light} 97.08%
 );
-$smart-cms-panel-surface-gradient: linear-gradient(
-    135.87deg,
-    rgba(17, 133, 110, 0.06) 14.97%,
-    rgba(1, 209, 167, 0.06) 97.08%
-);
+$smart-cms-panel-surface-gradient: linear-gradient(135.87deg, rgb(17 133 110 / 6%) 14.97%, rgb(1 209 167 / 6%) 97.08%);
 $smart-cms-panel-error: #a12020;
 
 .smart-cms-panel {
@@ -94,7 +90,7 @@ $smart-cms-panel-error: #a12020;
         &:focus {
             outline: none;
             border-color: $smart-cms-panel-accent;
-            box-shadow: 0 0 0 2px rgba(17, 133, 110, 0.2);
+            box-shadow: 0 0 0 2px rgb(17 133 110 / 20%);
         }
 
         &:disabled {
@@ -128,7 +124,7 @@ $smart-cms-panel-error: #a12020;
             transform 150ms ease;
 
         &:hover {
-            box-shadow: 0 4px 14px rgba(17, 133, 110, 0.4);
+            box-shadow: 0 4px 14px rgb(17 133 110 / 40%);
             transform: translateY(-1px);
         }
 
@@ -159,7 +155,7 @@ $smart-cms-panel-error: #a12020;
         cursor: pointer;
 
         &:hover {
-            background: rgba(17, 133, 110, 0.08);
+            background: rgb(17 133 110 / 8%);
         }
 
         &:disabled {
@@ -202,7 +198,7 @@ $smart-cms-panel-error: #a12020;
         display: none;
         width: 14px;
         height: 14px;
-        border: 2px solid rgba(255, 255, 255, 0.5);
+        border: 2px solid rgb(255 255 255 / 50%);
         border-top-color: #fff;
         border-radius: 50%;
         animation: smart-cms-panel-spin 600ms linear infinite;
@@ -221,14 +217,14 @@ $smart-cms-panel-error: #a12020;
         }
 
         &--success {
-            background: rgba(17, 133, 110, 0.1);
-            border: 1px solid rgba(17, 133, 110, 0.35);
+            background: rgb(17 133 110 / 10%);
+            border: 1px solid rgb(17 133 110 / 35%);
             color: #0c5e4e;
         }
 
         &--error {
-            background: rgba(204, 51, 51, 0.08);
-            border: 1px solid rgba(204, 51, 51, 0.35);
+            background: rgb(204 51 51 / 8%);
+            border: 1px solid rgb(204 51 51 / 35%);
             color: $smart-cms-panel-error;
         }
     }

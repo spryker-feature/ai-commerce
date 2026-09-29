@@ -17,6 +17,7 @@ export default class SearchByPhotoImage extends Component {
     protected cameraButtonsAbortController: AbortController | null = null;
     protected errorContainer: HTMLElement | null = null;
     protected errorMessage: HTMLElement | null = null;
+    protected errorItemTemplate: HTMLTemplateElement | null = null;
     protected parent: HTMLElement | null = null;
     protected popup: MainPopup | null = null;
 
