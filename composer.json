@@ -52,7 +52,13 @@
     },
     "autoload": {
         "psr-4": {
-            "SprykerFeature\\": "src/SprykerFeature/"
+            "SprykerFeature\\": "src/SprykerFeature/",
+            "SprykerFeatureTest\\Zed\\AiCommerce\\Helper\\": "tests/SprykerFeatureTest/Zed/AiCommerce/_support/Helper/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SprykerFeatureTest\\": "tests/SprykerFeatureTest/"
         }
     },
     "minimum-stability": "dev",
