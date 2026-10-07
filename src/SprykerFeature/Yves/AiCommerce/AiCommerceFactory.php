@@ -9,9 +9,11 @@ namespace SprykerFeature\Yves\AiCommerce;
 
 use Spryker\Client\AiFoundation\AiFoundationClientInterface;
 use Spryker\Client\Catalog\CatalogClientInterface;
+use Spryker\Client\Customer\CustomerClientInterface;
 use Spryker\Client\GlossaryStorage\GlossaryStorageClientInterface;
 use Spryker\Client\Locale\LocaleClientInterface;
 use Spryker\Client\ProductStorage\ProductStorageClientInterface;
+use Spryker\Client\Session\SessionClientInterface;
 use Spryker\Shared\Application\ApplicationConstants;
 use Spryker\Shared\Kernel\StrategyResolver;
 use Spryker\Shared\Kernel\StrategyResolverInterface;
@@ -47,9 +49,32 @@ use SprykerFeature\Yves\AiCommerce\SearchByImage\Form\SearchByImageForm;
 use SprykerFeature\Yves\AiCommerce\SearchByImage\Redirect\FirstProductRedirectResolver;
 use SprykerFeature\Yves\AiCommerce\SearchByImage\Redirect\RedirectResolverInterface;
 use SprykerFeature\Yves\AiCommerce\SearchByImage\Redirect\SearchResultsRedirectResolver;
+use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Checker\StorefrontAssistantAccessChecker;
+use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Checker\StorefrontAssistantAccessCheckerInterface;
+use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Mapper\StorefrontAssistantConversationMapper;
+use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Mapper\StorefrontAssistantConversationMapperInterface;
+use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Mapper\StorefrontAssistantPageContextMapper;
+use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Mapper\StorefrontAssistantPageContextMapperInterface;
+use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Mapper\StorefrontAssistantRequestPayloadMapper;
+use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Mapper\StorefrontAssistantRequestPayloadMapperInterface;
+use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Reader\StorefrontAssistantRequestPayloadReader;
+use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Reader\StorefrontAssistantRequestPayloadReaderInterface;
+use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Resolver\StorefrontAssistantValidationErrorResolver;
+use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Resolver\StorefrontAssistantValidationErrorResolverInterface;
+use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Sanitizer\StorefrontAssistantPageContextSanitizer;
+use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Sanitizer\StorefrontAssistantPageContextSanitizerInterface;
+use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Session\StorefrontAssistantStreamSessionBinder;
+use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Session\StorefrontAssistantStreamSessionBinderInterface;
+use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Validator\StorefrontAssistantRequestPayloadValidator;
+use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Validator\StorefrontAssistantRequestPayloadValidatorInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
+use Symfony\Component\HttpFoundation\Session\Storage\SessionStorageInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
@@ -227,6 +252,11 @@ class AiCommerceFactory extends AbstractFactory
         return $this->getProvidedDependency(AiCommerceDependencyProvider::CLIENT_CATALOG);
     }
 
+    public function getCustomerClient(): CustomerClientInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::CLIENT_CUSTOMER);
+    }
+
     public function getLocaleClient(): LocaleClientInterface
     {
         return $this->getProvidedDependency(AiCommerceDependencyProvider::CLIENT_LOCALE);
@@ -255,5 +285,83 @@ class AiCommerceFactory extends AbstractFactory
     public function getProductStorageClient(): ProductStorageClientInterface
     {
         return $this->getProvidedDependency(AiCommerceDependencyProvider::CLIENT_PRODUCT_STORAGE);
+    }
+
+    public function getCsrfTokenManager(): CsrfTokenManagerInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::SERVICE_FORM_CSRF_PROVIDER);
+    }
+
+    public function getSessionClient(): SessionClientInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::CLIENT_SESSION);
+    }
+
+    public function createStorefrontAssistantRequestPayloadMapper(): StorefrontAssistantRequestPayloadMapperInterface
+    {
+        return new StorefrontAssistantRequestPayloadMapper(
+            $this->createStorefrontAssistantPageContextSanitizer(),
+            $this->createStorefrontAssistantPageContextMapper(),
+        );
+    }
+
+    public function createStorefrontAssistantPageContextSanitizer(): StorefrontAssistantPageContextSanitizerInterface
+    {
+        return new StorefrontAssistantPageContextSanitizer();
+    }
+
+    public function createStorefrontAssistantPageContextMapper(): StorefrontAssistantPageContextMapperInterface
+    {
+        return new StorefrontAssistantPageContextMapper();
+    }
+
+    public function createStorefrontAssistantAccessChecker(): StorefrontAssistantAccessCheckerInterface
+    {
+        return new StorefrontAssistantAccessChecker(
+            $this->getConfig(),
+            $this->getCustomerClient(),
+        );
+    }
+
+    public function createStorefrontAssistantRequestPayloadReader(): StorefrontAssistantRequestPayloadReaderInterface
+    {
+        return new StorefrontAssistantRequestPayloadReader(
+            $this->createStorefrontAssistantRequestPayloadValidator(),
+        );
+    }
+
+    public function createStorefrontAssistantRequestPayloadValidator(): StorefrontAssistantRequestPayloadValidatorInterface
+    {
+        return new StorefrontAssistantRequestPayloadValidator(
+            $this->getConfig(),
+        );
+    }
+
+    public function createStorefrontAssistantValidationErrorResolver(): StorefrontAssistantValidationErrorResolverInterface
+    {
+        return new StorefrontAssistantValidationErrorResolver();
+    }
+
+    public function createStorefrontAssistantConversationMapper(): StorefrontAssistantConversationMapperInterface
+    {
+        return new StorefrontAssistantConversationMapper();
+    }
+
+    public function createStorefrontAssistantStreamSessionBinder(): StorefrontAssistantStreamSessionBinderInterface
+    {
+        return new StorefrontAssistantStreamSessionBinder(
+            $this->getSessionClient(),
+            $this->createStreamSession(),
+        );
+    }
+
+    public function createStreamSession(): SessionInterface
+    {
+        return new Session($this->createMockArraySessionStorage());
+    }
+
+    public function createMockArraySessionStorage(): SessionStorageInterface
+    {
+        return new MockArraySessionStorage();
     }
 }

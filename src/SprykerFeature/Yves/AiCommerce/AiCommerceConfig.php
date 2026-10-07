@@ -9,7 +9,11 @@ namespace SprykerFeature\Yves\AiCommerce;
 
 use Spryker\Yves\Kernel\AbstractBundleConfig;
 use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
+use SprykerFeature\Shared\AiCommerce\StorefrontAssistant\StorefrontAssistantPageType;
 
+/**
+ * @method \SprykerFeature\Shared\AiCommerce\AiCommerceConfig getSharedConfig()
+ */
 class AiCommerceConfig extends AbstractBundleConfig
 {
     /**
@@ -36,18 +40,36 @@ class AiCommerceConfig extends AbstractBundleConfig
 
     protected const string CONFIGURATION_KEY_SEARCH_BY_IMAGE_REDIRECT_TYPE = 'ai_commerce:search_by_image:search_by_image:redirect_type';
 
+    protected const string CONFIGURATION_KEY_STOREFRONT_ASSISTANT_PRODUCT_PAGE_PROMPTS = 'ai_commerce:storefront_assistant:suggested_prompts:product_page_prompts';
+
+    protected const string CONFIGURATION_KEY_STOREFRONT_ASSISTANT_CATEGORY_PAGE_PROMPTS = 'ai_commerce:storefront_assistant:suggested_prompts:category_page_prompts';
+
+    protected const string CONFIGURATION_KEY_STOREFRONT_ASSISTANT_SEARCH_PAGE_PROMPTS = 'ai_commerce:storefront_assistant:suggested_prompts:search_page_prompts';
+
+    protected const string CONFIGURATION_KEY_STOREFRONT_ASSISTANT_DEFAULT_PROMPTS = 'ai_commerce:storefront_assistant:suggested_prompts:default_prompts';
+
+    protected const string CONFIGURATION_KEY_STOREFRONT_ASSISTANT_PRODUCT_RESULTS_PROMPTS = 'ai_commerce:storefront_assistant:suggested_prompts:product_results_prompts';
+
     /**
-     * @var array<string>
+     * @var non-empty-string
      */
+    protected const string STOREFRONT_ASSISTANT_PROMPT_GROUP_PRODUCT_RESULTS = 'product_results';
+
+    /**
+     * @var non-empty-string
+     */
+    protected const string STOREFRONT_ASSISTANT_SUGGESTED_PROMPT_SEPARATOR = '|';
+
+    protected const int STOREFRONT_ASSISTANT_MAX_SUGGESTED_PROMPTS = 4;
+
+    protected const int STOREFRONT_ASSISTANT_MAX_SUGGESTED_PROMPT_LENGTH = 120;
+
     protected const array QUICK_ORDER_IMAGE_TO_CART_SUPPORTED_MIME_TYPES = [
         'image/jpeg',
         'image/jpg',
         'image/png',
     ];
 
-    /**
-     * @var array<string>
-     */
     protected const array QUICK_ORDER_IMAGE_TO_CART_SUPPORTED_IMAGE_EXTENSIONS = [
         'png',
         'jpeg',
@@ -227,5 +249,135 @@ class AiCommerceConfig extends AbstractBundleConfig
             static::CONFIGURATION_KEY_SEARCH_BY_IMAGE_REDIRECT_TYPE,
             static::SEARCH_BY_IMAGE_REDIRECT_TYPE_SEARCH_RESULTS,
         );
+    }
+
+    /**
+     * Specification:
+     * - Returns true when the Storefront Assistant feature is enabled.
+     * - Reads the value from Configuration Management on every call so a Back Office change takes effect without a deployment.
+     * - Defaults to false when the configuration key is not set.
+     *
+     * @api
+     */
+    public function isStorefrontAssistantEnabled(): bool
+    {
+        return (bool)filter_var(
+            $this->getModuleConfig(
+                $this->getSharedConfig()->getStorefrontAssistantEnabledKey(),
+                $this->getSharedConfig()->isStorefrontAssistantEnabledByDefault(),
+            ),
+            FILTER_VALIDATE_BOOLEAN,
+        );
+    }
+
+    /**
+     * Specification:
+     * - Returns the MIME types a customer may attach to a Storefront Assistant message.
+     * - Single source of truth shared with the Client validator so the browser hint and the server enforcement never diverge.
+     *
+     * @api
+     *
+     * @return list<string>
+     */
+    public function getStorefrontAssistantSupportedAttachmentMimeTypes(): array
+    {
+        return $this->getSharedConfig()->getStorefrontAssistantSupportedAttachmentMimeTypes();
+    }
+
+    /**
+     * Specification:
+     * - Returns the maximum decoded byte size a single Storefront Assistant attachment may reach.
+     * - Single source of truth shared with the Client validator so the browser hint and the server enforcement never diverge.
+     *
+     * @api
+     */
+    public function getStorefrontAssistantMaxAttachmentSizeBytes(): int
+    {
+        return $this->getSharedConfig()->getStorefrontAssistantMaxAttachmentSizeBytes();
+    }
+
+    /**
+     * Specification:
+     * - Returns the maximum number of attachments a single Storefront Assistant message may carry.
+     * - Single source of truth shared with the Client validator so the browser hint and the server enforcement never diverge.
+     *
+     * @api
+     */
+    public function getStorefrontAssistantMaxAttachmentCount(): int
+    {
+        return $this->getSharedConfig()->getStorefrontAssistantMaxAttachmentCount();
+    }
+
+    /**
+     * Specification:
+     * - Returns the maximum number of characters a single Storefront Assistant message may reach.
+     * - Derived from the conversation history context window so the limit follows a project that resizes it.
+     * - Never returns less than the floor that keeps ordinary customer questions acceptable.
+     * - Single source of truth shared with the Client validator so the browser hint and the server enforcement never diverge.
+     *
+     * @api
+     */
+    public function getStorefrontAssistantMaxMessageLengthCharacters(): int
+    {
+        return $this->getSharedConfig()->getStorefrontAssistantMaxMessageLengthCharacters();
+    }
+
+    /**
+     * Specification:
+     * - Returns the prompts offered to the customer, keyed by the page type they apply to, plus the
+     *   `product_results` follow-up set offered under product cards the assistant renders.
+     * - Reads each set from Configuration Management on every call so a Back Office change takes effect without a deployment.
+     * - Prompts are stored pre-written rather than generated per page view, so showing them costs no AI call and no latency.
+     * - A page type whose value is unset or blank contributes no prompts and simply shows no rail.
+     *
+     * @api
+     *
+     * @return array<string, list<string>>
+     */
+    public function getStorefrontAssistantSuggestedPrompts(): array
+    {
+        return [
+            StorefrontAssistantPageType::Product->value => $this->getSuggestedPromptSet(
+                static::CONFIGURATION_KEY_STOREFRONT_ASSISTANT_PRODUCT_PAGE_PROMPTS,
+            ),
+            StorefrontAssistantPageType::Category->value => $this->getSuggestedPromptSet(
+                static::CONFIGURATION_KEY_STOREFRONT_ASSISTANT_CATEGORY_PAGE_PROMPTS,
+            ),
+            StorefrontAssistantPageType::Search->value => $this->getSuggestedPromptSet(
+                static::CONFIGURATION_KEY_STOREFRONT_ASSISTANT_SEARCH_PAGE_PROMPTS,
+            ),
+            StorefrontAssistantPageType::Default->value => $this->getSuggestedPromptSet(
+                static::CONFIGURATION_KEY_STOREFRONT_ASSISTANT_DEFAULT_PROMPTS,
+            ),
+            static::STOREFRONT_ASSISTANT_PROMPT_GROUP_PRODUCT_RESULTS => $this->getSuggestedPromptSet(
+                static::CONFIGURATION_KEY_STOREFRONT_ASSISTANT_PRODUCT_RESULTS_PROMPTS,
+            ),
+        ];
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function getSuggestedPromptSet(string $configurationKey): array
+    {
+        $configuredValue = (string)$this->getModuleConfig($configurationKey, '');
+
+        $suggestedPrompts = [];
+
+        foreach (explode(static::STOREFRONT_ASSISTANT_SUGGESTED_PROMPT_SEPARATOR, $configuredValue) as $suggestedPrompt) {
+            $suggestedPrompt = trim($suggestedPrompt);
+
+            if ($suggestedPrompt === '') {
+                continue;
+            }
+
+            $suggestedPrompts[] = mb_substr($suggestedPrompt, 0, static::STOREFRONT_ASSISTANT_MAX_SUGGESTED_PROMPT_LENGTH);
+
+            if (count($suggestedPrompts) === static::STOREFRONT_ASSISTANT_MAX_SUGGESTED_PROMPTS) {
+                break;
+            }
+        }
+
+        return $suggestedPrompts;
     }
 }

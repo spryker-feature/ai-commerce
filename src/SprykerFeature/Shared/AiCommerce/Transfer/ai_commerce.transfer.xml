@@ -9,7 +9,8 @@
         <property name="aiConfigurationName" type="string" description="The configuration name of ai configuration"/>
         <property name="conversationReference" type="string" description="Optional conversation identifier for chat history persistence. When provided, enables storage-backed conversation history."/>
         <property name="maxRetries" type="int" description="Maximum number of retry attempts for the request in case of failures. Defaults to 1."/>
-        <property name="toolSetNames" type="string[]" singular="toolSetName" description="List of AI tool set names."/>
+        <property name="toolSetNames" type="string[]" singular="toolSetName" description="List of AI tool set names. Read by the Zed prompt path only; the Client streaming path uses toolNames."/>
+        <property name="toolNames" type="string[]" singular="toolName" description="List of AI tool names resolved against the Client-side tool plugin stack. Read by the Client streaming path only."/>
     </transfer>
 
     <transfer name="PromptResponse" strict="true">
@@ -121,16 +122,38 @@
     <transfer name="ConversationHistory" strict="true">
         <property name="messages" type="PromptMessage[]" singular="message" description="Collection of conversation messages in PromptMessage format."/>
         <property name="conversationReference" type="string" description="Unique identifier for a conversation thread."/>
+        <property name="originalMessages" type="string" description="JSON-encoded array of raw provider response."/>
     </transfer>
 
     <transfer name="ConversationHistoryCollection" strict="true">
         <property name="conversationHistories" type="ConversationHistory[]" singular="conversationHistory" description="Collection of conversation histories."/>
     </transfer>
 
+    <transfer name="AiConfiguration" strict="true">
+        <property name="name" type="string" description="The AI configuration name the resolved values belong to."/>
+        <property name="providerName" type="string" description="The AI provider identifier, e.g. openai, anthropic, bedrock."/>
+        <property name="providerConfig" type="array" singular="providerConfigItem" description="Provider specific configuration with configuration-management references already expanded."/>
+        <property name="systemPrompt" type="string" description="System prompt configured for the AI configuration."/>
+    </transfer>
+
+    <transfer name="ChatSessionResponse" strict="true">
+        <property name="aiConfiguration" type="AiConfiguration" description="The resolved AI configuration. Null when the request was rejected."/>
+        <property name="conversationHistory" type="ConversationHistory" description="The chat history of the conversation. Null when no history exists for it."/>
+        <property name="contextWindow" type="int" description="Maximum number of tokens to retain in the conversation history."/>
+        <property name="isSuccessful" type="bool" description="Indicates whether the chat session was initialized."/>
+        <property name="errors" type="Error[]" singular="error" description="List of errors encountered during initialization, if any."/>
+    </transfer>
+
+    <transfer name="ChatSessionRequest" strict="true">
+        <property name="aiConfigurationName" type="string" description="The AI configuration name to resolve. Must be present in the client resolvable allowlist."/>
+        <property name="conversationReference" type="string" description="Conversation identifier the chat history is loaded for."/>
+    </transfer>
+
     <transfer name="ToolInvocation" strict="true">
         <property name="name" type="string" description="The unique identifier of the tool that was called."/>
         <property name="arguments" type="array" singular="argument" description="The parameters passed to the tool during execution."/>
         <property name="result" type="string" description="The result returned after executing the tool."/>
+        <property name="isSuccessful" type="bool" description="Indicates whether the tool execution completed successfully."/>
     </transfer>
 
     <transfer name="User">
@@ -555,6 +578,194 @@
     </transfer>
 
     <transfer name="CmsPlaceholderTranslation">
+    </transfer>
+
+    <transfer name="StorefrontAssistantProduct" strict="true">
+        <property name="idProductAbstract" type="int" description="Abstract product identifier the enrichment plugins resolve storage data by."/>
+        <property name="name" type="string" description="Customer visible product name."/>
+        <property name="sku" type="string" description="Abstract product SKU."/>
+        <property name="url" type="string" description="Store and locale specific product detail page URL."/>
+        <property name="price" type="int" description="Product price in the smallest currency unit as returned by the catalog search."/>
+        <property name="imageUrl" type="string" description="Small product image URL resolved from storage. Rendered on the product card and never forwarded to the AI provider."/>
+        <property name="description" type="string" description="Product description resolved from storage. Forwarded to the AI provider so the agent compares products by what they are."/>
+        <property name="currentProductPrice" type="CurrentProductPrice" description="Price resolved for the current customer, store, currency and price mode, the same way a product detail page resolves it."/>
+        <property name="currencyIsoCode" type="string" description="Currency the resolved price is expressed in."/>
+        <property name="priceMode" type="string" description="Price mode the resolved price is expressed in, either GROSS_MODE or NET_MODE."/>
+        <property name="priceFormatted" type="string" description="Resolved price formatted with the currency symbol, the same way the storefront money filter formats it."/>
+        <property name="originalPrice" type="int" description="Price before the discount, present only when it is higher than the resolved price."/>
+        <property name="originalPriceFormatted" type="string" description="Original price formatted with the currency symbol, rendered struck through next to the resolved price."/>
+    </transfer>
+
+    <transfer name="StorefrontAssistantProductCollection" strict="true">
+        <property name="storefrontAssistantProducts" type="StorefrontAssistantProduct[]" singular="storefrontAssistantProduct" description="Products found by a Storefront Assistant tool, in result order."/>
+    </transfer>
+
+    <transfer name="StorefrontAssistantChatRequest" strict="true">
+        <property name="message" type="string" description="The customer supplied message for the current turn."/>
+        <property name="conversationReference" type="string" description="Identifier of the conversation the turn belongs to."/>
+        <property name="customerReference" type="string" description="Customer reference resolved server-side from the session. A value supplied by the caller payload is always discarded."/>
+        <property name="localeName" type="string" description="Locale the conversation is held in."/>
+        <property name="rawAttachments" type="array" singular="rawAttachment" description="Untrusted attachment payload as received from the caller, before server-side validation."/>
+        <property name="attachments" type="Attachment[]" singular="attachment" description="Attachments validated server-side and safe to forward to the AI provider."/>
+        <property name="selectedAgent" type="string" description="Customer pinned agent name for the conversation. Null means automatic selection."/>
+        <property name="storefrontAssistantPageContext" type="StorefrontAssistantPageContext" description="Where the customer is in the storefront when the turn is sent. Collected client-side and never authorizing: it may only inform prompt text."/>
+    </transfer>
+
+    <transfer name="StorefrontAssistantPageContext" strict="true">
+        <property name="pageType" type="string" description="Storefront page the turn was sent from. One of product, category or search."/>
+        <property name="productName" type="string" description="Name of the product the customer is viewing on a product page."/>
+        <property name="productSku" type="string" description="Abstract SKU of the product the customer is viewing on a product page."/>
+        <property name="categoryName" type="string" description="Name of the category the customer is browsing on a category page."/>
+        <property name="searchQuery" type="string" description="Catalog search query the customer ran on a search page."/>
+        <property name="filters" type="string[]" singular="filter" description="Facet values the customer has selected on a category or search page."/>
+    </transfer>
+
+    <transfer name="StorefrontAssistantChatResponse" strict="true">
+        <property name="conversationReference" type="string" description="Identifier of the conversation the turn belongs to."/>
+        <property name="isSuccessful" type="bool" description="Indicates whether the turn completed."/>
+        <property name="errors" type="Error[]" singular="error" description="List of errors encountered during the turn, if any."/>
+    </transfer>
+
+    <transfer name="StorefrontAssistantConversation" strict="true">
+        <property name="conversationReference" type="string" description="Identifier of the conversation."/>
+        <property name="customerReference" type="string" description="Customer reference the conversation is scoped to."/>
+        <property name="messages" type="StorefrontAssistantConversationMessage[]" singular="message" description="Customer visible conversation messages in chronological order."/>
+        <property name="updatedAt" type="int" description="Unix timestamp of the last write."/>
+        <property name="name" type="string" description="Customer visible label of the conversation shown in the history list."/>
+        <property name="createdAt" type="int" description="Unix timestamp of when the conversation was first recorded."/>
+        <property name="agent" type="string" description="Name of the agent that last answered in the conversation."/>
+        <property name="userSelectedAgent" type="string" description="Agent the customer pinned for the conversation. Null means automatic selection."/>
+    </transfer>
+
+    <transfer name="StorefrontAssistantConversationCollection" strict="true">
+        <property name="storefrontAssistantConversations" type="StorefrontAssistantConversation[]" singular="storefrontAssistantConversation" description="Customer scoped conversations in newest first order."/>
+    </transfer>
+
+    <transfer name="StorefrontAssistantConversationConditions" strict="true">
+        <property name="customerReference" type="string" description="Owner the conversations are scoped to. Resolved server-side from the session; a value from the caller payload is discarded."/>
+        <property name="conversationReferences" type="array" singular="conversationReference" description="Optional conversation references to restrict the read to."/>
+        <property name="limit" type="int" description="Maximum number of conversations to return."/>
+    </transfer>
+
+    <transfer name="StorefrontAssistantConversationCollectionCriteria" strict="true">
+        <property name="storefrontAssistantConversationConditions" type="StorefrontAssistantConversationConditions"/>
+        <property name="sortCollection" type="Sort[]" singular="sort"/>
+        <property name="pagination" type="Pagination"/>
+    </transfer>
+
+    <transfer name="StorefrontAssistantConversationDeleteConditions" strict="true">
+        <property name="customerReference" type="string" description="Owner the delete is scoped to. Resolved server-side from the session; a value from the caller payload is discarded."/>
+        <property name="conversationReferences" type="array" singular="conversationReference" description="Conversation references the owner asked to delete."/>
+    </transfer>
+
+    <transfer name="StorefrontAssistantConversationCollectionDeleteCriteria" strict="true">
+        <property name="storefrontAssistantConversationDeleteConditions" type="StorefrontAssistantConversationDeleteConditions"/>
+        <property name="sortCollection" type="Sort[]" singular="sort"/>
+        <property name="pagination" type="Pagination"/>
+    </transfer>
+
+    <transfer name="StorefrontAssistantConversationCollectionResponse" strict="true">
+        <property name="isSuccessful" type="bool" description="Indicates whether the delete completed."/>
+        <property name="errors" type="Error[]" singular="error" description="List of errors encountered during the delete, if any."/>
+        <property name="deletedCount" type="int" description="Number of conversations actually removed. A reference owned by another customer contributes zero."/>
+    </transfer>
+
+    <transfer name="StorefrontAssistantConversationMessageConditions" strict="true">
+        <property name="customerReference" type="string" description="Owner the message read is scoped to. Resolved server-side from the session; a value from the caller payload is discarded."/>
+        <property name="conversationReference" type="string" description="Conversation the messages are read for."/>
+    </transfer>
+
+    <transfer name="StorefrontAssistantConversationMessageCollectionCriteria" strict="true">
+        <property name="storefrontAssistantConversationMessageConditions" type="StorefrontAssistantConversationMessageConditions"/>
+        <property name="sortCollection" type="Sort[]" singular="sort"/>
+        <property name="pagination" type="Pagination"/>
+    </transfer>
+
+    <transfer name="StorefrontAssistantConversationMessageCollection" strict="true">
+        <property name="conversationReference" type="string" description="Conversation the messages belong to."/>
+        <property name="messages" type="StorefrontAssistantConversationMessage[]" singular="message" description="Conversation messages in chronological order, loaded from the persisted chat history."/>
+        <property name="isSuccessful" type="bool" description="Indicates whether the messages could be read for the owner."/>
+        <property name="errors" type="Error[]" singular="error" description="List of errors encountered during the read, if any."/>
+    </transfer>
+
+    <transfer name="Sort">
+        <property name="field" type="string"/>
+        <property name="isAscending" type="bool"/>
+    </transfer>
+
+    <transfer name="StorefrontAssistantConversationMessage" strict="true">
+        <property name="role" type="string" description="Message author role, one of user, ai or tool_result. The assistant role is `ai` to match the storefront renderer, which applies markdown to that role only."/>
+        <property name="content" type="string" description="Message content."/>
+        <property name="isTruncated" type="bool" description="Indicates the assistant message was synthesized from a stream that did not complete."/>
+        <property name="createdAt" type="int" description="Unix timestamp of when the message was recorded."/>
+        <property name="attachments" type="Attachment[]" singular="attachment" description="Attachments the customer sent with this message, used to restore the attachment chips in conversation history."/>
+        <property name="toolInvocations" type="ToolInvocation[]" singular="toolInvocation" description="Tool invocations recorded with this message, used to restore the tool call entries in conversation history."/>
+    </transfer>
+
+    <transfer name="CategoryNodeStorage">
+        <property name="name" type="string"/>
+        <property name="isActive" type="bool"/>
+    </transfer>
+
+    <transfer name="ConversationHistoryCollectionDeleteCriteria" strict="true">
+        <property name="conversationHistoryConditions" type="ConversationHistoryConditions"/>
+    </transfer>
+
+    <transfer name="ConversationHistoryCollectionResponse" strict="true">
+        <property name="isSuccessful" type="bool"/>
+    </transfer>
+
+    <transfer name="PriceProductFilter">
+        <property name="idProduct" type="int"/>
+        <property name="idProductAbstract" type="int"/>
+        <property name="quantity" type="int"/>
+        <property name="storeName" type="string"/>
+        <property name="currencyIsoCode" type="string"/>
+        <property name="priceMode" type="string"/>
+        <property name="productOfferReference" type="string"/>
+    </transfer>
+
+    <transfer name="CurrentProductPrice">
+        <property name="price" type="int"/>
+        <property name="prices" type="array" singular="price"/>
+    </transfer>
+
+    <transfer name="Money">
+        <property name="amount" type="string"/>
+        <property name="currency" type="Currency"/>
+    </transfer>
+
+    <transfer name="Currency">
+    </transfer>
+
+    <transfer name="ProductOfferStorageCriteria">
+        <property name="productConcreteSkus" type="string[]" singular="productConcreteSku"/>
+    </transfer>
+
+    <transfer name="FacetConfig">
+        <property name="name" type="string"/>
+        <property name="parameterName" type="string"/>
+        <property name="fieldName" type="string"/>
+        <property name="isMultiValued" type="bool"/>
+    </transfer>
+
+    <transfer name="PromptStreamChunk" strict="true">
+    </transfer>
+
+    <transfer name="SearchConfigExtension">
+        <property name="facetConfigs" type="FacetConfig[]" singular="facetConfig"/>
+    </transfer>
+
+    <transfer name="ProductAbstractImageStorage">
+        <property name="imageSets" singular="imageSet" type="ProductImageSetStorage[]"/>
+    </transfer>
+
+    <transfer name="ProductImageSetStorage">
+        <property name="images" singular="image" type="ProductImageStorage[]"/>
+    </transfer>
+
+    <transfer name="ProductImageStorage">
+        <property name="externalUrlSmall" type="string"/>
     </transfer>
 
 </transfers>

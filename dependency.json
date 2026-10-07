@@ -3,6 +3,10 @@
         "spryker/ai-foundation": "Provides basic AI functionality.",
         "spryker/catalog": "Provides Catalog functionality.",
         "spryker/configuration": "Provides BO configuration.",
+        "spryker/locale": "Provides the current storefront locale used to scope Storefront Assistant catalog lookups.",
+        "spryker/customer": "Provides the storefront session customer identity for the Storefront Assistant.",
+        "spryker/storage": "Provides the key-value storage used by the Storefront Assistant.",
+        "spryker/store": "Provides the current storefront store used to scope Storefront Assistant catalog lookups.",
         "spryker-shop/shop-ui": "Provides ShopUi molecules used in Twig templates (ajax-provider, ajax-loader, main-popup).",
         "spryker/transfer": "Provides transfer objects definition with strict types and `::get*OrFail()` functionality."
     }

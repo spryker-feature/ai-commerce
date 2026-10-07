@@ -8,7 +8,9 @@
 namespace SprykerFeature\Yves\AiCommerce;
 
 use Spryker\Client\Catalog\CatalogClientInterface;
+use Spryker\Client\Customer\CustomerClientInterface;
 use Spryker\Client\GlossaryStorage\GlossaryStorageClientInterface;
+use Spryker\Client\Session\SessionClientInterface;
 use Spryker\Shared\Kernel\ContainerInterface;
 use Spryker\Yves\Kernel\AbstractBundleDependencyProvider;
 use Spryker\Yves\Kernel\Container;
@@ -18,6 +20,8 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
     public const string CLIENT_AI_FOUNDATION = 'CLIENT_AI_FOUNDATION';
 
     public const string CLIENT_CATALOG = 'CLIENT_CATALOG';
+
+    public const string CLIENT_CUSTOMER = 'CLIENT_CUSTOMER';
 
     public const string CLIENT_LOCALE = 'CLIENT_LOCALE';
 
@@ -45,17 +49,27 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
 
     public const string CLIENT_PRODUCT_STORAGE = 'CLIENT_PRODUCT_STORAGE';
 
+    public const string CLIENT_SESSION = 'CLIENT_SESSION';
+
+    /**
+     * @uses \Spryker\Yves\Form\Plugin\Application\FormApplicationPlugin::SERVICE_FORM_CSRF_PROVIDER
+     */
+    public const string SERVICE_FORM_CSRF_PROVIDER = 'form.csrf_provider';
+
     public function provideDependencies(Container $container): Container
     {
         $container = parent::provideDependencies($container);
         $container = $this->addAiFoundationClient($container);
         $container = $this->addCatalogClient($container);
+        $container = $this->addCustomerClient($container);
         $container = $this->addLocaleClient($container);
         $container = $this->addFlashMessengerService($container);
         $container = $this->addTranslatorService($container);
         $container = $this->addGlossaryStorageClient($container);
         $container = $this->addRouter($container);
         $container = $this->addProductStorageClient($container);
+        $container = $this->addCsrfTokenManager($container);
+        $container = $this->addSessionClient($container);
 
         return $container;
     }
@@ -73,6 +87,15 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
     {
         $container->set(static::CLIENT_CATALOG, function (Container $container): CatalogClientInterface {
             return $container->getLocator()->catalog()->client();
+        });
+
+        return $container;
+    }
+
+    protected function addCustomerClient(Container $container): Container
+    {
+        $container->set(static::CLIENT_CUSTOMER, function (Container $container): CustomerClientInterface {
+            return $container->getLocator()->customer()->client();
         });
 
         return $container;
@@ -127,6 +150,24 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
     {
         $container->set(static::CLIENT_PRODUCT_STORAGE, function (Container $container) {
             return $container->getLocator()->productStorage()->client();
+        });
+
+        return $container;
+    }
+
+    protected function addCsrfTokenManager(Container $container): Container
+    {
+        $container->set(static::SERVICE_FORM_CSRF_PROVIDER, function (ContainerInterface $container) {
+            return $container->getApplicationService(static::SERVICE_FORM_CSRF_PROVIDER);
+        });
+
+        return $container;
+    }
+
+    protected function addSessionClient(Container $container): Container
+    {
+        $container->set(static::CLIENT_SESSION, function (Container $container): SessionClientInterface {
+            return $container->getLocator()->session()->client();
         });
 
         return $container;
