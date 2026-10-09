@@ -12,11 +12,6 @@ namespace SprykerFeature\Client\AiCommerce\StorefrontAssistant\Search;
 interface CatalogSearchResultMapperInterface
 {
     /**
-     * @return array<string, mixed>
-     */
-    public function mapEmptyQueryResult(): array;
-
-    /**
      * @param array<string, mixed> $searchResults
      *
      * @return list<int>
@@ -39,6 +34,12 @@ interface CatalogSearchResultMapperInterface
         int $page,
         int $limit,
         array $facetConfigTransfers,
+        bool $isEmptiedByConstraints = false,
         array $categoryNodeNames = []
     ): array;
+
+    /**
+     * @param array<string, mixed> $searchResults
+     */
+    public function resolveTotalResults(array $searchResults): ?int;
 }

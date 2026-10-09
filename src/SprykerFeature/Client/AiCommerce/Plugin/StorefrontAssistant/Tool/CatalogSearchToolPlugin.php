@@ -23,17 +23,17 @@ class CatalogSearchToolPlugin extends AbstractPlugin implements ToolPluginInterf
     public const string TOOL_NAME = 'catalog_search';
 
     protected const string TOOL_DESCRIPTION = <<<'DESCRIPTION'
-        Searches the shop catalog and returns real products for the current store, locale and currency, together with the refinements that actually narrow this result set.
-
-        How to use it well:
-        - `query` is matched as words against the catalogue, not read as a request. Send the product itself in two to four words — "camera", "laptop backpack" — and leave every qualifier out of it. A sentence like "a waterproof camera for hiking" matches more products rather than fewer, because each extra word adds matches of its own, and ranks incidental mentions above the product the customer asked for.
-        - Express the qualifiers as arguments instead: a budget through `priceMax`, "cheap" or "best" through `sort`, and any attribute — brand, colour, capacity — through `filters` once a refinement has shown it exists.
-        - Search broadly first with `query` alone. The reply carries `availableRefinements`, where every value has a `matchCount`: that is how many of the matching products carry it. Pick refinements from those lists rather than inventing values, and prefer a value whose `matchCount` is well below `totalResults` — one equal to `totalResults` narrows nothing, and a value not in the list returns nothing.
-        - Then narrow in a second call by passing the chosen values back through the argument the refinement names in `filterArgument`: `category`, `label`, `productClass`, the price bounds, `ratingMin`, or a `filters` entry such as `filters.brand`. A refinement whose `valueType` is `categoryId` is filtered by the numeric `value`, not by the `label` shown beside it. Filters combine as AND; `label`, `productClass` and a multi-valued `filters` entry take several values, which combine as OR within that filter.
-        - `priceRange` in the reply gives the real lowest and highest price among the matches, in the same units `priceMin` and `priceMax` expect, so bound a budget from it instead of guessing.
-        - When `hasMoreResults` is true, either narrow with a refinement or ask for the next `page`. When `totalResults` is 0, relax the most restrictive filter rather than repeating the same search, and use `didYouMean` if it is present.
-        - `appliedFilters` echoes what was really applied. `ignoredArguments` lists what was dropped, each entry naming the `argument` and the `reason` it could not be used — read the reason and correct that argument rather than repeating the call unchanged.
-        - When `totalResults` is 0 and `didYouMean` is present, search again with that spelling before telling the customer nothing was found: it is the catalogue's own correction of the query. With no `didYouMean`, drop the most restrictive filter — or the longest word of the query — and try once more before giving up.
+        Searches the shop catalog for the current store, locale and currency and returns product rows plus the refinements that narrow this result.
+        - `query` is optional: omit it to browse by `category`, by `label` ("on sale" is SALE, "new arrivals" is NEW), by a price bound or by a filter; with no argument it browses the whole catalogue.
+        - A seller ("sold by Video King") goes in `merchant`, never in `query`. When a `merchant` search returns nothing, tell the customer no seller of that name offers such products and name at most five sellers from `emptiedBy` instead of showing other sellers' products.
+        - Prices are in the store currency's normal units, so 100 euros is 100, for the bounds, `price` and `priceRange` alike. "Under 100" is `priceMax` 100; "between 100 and 200" is `priceMin` 100 and `priceMax` 200; "around 150" is `priceMin` 120 and `priceMax` 180. Apply a budget in the first search, and leave out a row whose own `price` still falls outside it.
+        - Every `availableRefinements` value carries a `matchCount`. Choose values from these lists, preferring one well below `totalResults`, and pass them back through the argument named in `filterArgument`; a `valueType` categoryId is filtered by its numeric `value`. Filters combine as AND, several values of one filter as OR.
+        - `priceRange` (`min`, `max`, `minFormatted`, `maxFormatted`) spans every match and ignores the search's own price bounds: answer what prices exist or what budget is realistic from it instead of searching again. `ratingRange` spans the rated matches.
+        - Rows carry `labels`, `rating` with `reviewCount` only when rated, up to ten `attributes` and `variants`. The `description` is cut short, so judge specifications by `attributes`. Never call a row without `rating` top-rated, and say so when fewer than three matches are rated. A missing attribute is unknown, not absent: compare products by the attributes both rows carry. For a numeric need no refinement covers, such as "at least 20 megapixels", keep only rows whose attribute meets it; for the cheapest, browse with `sort` price_asc and page on.
+        - Rows that share a name are different listings: say for each what differs, such as its `variants`, `color` or price.
+        - `hasMoreResults` true: narrow with a refinement, or search again with `excludeShown` true when the customer wants more.
+        - `ignoredArguments` names each dropped `argument` and its `reason`: correct it instead of repeating the call or presenting unfiltered results as matching.
+        - `totalResults` 0: follow `suggestedNextAction`. `emptiedBy` names each wish without a match with its `argument`, `requested` value and the `availableValues` or `availableRange` that exist: tell the customer and offer the closest ones, never silently dropping it. `didYouMean` appears only when the words themselves matched nothing.
         DESCRIPTION;
 
     /**
@@ -72,32 +72,32 @@ class CatalogSearchToolPlugin extends AbstractPlugin implements ToolPluginInterf
             new ToolParameter(
                 CatalogSearchArgumentResolver::PARAMETER_QUERY,
                 ToolParameterType::String,
-                'The product to search for, in two to four words naming the product itself — "camera", "laptop backpack". Not the customer\'s sentence: this text is matched as words against the catalogue, so intent words ("for hiking", "something to", "cheap") add matches of their own and push incidental mentions above the product that was asked for. Express every constraint through the other arguments instead.',
-                true,
+                'Optional. The product itself in two to four words, such as "camera", or a specific model\'s brand and model, such as "Samsung Galaxy S5 mini". Never the customer\'s sentence or intent words. Omit to browse.',
+                false,
             ),
             new ToolParameter(
                 CatalogSearchArgumentResolver::PARAMETER_CATEGORY,
                 ToolParameterType::Integer,
-                'Narrows to one category, given as its numeric category id and never as its name. Take the id from the `value` field of the `category` entry in a previous search\'s availableRefinements, where every entry also carries a readable `label` so the right one can be told apart. Omit it on a first search and choose from the refinements that come back.',
+                'A numeric category id, never a name: from the shop\'s category list, `category_tree` or the `value` of a `category` refinement.',
                 false,
             ),
             new ToolParameter(
                 CatalogSearchArgumentResolver::PARAMETER_PRICE_MIN,
-                ToolParameterType::Integer,
-                'Lowest acceptable price, in the same units as the `priceRange` and the product `price` in the reply, which is the smallest unit of the store currency (cents, for example 2500 for 25.00). Omit when the customer named no lower bound.',
+                ToolParameterType::Number,
+                'Lowest price in the store currency\'s normal units, so 24.99 euros is 24.99. Omit for "under X".',
                 false,
             ),
             new ToolParameter(
                 CatalogSearchArgumentResolver::PARAMETER_PRICE_MAX,
-                ToolParameterType::Integer,
-                'Highest acceptable price, in the same units as priceMin. For "under 50" in a currency with cents, pass 5000. Omit when the customer named no upper bound.',
+                ToolParameterType::Number,
+                'Highest price in the store currency\'s normal units, so "under 50 euros" is 50.',
                 false,
             ),
             new ToolParameter(
                 CatalogSearchArgumentResolver::PARAMETER_RATING_MIN,
                 ToolParameterType::Integer,
                 sprintf(
-                    'Lowest acceptable average customer rating on a %d to %d star scale, so 4 means "%d stars and up". A value outside that scale is ignored rather than applied.',
+                    'Lowest average rating on a %d to %d star scale; 4 means "%d stars and up".',
                     CatalogSearchArgumentResolver::RATING_MIN,
                     CatalogSearchArgumentResolver::RATING_MAX,
                     CatalogSearchArgumentResolver::RATING_MAX - 1,
@@ -107,20 +107,26 @@ class CatalogSearchToolPlugin extends AbstractPlugin implements ToolPluginInterf
             new ToolParameter(
                 CatalogSearchArgumentResolver::PARAMETER_LABEL,
                 ToolParameterType::Array,
-                'Product labels to filter by, such as those marking new or discounted products. Pass values from the `label` entry of availableRefinements; several are allowed and match products carrying any of them. A single label may be passed as a plain string.',
+                'Label keys such as SALE or NEW, or `label` refinement values; several match any.',
                 false,
             ),
             new ToolParameter(
                 CatalogSearchArgumentResolver::PARAMETER_PRODUCT_CLASS,
                 ToolParameterType::Array,
-                'Product classes to filter by. Pass values from the `product-class-names` entry of availableRefinements; several are allowed and match products in any of them. A single class may be passed as a plain string.',
+                'Values of the `product-class-names` refinement; several match any.',
+                false,
+            ),
+            new ToolParameter(
+                CatalogSearchArgumentResolver::PARAMETER_MERCHANT,
+                ToolParameterType::Array,
+                'Seller names as the `merchant` refinement lists them, such as "Video King"; several match any.',
                 false,
             ),
             new ToolParameter(
                 CatalogSearchArgumentResolver::PARAMETER_SORT,
                 ToolParameterType::String,
                 sprintf(
-                    'Result ordering, one of: %s. Omit to let the shop rank by relevance to the query, which is the better choice for an open-ended search.',
+                    'One of: %s. Omit for relevance. Never sort a lookup of a specific model.',
                     implode(', ', CatalogSearchArgumentResolver::SUPPORTED_SORT_PARAMS),
                 ),
                 false,
@@ -128,7 +134,13 @@ class CatalogSearchToolPlugin extends AbstractPlugin implements ToolPluginInterf
             new ToolParameter(
                 CatalogSearchArgumentResolver::PARAMETER_PAGE,
                 ToolParameterType::Integer,
-                'The 1-based page to return, for when the customer asks to see more beyond what a previous call already showed. Narrowing with a refinement usually serves the customer better than paging.',
+                'The 1-based page. For more of a search already shown, pass `excludeShown` instead.',
+                false,
+            ),
+            new ToolParameter(
+                CatalogSearchArgumentResolver::PARAMETER_EXCLUDE_SHOWN,
+                ToolParameterType::Boolean,
+                'True leaves out the products displayed earlier in this conversation, for "show me more". Keep the other arguments of the search being continued.',
                 false,
             ),
             new ToolParameter(
@@ -145,7 +157,7 @@ class CatalogSearchToolPlugin extends AbstractPlugin implements ToolPluginInterf
             new ToolParameter(
                 CatalogSearchArgumentResolver::PARAMETER_FILTERS,
                 ToolParameterType::Object,
-                'Attribute filters, as an object keyed by the `filterArgument` a refinement reports, for example {"brand": "Canon", "color": "Black"}. Which attributes exist is decided by the shop, so take both the key and the value from the `availableRefinements` of a previous search rather than assuming an attribute is filterable. A key the shop does not filter by is reported back in `ignoredArguments` instead of narrowing anything, and a filter whose refinement allows several values accepts an array.',
+                'Attribute filters keyed by a refinement\'s `filterArgument`, such as {"brand": "Canon", "color": "Black"}; a multi-value filter accepts an array. Pass a value the customer named in the first call under its usual key.',
                 false,
             ),
         ];

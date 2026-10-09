@@ -31,6 +31,7 @@ class StorefrontAssistantSsePostToolCallPlugin extends AbstractPlugin implements
      * - Emits the tool output event for storefront assistant AI configurations after each customer facing tool call.
      * - Emits a denied output event when the tool was not allowed to execute.
      * - Emits nothing for a tool internal to the agent, so its result never reaches the customer.
+     * - Expands a displayed product result with refinement chips, active filters and a see-all link of the catalog search of this turn it came from.
      *
      * @api
      */
@@ -66,7 +67,11 @@ class StorefrontAssistantSsePostToolCallPlugin extends AbstractPlugin implements
             StreamEventKey::OUTPUT => [
                 static::OUTPUT_KEY_RESULT => $this->getFactory()
                     ->createToolResultProductEnricher()
-                    ->enrich((string)$aiToolCallTransfer->getToolResult()),
+                    ->enrich(
+                        $this->getFactory()
+                            ->createDisplayProductRefinementExpander()
+                            ->expandToolResult($toolName, (string)$aiToolCallTransfer->getToolResult()),
+                    ),
             ],
         ]);
     }

@@ -33,6 +33,8 @@ class SearchFilterConfigReaderTest extends Unit
 
     protected const string PARAMETER_NAME_MERCHANT_NAME = 'merchant_name';
 
+    protected const string PARAMETER_NAME_MERCHANT_REFERENCE = 'merchant_reference';
+
     protected const string PARAMETER_NAME_CATEGORY = 'category';
 
     protected const string PARAMETER_NAME_PRICE = 'price';
@@ -63,7 +65,7 @@ class SearchFilterConfigReaderTest extends Unit
     {
         // Arrange
         $searchFilterConfigReader = $this->createSearchFilterConfigReader([
-            $this->createFacetConfigTransfer(static::PARAMETER_NAME_MERCHANT_NAME),
+            $this->createFacetConfigTransfer(static::PARAMETER_NAME_MERCHANT_REFERENCE),
             $this->createFacetConfigTransfer(static::PARAMETER_NAME_BRAND),
         ]);
 
@@ -71,8 +73,22 @@ class SearchFilterConfigReaderTest extends Unit
         $facetConfigTransfers = $searchFilterConfigReader->getFilterableFacetConfigs();
 
         // Assert
-        $this->assertArrayNotHasKey(static::PARAMETER_NAME_MERCHANT_NAME, $facetConfigTransfers);
+        $this->assertArrayNotHasKey(static::PARAMETER_NAME_MERCHANT_REFERENCE, $facetConfigTransfers);
         $this->assertArrayHasKey(static::PARAMETER_NAME_BRAND, $facetConfigTransfers);
+    }
+
+    public function testGivenAMerchantNameFacetWhenReadThenItIsOffered(): void
+    {
+        // Arrange
+        $searchFilterConfigReader = $this->createSearchFilterConfigReader([
+            $this->createFacetConfigTransfer(static::PARAMETER_NAME_MERCHANT_NAME),
+        ]);
+
+        // Act
+        $facetConfigTransfers = $searchFilterConfigReader->getFilterableFacetConfigs();
+
+        // Assert
+        $this->assertArrayHasKey(static::PARAMETER_NAME_MERCHANT_NAME, $facetConfigTransfers);
     }
 
     /**
@@ -162,7 +178,7 @@ class SearchFilterConfigReaderTest extends Unit
 
         foreach ($facetConfigTransfers as $parameterName => $facetConfigTransfer) {
             $this->assertSame($parameterName, $facetConfigTransfer->getParameterName());
-            $this->assertNotContains($parameterName, [static::PARAMETER_NAME_MERCHANT_NAME]);
+            $this->assertNotContains($parameterName, [static::PARAMETER_NAME_MERCHANT_REFERENCE]);
         }
     }
 

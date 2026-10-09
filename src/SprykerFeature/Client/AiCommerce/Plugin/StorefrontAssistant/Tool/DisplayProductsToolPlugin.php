@@ -13,6 +13,7 @@ use Spryker\Client\AiFoundation\Dependency\Tools\ToolPluginInterface;
 use Spryker\Client\Kernel\AbstractPlugin;
 use Spryker\Shared\AiFoundation\Tools\ToolParameterType;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Product\DisplayProductReader;
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Product\DisplayProductReasonResolver;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Tool\ToolParameter;
 
 /**
@@ -22,7 +23,7 @@ class DisplayProductsToolPlugin extends AbstractPlugin implements ToolPluginInte
 {
     public const string TOOL_NAME = 'display_products';
 
-    protected const string TOOL_DESCRIPTION = 'Displays products to the customer as product cards, each showing the name, image, resolved price, SKU and a link. Call this once per reply with only the products worth showing, taken from an earlier catalog_search result. The customer sees nothing from catalog_search itself, so a product you do not pass here is never shown. Pass the idProductAbstract values exactly as the search returned them.';
+    protected const string TOOL_DESCRIPTION = 'Shows the customer product cards (name, reason, image, price, SKU and link) for the idProductAbstract values you pass, exactly as a tool returned them. Call it once per reply with only the products worth showing; a product you do not pass is never shown.';
 
     /**
      * {@inheritDoc}
@@ -58,8 +59,17 @@ class DisplayProductsToolPlugin extends AbstractPlugin implements ToolPluginInte
                 DisplayProductReader::PARAMETER_ID_PRODUCT_ABSTRACTS,
                 ToolParameterType::Array,
                 sprintf(
-                    'The idProductAbstract values of the products to show the customer, in the order they should appear, taken from a previous catalog_search result. At most %d are displayed.',
+                    'The idProductAbstract values to show, in display order. At most %d are displayed.',
                     DisplayProductReader::MAX_PRODUCTS,
+                ),
+                true,
+            ),
+            new ToolParameter(
+                DisplayProductReader::PARAMETER_REASONS,
+                ToolParameterType::Object,
+                sprintf(
+                    'A reason for every card keyed by idProductAbstract, max %d chars: the fact that fits the request, such as {"12": "20 MP · 8× zoom"}; same-name cards differ by variant, seller or price.',
+                    DisplayProductReasonResolver::MAX_REASON_LENGTH,
                 ),
                 true,
             ),

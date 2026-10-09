@@ -25,6 +25,8 @@ class CatalogSearchArgumentResolver implements CatalogSearchArgumentResolverInte
 
     public const string PARAMETER_PRODUCT_CLASS = 'productClass';
 
+    public const string PARAMETER_MERCHANT = 'merchant';
+
     public const string PARAMETER_SORT = 'sort';
 
     public const string PARAMETER_PAGE = 'page';
@@ -32,6 +34,8 @@ class CatalogSearchArgumentResolver implements CatalogSearchArgumentResolverInte
     public const string PARAMETER_FILTERS = 'filters';
 
     public const string PARAMETER_LIMIT = 'limit';
+
+    public const string PARAMETER_EXCLUDE_SHOWN = 'excludeShown';
 
     public const string SORT_RATING = 'rating';
 
@@ -79,6 +83,11 @@ class CatalogSearchArgumentResolver implements CatalogSearchArgumentResolverInte
      */
     public const string REQUEST_PARAMETER_PRODUCT_CLASS = 'product-class-names';
 
+    /**
+     * @uses \Spryker\Client\MerchantProductOfferSearch\Plugin\Search\MerchantNameSearchConfigExpanderPlugin::PARAMETER_NAME
+     */
+    public const string REQUEST_PARAMETER_MERCHANT_NAME = 'merchant_name';
+
     public const string REQUEST_PARAMETER_SORT = 'sort';
 
     /**
@@ -90,6 +99,20 @@ class CatalogSearchArgumentResolver implements CatalogSearchArgumentResolverInte
      * @uses \Spryker\Client\Catalog\Plugin\Config\CatalogSearchConfigBuilder::PARAMETER_NAME_ITEMS_PER_PAGE
      */
     public const string REQUEST_PARAMETER_ITEMS_PER_PAGE = 'ipp';
+
+    /**
+     * Maps a facet name as the search returns it to the argument that filters by it, so a refinement
+     * the agent reads can be passed straight back instead of guessed at.
+     *
+     * @var array<string, string>
+     */
+    public const array REQUEST_PARAMETER_TO_FILTER_ARGUMENT = [
+        self::REQUEST_PARAMETER_CATEGORY => self::PARAMETER_CATEGORY,
+        self::REQUEST_PARAMETER_LABEL => self::PARAMETER_LABEL,
+        self::REQUEST_PARAMETER_PRODUCT_CLASS => self::PARAMETER_PRODUCT_CLASS,
+        self::REQUEST_PARAMETER_MERCHANT_NAME => self::PARAMETER_MERCHANT,
+        self::REQUEST_PARAMETER_RATING => self::PARAMETER_RATING_MIN,
+    ];
 
     public const string RANGE_KEY_MIN = 'min';
 
@@ -109,14 +132,21 @@ class CatalogSearchArgumentResolver implements CatalogSearchArgumentResolverInte
 
     public const int RATING_MAX = 5;
 
+    /**
+     * @uses \Spryker\Shared\Money\Converter\DecimalToIntegerConverter::PRICE_PRECISION
+     */
+    public const int PRICE_PRECISION = 100;
+
     protected const string IGNORED_ARGUMENT_KEY_ARGUMENT = 'argument';
 
     protected const string IGNORED_ARGUMENT_KEY_REASON = 'reason';
 
     protected const string FILTER_ARGUMENT_FORMAT = '%s.%s';
 
-    public function __construct(protected CatalogSearchPageResolverInterface $catalogSearchPageResolver)
-    {
+    public function __construct(
+        protected CatalogSearchPageResolverInterface $catalogSearchPageResolver,
+        protected ProductLabelNameResolverInterface $productLabelNameResolver
+    ) {
     }
 
     /**
@@ -137,6 +167,20 @@ class CatalogSearchArgumentResolver implements CatalogSearchArgumentResolverInte
     public function resolvePage(array $arguments): int
     {
         return max(1, $this->resolveIntArgument($arguments, static::PARAMETER_PAGE) ?? 1);
+    }
+
+    /**
+     * @param array<int|string, mixed> $arguments
+     */
+    public function isShownProductExclusionRequested(array $arguments): bool
+    {
+        $value = $arguments[static::PARAMETER_EXCLUDE_SHOWN] ?? null;
+
+        if (!is_scalar($value)) {
+            return false;
+        }
+
+        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
     }
 
     /**
@@ -189,7 +233,9 @@ class CatalogSearchArgumentResolver implements CatalogSearchArgumentResolverInte
             $requestParameters[static::REQUEST_PARAMETER_CATEGORY] = $category;
         }
 
-        $labels = $this->resolveStringListArgument($arguments, static::PARAMETER_LABEL);
+        $labels = $this->productLabelNameResolver->resolveLabelNames(
+            $this->resolveStringListArgument($arguments, static::PARAMETER_LABEL),
+        );
 
         if ($labels !== []) {
             $requestParameters[static::REQUEST_PARAMETER_LABEL] = $labels;
@@ -199,6 +245,12 @@ class CatalogSearchArgumentResolver implements CatalogSearchArgumentResolverInte
 
         if ($productClasses !== []) {
             $requestParameters[static::REQUEST_PARAMETER_PRODUCT_CLASS] = $productClasses;
+        }
+
+        $merchantNames = $this->resolveMerchantNames($arguments, $ignoredArguments, $facetConfigTransfers);
+
+        if ($merchantNames !== null) {
+            $requestParameters[static::REQUEST_PARAMETER_MERCHANT_NAME] = $merchantNames;
         }
 
         $priceRange = $this->resolvePriceRange($arguments, $ignoredArguments);
@@ -338,6 +390,35 @@ class CatalogSearchArgumentResolver implements CatalogSearchArgumentResolverInte
     }
 
     /**
+     * @param array<int|string, mixed> $arguments
+     * @param array<int, array<string, string>> $ignoredArguments
+     * @param array<string, \Generated\Shared\Transfer\FacetConfigTransfer> $facetConfigTransfers
+     *
+     * @return array<int, string>|string|null
+     */
+    protected function resolveMerchantNames(array $arguments, array &$ignoredArguments, array $facetConfigTransfers)
+    {
+        $merchantNames = $this->resolveStringListArgument($arguments, static::PARAMETER_MERCHANT);
+
+        if ($merchantNames === []) {
+            return null;
+        }
+
+        $facetConfigTransfer = $facetConfigTransfers[static::REQUEST_PARAMETER_MERCHANT_NAME] ?? null;
+
+        if ($facetConfigTransfer === null) {
+            $ignoredArguments[] = $this->formatIgnoredArgument(
+                static::PARAMETER_MERCHANT,
+                'this shop does not filter by seller; search without it',
+            );
+
+            return null;
+        }
+
+        return $this->resolveFilterValue($merchantNames, (bool)$facetConfigTransfer->getIsMultiValued());
+    }
+
+    /**
      * @uses \Spryker\Client\ProductReview\Plugin\ProductRatingValueTransformer::transformFromDisplay()
      *
      * @param array<int|string, mixed> $arguments
@@ -415,12 +496,12 @@ class CatalogSearchArgumentResolver implements CatalogSearchArgumentResolverInte
      * @param array<int|string, mixed> $arguments
      * @param array<int, array<string, string>> $ignoredArguments
      *
-     * @return array<string, int>|null
+     * @return array<string, float>|null
      */
     protected function resolvePriceRange(array $arguments, array &$ignoredArguments): ?array
     {
-        $priceMin = $this->resolveIntArgument($arguments, static::PARAMETER_PRICE_MIN);
-        $priceMax = $this->resolveIntArgument($arguments, static::PARAMETER_PRICE_MAX);
+        $priceMin = $this->resolveFloatArgument($arguments, static::PARAMETER_PRICE_MIN);
+        $priceMax = $this->resolveFloatArgument($arguments, static::PARAMETER_PRICE_MAX);
 
         if ($priceMin !== null && $priceMin < 0) {
             $ignoredArguments[] = $this->formatIgnoredArgument(static::PARAMETER_PRICE_MIN, 'cannot be negative');
@@ -518,5 +599,21 @@ class CatalogSearchArgumentResolver implements CatalogSearchArgumentResolverInte
         }
 
         return (int)$value;
+    }
+
+    /**
+     * @param array<int|string, mixed> $arguments
+     */
+    protected function resolveFloatArgument(array $arguments, string $name): ?float
+    {
+        $value = $arguments[$name] ?? null;
+
+        if ($value === null || is_bool($value) || !is_numeric($value)) {
+            return null;
+        }
+
+        $value = (float)$value;
+
+        return is_finite($value) ? $value : null;
     }
 }

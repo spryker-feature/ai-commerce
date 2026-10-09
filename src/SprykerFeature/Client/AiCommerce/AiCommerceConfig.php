@@ -8,7 +8,6 @@
 namespace SprykerFeature\Client\AiCommerce;
 
 use Spryker\Client\Kernel\AbstractBundleConfig;
-use SprykerFeature\Client\AiCommerce\Plugin\StorefrontAssistant\Tool\DisplayProductsToolPlugin;
 use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
 
 /**
@@ -18,10 +17,6 @@ class AiCommerceConfig extends AbstractBundleConfig
 {
     protected const string SEARCH_BY_IMAGE_PROMPT_TEMPLATE = 'Identify the main product in this image and respond with only the most relevant product search term. One to three words maximum.';
 
-    protected const string STOREFRONT_ASSISTANT_AI_CONFIGURATION_NAME = 'AI_COMMERCE:AI_CONFIGURATION_STOREFRONT_ASSISTANT_OPENAI';
-
-    protected const string CONFIGURATION_KEY_STOREFRONT_ASSISTANT_AI_VENDOR_AI_CONFIGURATION = 'ai_commerce:storefront_assistant:ai_vendor:ai_configuration';
-
     protected const int STOREFRONT_ASSISTANT_CONVERSATION_TIME_TO_LIVE = 2592000;
 
     protected const int STOREFRONT_ASSISTANT_CONVERSATION_LIST_LIMIT = 50;
@@ -29,6 +24,14 @@ class AiCommerceConfig extends AbstractBundleConfig
     protected const int STOREFRONT_ASSISTANT_CONVERSATION_INDEX_LIMIT = 100;
 
     protected const int STOREFRONT_ASSISTANT_CATEGORY_TREE_LIMIT = 200;
+
+    protected const int STOREFRONT_ASSISTANT_INLINE_CATEGORY_TREE_LIMIT = 200;
+
+    protected const int STOREFRONT_ASSISTANT_MAX_REFINEMENT_CHIPS = 6;
+
+    protected const float STOREFRONT_ASSISTANT_PRICE_OUTLIER_FACTOR = 5.0;
+
+    protected const bool STOREFRONT_ASSISTANT_IS_REASONING_STREAMED = true;
 
     protected const string CONFIGURATION_KEY_STOREFRONT_ASSISTANT_GENERAL_IS_PRODUCT_DISCOVERY_AGENT_ENABLED = 'ai_commerce:storefront_assistant:general:is_product_discovery_agent_enabled';
 
@@ -92,7 +95,7 @@ class AiCommerceConfig extends AbstractBundleConfig
     /**
      * Specification:
      * - Returns the AI configuration name the Storefront Assistant resolves through the AI Foundation gateway.
-     * - Resolves the value from Configuration Management; falls back to the module default when unset or blank.
+     * - Returns an empty string by default: the project resolves the AI configuration name.
      * - The name must be present in \Spryker\Zed\AiFoundation\AiFoundationConfig::getClientResolvableAiConfigurationNames(),
      *   otherwise the chat session is rejected.
      *
@@ -100,16 +103,7 @@ class AiCommerceConfig extends AbstractBundleConfig
      */
     public function getStorefrontAssistantAiConfigurationName(): string
     {
-        $aiConfigurationName = (string)$this->getModuleConfig(
-            static::CONFIGURATION_KEY_STOREFRONT_ASSISTANT_AI_VENDOR_AI_CONFIGURATION,
-            static::STOREFRONT_ASSISTANT_AI_CONFIGURATION_NAME,
-        );
-
-        if (trim($aiConfigurationName) === '') {
-            return static::STOREFRONT_ASSISTANT_AI_CONFIGURATION_NAME;
-        }
-
-        return $aiConfigurationName;
+        return '';
     }
 
     /**
@@ -129,7 +123,20 @@ class AiCommerceConfig extends AbstractBundleConfig
 
     /**
      * Specification:
+     * - Defines whether the reasoning chunks of the model, such as reasoning summaries or thinking blocks, are streamed to the customer.
+     * - When disabled, the customer sees only the answer text and the tool status labels.
+     *
+     * @api
+     */
+    public function isStorefrontAssistantReasoningStreamed(): bool
+    {
+        return static::STOREFRONT_ASSISTANT_IS_REASONING_STREAMED;
+    }
+
+    /**
+     * Specification:
      * - Returns the names of the tools whose results are shown to the customer.
+     * - Returns an empty list by default: the project lists the customer-facing tools.
      * - A tool absent from this list is internal to the agent: its result is never emitted as an SSE
      *   event and never rendered in the conversation history, though it is still persisted so the
      *   agent keeps its working context across turns.
@@ -140,9 +147,7 @@ class AiCommerceConfig extends AbstractBundleConfig
      */
     public function getStorefrontAssistantCustomerFacingToolNames(): array
     {
-        return [
-            DisplayProductsToolPlugin::TOOL_NAME,
-        ];
+        return [];
     }
 
     /**
@@ -191,6 +196,56 @@ class AiCommerceConfig extends AbstractBundleConfig
     public function getStorefrontAssistantCategoryTreeLimit(): int
     {
         return static::STOREFRONT_ASSISTANT_CATEGORY_TREE_LIMIT;
+    }
+
+    /**
+     * Specification:
+     * - Returns the maximum number of category lines the Product Discovery Agent receives up front in its system prompt.
+     * - A category tree with more lines is not inlined; the agent then looks categories up with the category tree tool.
+     *
+     * @api
+     */
+    public function getStorefrontAssistantInlineCategoryTreeLimit(): int
+    {
+        return static::STOREFRONT_ASSISTANT_INLINE_CATEGORY_TREE_LIMIT;
+    }
+
+    /**
+     * Specification:
+     * - Returns the maximum number of refinement chips shown under the product cards of a Storefront Assistant reply.
+     *
+     * @api
+     */
+    public function getStorefrontAssistantMaxRefinementChips(): int
+    {
+        return static::STOREFRONT_ASSISTANT_MAX_REFINEMENT_CHIPS;
+    }
+
+    /**
+     * Specification:
+     * - Returns how many times the median price of the other same-name products a product price must exceed to be flagged as a price outlier.
+     *
+     * @api
+     */
+    public function getStorefrontAssistantPriceOutlierFactor(): float
+    {
+        return static::STOREFRONT_ASSISTANT_PRICE_OUTLIER_FACTOR;
+    }
+
+    /**
+     * Specification:
+     * - Returns the names of the tools the Product Discovery Agent may call.
+     * - Returns an empty list by default: the project lists the tools it enables.
+     * - Every name must be registered as a tool plugin in AI Foundation.
+     * - The category tree tool is left out of a turn whose system prompt already carries the inline category tree.
+     *
+     * @api
+     *
+     * @return list<string>
+     */
+    public function getProductDiscoveryAgentToolNames(): array
+    {
+        return [];
     }
 
     /**

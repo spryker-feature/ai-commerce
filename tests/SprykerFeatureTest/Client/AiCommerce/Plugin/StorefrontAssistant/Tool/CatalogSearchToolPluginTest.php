@@ -12,6 +12,7 @@ namespace SprykerFeatureTest\Client\AiCommerce\Plugin\StorefrontAssistant\Tool;
 use Codeception\Test\Unit;
 use Spryker\Client\AiFoundation\Dependency\Tools\ToolParameterInterface;
 use Spryker\Client\AiFoundation\Dependency\Tools\ToolPluginInterface;
+use Spryker\Shared\AiFoundation\Tools\ToolParameterType;
 use SprykerFeature\Client\AiCommerce\Plugin\StorefrontAssistant\Tool\CatalogSearchToolPlugin;
 use SprykerFeatureTest\Client\AiCommerce\AiCommerceClientTester;
 
@@ -113,6 +114,8 @@ class CatalogSearchToolPluginTest extends Unit
 
     protected const string KEY_DID_YOU_MEAN = 'didYouMean';
 
+    protected const string NEXT_ACTION_LONGEST_WORD = 'longest word';
+
     protected const int LIMIT_ABOVE_MAX = 99;
 
     protected const int LIMIT_WITHIN_RANGE = 8;
@@ -131,19 +134,168 @@ class CatalogSearchToolPluginTest extends Unit
 
     protected const string KEY_REASON = 'reason';
 
+    protected const string REQUEST_PARAMETER_PRICE = 'price';
+
+    protected const string RANGE_KEY_MIN = 'min';
+
+    protected const string RANGE_KEY_MAX = 'max';
+
+    protected const string KEY_PRICE = 'price';
+
+    protected const string KEY_URL = 'url';
+
+    protected const string KEY_PRICE_MODE = 'priceMode';
+
+    protected const string KEY_CURRENCY_ISO_CODE = 'currencyIsoCode';
+
+    protected const int BUDGET_UPPER = 100;
+
+    protected const int BUDGET_WINDOW_LOWER = 100;
+
+    protected const int BUDGET_WINDOW_UPPER = 200;
+
+    protected const string BUDGET_DECIMAL = '99.99';
+
+    protected const int SEARCH_HIT_PRICE = 12345;
+
+    protected const int PRICE_PRECISION = 100;
+
+    protected const string KEY_PRICE_RANGE = 'priceRange';
+
+    protected const string KEY_RATING_RANGE = 'ratingRange';
+
+    protected const string KEY_MIN_FORMATTED = 'minFormatted';
+
+    protected const string KEY_MAX_FORMATTED = 'maxFormatted';
+
+    protected const string FACET_NAME_PRICE = 'price-DEFAULT-EUR-GROSS_MODE';
+
+    protected const string FACET_NAME_RATING = 'rating';
+
+    protected const int PRICE_RANGE_MIN = 2500;
+
+    protected const int PRICE_RANGE_MAX = 345700;
+
+    protected const int RATING_RANGE_MIN = 3;
+
+    protected const int RATING_RANGE_MAX = 5;
+
+    protected const int RATING_RANGE_NONE = 0;
+
+    protected const string PARAMETER_LABEL = 'label';
+
+    protected const int TOTAL_RESULTS_WHOLE_CATALOG = 214;
+
+    protected const string PARAMETER_MERCHANT = 'merchant';
+
+    protected const string FACET_MERCHANT_NAME = 'merchant_name';
+
+    protected const string FACET_MERCHANT_REFERENCE = 'merchant_reference';
+
+    protected const string FILTER_ARGUMENT_MERCHANT_REFERENCE = 'filters.merchant_reference';
+
+    protected const string MERCHANT_NAME = 'Video King';
+
+    protected const string MERCHANT_NAME_OTHER = 'Spryker';
+
+    protected const string MERCHANT_REFERENCE = 'MER000002';
+
     protected AiCommerceClientTester $tester;
 
-    public function testGivenBlankQueryWhenExecutedThenNothingIsSearched(): void
+    public function testGivenNoQueryAndACategoryWhenExecutedThenTheCategoryIsBrowsedWithoutAFreeTextWord(): void
+    {
+        // Arrange
+        $idCategoryNode = $this->tester->getIdCategoryNodeFromStorage();
+        $capturedRequestParameters = [];
+        $capturedSearchString = null;
+        $this->tester->setUpCatalogSearchResultCapturingRequestParameters([], $capturedRequestParameters, $capturedSearchString);
+
+        // Act
+        (new CatalogSearchToolPlugin())->execute([static::PARAMETER_CATEGORY => (string)$idCategoryNode]);
+
+        // Assert
+        $this->assertSame('', $capturedSearchString);
+        $this->assertSame($idCategoryNode, $capturedRequestParameters[static::PARAMETER_CATEGORY] ?? null);
+    }
+
+    public function testGivenNoArgumentsWhenExecutedThenTheWholeCatalogIsBrowsed(): void
+    {
+        // Arrange
+        $this->tester->setUpCurrentStore();
+        $capturedRequestParameters = [];
+        $capturedSearchString = null;
+        $this->tester->setUpCatalogSearchResultCapturingRequestParameters(
+            $this->tester->createCatalogSearchResultWithTotal(static::TOTAL_RESULTS_WHOLE_CATALOG),
+            $capturedRequestParameters,
+            $capturedSearchString,
+        );
+
+        // Act
+        $result = (new CatalogSearchToolPlugin())->execute();
+
+        // Assert
+        $this->assertSame('', $capturedSearchString);
+        $this->assertSame(static::TOTAL_RESULTS_WHOLE_CATALOG, $result[static::KEY_TOTAL_RESULTS]);
+    }
+
+    public function testGivenALabelKeyWhenExecutedThenTheSearchFiltersByItsLocalizedName(): void
+    {
+        // Arrange
+        $productLabelDictionaryItemTransfer = $this->tester->getProductLabelDictionaryItemFromStorage();
+        $capturedRequestParameters = [];
+        $this->tester->setUpCatalogSearchResultCapturingRequestParameters([], $capturedRequestParameters);
+
+        // Act
+        (new CatalogSearchToolPlugin())->execute([
+            static::PARAMETER_LABEL => strtolower($productLabelDictionaryItemTransfer->getKeyOrFail()),
+        ]);
+
+        // Assert
+        $this->assertSame([$productLabelDictionaryItemTransfer->getNameOrFail()], $capturedRequestParameters[static::PARAMETER_LABEL] ?? null);
+    }
+
+    public function testGivenAnAlreadyLocalizedLabelWhenExecutedThenItIsPassedUnchanged(): void
+    {
+        // Arrange
+        $productLabelDictionaryItemTransfer = $this->tester->getProductLabelDictionaryItemFromStorage();
+        $capturedRequestParameters = [];
+        $this->tester->setUpCatalogSearchResultCapturingRequestParameters([], $capturedRequestParameters);
+
+        // Act
+        (new CatalogSearchToolPlugin())->execute([
+            static::PARAMETER_LABEL => [$productLabelDictionaryItemTransfer->getNameOrFail()],
+        ]);
+
+        // Assert
+        $this->assertSame([$productLabelDictionaryItemTransfer->getNameOrFail()], $capturedRequestParameters[static::PARAMETER_LABEL] ?? null);
+    }
+
+    public function testGivenThePluginWhenItsContractIsReadThenTheQueryIsOptional(): void
     {
         // Arrange
         $catalogSearchToolPlugin = new CatalogSearchToolPlugin();
 
         // Act
-        $result = $catalogSearchToolPlugin->execute([static::PARAMETER_QUERY => ' ']);
+        $parameters = $catalogSearchToolPlugin->getParameters();
 
         // Assert
-        $this->assertSame([], $result[static::KEY_PRODUCTS]);
-        $this->assertSame(0, $result[static::KEY_TOTAL_RESULTS]);
+        $queryParameter = $this->findParameter($parameters, static::PARAMETER_QUERY);
+        $this->assertNotNull($queryParameter);
+        $this->assertFalse($queryParameter->isRequired());
+    }
+
+    /**
+     * @param array<\Spryker\Client\AiFoundation\Dependency\Tools\ToolParameterInterface> $parameters
+     */
+    protected function findParameter(array $parameters, string $name): ?ToolParameterInterface
+    {
+        foreach ($parameters as $parameter) {
+            if ($parameter->getName() === $name) {
+                return $parameter;
+            }
+        }
+
+        return null;
     }
 
     public function testGivenSearchHitWhenExecutedThenItIsExpandedFromRealProductStorage(): void
@@ -358,7 +510,7 @@ class CatalogSearchToolPluginTest extends Unit
         // Assert
         $this->assertInstanceOf(ToolPluginInterface::class, $catalogSearchToolPlugin);
         $this->assertSame(CatalogSearchToolPlugin::TOOL_NAME, $catalogSearchToolPlugin->getName());
-        $this->assertContainsOnlyInstancesOf(ToolParameterInterface::class, $parameters);
+        $this->assertNotEmpty($parameters);
     }
 
     /**
@@ -442,11 +594,11 @@ class CatalogSearchToolPluginTest extends Unit
         $this->assertIgnoredArgumentReported(static::IGNORED_ARGUMENT_UNKNOWN_FILTER, $result);
     }
 
-    public function testGivenMerchantScopingWhenExecutedThenItIsNeverFilterable(): void
+    public function testGivenMerchantReferenceScopingWhenExecutedThenItIsNeverFilterable(): void
     {
         // Arrange
         $this->tester->setUpCurrentStore();
-        $this->tester->setUpFilterableFacetConfigs([]);
+        $this->tester->setUpFilterableFacetConfigs([static::FACET_MERCHANT_REFERENCE => false]);
         $capturedRequestParameters = [];
         $this->tester->setUpCatalogSearchResultCapturingRequestParameters([], $capturedRequestParameters);
         $catalogSearchToolPlugin = new CatalogSearchToolPlugin();
@@ -454,12 +606,168 @@ class CatalogSearchToolPluginTest extends Unit
         // Act
         $result = $catalogSearchToolPlugin->execute([
             static::PARAMETER_QUERY => static::QUERY,
-            static::PARAMETER_FILTERS => ['merchant_name' => 'Video King'],
+            static::PARAMETER_FILTERS => [static::FACET_MERCHANT_REFERENCE => static::MERCHANT_REFERENCE],
         ]);
 
         // Assert
-        $this->assertArrayNotHasKey('merchant_name', $capturedRequestParameters);
-        $this->assertIgnoredArgumentReported('filters.merchant_name', $result);
+        $this->assertArrayNotHasKey(static::FACET_MERCHANT_REFERENCE, $capturedRequestParameters);
+        $this->assertIgnoredArgumentReported(static::FILTER_ARGUMENT_MERCHANT_REFERENCE, $result);
+    }
+
+    public function testGivenAMerchantWhenExecutedThenItReachesTheSearchAsTheMerchantNameFilter(): void
+    {
+        // Arrange
+        $this->tester->setUpCurrentStore();
+        $this->tester->setUpFilterableFacetConfigs([static::FACET_MERCHANT_NAME => true]);
+        $capturedRequestParameters = [];
+        $this->tester->setUpCatalogSearchResultCapturingRequestParameters([], $capturedRequestParameters);
+
+        // Act
+        $result = (new CatalogSearchToolPlugin())->execute([
+            static::PARAMETER_QUERY => static::QUERY,
+            static::PARAMETER_MERCHANT => static::MERCHANT_NAME,
+        ]);
+
+        // Assert
+        $this->assertSame([static::MERCHANT_NAME], $capturedRequestParameters[static::FACET_MERCHANT_NAME] ?? null);
+        $this->assertSame([static::MERCHANT_NAME], $result[static::KEY_APPLIED_FILTERS][static::FACET_MERCHANT_NAME] ?? null);
+        $this->assertArrayNotHasKey(static::KEY_IGNORED_ARGUMENTS, $result);
+    }
+
+    public function testGivenSeveralMerchantsWhenExecutedThenTheSearchMatchesAnyOfThem(): void
+    {
+        // Arrange
+        $this->tester->setUpCurrentStore();
+        $this->tester->setUpFilterableFacetConfigs([static::FACET_MERCHANT_NAME => true]);
+        $capturedRequestParameters = [];
+        $this->tester->setUpCatalogSearchResultCapturingRequestParameters([], $capturedRequestParameters);
+
+        // Act
+        (new CatalogSearchToolPlugin())->execute([
+            static::PARAMETER_MERCHANT => [static::MERCHANT_NAME, static::MERCHANT_NAME_OTHER, static::MERCHANT_NAME],
+        ]);
+
+        // Assert
+        $this->assertSame(
+            [static::MERCHANT_NAME, static::MERCHANT_NAME_OTHER],
+            $capturedRequestParameters[static::FACET_MERCHANT_NAME] ?? null,
+        );
+    }
+
+    public function testGivenAMerchantNameFilterWhenExecutedThenItIsAppliedLikeTheMerchantArgument(): void
+    {
+        // Arrange
+        $this->tester->setUpCurrentStore();
+        $this->tester->setUpFilterableFacetConfigs([static::FACET_MERCHANT_NAME => true]);
+        $capturedRequestParameters = [];
+        $this->tester->setUpCatalogSearchResultCapturingRequestParameters([], $capturedRequestParameters);
+
+        // Act
+        $result = (new CatalogSearchToolPlugin())->execute([
+            static::PARAMETER_QUERY => static::QUERY,
+            static::PARAMETER_FILTERS => [static::FACET_MERCHANT_NAME => static::MERCHANT_NAME],
+        ]);
+
+        // Assert
+        $this->assertSame([static::MERCHANT_NAME], $capturedRequestParameters[static::FACET_MERCHANT_NAME] ?? null);
+        $this->assertArrayNotHasKey(static::KEY_IGNORED_ARGUMENTS, $result);
+    }
+
+    public function testGivenAMerchantInAShopWithoutSellerFilteringWhenExecutedThenItIsReportedBackInsteadOfApplied(): void
+    {
+        // Arrange
+        $this->tester->setUpCurrentStore();
+        $this->tester->setUpFilterableFacetConfigs([static::FILTER_BRAND => false]);
+        $capturedRequestParameters = [];
+        $this->tester->setUpCatalogSearchResultCapturingRequestParameters([], $capturedRequestParameters);
+
+        // Act
+        $result = (new CatalogSearchToolPlugin())->execute([
+            static::PARAMETER_QUERY => static::QUERY,
+            static::PARAMETER_MERCHANT => static::MERCHANT_NAME,
+        ]);
+
+        // Assert
+        $this->assertArrayNotHasKey(static::FACET_MERCHANT_NAME, $capturedRequestParameters);
+        $this->assertIgnoredArgumentReported(static::PARAMETER_MERCHANT, $result);
+    }
+
+    public function testGivenAMerchantFacetWhenExecutedThenTheRefinementNamesTheMerchantArgument(): void
+    {
+        // Arrange
+        $this->tester->setUpCurrentStore();
+        $this->tester->setUpFilterableFacetConfigs([static::FACET_MERCHANT_NAME => true]);
+        $this->tester->setUpCatalogSearchResult(
+            $this->tester->createCatalogSearchResultWithFacet(
+                static::FACET_MERCHANT_NAME,
+                [static::MERCHANT_NAME, static::MERCHANT_NAME_OTHER],
+            ),
+        );
+
+        // Act
+        $result = (new CatalogSearchToolPlugin())->execute([static::PARAMETER_QUERY => static::QUERY]);
+
+        // Assert
+        $refinement = $this->findRefinement($result, static::FACET_MERCHANT_NAME);
+        $this->assertNotNull($refinement);
+        $this->assertSame(static::PARAMETER_MERCHANT, $refinement[static::KEY_FILTER_ARGUMENT]);
+    }
+
+    public function testGivenAFacetNoArgumentAppliesWhenExecutedThenItIsNotOfferedAsARefinement(): void
+    {
+        // Arrange
+        $this->tester->setUpCurrentStore();
+        $this->tester->setUpFilterableFacetConfigs([static::FILTER_BRAND => false]);
+        $this->tester->setUpCatalogSearchResult(
+            $this->tester->createCatalogSearchResultWithFacet(static::FACET_MERCHANT_NAME, [static::MERCHANT_NAME]),
+        );
+
+        // Act
+        $result = (new CatalogSearchToolPlugin())->execute([static::PARAMETER_QUERY => static::QUERY]);
+
+        // Assert
+        $this->assertNull($this->findRefinement($result, static::FACET_MERCHANT_NAME));
+    }
+
+    public function testGivenAnySearchWhenExecutedThenEveryRefinementNamesAnArgumentTheSearchAccepts(): void
+    {
+        // Arrange
+        $this->tester->setUpCurrentStore();
+        $this->tester->setUpFilterableFacetConfigs([static::FILTER_BRAND => false, static::FACET_MERCHANT_NAME => true]);
+        $this->tester->setUpCatalogSearchResult($this->tester->createCatalogSearchResultWithFacets([
+            $this->tester->createCatalogSearchFacet(static::FILTER_BRAND, [static::FILTER_VALUE_BRAND]),
+            $this->tester->createCatalogSearchFacet(static::FACET_MERCHANT_NAME, [static::MERCHANT_NAME]),
+            $this->tester->createCatalogSearchFacet(static::FILTER_UNKNOWN, [static::FILTER_VALUE_COLOR]),
+        ]));
+        $catalogSearchToolPlugin = new CatalogSearchToolPlugin();
+        $acceptedArguments = array_map(
+            static fn (ToolParameterInterface $parameter): string => $parameter->getName(),
+            $catalogSearchToolPlugin->getParameters(),
+        );
+
+        // Act
+        $result = $catalogSearchToolPlugin->execute([static::PARAMETER_QUERY => static::QUERY]);
+
+        // Assert
+        $this->assertCount(2, $result[static::KEY_AVAILABLE_REFINEMENTS]);
+
+        foreach ($result[static::KEY_AVAILABLE_REFINEMENTS] as $refinement) {
+            $this->assertContains(explode('.', $refinement[static::KEY_FILTER_ARGUMENT])[0], $acceptedArguments);
+        }
+    }
+
+    public function testGivenThePluginWhenItsContractIsReadThenItAcceptsAMerchant(): void
+    {
+        // Arrange
+        $catalogSearchToolPlugin = new CatalogSearchToolPlugin();
+
+        // Act
+        $merchantParameter = $this->findParameter($catalogSearchToolPlugin->getParameters(), static::PARAMETER_MERCHANT);
+
+        // Assert
+        $this->assertNotNull($merchantParameter);
+        $this->assertSame(ToolParameterType::Array, $merchantParameter->getType());
+        $this->assertFalse($merchantParameter->isRequired());
     }
 
     public function testGivenMoreMatchesThanTheAgentIsShownWhenExecutedThenTheRestAreReportedAsReachable(): void
@@ -476,6 +784,20 @@ class CatalogSearchToolPluginTest extends Unit
 
         // Assert
         $this->assertTrue($result[static::KEY_HAS_MORE_RESULTS]);
+    }
+
+    public function testGivenLastPageWhenSearchingThenHasMoreResultsIsFalse(): void
+    {
+        // Arrange
+        $this->tester->setUpCurrentStore();
+        $this->tester->setUpCatalogSearchResult($this->tester->createCatalogSearchResultWithTotal(static::TOTAL_RESULTS_BEYOND_WINDOW));
+        $catalogSearchToolPlugin = new CatalogSearchToolPlugin();
+
+        // Act
+        $result = $catalogSearchToolPlugin->execute([static::PARAMETER_QUERY => static::QUERY, static::PARAMETER_PAGE => static::PAGE_SECOND]);
+
+        // Assert
+        $this->assertFalse($result[static::KEY_HAS_MORE_RESULTS]);
     }
 
     /**
@@ -537,7 +859,7 @@ class CatalogSearchToolPluginTest extends Unit
         );
     }
 
-    public function testGivenNoMatchAndNoSpellingSuggestionWhenExecutedThenTheReplyTellsTheModelToRelaxAFilter(): void
+    public function testGivenNoMatchAndNoSpellingSuggestionWhenExecutedThenTheReplyTellsTheModelToBroadenTheWords(): void
     {
         // Arrange
         $this->tester->setUpCurrentStore();
@@ -551,7 +873,7 @@ class CatalogSearchToolPluginTest extends Unit
 
         // Assert
         $this->assertArrayNotHasKey(static::KEY_DID_YOU_MEAN, $result);
-        $this->assertNotSame('', trim($result[static::KEY_SUGGESTED_NEXT_ACTION]));
+        $this->assertStringContainsString(static::NEXT_ACTION_LONGEST_WORD, $result[static::KEY_SUGGESTED_NEXT_ACTION]);
     }
 
     public function testGivenMatchesWhenExecutedThenNoRecoveryIsSuggested(): void
@@ -628,5 +950,223 @@ class CatalogSearchToolPluginTest extends Unit
         // Assert
         $this->assertCount(static::MAX_RESULTS_DEFAULT, $result[static::KEY_PRODUCTS]);
         $this->assertContains($capturedRequestParameters['ipp'] ?? null, static::VALID_ITEMS_PER_PAGE_OPTIONS);
+    }
+
+    public function testGivenAnUpperBudgetInMajorUnitsWhenExecutedThenItReachesTheSearchUnchanged(): void
+    {
+        // Arrange
+        $this->tester->setUpCurrentStore();
+        $capturedRequestParameters = [];
+        $this->tester->setUpCatalogSearchResultCapturingRequestParameters([], $capturedRequestParameters);
+        $catalogSearchToolPlugin = new CatalogSearchToolPlugin();
+
+        // Act
+        $result = $catalogSearchToolPlugin->execute([
+            static::PARAMETER_QUERY => static::QUERY,
+            static::PARAMETER_PRICE_MAX => static::BUDGET_UPPER,
+        ]);
+
+        // Assert
+        $this->assertSame(
+            [static::RANGE_KEY_MAX => (float)static::BUDGET_UPPER],
+            $capturedRequestParameters[static::REQUEST_PARAMETER_PRICE] ?? null,
+        );
+        $this->assertArrayNotHasKey(static::KEY_IGNORED_ARGUMENTS, $result);
+    }
+
+    public function testGivenABudgetWindowWhenExecutedThenBothBoundsReachTheSearchInMajorUnits(): void
+    {
+        // Arrange
+        $this->tester->setUpCurrentStore();
+        $capturedRequestParameters = [];
+        $this->tester->setUpCatalogSearchResultCapturingRequestParameters([], $capturedRequestParameters);
+        $catalogSearchToolPlugin = new CatalogSearchToolPlugin();
+
+        // Act
+        $catalogSearchToolPlugin->execute([
+            static::PARAMETER_QUERY => static::QUERY,
+            static::PARAMETER_PRICE_MIN => static::BUDGET_WINDOW_LOWER,
+            static::PARAMETER_PRICE_MAX => static::BUDGET_WINDOW_UPPER,
+        ]);
+
+        // Assert
+        $this->assertSame(
+            [
+                static::RANGE_KEY_MIN => (float)static::BUDGET_WINDOW_LOWER,
+                static::RANGE_KEY_MAX => (float)static::BUDGET_WINDOW_UPPER,
+            ],
+            $capturedRequestParameters[static::REQUEST_PARAMETER_PRICE] ?? null,
+        );
+    }
+
+    public function testGivenADecimalBudgetWhenExecutedThenItIsNotRounded(): void
+    {
+        // Arrange
+        $this->tester->setUpCurrentStore();
+        $capturedRequestParameters = [];
+        $this->tester->setUpCatalogSearchResultCapturingRequestParameters([], $capturedRequestParameters);
+        $catalogSearchToolPlugin = new CatalogSearchToolPlugin();
+
+        // Act
+        $catalogSearchToolPlugin->execute([
+            static::PARAMETER_QUERY => static::QUERY,
+            static::PARAMETER_PRICE_MAX => static::BUDGET_DECIMAL,
+        ]);
+
+        // Assert
+        $this->assertSame(
+            (float)static::BUDGET_DECIMAL,
+            $capturedRequestParameters[static::REQUEST_PARAMETER_PRICE][static::RANGE_KEY_MAX] ?? null,
+        );
+    }
+
+    public function testGivenThePluginWhenItsPriceParametersAreReadThenTheyAreNumbersInNormalCurrencyUnits(): void
+    {
+        // Arrange
+        $catalogSearchToolPlugin = new CatalogSearchToolPlugin();
+
+        // Act
+        $priceParameters = array_values(array_filter(
+            $catalogSearchToolPlugin->getParameters(),
+            static fn (ToolParameterInterface $toolParameter): bool => in_array(
+                $toolParameter->getName(),
+                [static::PARAMETER_PRICE_MIN, static::PARAMETER_PRICE_MAX],
+                true,
+            ),
+        ));
+
+        // Assert
+        $this->assertCount(2, $priceParameters);
+
+        foreach ($priceParameters as $priceParameter) {
+            $this->assertSame(ToolParameterType::Number, $priceParameter->getType());
+            $this->assertStringNotContainsString('smallest unit', $priceParameter->getDescription());
+            $this->assertStringNotContainsString('5000', $priceParameter->getDescription());
+        }
+
+        $this->assertStringNotContainsString('smallest unit', $catalogSearchToolPlugin->getDescription());
+    }
+
+    public function testGivenThePluginWhenItsGuidanceIsReadThenNamedValuesAreFilteredAtOnceAndModelLookupsAreNotSorted(): void
+    {
+        // Arrange
+        $catalogSearchToolPlugin = new CatalogSearchToolPlugin();
+
+        // Act
+        $toolParameterDescriptions = [];
+
+        foreach ($catalogSearchToolPlugin->getParameters() as $toolParameter) {
+            $toolParameterDescriptions[$toolParameter->getName()] = $toolParameter->getDescription();
+        }
+
+        // Assert
+        $toolDescription = $catalogSearchToolPlugin->getDescription();
+        $this->assertStringNotContainsString('once a refinement has shown it exists', $toolDescription);
+        $this->assertStringContainsString('"Samsung Galaxy S5 mini"', $toolParameterDescriptions[static::PARAMETER_QUERY]);
+        $this->assertStringContainsString('Never sort a lookup of a specific model', $toolParameterDescriptions[static::PARAMETER_SORT]);
+        $this->assertStringContainsString('in the first call', $toolParameterDescriptions[static::PARAMETER_FILTERS]);
+    }
+
+    public function testGivenAPricedSearchHitWhenExecutedThenTheAgentReadsItsPriceInMajorUnits(): void
+    {
+        // Arrange
+        $this->tester->setUpCurrentStore();
+        $idProductAbstract = $this->tester->getIdProductAbstractFromStorage();
+        $expectedPrice = $this->tester->findDisplayedProductPrice($idProductAbstract) ?? static::SEARCH_HIT_PRICE;
+        $this->tester->setUpCatalogSearchResult(
+            $this->tester->createCatalogSearchResultWithPrice($idProductAbstract, static::SEARCH_HIT_PRICE),
+        );
+        $catalogSearchToolPlugin = new CatalogSearchToolPlugin();
+
+        // Act
+        $result = $catalogSearchToolPlugin->execute([static::PARAMETER_QUERY => static::QUERY]);
+
+        // Assert
+        $product = $result[static::KEY_PRODUCTS][0];
+        $this->assertSame(round($expectedPrice / static::PRICE_PRECISION, 2), $product[static::KEY_PRICE]);
+        $this->assertArrayNotHasKey(static::KEY_URL, $product);
+        $this->assertArrayNotHasKey(static::KEY_PRICE_MODE, $product);
+        $this->assertArrayNotHasKey(static::KEY_CURRENCY_ISO_CODE, $product);
+    }
+
+    public function testGivenAPriceFacetNamedAfterThePriceIdentifierWhenExecutedThenThePriceRangeIsReturnedInMajorUnits(): void
+    {
+        // Arrange
+        $this->tester->setUpCurrentStore();
+        $this->tester->setUpCatalogSearchResult($this->tester->createCatalogSearchResultWithFacets([
+            $this->tester->createRangeFacet(static::FACET_NAME_PRICE, static::REQUEST_PARAMETER_PRICE, static::PRICE_RANGE_MIN, static::PRICE_RANGE_MAX),
+        ]));
+
+        // Act
+        $result = (new CatalogSearchToolPlugin())->execute([static::PARAMETER_QUERY => static::QUERY]);
+
+        // Assert
+        $this->assertSame(round(static::PRICE_RANGE_MIN / static::PRICE_PRECISION, 2), $result[static::KEY_PRICE_RANGE][static::RANGE_KEY_MIN]);
+        $this->assertSame(round(static::PRICE_RANGE_MAX / static::PRICE_PRECISION, 2), $result[static::KEY_PRICE_RANGE][static::RANGE_KEY_MAX]);
+    }
+
+    public function testGivenAPriceRangeWhenExecutedThenItCarriesBoundsFormattedInTheStoreCurrency(): void
+    {
+        // Arrange
+        $this->tester->setUpCurrentStore();
+        $this->tester->setUpCatalogSearchResult($this->tester->createCatalogSearchResultWithFacets([
+            $this->tester->createRangeFacet(static::FACET_NAME_PRICE, static::REQUEST_PARAMETER_PRICE, static::PRICE_RANGE_MIN, static::PRICE_RANGE_MAX),
+        ]));
+
+        // Act
+        $result = (new CatalogSearchToolPlugin())->execute([static::PARAMETER_QUERY => static::QUERY]);
+
+        // Assert
+        $this->assertSame($this->tester->formatAmountInCurrentCurrency(static::PRICE_RANGE_MIN), $result[static::KEY_PRICE_RANGE][static::KEY_MIN_FORMATTED]);
+        $this->assertSame($this->tester->formatAmountInCurrentCurrency(static::PRICE_RANGE_MAX), $result[static::KEY_PRICE_RANGE][static::KEY_MAX_FORMATTED]);
+    }
+
+    public function testGivenARatingFacetWhenExecutedThenTheRatingRangeIsReturned(): void
+    {
+        // Arrange
+        $this->tester->setUpCurrentStore();
+        $this->tester->setUpCatalogSearchResult($this->tester->createCatalogSearchResultWithFacets([
+            $this->tester->createRangeFacet(static::FACET_NAME_RATING, static::FACET_NAME_RATING, static::RATING_RANGE_MIN, static::RATING_RANGE_MAX),
+        ]));
+
+        // Act
+        $result = (new CatalogSearchToolPlugin())->execute([static::PARAMETER_QUERY => static::QUERY]);
+
+        // Assert
+        $this->assertSame(
+            [static::RANGE_KEY_MIN => static::RATING_RANGE_MIN, static::RANGE_KEY_MAX => static::RATING_RANGE_MAX],
+            $result[static::KEY_RATING_RANGE] ?? null,
+        );
+    }
+
+    public function testGivenNoRatedMatchWhenExecutedThenNoRatingRangeIsReturned(): void
+    {
+        // Arrange
+        $this->tester->setUpCurrentStore();
+        $this->tester->setUpCatalogSearchResult($this->tester->createCatalogSearchResultWithFacets([
+            $this->tester->createRangeFacet(static::FACET_NAME_RATING, static::FACET_NAME_RATING, static::RATING_RANGE_NONE, static::RATING_RANGE_NONE),
+        ]));
+
+        // Act
+        $result = (new CatalogSearchToolPlugin())->execute([static::PARAMETER_QUERY => static::QUERY]);
+
+        // Assert
+        $this->assertArrayNotHasKey(static::KEY_RATING_RANGE, $result);
+    }
+
+    public function testGivenRangeFacetsWhenExecutedThenTheyAreNotOfferedAsRefinements(): void
+    {
+        // Arrange
+        $this->tester->setUpCurrentStore();
+        $this->tester->setUpCatalogSearchResult($this->tester->createCatalogSearchResultWithFacets([
+            $this->tester->createRangeFacet(static::FACET_NAME_PRICE, static::REQUEST_PARAMETER_PRICE, static::PRICE_RANGE_MIN, static::PRICE_RANGE_MAX),
+            $this->tester->createRangeFacet(static::FACET_NAME_RATING, static::FACET_NAME_RATING, static::RATING_RANGE_MIN, static::RATING_RANGE_MAX),
+        ]));
+
+        // Act
+        $result = (new CatalogSearchToolPlugin())->execute([static::PARAMETER_QUERY => static::QUERY]);
+
+        // Assert
+        $this->assertSame([], $result[static::KEY_AVAILABLE_REFINEMENTS]);
     }
 }

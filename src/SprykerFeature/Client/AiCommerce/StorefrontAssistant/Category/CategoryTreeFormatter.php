@@ -32,10 +32,18 @@ class CategoryTreeFormatter implements CategoryTreeFormatterInterface
 
     public function formatCategoryTree(): string
     {
-        $categoryLines = [];
-        $this->collectCategoryLines($this->getCategoryNodeStorageTransfers(), 0, $categoryLines);
+        return implode(static::LINE_SEPARATOR, array_slice($this->getCategoryLines(), 0, $this->maxCategoryCount));
+    }
 
-        return implode(static::LINE_SEPARATOR, array_slice($categoryLines, 0, $this->maxCategoryCount));
+    public function findInlineCategoryTree(int $maxLineCount): ?string
+    {
+        $categoryLines = $this->getCategoryLines();
+
+        if ($categoryLines === [] || count($categoryLines) > $maxLineCount) {
+            return null;
+        }
+
+        return implode(static::LINE_SEPARATOR, $categoryLines);
     }
 
     public function findIdCategoryNodeByName(string $categoryName): ?int
@@ -50,6 +58,17 @@ class CategoryTreeFormatter implements CategoryTreeFormatterInterface
         $this->collectIdsCategoryNodeByName($this->getCategoryNodeStorageTransfers(), $categoryName, $categoryNodeIds);
 
         return count($categoryNodeIds) === 1 ? $categoryNodeIds[0] : null;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    protected function getCategoryLines(): array
+    {
+        $categoryLines = [];
+        $this->collectCategoryLines($this->getCategoryNodeStorageTransfers(), 0, $categoryLines);
+
+        return $categoryLines;
     }
 
     /**

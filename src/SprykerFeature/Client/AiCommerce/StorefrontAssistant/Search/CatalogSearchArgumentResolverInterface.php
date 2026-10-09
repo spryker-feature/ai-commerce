@@ -22,6 +22,11 @@ interface CatalogSearchArgumentResolverInterface
     public function resolvePage(array $arguments): int;
 
     /**
+     * @param array<int|string, mixed> $arguments
+     */
+    public function isShownProductExclusionRequested(array $arguments): bool;
+
+    /**
      * @param-out array<int, array<string, string>> $ignoredArguments
      *
      * @param array<int|string, mixed> $arguments

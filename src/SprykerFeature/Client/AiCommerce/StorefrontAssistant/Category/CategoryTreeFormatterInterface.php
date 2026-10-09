@@ -13,5 +13,7 @@ interface CategoryTreeFormatterInterface
 {
     public function formatCategoryTree(): string;
 
+    public function findInlineCategoryTree(int $maxLineCount): ?string;
+
     public function findIdCategoryNodeByName(string $categoryName): ?int;
 }

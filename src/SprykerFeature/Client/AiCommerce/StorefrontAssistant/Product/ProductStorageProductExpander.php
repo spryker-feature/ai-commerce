@@ -23,6 +23,18 @@ class ProductStorageProductExpander implements ProductExpanderInterface
 
     protected const string STORAGE_KEY_URL = 'url';
 
+    protected const string STORAGE_KEY_ATTRIBUTES = 'attributes';
+
+    protected const string STORAGE_KEY_ATTRIBUTE_MAP = 'attribute_map';
+
+    protected const string STORAGE_KEY_PRODUCT_CONCRETE_IDS = 'product_concrete_ids';
+
+    protected const string STORAGE_KEY_SUPER_ATTRIBUTES = 'super_attributes';
+
+    protected const int MAX_ATTRIBUTES = 10;
+
+    protected const int MAX_ATTRIBUTE_VALUE_LENGTH = 50;
+
     public function __construct(protected ProductStorageClientInterface $productStorageClient)
     {
     }
@@ -91,6 +103,136 @@ class ProductStorageProductExpander implements ProductExpanderInterface
             $storefrontAssistantProductTransfer->getUrl(),
             static fn (string $url): StorefrontAssistantProductTransfer => $storefrontAssistantProductTransfer->setUrl($url),
         );
+
+        $storefrontAssistantProductTransfer->setAttributes($this->extractAttributes($productData));
+        $this->expandProductWithConcreteProducts($storefrontAssistantProductTransfer, $productData);
+    }
+
+    /**
+     * @param array<mixed> $productData
+     *
+     * @return array<string, string>
+     */
+    protected function extractAttributes(array $productData): array
+    {
+        $storedAttributes = $productData[static::STORAGE_KEY_ATTRIBUTES] ?? null;
+
+        if (!is_array($storedAttributes)) {
+            return [];
+        }
+
+        $attributes = [];
+
+        foreach ($storedAttributes as $attributeKey => $attributeValue) {
+            if (!is_string($attributeKey) || !is_scalar($attributeValue) || is_bool($attributeValue)) {
+                continue;
+            }
+
+            $attributeValue = trim((string)$attributeValue);
+
+            if ($attributeValue === '' || mb_strlen($attributeValue) > static::MAX_ATTRIBUTE_VALUE_LENGTH) {
+                continue;
+            }
+
+            $attributes[$attributeKey] = $attributeValue;
+
+            if (count($attributes) === static::MAX_ATTRIBUTES) {
+                break;
+            }
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * @param array<mixed> $productData
+     */
+    protected function expandProductWithConcreteProducts(
+        StorefrontAssistantProductTransfer $storefrontAssistantProductTransfer,
+        array $productData
+    ): void {
+        $attributeMap = $productData[static::STORAGE_KEY_ATTRIBUTE_MAP] ?? null;
+
+        if (!is_array($attributeMap)) {
+            return;
+        }
+
+        $productConcreteIds = $this->extractProductConcreteIds($attributeMap);
+
+        foreach ($productConcreteIds as $concreteSku => $idProductConcrete) {
+            $storefrontAssistantProductTransfer
+                ->setIdProductConcrete($idProductConcrete)
+                ->setConcreteSku((string)$concreteSku);
+
+            break;
+        }
+
+        $variantCount = count($productConcreteIds);
+
+        if ($variantCount <= 1) {
+            return;
+        }
+
+        $storefrontAssistantProductTransfer
+            ->setVariantCount($variantCount)
+            ->setVariants($this->extractVariants($attributeMap));
+    }
+
+    /**
+     * @param array<mixed> $attributeMap
+     *
+     * @return array<string|int, int>
+     */
+    protected function extractProductConcreteIds(array $attributeMap): array
+    {
+        $storedProductConcreteIds = $attributeMap[static::STORAGE_KEY_PRODUCT_CONCRETE_IDS] ?? null;
+
+        if (!is_array($storedProductConcreteIds)) {
+            return [];
+        }
+
+        $productConcreteIds = [];
+
+        foreach ($storedProductConcreteIds as $concreteSku => $idProductConcrete) {
+            if (!is_bool($idProductConcrete) && is_numeric($idProductConcrete) && (int)$idProductConcrete > 0) {
+                $productConcreteIds[$concreteSku] = (int)$idProductConcrete;
+            }
+        }
+
+        return $productConcreteIds;
+    }
+
+    /**
+     * @param array<mixed> $attributeMap
+     *
+     * @return array<string, list<string>>
+     */
+    protected function extractVariants(array $attributeMap): array
+    {
+        $superAttributes = $attributeMap[static::STORAGE_KEY_SUPER_ATTRIBUTES] ?? null;
+
+        if (!is_array($superAttributes)) {
+            return [];
+        }
+
+        $variants = [];
+
+        foreach ($superAttributes as $attributeKey => $attributeValues) {
+            if (!is_string($attributeKey) || !is_array($attributeValues)) {
+                continue;
+            }
+
+            $values = array_values(array_unique(array_map(
+                'strval',
+                array_filter($attributeValues, static fn ($value): bool => is_scalar($value) && !is_bool($value) && trim((string)$value) !== ''),
+            )));
+
+            if ($values !== []) {
+                $variants[$attributeKey] = $values;
+            }
+        }
+
+        return $variants;
     }
 
     /**

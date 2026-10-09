@@ -18,6 +18,10 @@ use Generated\Shared\Transfer\StorefrontAssistantChatResponseTransfer;
 use Generated\Shared\Transfer\StorefrontAssistantConversationTransfer;
 use Spryker\Shared\Log\LoggerTrait;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Agent\AgentSelectorInterface;
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Choice\ChoiceOfferRegistryInterface;
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Comparison\ComparisonRegistryInterface;
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Conversation\ShownProductRegistryInterface;
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Search\CatalogSearchResultRegistryInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Storage\ConversationStorageInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Translation\StorefrontAssistantTranslatorInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Validator\StorefrontAssistantChatRequestValidationResult;
@@ -55,7 +59,11 @@ class StorefrontAssistantChatStreamer implements StorefrontAssistantChatStreamer
         protected AgentSelectorInterface $agentSelector,
         protected StreamEventEmitterInterface $streamEventEmitter,
         protected StreamBlockTrackerInterface $streamBlockTracker,
-        protected StorefrontAssistantTranslatorInterface $storefrontAssistantTranslator
+        protected StorefrontAssistantTranslatorInterface $storefrontAssistantTranslator,
+        protected ShownProductRegistryInterface $shownProductRegistry,
+        protected CatalogSearchResultRegistryInterface $catalogSearchResultRegistry,
+        protected ChoiceOfferRegistryInterface $choiceOfferRegistry,
+        protected ComparisonRegistryInterface $comparisonRegistry
     ) {
     }
 
@@ -117,6 +125,7 @@ class StorefrontAssistantChatStreamer implements StorefrontAssistantChatStreamer
             );
         } finally {
             $this->finishMessage();
+            $this->clearTurnState();
         }
     }
 
@@ -139,6 +148,12 @@ class StorefrontAssistantChatStreamer implements StorefrontAssistantChatStreamer
             return;
         }
 
+        $this->clearTurnState();
+        $this->shownProductRegistry->startTurn(
+            (string)$storefrontAssistantChatRequestTransfer->getCustomerReference(),
+            (string)$storefrontAssistantChatRequestTransfer->getConversationReference(),
+        );
+
         $this->saveConversationMetadata(
             (string)$storefrontAssistantChatRequestTransfer->getCustomerReference(),
             (string)$storefrontAssistantChatRequestTransfer->getConversationReference(),
@@ -156,6 +171,17 @@ class StorefrontAssistantChatStreamer implements StorefrontAssistantChatStreamer
         if ($promptResponseTransfer->getIsSuccessful() !== true) {
             $this->emitPromptResponseError($promptResponseTransfer, $storefrontAssistantChatRequestTransfer->getLocaleName());
         }
+    }
+
+    /**
+     * Clears the static turn registries, so the references, shown products and search results of a customer do not stay in a long-running process.
+     */
+    protected function clearTurnState(): void
+    {
+        $this->shownProductRegistry->clear();
+        $this->catalogSearchResultRegistry->clear();
+        $this->choiceOfferRegistry->clear();
+        $this->comparisonRegistry->clear();
     }
 
     protected function emitPromptResponseError(

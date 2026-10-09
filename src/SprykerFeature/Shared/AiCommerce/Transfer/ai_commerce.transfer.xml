@@ -334,6 +334,7 @@
         <property name="shipment" type="Shipment"/>
         <property name="sumPrice" type="int"/>
         <property name="unitTaxAmount" type="int"/>
+        <property name="idProductAbstract" type="int"/>
     </transfer>
 
     <transfer name="Attachment" strict="true">
@@ -594,6 +595,17 @@
         <property name="priceFormatted" type="string" description="Resolved price formatted with the currency symbol, the same way the storefront money filter formats it."/>
         <property name="originalPrice" type="int" description="Price before the discount, present only when it is higher than the resolved price."/>
         <property name="originalPriceFormatted" type="string" description="Original price formatted with the currency symbol, rendered struck through next to the resolved price."/>
+        <property name="idProductConcrete" type="int" description="First concrete product of the abstract, the one its price is resolved for. Internal, never forwarded to the AI provider."/>
+        <property name="concreteSku" type="string" description="SKU of the first concrete product, used to resolve its default product offer. Internal, never forwarded to the AI provider."/>
+        <property name="attributes" type="array" singular="attribute" description="Specification attributes of the abstract product from storage, keyed by attribute key, so the agent compares and filters products by their real data."/>
+        <property name="variants" type="array" singular="variant" description="Values each variant-defining attribute takes across the concrete products, keyed by attribute key. Present only when the product has several variants."/>
+        <property name="variantCount" type="int" description="Number of concrete products of the abstract. Present only when it is more than one."/>
+        <property name="rating" type="float" description="Average customer rating as indexed by the catalog search. Present only for rated products."/>
+        <property name="reviewCount" type="int" description="Number of customer reviews behind the rating. Present only for rated products."/>
+        <property name="labelIds" type="int[]" singular="labelId" description="Product label identifiers as indexed by the catalog search. Internal, resolved to label names."/>
+        <property name="labels" type="string[]" singular="label" description="Localized names of the product labels the product carries, such as SALE or New."/>
+        <property name="reason" type="string" description="Short reason the product card is suggested, at most 60 characters, rendered under the product name."/>
+        <property name="isPriceOutlier" type="bool" description="True when the price is more than the configured factor times the median price of the other same-name products shown with it. Present only when true."/>
     </transfer>
 
     <transfer name="StorefrontAssistantProductCollection" strict="true">
@@ -617,7 +629,18 @@
         <property name="productSku" type="string" description="Abstract SKU of the product the customer is viewing on a product page."/>
         <property name="categoryName" type="string" description="Name of the category the customer is browsing on a category page."/>
         <property name="searchQuery" type="string" description="Catalog search query the customer ran on a search page."/>
-        <property name="filters" type="string[]" singular="filter" description="Facet values the customer has selected on a category or search page."/>
+        <property name="filters" type="string[]" singular="filter" description="Facets the customer has selected on a category or search page, each as the filter parameter name and the selected value."/>
+        <property name="idProductAbstract" type="int" description="Abstract product the viewed SKU resolves to in the catalog. Resolved server-side, never mapped from the payload."/>
+        <property name="productLabels" type="string[]" singular="productLabel" description="Names of the labels of the viewed product. Resolved server-side, never mapped from the payload."/>
+    </transfer>
+
+    <transfer name="StorefrontAssistantProductDetailsRequest" strict="true">
+        <property name="idProductAbstract" type="int" description="Abstract product whose details are read."/>
+        <property name="sku" type="string" description="Abstract or concrete SKU the product was requested by, if any."/>
+        <property name="localeName" type="string" description="Locale the product details are read in."/>
+        <property name="storeName" type="string" description="Store the product details are read for."/>
+        <property name="quantity" type="int" description="Quantity the customer asked about, if any."/>
+        <property name="productAbstractStorageData" type="array" singular="productAbstractStorageDataItem" description="Abstract product storage data of the product, read once and shared by every details expander."/>
     </transfer>
 
     <transfer name="StorefrontAssistantChatResponse" strict="true">
@@ -705,6 +728,8 @@
     <transfer name="CategoryNodeStorage">
         <property name="name" type="string"/>
         <property name="isActive" type="bool"/>
+        <property name="nodeId" type="int"/>
+        <property name="url" type="string"/>
     </transfer>
 
     <transfer name="ConversationHistoryCollectionDeleteCriteria" strict="true">
@@ -728,6 +753,8 @@
     <transfer name="CurrentProductPrice">
         <property name="price" type="int"/>
         <property name="prices" type="array" singular="price"/>
+        <property name="priceDataByPriceType" type="array" singular="priceDataByPriceType"/>
+        <property name="priceMode" type="string"/>
     </transfer>
 
     <transfer name="Money">
@@ -736,10 +763,35 @@
     </transfer>
 
     <transfer name="Currency">
+        <property name="code" type="string"/>
     </transfer>
 
     <transfer name="ProductOfferStorageCriteria">
         <property name="productConcreteSkus" type="string[]" singular="productConcreteSku"/>
+    </transfer>
+
+    <transfer name="ProductOfferStorageCollection">
+        <property name="productOffers" type="ProductOfferStorage[]" singular="productOffer"/>
+    </transfer>
+
+    <transfer name="ProductOfferStorage">
+        <property name="productOfferReference" type="string"/>
+        <property name="productConcreteSku" type="string"/>
+        <property name="merchantReference" type="string"/>
+        <property name="merchantStorage" type="MerchantStorage"/>
+        <property name="price" type="CurrentProductPrice"/>
+        <property name="isNeverOutOfStock" type="bool" strict="true"/>
+        <property name="stockQuantity" type="float" strict="true"/>
+        <property name="isDefault" type="bool"/>
+    </transfer>
+
+    <transfer name="MerchantStorage">
+        <property name="name" type="string"/>
+        <property name="merchantReference" type="string"/>
+    </transfer>
+
+    <transfer name="MerchantStorageCriteria">
+        <property name="merchantReferences" type="string[]" singular="merchantReference"/>
     </transfer>
 
     <transfer name="FacetConfig">
@@ -749,12 +801,150 @@
         <property name="isMultiValued" type="bool"/>
     </transfer>
 
+    <transfer name="RangeSearchResult">
+        <property name="name" type="string"/>
+        <property name="min" type="float"/>
+        <property name="max" type="float"/>
+        <property name="config" type="FacetConfig"/>
+    </transfer>
+
     <transfer name="PromptStreamChunk" strict="true">
+    </transfer>
+
+    <transfer name="ProductLabelDictionaryItem">
+        <property name="idProductLabel" type="int"/>
+        <property name="name" type="string"/>
+        <property name="key" type="string"/>
     </transfer>
 
     <transfer name="SearchConfigExtension">
         <property name="facetConfigs" type="FacetConfig[]" singular="facetConfig"/>
     </transfer>
+
+    <transfer name="ProductAbstractAvailability">
+        <property name="sku" type="string"/>
+        <property name="availability" type="decimal"/>
+        <property name="productConcreteAvailabilities" type="ProductConcreteAvailability[]" singular="productConcreteAvailability"/>
+    </transfer>
+
+    <transfer name="ProductConcreteAvailability">
+        <property name="sku" type="string"/>
+        <property name="availability" type="decimal"/>
+        <property name="isNeverOutOfStock" type="bool"/>
+    </transfer>
+
+    <transfer name="ProductDiscontinuedStorage">
+        <property name="sku" type="string"/>
+        <property name="note" type="string"/>
+    </transfer>
+
+    <transfer name="ProductAlternativeStorage">
+        <property name="productAbstractIds" type="array" singular="productAbstractIds"/>
+        <property name="productConcreteIds" type="array" singular="productConcreteIds"/>
+    </transfer>
+
+    <transfer name="ProductAbstractOptionStorage">
+        <property name="idProductAbstract" type="int"/>
+        <property name="productOptionGroups" type="ProductOptionGroupStorage[]" singular="productOptionGroup"/>
+    </transfer>
+
+    <transfer name="ProductOptionGroupStorage">
+        <property name="name" type="string"/>
+        <property name="productOptionValues" type="ProductOptionValueStorage[]" singular="productOptionValue"/>
+    </transfer>
+
+    <transfer name="ProductOptionValueStorage">
+        <property name="sku" type="string"/>
+        <property name="price" type="int"/>
+        <property name="value" type="string"/>
+    </transfer>
+
+    <transfer name="Quote">
+        <property name="store" type="Store"/>
+        <property name="items" type="Item[]" singular="item"/>
+    </transfer>
+
+    <transfer name="Store">
+        <property name="name" type="string"/>
+    </transfer>
+
+    <transfer name="ConcreteAlternativeProductCriteria" strict="true">
+        <property name="concreteAlternativeProductConditions" type="ConcreteAlternativeProductConditions"/>
+    </transfer>
+
+    <transfer name="ConcreteAlternativeProductConditions" strict="true">
+        <property name="skus" type="array" singular="sku"/>
+        <property name="localeName" type="string"/>
+    </transfer>
+
+    <transfer name="ConcreteAlternativeProductCollection" strict="true">
+        <property name="concreteAlternativeProducts" type="ConcreteAlternativeProduct[]" singular="concreteAlternativeProduct"/>
+    </transfer>
+
+    <transfer name="ConcreteAlternativeProduct" strict="true">
+        <property name="sku" type="string"/>
+        <property name="alternativeProducts" type="ProductView[]" singular="alternativeProduct"/>
+    </transfer>
+
+    <transfer name="ProductView">
+        <property name="idProductAbstract" type="int"/>
+    </transfer>
+
+    <transfer name="ProductAbstractCategoryStorage">
+        <property name="idProductAbstract" type="int"/>
+        <property name="categories" type="ProductCategoryStorage[]" singular="category"/>
+    </transfer>
+
+    <transfer name="ProductCategoryStorage">
+        <property name="categoryNodeId" type="int"/>
+        <property name="name" type="string"/>
+    </transfer>
+
+    <transfer name="CmsPageStorage">
+        <property name="idCmsPage" type="int"/>
+        <property name="name" type="string"/>
+        <property name="url" type="string"/>
+        <property name="placeholders" type="array" singular="placeholder"/>
+        <property name="isActive" type="bool"/>
+        <property name="validFrom" type="string"/>
+        <property name="validTo" type="string"/>
+    </transfer>
+
+    <transfer name="ProductReviewStorage">
+        <property name="averageRating" type="float"/>
+        <property name="reviewCount" type="int"/>
+    </transfer>
+
+    <transfer name="ProductSetDataStorage">
+        <property name="idProductSet" type="int"/>
+        <property name="name" type="string"/>
+        <property name="url" type="string"/>
+        <property name="productAbstractIds" type="array" singular="productAbstractIds"/>
+    </transfer>
+
+    <transfer name="ProductBundleStorage">
+        <property name="bundledProducts" type="ProductForProductBundleStorage[]" singular="bundledProduct"/>
+    </transfer>
+
+    <transfer name="ProductBundleStorageCriteria">
+        <property name="productConcreteIds" type="int[]" singular="idProductConcrete"/>
+    </transfer>
+
+    <transfer name="ProductForProductBundleStorage">
+        <property name="idProductConcrete" type="int"/>
+        <property name="sku" type="string"/>
+        <property name="name" type="string"/>
+        <property name="quantity" type="int"/>
+        <property name="url" type="string"/>
+    </transfer>
+
+
+
+
+
+
+
+
 
     <transfer name="ProductAbstractImageStorage">
         <property name="imageSets" singular="imageSet" type="ProductImageSetStorage[]"/>

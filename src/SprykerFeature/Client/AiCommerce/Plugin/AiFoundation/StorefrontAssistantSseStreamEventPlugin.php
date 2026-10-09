@@ -28,7 +28,8 @@ class StorefrontAssistantSseStreamEventPlugin extends AbstractPlugin implements 
 
     /**
      * {@inheritDoc}
-     * - Streams the text and reasoning chunks of storefront assistant AI configurations to the customer.
+     * - Streams the text chunks of storefront assistant AI configurations to the customer.
+     * - Streams the reasoning chunks only when reasoning streaming is enabled in the module config.
      * - Wraps the deltas of a chunk run in the start and end events of the protocol block.
      *
      * @api
@@ -66,7 +67,7 @@ class StorefrontAssistantSseStreamEventPlugin extends AbstractPlugin implements 
 
         return match ($promptStreamChunkType) {
             PromptStreamChunkType::Text => StreamEventBlockType::Text,
-            PromptStreamChunkType::Reasoning => StreamEventBlockType::Reasoning,
+            PromptStreamChunkType::Reasoning => $this->getConfig()->isStorefrontAssistantReasoningStreamed() ? StreamEventBlockType::Reasoning : null,
         };
     }
 }

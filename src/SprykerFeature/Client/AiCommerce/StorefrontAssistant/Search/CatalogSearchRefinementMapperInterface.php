@@ -30,7 +30,14 @@ interface CatalogSearchRefinementMapperInterface
     /**
      * @param mixed $facets
      *
-     * @return array<string, int>|null
+     * @return array<string, float|string>|null
      */
     public function findPriceRange($facets): ?array;
+
+    /**
+     * @param mixed $facets
+     *
+     * @return array<string, int>|null
+     */
+    public function findRatingRange($facets): ?array;
 }

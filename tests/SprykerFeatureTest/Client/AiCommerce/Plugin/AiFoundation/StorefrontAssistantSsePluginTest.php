@@ -14,9 +14,8 @@ use Generated\Shared\Transfer\AiToolCallTransfer;
 use Generated\Shared\Transfer\PromptRequestTransfer;
 use Generated\Shared\Transfer\PromptStreamChunkTransfer;
 use Spryker\Shared\AiFoundation\Stream\PromptStreamChunkType;
-use SprykerFeature\Client\AiCommerce\Plugin\AiFoundation\StorefrontAssistantSsePostToolCallPlugin;
-use SprykerFeature\Client\AiCommerce\Plugin\AiFoundation\StorefrontAssistantSsePreToolCallPlugin;
 use SprykerFeature\Client\AiCommerce\Plugin\AiFoundation\StorefrontAssistantSseStreamEventPlugin;
+use SprykerFeature\Client\AiCommerce\Plugin\StorefrontAssistant\Tool\CompareProductsToolPlugin;
 use SprykerFeature\Client\AiCommerce\Plugin\StorefrontAssistant\Tool\DisplayProductsToolPlugin;
 use SprykerFeature\Shared\AiCommerce\Stream\StreamEventType;
 use SprykerFeatureTest\Client\AiCommerce\AiCommerceClientTester;
@@ -37,11 +36,15 @@ class StorefrontAssistantSsePluginTest extends Unit
 
     protected const string STREAMED_TEXT = 'Hello';
 
+    protected const string STREAMED_REASONING = 'The customer wants a camera, so I search the camera category first.';
+
     protected const string PROVIDER_TOOL_CALL_ID = 'call_provider_generated_1';
 
     protected const string PROVIDER_TOOL_CALL_ID_SECOND = 'call_provider_generated_2';
 
     protected const string SYNTHETIC_TOOL_CALL_ID_PREFIX = 'call_';
+
+    protected const string COMPARISON_TOOL_RESULT = '{"comparedProducts":[{"idProductAbstract":1},{"idProductAbstract":4}],"attributeRows":[]}';
 
     protected AiCommerceClientTester $tester;
 
@@ -52,7 +55,7 @@ class StorefrontAssistantSsePluginTest extends Unit
 
         // Act
         $streamedParts = $this->tester->captureStreamedOutput(function (): void {
-            (new StorefrontAssistantSsePreToolCallPlugin())->preToolCall($this->createAiToolCallTransfer());
+            $this->tester->createStorefrontAssistantSsePreToolCallPlugin()->preToolCall($this->createAiToolCallTransfer());
         });
 
         // Assert
@@ -69,7 +72,7 @@ class StorefrontAssistantSsePluginTest extends Unit
 
         // Act
         $streamedParts = $this->tester->captureStreamedOutput(function (): void {
-            (new StorefrontAssistantSsePostToolCallPlugin())->postToolCall($this->createAiToolCallTransfer());
+            $this->tester->createStorefrontAssistantSsePostToolCallPlugin()->postToolCall($this->createAiToolCallTransfer());
         });
 
         // Assert
@@ -79,6 +82,23 @@ class StorefrontAssistantSsePluginTest extends Unit
         );
     }
 
+    public function testGivenCompareProductsToolCallWhenPostToolCallThenToolOutputIsEmitted(): void
+    {
+        // Arrange
+        $this->tester->enableStorefrontAssistant();
+
+        // Act
+        $streamedParts = $this->tester->captureStreamedOutput(function (): void {
+            $this->tester->createStorefrontAssistantSsePostToolCallPlugin()->postToolCall(
+                $this->createAiToolCallTransfer(CompareProductsToolPlugin::TOOL_NAME)->setToolResult(static::COMPARISON_TOOL_RESULT),
+            );
+        });
+
+        // Assert
+        $this->assertSame([StreamEventType::ToolOutputAvailable->value], $this->tester->extractStreamedPartTypes($streamedParts));
+        $this->assertStringContainsString('comparedProducts', $streamedParts);
+    }
+
     public function testGivenAToolThatWasNotAllowedToRunWhenItCompletesThenTheDeniedPartIsEmitted(): void
     {
         // Arrange
@@ -86,7 +106,7 @@ class StorefrontAssistantSsePluginTest extends Unit
 
         // Act
         $streamedParts = $this->tester->captureStreamedOutput(function (): void {
-            (new StorefrontAssistantSsePostToolCallPlugin())->postToolCall(
+            $this->tester->createStorefrontAssistantSsePostToolCallPlugin()->postToolCall(
                 $this->createAiToolCallTransfer()->setIsExecutionAllowed(false),
             );
         });
@@ -105,7 +125,7 @@ class StorefrontAssistantSsePluginTest extends Unit
 
         // Act
         $streamedParts = $this->tester->captureStreamedOutput(function (): void {
-            (new StorefrontAssistantSsePostToolCallPlugin())->postToolCall(
+            $this->tester->createStorefrontAssistantSsePostToolCallPlugin()->postToolCall(
                 $this->createAiToolCallTransfer(static::INTERNAL_TOOL_NAME),
             );
         });
@@ -121,7 +141,7 @@ class StorefrontAssistantSsePluginTest extends Unit
 
         // Act
         $streamedParts = $this->tester->captureStreamedOutput(function (): void {
-            (new StorefrontAssistantSseStreamEventPlugin())->onStreamEvent(
+            $this->tester->createStorefrontAssistantSseStreamEventPlugin()->onStreamEvent(
                 (new PromptStreamChunkTransfer())
                     ->setType(PromptStreamChunkType::Text->value)
                     ->setContent(static::STREAMED_TEXT),
@@ -136,6 +156,46 @@ class StorefrontAssistantSsePluginTest extends Unit
         );
     }
 
+    public function testGivenReasoningStreamingDisabledWhenAReasoningChunkIsStreamedThenNothingReachesTheCustomer(): void
+    {
+        // Arrange
+        $this->tester->enableStorefrontAssistant();
+        /** @var \SprykerFeature\Client\AiCommerce\AiCommerceConfig $aiCommerceConfig */
+        $aiCommerceConfig = $this->tester->mockConfigMethod('isStorefrontAssistantReasoningStreamed', false);
+        $streamEventPlugin = new StorefrontAssistantSseStreamEventPlugin();
+        $streamEventPlugin->setConfig($aiCommerceConfig);
+
+        // Act
+        $streamedParts = $this->tester->captureStreamedOutput(function () use ($streamEventPlugin): void {
+            $this->streamReasoningChunk($streamEventPlugin);
+        });
+
+        // Assert
+        $this->assertSame('', $streamedParts);
+    }
+
+    public function testGivenReasoningStreamingEnabledWhenAReasoningChunkIsStreamedThenTheReasoningDeltaIsEmitted(): void
+    {
+        // Arrange
+        $this->tester->enableStorefrontAssistant();
+        /** @var \SprykerFeature\Client\AiCommerce\AiCommerceConfig $aiCommerceConfig */
+        $aiCommerceConfig = $this->tester->mockConfigMethod('isStorefrontAssistantReasoningStreamed', true);
+        $streamEventPlugin = new StorefrontAssistantSseStreamEventPlugin();
+        $streamEventPlugin->setConfig($aiCommerceConfig);
+
+        // Act
+        $streamedParts = $this->tester->captureStreamedOutput(function () use ($streamEventPlugin): void {
+            $this->streamReasoningChunk($streamEventPlugin);
+        });
+
+        // Assert
+        $this->assertContains(
+            StreamEventType::ReasoningDelta->value,
+            $this->tester->extractStreamedPartTypes($streamedParts),
+        );
+        $this->assertStringContainsString(static::STREAMED_REASONING, $streamedParts);
+    }
+
     public function testGivenAConfigurationOutsideTheAllowlistWhenAToolCallStartsThenNothingIsEmitted(): void
     {
         // Arrange
@@ -143,7 +203,7 @@ class StorefrontAssistantSsePluginTest extends Unit
 
         // Act
         $streamedParts = $this->tester->captureStreamedOutput(function (): void {
-            (new StorefrontAssistantSsePreToolCallPlugin())->preToolCall(
+            $this->tester->createStorefrontAssistantSsePreToolCallPlugin()->preToolCall(
                 $this->createAiToolCallTransfer()->setPromptRequest(
                     (new PromptRequestTransfer())->setAiConfigurationName('AI_COMMERCE:AI_CONFIGURATION_BACKOFFICE_ASSISTANT'),
                 ),
@@ -161,7 +221,7 @@ class StorefrontAssistantSsePluginTest extends Unit
 
         // Act
         $streamedParts = $this->tester->captureStreamedOutput(function (): void {
-            (new StorefrontAssistantSsePreToolCallPlugin())->preToolCall(
+            $this->tester->createStorefrontAssistantSsePreToolCallPlugin()->preToolCall(
                 $this->createAiToolCallTransfer()->setToolCallId(static::PROVIDER_TOOL_CALL_ID),
             );
         });
@@ -180,7 +240,7 @@ class StorefrontAssistantSsePluginTest extends Unit
 
         // Act
         $streamedParts = $this->tester->captureStreamedOutput(function (): void {
-            (new StorefrontAssistantSsePostToolCallPlugin())->postToolCall(
+            $this->tester->createStorefrontAssistantSsePostToolCallPlugin()->postToolCall(
                 $this->createAiToolCallTransfer()->setToolCallId(static::PROVIDER_TOOL_CALL_ID),
             );
         });
@@ -199,8 +259,8 @@ class StorefrontAssistantSsePluginTest extends Unit
 
         // Act
         $streamedParts = $this->tester->captureStreamedOutput(function (): void {
-            $preToolCallPlugin = new StorefrontAssistantSsePreToolCallPlugin();
-            $postToolCallPlugin = new StorefrontAssistantSsePostToolCallPlugin();
+            $preToolCallPlugin = $this->tester->createStorefrontAssistantSsePreToolCallPlugin();
+            $postToolCallPlugin = $this->tester->createStorefrontAssistantSsePostToolCallPlugin();
 
             $preToolCallPlugin->preToolCall(
                 $this->createAiToolCallTransfer()->setToolCallId(static::PROVIDER_TOOL_CALL_ID),
@@ -238,14 +298,14 @@ class StorefrontAssistantSsePluginTest extends Unit
 
         // Act
         $streamedParts = $this->tester->captureStreamedOutput(function (): void {
-            (new StorefrontAssistantSsePreToolCallPlugin())->preToolCall($this->createAiToolCallTransfer());
+            $this->tester->createStorefrontAssistantSsePreToolCallPlugin()->preToolCall($this->createAiToolCallTransfer());
         });
 
         // Assert
         $toolCallIds = $this->tester->extractStreamedToolCallIds($streamedParts);
         $this->assertCount(2, $toolCallIds);
         $this->assertSame($toolCallIds[0], $toolCallIds[1]);
-        $this->assertStringStartsWith(static::SYNTHETIC_TOOL_CALL_ID_PREFIX, $toolCallIds[0]);
+        $this->assertTrue(str_starts_with($toolCallIds[0], static::SYNTHETIC_TOOL_CALL_ID_PREFIX));
     }
 
     public function testGivenNoProviderToolCallIdWhenTheToolCompletesThenTheOutputPartCarriesTheSyntheticIdentifierOfItsInputParts(): void
@@ -255,16 +315,27 @@ class StorefrontAssistantSsePluginTest extends Unit
 
         // Act
         $streamedParts = $this->tester->captureStreamedOutput(function (): void {
-            $aiToolCallTransfer = (new StorefrontAssistantSsePreToolCallPlugin())->preToolCall($this->createAiToolCallTransfer());
+            $aiToolCallTransfer = $this->tester->createStorefrontAssistantSsePreToolCallPlugin()->preToolCall($this->createAiToolCallTransfer());
 
-            (new StorefrontAssistantSsePostToolCallPlugin())->postToolCall($aiToolCallTransfer);
+            $this->tester->createStorefrontAssistantSsePostToolCallPlugin()->postToolCall($aiToolCallTransfer);
         });
 
         // Assert
         $toolCallIds = $this->tester->extractStreamedToolCallIds($streamedParts);
         $this->assertCount(3, $toolCallIds);
         $this->assertSame(array_fill(0, 3, $toolCallIds[0]), $toolCallIds);
-        $this->assertStringStartsWith(static::SYNTHETIC_TOOL_CALL_ID_PREFIX, $toolCallIds[0]);
+        $this->assertTrue(str_starts_with($toolCallIds[0], static::SYNTHETIC_TOOL_CALL_ID_PREFIX));
+    }
+
+    protected function streamReasoningChunk(
+        StorefrontAssistantSseStreamEventPlugin $streamEventPlugin = new StorefrontAssistantSseStreamEventPlugin()
+    ): void {
+        $streamEventPlugin->onStreamEvent(
+            (new PromptStreamChunkTransfer())
+                ->setType(PromptStreamChunkType::Reasoning->value)
+                ->setContent(static::STREAMED_REASONING),
+            (new PromptRequestTransfer())->setAiConfigurationName(static::AI_CONFIGURATION_NAME),
+        );
     }
 
     protected function createAiToolCallTransfer(

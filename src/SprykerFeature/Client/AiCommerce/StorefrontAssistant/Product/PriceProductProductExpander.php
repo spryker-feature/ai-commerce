@@ -20,21 +20,15 @@ use Spryker\Client\Money\MoneyClientInterface;
 use Spryker\Client\Price\PriceClientInterface;
 use Spryker\Client\PriceProductStorage\PriceProductStorageClientInterface;
 use Spryker\Client\ProductOfferStorage\ProductOfferStorageClientInterface;
-use Spryker\Client\ProductStorage\ProductStorageClientInterface;
 
 class PriceProductProductExpander implements ProductExpanderInterface
 {
     protected const int DEFAULT_QUANTITY = 1;
 
-    protected const string STORAGE_KEY_ATTRIBUTE_MAP = 'attribute_map';
-
-    protected const string STORAGE_KEY_PRODUCT_CONCRETE_IDS = 'product_concrete_ids';
-
     protected const string PRICE_TYPE_ORIGINAL = 'ORIGINAL';
 
     public function __construct(
         protected PriceProductStorageClientInterface $priceProductStorageClient,
-        protected ProductStorageClientInterface $productStorageClient,
         protected ProductOfferStorageClientInterface $productOfferStorageClient,
         protected MoneyClientInterface $moneyClient,
         protected PriceClientInterface $priceClient,
@@ -47,26 +41,12 @@ class PriceProductProductExpander implements ProductExpanderInterface
         string $localeName,
         string $storeName
     ): StorefrontAssistantProductCollectionTransfer {
-        $productAbstractIds = $this->extractProductAbstractIds($storefrontAssistantProductCollectionTransfer);
-
-        if ($productAbstractIds === []) {
-            return $storefrontAssistantProductCollectionTransfer;
-        }
-
-        $productStorageData = $this->productStorageClient
-            ->getBulkProductAbstractStorageDataByProductAbstractIdsForLocaleNameAndStore(
-                $productAbstractIds,
-                $localeName,
-                $storeName,
-            );
-
         $currencyIsoCode = (string)$this->currencyClient->getCurrent()->getCode();
         $priceMode = (string)$this->priceClient->getCurrentPriceMode();
 
         foreach ($storefrontAssistantProductCollectionTransfer->getStorefrontAssistantProducts() as $storefrontAssistantProductTransfer) {
             $this->expandProductWithCurrentPrice(
                 $storefrontAssistantProductTransfer,
-                $productStorageData[$storefrontAssistantProductTransfer->getIdProductAbstract()] ?? null,
                 $storeName,
                 $currencyIsoCode,
                 $priceMode,
@@ -78,24 +58,17 @@ class PriceProductProductExpander implements ProductExpanderInterface
 
     protected function expandProductWithCurrentPrice(
         StorefrontAssistantProductTransfer $storefrontAssistantProductTransfer,
-        mixed $productData,
         string $storeName,
         string $currencyIsoCode,
         string $priceMode
     ): void {
         $idProductAbstract = $storefrontAssistantProductTransfer->getIdProductAbstract();
 
-        if ($idProductAbstract === null || $idProductAbstract <= 0) {
+        $idProductConcrete = $storefrontAssistantProductTransfer->getIdProductConcrete();
+
+        if ($idProductAbstract === null || $idProductAbstract <= 0 || $idProductConcrete === null || $idProductConcrete <= 0) {
             return;
         }
-
-        $productConcrete = $this->findFirstProductConcrete($productData);
-
-        if ($productConcrete === null) {
-            return;
-        }
-
-        [$idProductConcrete, $concreteSku] = $productConcrete;
 
         $priceProductFilterTransfer = (new PriceProductFilterTransfer())
             ->setIdProductAbstract($idProductAbstract)
@@ -104,7 +77,7 @@ class PriceProductProductExpander implements ProductExpanderInterface
             ->setStoreName($storeName)
             ->setCurrencyIsoCode($currencyIsoCode)
             ->setPriceMode($priceMode)
-            ->setProductOfferReference($this->findDefaultProductOfferReference($concreteSku));
+            ->setProductOfferReference($this->findDefaultProductOfferReference((string)$storefrontAssistantProductTransfer->getConcreteSku()));
 
         $currentProductPriceTransfer = $this->priceProductStorageClient
             ->getResolvedCurrentProductPriceTransfer($priceProductFilterTransfer);
@@ -162,48 +135,5 @@ class PriceProductProductExpander implements ProductExpanderInterface
                 ->setAmount((string)$amount)
                 ->setCurrency($this->currencyClient->getCurrent()),
         );
-    }
-
-    /**
-     * @return array{0: int, 1: string}|null
-     */
-    protected function findFirstProductConcrete(mixed $productData): ?array
-    {
-        if (!is_array($productData)) {
-            return null;
-        }
-
-        $productConcreteIds = $productData[static::STORAGE_KEY_ATTRIBUTE_MAP][static::STORAGE_KEY_PRODUCT_CONCRETE_IDS] ?? null;
-
-        if (!is_array($productConcreteIds)) {
-            return null;
-        }
-
-        foreach ($productConcreteIds as $concreteSku => $idProductConcrete) {
-            if (!is_bool($idProductConcrete) && is_numeric($idProductConcrete) && (int)$idProductConcrete > 0) {
-                return [(int)$idProductConcrete, is_string($concreteSku) ? $concreteSku : ''];
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * @return array<int, int>
-     */
-    protected function extractProductAbstractIds(
-        StorefrontAssistantProductCollectionTransfer $storefrontAssistantProductCollectionTransfer
-    ): array {
-        $productAbstractIds = [];
-
-        foreach ($storefrontAssistantProductCollectionTransfer->getStorefrontAssistantProducts() as $storefrontAssistantProductTransfer) {
-            $idProductAbstract = $storefrontAssistantProductTransfer->getIdProductAbstract();
-
-            if ($idProductAbstract !== null && $idProductAbstract > 0) {
-                $productAbstractIds[] = $idProductAbstract;
-            }
-        }
-
-        return array_values(array_unique($productAbstractIds));
     }
 }

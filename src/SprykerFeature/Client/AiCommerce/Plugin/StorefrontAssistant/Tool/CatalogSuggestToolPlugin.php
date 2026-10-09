@@ -23,15 +23,10 @@ class CatalogSuggestToolPlugin extends AbstractPlugin implements ToolPluginInter
     public const string TOOL_NAME = 'catalog_suggest';
 
     protected const string TOOL_DESCRIPTION = <<<'DESCRIPTION'
-        Looks a term up across everything the shop publishes — products, categories, content pages and product sets — and returns the catalogue's own vocabulary for it.
-
-        Two things it is for:
-        - Grounding a term before searching. `matchingTerms` holds the completions the shop's own catalogue contains. If a word the customer used returns no terms, the catalogue does not describe products that way, and searching for it will return nothing useful — search for the product noun instead, or narrow with a filter.
-        - Answering what `catalog_search` cannot. `cms_page` results are the shop's own content pages — delivery, returns, warranty, imprint — so a question about shipping or returns is answered from there, with the page `url`, instead of from your own knowledge. `category` and `product_set` results point the customer at a whole section or a curated set rather than at five loose products.
-
-        Use it when a search returned nothing or something irrelevant, when the customer asks about anything other than a specific product, or before searching with a word you are not sure this shop uses. Every result carries the real `name` and `url` — never state a page, category or product this tool did not return.
-
-        A `category` result's `id` is the category entity id, which is NOT what `catalog_search` filters by; take a filterable category id from `category_tree`.
+        Looks a term up across what the shop publishes: `matchingTerms` (the catalogue's own vocabulary) plus `category`, `cms_page` and `product_set` results, each with its real `name` and `url`. Never state a page, category or product it did not return.
+        - A word with no `matchingTerms` is not how the catalogue describes products: search for the product noun or narrow with a filter instead.
+        - A `cms_page` (delivery, returns, warranty, imprint) is read with `read_shop_page` by its `id`: answer from that text, never from your own knowledge. A `category` or `product_set` result points the customer at a whole section or a curated set.
+        - A `category` result's `id` is NOT what `catalog_search` filters by: take category ids from the shop's category list or `category_tree`.
         DESCRIPTION;
 
     /**
@@ -67,14 +62,14 @@ class CatalogSuggestToolPlugin extends AbstractPlugin implements ToolPluginInter
             new ToolParameter(
                 CatalogSuggestionReader::PARAMETER_QUERY,
                 ToolParameterType::String,
-                'The term to look up, in the customer\'s own words or as a single product noun. A short term matches more of the catalogue\'s vocabulary than a sentence does.',
+                'The term, in the customer\'s words or as one product noun; a short term matches more than a sentence.',
                 true,
             ),
             new ToolParameter(
                 CatalogSuggestionReader::PARAMETER_LIMIT,
                 ToolParameterType::Integer,
                 sprintf(
-                    'How many results to return per entity type, between %d and %d. Omit for %d.',
+                    'Results per entity type, %d to %d; default %d.',
                     CatalogSuggestionReader::LIMIT_MIN,
                     CatalogSuggestionReader::LIMIT_MAX,
                     CatalogSuggestionReader::DEFAULT_LIMIT,

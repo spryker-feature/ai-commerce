@@ -8,19 +8,32 @@
 namespace SprykerFeature\Client\AiCommerce;
 
 use Spryker\Client\AiFoundation\AiFoundationClientInterface;
+use Spryker\Client\AvailabilityStorage\AvailabilityStorageClientInterface;
 use Spryker\Client\Catalog\CatalogClientInterface;
 use Spryker\Client\CategoryStorage\CategoryStorageClientInterface;
+use Spryker\Client\CmsStorage\CmsStorageClientInterface;
 use Spryker\Client\Currency\CurrencyClientInterface;
 use Spryker\Client\GlossaryStorage\GlossaryStorageClientInterface;
 use Spryker\Client\Kernel\AbstractDependencyProvider;
 use Spryker\Client\Kernel\Container;
 use Spryker\Client\Locale\LocaleClientInterface;
+use Spryker\Client\MerchantStorage\MerchantStorageClientInterface;
 use Spryker\Client\Money\MoneyClientInterface;
+use Spryker\Client\Permission\PermissionClientInterface;
 use Spryker\Client\Price\PriceClientInterface;
 use Spryker\Client\PriceProductStorage\PriceProductStorageClientInterface;
+use Spryker\Client\ProductAlternativeStorage\ProductAlternativeStorageClientInterface;
+use Spryker\Client\ProductBundleStorage\ProductBundleStorageClientInterface;
+use Spryker\Client\ProductCategoryStorage\ProductCategoryStorageClientInterface;
+use Spryker\Client\ProductDiscontinuedStorage\ProductDiscontinuedStorageClientInterface;
 use Spryker\Client\ProductImageStorage\ProductImageStorageClientInterface;
+use Spryker\Client\ProductLabelStorage\ProductLabelStorageClientInterface;
 use Spryker\Client\ProductOfferStorage\ProductOfferStorageClientInterface;
-use Spryker\Client\ProductSearchConfigStorage\Plugin\Config\ProductSearchConfigExpanderPlugin;
+use Spryker\Client\ProductOptionStorage\ProductOptionStorageClientInterface;
+use Spryker\Client\ProductRelationStorage\ProductRelationStorageClientInterface;
+use Spryker\Client\ProductReviewStorage\ProductReviewStorageClientInterface;
+use Spryker\Client\ProductSetPageSearch\ProductSetPageSearchClientInterface;
+use Spryker\Client\ProductSetStorage\ProductSetStorageClientInterface;
 use Spryker\Client\ProductStorage\ProductStorageClientInterface;
 use Spryker\Client\Storage\StorageClientInterface;
 use Spryker\Client\Store\StoreClientInterface;
@@ -54,6 +67,46 @@ class AiCommerceDependencyProvider extends AbstractDependencyProvider
     public const string CLIENT_LOCALE = 'CLIENT_LOCALE';
 
     public const string CLIENT_GLOSSARY_STORAGE = 'CLIENT_GLOSSARY_STORAGE';
+
+    public const string CLIENT_PRODUCT_LABEL_STORAGE = 'CLIENT_PRODUCT_LABEL_STORAGE';
+
+    public const string CLIENT_AVAILABILITY_STORAGE = 'CLIENT_AVAILABILITY_STORAGE';
+
+    public const string CLIENT_PRODUCT_DISCONTINUED_STORAGE = 'CLIENT_PRODUCT_DISCONTINUED_STORAGE';
+
+    public const string CLIENT_PRODUCT_ALTERNATIVE_STORAGE = 'CLIENT_PRODUCT_ALTERNATIVE_STORAGE';
+
+    public const string CLIENT_PRODUCT_OPTION_STORAGE = 'CLIENT_PRODUCT_OPTION_STORAGE';
+
+    public const string CLIENT_MERCHANT_STORAGE = 'CLIENT_MERCHANT_STORAGE';
+
+    public const string CLIENT_PERMISSION = 'CLIENT_PERMISSION';
+
+    public const string CLIENT_PRODUCT_RELATION_STORAGE = 'CLIENT_PRODUCT_RELATION_STORAGE';
+
+    public const string CLIENT_PRODUCT_CATEGORY_STORAGE = 'CLIENT_PRODUCT_CATEGORY_STORAGE';
+
+    public const string CLIENT_CMS_STORAGE = 'CLIENT_CMS_STORAGE';
+
+    /**
+     * @api
+     */
+    public const string CLIENT_PRODUCT_REVIEW_STORAGE = 'CLIENT_PRODUCT_REVIEW_STORAGE';
+
+    /**
+     * @api
+     */
+    public const string CLIENT_PRODUCT_SET_PAGE_SEARCH = 'CLIENT_PRODUCT_SET_PAGE_SEARCH';
+
+    /**
+     * @api
+     */
+    public const string CLIENT_PRODUCT_SET_STORAGE = 'CLIENT_PRODUCT_SET_STORAGE';
+
+    /**
+     * @api
+     */
+    public const string CLIENT_PRODUCT_BUNDLE_STORAGE = 'CLIENT_PRODUCT_BUNDLE_STORAGE';
 
     /**
      * @api
@@ -89,6 +142,20 @@ class AiCommerceDependencyProvider extends AbstractDependencyProvider
         $container = $this->addMoneyClient($container);
         $container = $this->addPriceClient($container);
         $container = $this->addCurrencyClient($container);
+        $container = $this->addProductLabelStorageClient($container);
+        $container = $this->addAvailabilityStorageClient($container);
+        $container = $this->addProductDiscontinuedStorageClient($container);
+        $container = $this->addProductAlternativeStorageClient($container);
+        $container = $this->addProductOptionStorageClient($container);
+        $container = $this->addMerchantStorageClient($container);
+        $container = $this->addPermissionClient($container);
+        $container = $this->addProductRelationStorageClient($container);
+        $container = $this->addProductCategoryStorageClient($container);
+        $container = $this->addCmsStorageClient($container);
+        $container = $this->addProductReviewStorageClient($container);
+        $container = $this->addProductSetPageSearchClient($container);
+        $container = $this->addProductSetStorageClient($container);
+        $container = $this->addProductBundleStorageClient($container);
         $container = $this->addStorefrontAssistantAgentPlugins($container);
         $container = $this->addStorefrontAssistantProductCollectionExpanderPlugins($container);
         $container = $this->addSearchConfigExpanderPlugins($container);
@@ -101,9 +168,7 @@ class AiCommerceDependencyProvider extends AbstractDependencyProvider
      */
     protected function getSearchConfigExpanderPlugins(): array
     {
-        return [
-            new ProductSearchConfigExpanderPlugin(),
-        ];
+        return [];
     }
 
     protected function addSearchConfigExpanderPlugins(Container $container): Container
@@ -218,6 +283,132 @@ class AiCommerceDependencyProvider extends AbstractDependencyProvider
     {
         $container->set(static::CLIENT_CURRENCY, function (Container $container): CurrencyClientInterface {
             return $container->getLocator()->currency()->client();
+        });
+
+        return $container;
+    }
+
+    protected function addProductLabelStorageClient(Container $container): Container
+    {
+        $container->set(static::CLIENT_PRODUCT_LABEL_STORAGE, function (Container $container): ProductLabelStorageClientInterface {
+            return $container->getLocator()->productLabelStorage()->client();
+        });
+
+        return $container;
+    }
+
+    protected function addAvailabilityStorageClient(Container $container): Container
+    {
+        $container->set(static::CLIENT_AVAILABILITY_STORAGE, function (Container $container): AvailabilityStorageClientInterface {
+            return $container->getLocator()->availabilityStorage()->client();
+        });
+
+        return $container;
+    }
+
+    protected function addProductDiscontinuedStorageClient(Container $container): Container
+    {
+        $container->set(static::CLIENT_PRODUCT_DISCONTINUED_STORAGE, function (Container $container): ProductDiscontinuedStorageClientInterface {
+            return $container->getLocator()->productDiscontinuedStorage()->client();
+        });
+
+        return $container;
+    }
+
+    protected function addProductAlternativeStorageClient(Container $container): Container
+    {
+        $container->set(static::CLIENT_PRODUCT_ALTERNATIVE_STORAGE, function (Container $container): ProductAlternativeStorageClientInterface {
+            return $container->getLocator()->productAlternativeStorage()->client();
+        });
+
+        return $container;
+    }
+
+    protected function addProductOptionStorageClient(Container $container): Container
+    {
+        $container->set(static::CLIENT_PRODUCT_OPTION_STORAGE, function (Container $container): ProductOptionStorageClientInterface {
+            return $container->getLocator()->productOptionStorage()->client();
+        });
+
+        return $container;
+    }
+
+    protected function addMerchantStorageClient(Container $container): Container
+    {
+        $container->set(static::CLIENT_MERCHANT_STORAGE, function (Container $container): MerchantStorageClientInterface {
+            return $container->getLocator()->merchantStorage()->client();
+        });
+
+        return $container;
+    }
+
+    protected function addPermissionClient(Container $container): Container
+    {
+        $container->set(static::CLIENT_PERMISSION, function (Container $container): PermissionClientInterface {
+            return $container->getLocator()->permission()->client();
+        });
+
+        return $container;
+    }
+
+    protected function addProductRelationStorageClient(Container $container): Container
+    {
+        $container->set(static::CLIENT_PRODUCT_RELATION_STORAGE, function (Container $container): ProductRelationStorageClientInterface {
+            return $container->getLocator()->productRelationStorage()->client();
+        });
+
+        return $container;
+    }
+
+    protected function addProductCategoryStorageClient(Container $container): Container
+    {
+        $container->set(static::CLIENT_PRODUCT_CATEGORY_STORAGE, function (Container $container): ProductCategoryStorageClientInterface {
+            return $container->getLocator()->productCategoryStorage()->client();
+        });
+
+        return $container;
+    }
+
+    protected function addCmsStorageClient(Container $container): Container
+    {
+        $container->set(static::CLIENT_CMS_STORAGE, function (Container $container): CmsStorageClientInterface {
+            return $container->getLocator()->cmsStorage()->client();
+        });
+
+        return $container;
+    }
+
+    protected function addProductReviewStorageClient(Container $container): Container
+    {
+        $container->set(static::CLIENT_PRODUCT_REVIEW_STORAGE, function (Container $container): ProductReviewStorageClientInterface {
+            return $container->getLocator()->productReviewStorage()->client();
+        });
+
+        return $container;
+    }
+
+    protected function addProductSetPageSearchClient(Container $container): Container
+    {
+        $container->set(static::CLIENT_PRODUCT_SET_PAGE_SEARCH, function (Container $container): ProductSetPageSearchClientInterface {
+            return $container->getLocator()->productSetPageSearch()->client();
+        });
+
+        return $container;
+    }
+
+    protected function addProductSetStorageClient(Container $container): Container
+    {
+        $container->set(static::CLIENT_PRODUCT_SET_STORAGE, function (Container $container): ProductSetStorageClientInterface {
+            return $container->getLocator()->productSetStorage()->client();
+        });
+
+        return $container;
+    }
+
+    protected function addProductBundleStorageClient(Container $container): Container
+    {
+        $container->set(static::CLIENT_PRODUCT_BUNDLE_STORAGE, function (Container $container): ProductBundleStorageClientInterface {
+            return $container->getLocator()->productBundleStorage()->client();
         });
 
         return $container;

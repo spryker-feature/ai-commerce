@@ -15,6 +15,7 @@ interface PageContextSystemPromptComposerInterface
 {
     public function composeSystemPrompt(
         string $systemPrompt,
-        StorefrontAssistantChatRequestTransfer $storefrontAssistantChatRequestTransfer
+        StorefrontAssistantChatRequestTransfer $storefrontAssistantChatRequestTransfer,
+        ?string $inlineCategoryTree = null
     ): string;
 }

@@ -14,15 +14,12 @@ use Spryker\Client\SearchExtension\Dependency\Plugin\SearchConfigExpanderPluginI
 
 class SearchFilterConfigReader implements SearchFilterConfigReaderInterface
 {
-    protected const string PARAMETER_NAME_MERCHANT_NAME = 'merchant_name';
-
     protected const string PARAMETER_NAME_MERCHANT_REFERENCE = 'merchant_reference';
 
     /**
      * @var list<string>
      */
     protected const array EXCLUDED_PARAMETER_NAMES = [
-        self::PARAMETER_NAME_MERCHANT_NAME,
         self::PARAMETER_NAME_MERCHANT_REFERENCE,
     ];
 

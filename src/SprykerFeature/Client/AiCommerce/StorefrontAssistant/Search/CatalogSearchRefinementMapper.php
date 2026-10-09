@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace SprykerFeature\Client\AiCommerce\StorefrontAssistant\Search;
 
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Price\StorefrontAssistantPriceFormatterInterface;
+
 class CatalogSearchRefinementMapper implements CatalogSearchRefinementMapperInterface
 {
     protected const string FACET_KEY_NAME = 'name';
@@ -18,6 +20,18 @@ class CatalogSearchRefinementMapper implements CatalogSearchRefinementMapperInte
     protected const string FACET_KEY_MIN = 'min';
 
     protected const string FACET_KEY_MAX = 'max';
+
+    protected const string FACET_KEY_CONFIG = 'config';
+
+    protected const string FACET_CONFIG_KEY_PARAMETER_NAME = 'parameter_name';
+
+    protected const string FACET_CONFIG_KEY_PARAMETER_NAME_CAMEL_CASE = 'parameterName';
+
+    protected const string RANGE_KEY_MIN_FORMATTED = 'minFormatted';
+
+    protected const string RANGE_KEY_MAX_FORMATTED = 'maxFormatted';
+
+    protected const int PRICE_RANGE_FRACTION_DIGITS = 2;
 
     protected const string FACET_VALUE_KEY_VALUE = 'value';
 
@@ -40,21 +54,16 @@ class CatalogSearchRefinementMapper implements CatalogSearchRefinementMapperInte
     protected const int MAX_REFINEMENT_VALUES = 10;
 
     /**
-     * Maps a facet name as the search returns it to the argument that filters by it, so a refinement
-     * the agent reads can be passed straight back instead of guessed at.
-     *
-     * @var array<string, string>
+     * @var list<string>
      */
-    protected const array FACET_NAME_TO_FILTER_ARGUMENT = [
-        CatalogSearchArgumentResolver::REQUEST_PARAMETER_CATEGORY => CatalogSearchArgumentResolver::PARAMETER_CATEGORY,
-        CatalogSearchArgumentResolver::REQUEST_PARAMETER_LABEL => CatalogSearchArgumentResolver::PARAMETER_LABEL,
-        CatalogSearchArgumentResolver::REQUEST_PARAMETER_PRODUCT_CLASS => CatalogSearchArgumentResolver::PARAMETER_PRODUCT_CLASS,
-        CatalogSearchArgumentResolver::REQUEST_PARAMETER_RATING => CatalogSearchArgumentResolver::PARAMETER_RATING_MIN,
+    protected const array CONFIGURED_FACET_NAMES = [
+        CatalogSearchArgumentResolver::REQUEST_PARAMETER_MERCHANT_NAME,
     ];
 
     public function __construct(
         protected CatalogSearchArgumentResolverInterface $catalogSearchArgumentResolver,
-        protected SearchResultDataExtractorInterface $searchResultDataExtractor
+        protected SearchResultDataExtractorInterface $searchResultDataExtractor,
+        protected StorefrontAssistantPriceFormatterInterface $storefrontAssistantPriceFormatter
     ) {
     }
 
@@ -112,9 +121,51 @@ class CatalogSearchRefinementMapper implements CatalogSearchRefinementMapperInte
     /**
      * @param mixed $facets
      *
-     * @return array<string, int>|null
+     * @return array<string, float|string>|null
      */
     public function findPriceRange($facets): ?array
+    {
+        $range = $this->findRange($facets, CatalogSearchArgumentResolver::REQUEST_PARAMETER_PRICE);
+
+        if ($range === null) {
+            return null;
+        }
+
+        [$min, $max] = array_map(static fn (float $amount): int => (int)round($amount), $range);
+
+        return [
+            CatalogSearchArgumentResolver::RANGE_KEY_MIN => round($min / CatalogSearchArgumentResolver::PRICE_PRECISION, static::PRICE_RANGE_FRACTION_DIGITS),
+            CatalogSearchArgumentResolver::RANGE_KEY_MAX => round($max / CatalogSearchArgumentResolver::PRICE_PRECISION, static::PRICE_RANGE_FRACTION_DIGITS),
+            static::RANGE_KEY_MIN_FORMATTED => $this->storefrontAssistantPriceFormatter->formatAmount($min),
+            static::RANGE_KEY_MAX_FORMATTED => $this->storefrontAssistantPriceFormatter->formatAmount($max),
+        ];
+    }
+
+    /**
+     * @param mixed $facets
+     *
+     * @return array<string, int>|null
+     */
+    public function findRatingRange($facets): ?array
+    {
+        $range = $this->findRange($facets, CatalogSearchArgumentResolver::REQUEST_PARAMETER_RATING);
+
+        if ($range === null) {
+            return null;
+        }
+
+        return [
+            CatalogSearchArgumentResolver::RANGE_KEY_MIN => (int)round($range[0]),
+            CatalogSearchArgumentResolver::RANGE_KEY_MAX => (int)round($range[1]),
+        ];
+    }
+
+    /**
+     * @param mixed $facets
+     *
+     * @return array{0: float, 1: float}|null
+     */
+    protected function findRange($facets, string $parameterName): ?array
     {
         if (!is_array($facets)) {
             return null;
@@ -123,24 +174,35 @@ class CatalogSearchRefinementMapper implements CatalogSearchRefinementMapperInte
         foreach ($facets as $facet) {
             $facetData = $this->searchResultDataExtractor->extractData($facet);
 
-            if ($facetData === null || ($facetData[static::FACET_KEY_NAME] ?? null) !== CatalogSearchArgumentResolver::REQUEST_PARAMETER_PRICE) {
+            if ($facetData === null || $this->resolveFacetParameterName($facetData) !== $parameterName) {
                 continue;
             }
 
             $min = $facetData[static::FACET_KEY_MIN] ?? null;
             $max = $facetData[static::FACET_KEY_MAX] ?? null;
 
-            if (!is_numeric($min) || !is_numeric($max)) {
+            if (!is_numeric($min) || !is_numeric($max) || (float)$max <= 0) {
                 return null;
             }
 
-            return [
-                CatalogSearchArgumentResolver::RANGE_KEY_MIN => (int)$min,
-                CatalogSearchArgumentResolver::RANGE_KEY_MAX => (int)$max,
-            ];
+            return [(float)$min, (float)$max];
         }
 
         return null;
+    }
+
+    /**
+     * @param array<string, mixed> $facetData
+     */
+    protected function resolveFacetParameterName(array $facetData): ?string
+    {
+        $facetConfigData = $this->searchResultDataExtractor->extractData($facetData[static::FACET_KEY_CONFIG] ?? null);
+        $parameterName = $facetConfigData[static::FACET_CONFIG_KEY_PARAMETER_NAME]
+            ?? $facetConfigData[static::FACET_CONFIG_KEY_PARAMETER_NAME_CAMEL_CASE]
+            ?? $facetData[static::FACET_KEY_NAME]
+            ?? null;
+
+        return is_string($parameterName) ? $parameterName : null;
     }
 
     /**
@@ -193,12 +255,17 @@ class CatalogSearchRefinementMapper implements CatalogSearchRefinementMapperInte
             $refinementValues = $this->expandCategoryRefinementValuesWithLabels($refinementValues, $categoryNodeNames);
         }
 
-        $refinement = [static::FACET_KEY_NAME => $name, static::FACET_KEY_VALUES => $refinementValues];
         $filterArgument = $this->resolveFilterArgument($name, $facetConfigTransfers);
 
-        if ($filterArgument !== null) {
-            $refinement[static::REFINEMENT_KEY_FILTER_ARGUMENT] = $filterArgument;
+        if ($filterArgument === null) {
+            return null;
         }
+
+        $refinement = [
+            static::FACET_KEY_NAME => $name,
+            static::FACET_KEY_VALUES => $refinementValues,
+            static::REFINEMENT_KEY_FILTER_ARGUMENT => $filterArgument,
+        ];
 
         if ($name === CatalogSearchArgumentResolver::REQUEST_PARAMETER_CATEGORY) {
             $refinement[static::REFINEMENT_KEY_VALUE_TYPE] = static::VALUE_TYPE_CATEGORY_ID;
@@ -212,9 +279,9 @@ class CatalogSearchRefinementMapper implements CatalogSearchRefinementMapperInte
      */
     protected function resolveFilterArgument(string $facetName, array $facetConfigTransfers): ?string
     {
-        $filterArgument = static::FACET_NAME_TO_FILTER_ARGUMENT[$facetName] ?? null;
+        $filterArgument = CatalogSearchArgumentResolver::REQUEST_PARAMETER_TO_FILTER_ARGUMENT[$facetName] ?? null;
 
-        if ($filterArgument !== null) {
+        if ($filterArgument !== null && !in_array($facetName, static::CONFIGURED_FACET_NAMES, true)) {
             return $filterArgument;
         }
 
@@ -222,7 +289,7 @@ class CatalogSearchRefinementMapper implements CatalogSearchRefinementMapperInte
             return null;
         }
 
-        return $this->catalogSearchArgumentResolver->formatFilterArgument($facetName);
+        return $filterArgument ?? $this->catalogSearchArgumentResolver->formatFilterArgument($facetName);
     }
 
     /**
