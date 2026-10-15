@@ -12,8 +12,7 @@ namespace SprykerFeatureTest\Zed\AiCommerce\Communication\BackofficeAssistant;
 use Codeception\Test\Unit;
 use Generated\Shared\Transfer\BackofficeAssistantPromptRequestTransfer;
 use RuntimeException;
-use Spryker\Shared\Translator\TranslatorConstants;
-use Spryker\Zed\Locale\LocaleDependencyProvider;
+use Spryker\Zed\Translator\Business\TranslatorFacadeInterface;
 use SprykerFeature\Shared\AiCommerce\BackofficeAssistant\BackofficeAssistantEventType;
 use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Emitter\SseEventEmitterInterface;
 use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\IntentRouterInterface;
@@ -34,49 +33,33 @@ use SprykerFeatureTest\Zed\AiCommerce\AiCommerceCommunicationTester;
  */
 class PromptProcessorTest extends Unit
 {
-    protected const string LOCALE_EN_US = 'en_US';
-
-    protected const string LOCALE_DE_DE = 'de_DE';
-
-    protected const string MODULE_ZED_TRANSLATION_FILE_PATTERN = '%s/data/translation/Zed/[a-z][a-z]_[A-Z][A-Z].csv';
-
-    protected const string TRANSLATOR_CACHE_DIRECTORY = 'ai-commerce-translator';
-
     protected const string KEY_MESSAGE = 'message';
 
-    protected const string MESSAGE_PROMPT_REQUIRED_EN_US = 'Prompt is required.';
+    protected const string GLOSSARY_KEY_PROMPT_REQUIRED = 'backoffice_assistant.validation.prompt_required';
 
-    protected const string MESSAGE_USER_ID_REQUIRED_EN_US = 'User is not identified.';
+    protected const string GLOSSARY_KEY_USER_ID_REQUIRED = 'backoffice_assistant.validation.user_id_required';
 
-    protected const string MESSAGE_AI_SERVICE_UNAVAILABLE_EN_US = 'AI service unavailable.';
+    protected const string GLOSSARY_KEY_AI_SERVICE_UNAVAILABLE = 'backoffice_assistant.error.ai_service_unavailable';
 
-    protected const string MESSAGE_PROMPT_REQUIRED_DE_DE = 'Eingabe ist erforderlich.';
+    protected const string MESSAGE_PROMPT_REQUIRED = 'Eingabe ist erforderlich.';
 
-    protected const string MESSAGE_USER_ID_REQUIRED_DE_DE = 'Benutzer ist nicht identifiziert.';
+    protected const string MESSAGE_USER_ID_REQUIRED = 'Benutzer ist nicht identifiziert.';
 
-    protected const string MESSAGE_AI_SERVICE_UNAVAILABLE_DE_DE = 'KI-Dienst nicht verfügbar.';
+    protected const string MESSAGE_AI_SERVICE_UNAVAILABLE = 'KI-Dienst nicht verfügbar.';
+
+    protected const array TRANSLATIONS = [
+        self::GLOSSARY_KEY_PROMPT_REQUIRED => self::MESSAGE_PROMPT_REQUIRED,
+        self::GLOSSARY_KEY_USER_ID_REQUIRED => self::MESSAGE_USER_ID_REQUIRED,
+        self::GLOSSARY_KEY_AI_SERVICE_UNAVAILABLE => self::MESSAGE_AI_SERVICE_UNAVAILABLE,
+    ];
 
     protected const string PROMPT = 'Show me the latest orders';
 
     protected AiCommerceCommunicationTester $tester;
 
-    protected function _before(): void
+    public function testProcessEmitsTranslatedValidationErrorsWhenPromptAndUserAreMissing(): void
     {
-        parent::_before();
-
-        $this->configureTranslatorWithModuleTranslationFiles();
-    }
-
-    /**
-     * @dataProvider provideValidationErrorMessagesByLocale
-     */
-    public function testProcessEmitsTranslatedValidationErrorsWhenPromptAndUserAreMissing(
-        string $localeName,
-        string $expectedPromptRequiredMessage,
-        string $expectedUserIdRequiredMessage,
-    ): void {
         // Arrange
-        $this->tester->setDependency(LocaleDependencyProvider::LOCALE_CURRENT, $localeName);
         $emittedEvents = [];
         $promptProcessor = $this->createPromptProcessor(
             $this->createRecordingSseEventEmitter($emittedEvents),
@@ -88,20 +71,14 @@ class PromptProcessorTest extends Unit
 
         // Assert
         $this->assertSame([
-            [BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => $expectedPromptRequiredMessage]],
-            [BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => $expectedUserIdRequiredMessage]],
+            [BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => static::MESSAGE_PROMPT_REQUIRED]],
+            [BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => static::MESSAGE_USER_ID_REQUIRED]],
         ], $emittedEvents);
     }
 
-    /**
-     * @dataProvider provideAiServiceUnavailableMessageByLocale
-     */
-    public function testProcessEmitsTranslatedAiServiceUnavailableErrorWhenIntentRouterFails(
-        string $localeName,
-        string $expectedAiServiceUnavailableMessage,
-    ): void {
+    public function testProcessEmitsTranslatedAiServiceUnavailableErrorWhenIntentRouterFails(): void
+    {
         // Arrange
-        $this->tester->setDependency(LocaleDependencyProvider::LOCALE_CURRENT, $localeName);
         $emittedEvents = [];
         $intentRouterMock = $this->createMock(IntentRouterInterface::class);
         $intentRouterMock->method('route')->willThrowException(new RuntimeException());
@@ -113,20 +90,14 @@ class PromptProcessorTest extends Unit
 
         // Assert
         $this->assertSame(
-            [[BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => $expectedAiServiceUnavailableMessage]]],
+            [[BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => static::MESSAGE_AI_SERVICE_UNAVAILABLE]]],
             $emittedEvents,
         );
     }
 
-    /**
-     * @dataProvider provideAiServiceUnavailableMessageByLocale
-     */
-    public function testProcessEmitsTranslatedAiServiceUnavailableErrorWhenIntentRouterReturnsNoResponse(
-        string $localeName,
-        string $expectedAiServiceUnavailableMessage,
-    ): void {
+    public function testProcessEmitsTranslatedAiServiceUnavailableErrorWhenIntentRouterReturnsNoResponse(): void
+    {
         // Arrange
-        $this->tester->setDependency(LocaleDependencyProvider::LOCALE_CURRENT, $localeName);
         $emittedEvents = [];
         $intentRouterMock = $this->createMock(IntentRouterInterface::class);
         $intentRouterMock->method('route')->willReturn(null);
@@ -138,41 +109,9 @@ class PromptProcessorTest extends Unit
 
         // Assert
         $this->assertSame(
-            [[BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => $expectedAiServiceUnavailableMessage]]],
+            [[BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => static::MESSAGE_AI_SERVICE_UNAVAILABLE]]],
             $emittedEvents,
         );
-    }
-
-    /**
-     * @return array<string, array<string>>
-     */
-    public function provideValidationErrorMessagesByLocale(): array
-    {
-        return [
-            static::LOCALE_EN_US => [static::LOCALE_EN_US, static::MESSAGE_PROMPT_REQUIRED_EN_US, static::MESSAGE_USER_ID_REQUIRED_EN_US],
-            static::LOCALE_DE_DE => [static::LOCALE_DE_DE, static::MESSAGE_PROMPT_REQUIRED_DE_DE, static::MESSAGE_USER_ID_REQUIRED_DE_DE],
-        ];
-    }
-
-    /**
-     * @return array<string, array<string>>
-     */
-    public function provideAiServiceUnavailableMessageByLocale(): array
-    {
-        return [
-            static::LOCALE_EN_US => [static::LOCALE_EN_US, static::MESSAGE_AI_SERVICE_UNAVAILABLE_EN_US],
-            static::LOCALE_DE_DE => [static::LOCALE_DE_DE, static::MESSAGE_AI_SERVICE_UNAVAILABLE_DE_DE],
-        ];
-    }
-
-    protected function configureTranslatorWithModuleTranslationFiles(): void
-    {
-        $this->tester->setConfig(
-            TranslatorConstants::TRANSLATION_ZED_FILE_PATH_PATTERNS,
-            [sprintf(static::MODULE_ZED_TRANSLATION_FILE_PATTERN, dirname(__DIR__, 6))],
-        );
-        $this->tester->setConfig(TranslatorConstants::TRANSLATION_ZED_CACHE_DIRECTORY, codecept_output_dir(static::TRANSLATOR_CACHE_DIRECTORY));
-        $this->tester->setConfig(TranslatorConstants::TRANSLATION_ZED_DEBUG_ENABLED, true);
     }
 
     protected function createPromptProcessor(
@@ -190,8 +129,18 @@ class PromptProcessorTest extends Unit
             $sseEventEmitter,
             $intentRouter,
             $communicationFactory->createBackofficeAssistantPromptRequestValidator(),
-            $communicationFactory->getTranslatorFacade(),
+            $this->createTranslatorFacadeMock(),
         );
+    }
+
+    protected function createTranslatorFacadeMock(): TranslatorFacadeInterface
+    {
+        $translatorFacadeMock = $this->createMock(TranslatorFacadeInterface::class);
+        $translatorFacadeMock->method('trans')->willReturnCallback(
+            fn (string $id): string => static::TRANSLATIONS[$id] ?? $id,
+        );
+
+        return $translatorFacadeMock;
     }
 
     /**
