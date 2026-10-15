@@ -123,15 +123,7 @@ class SmartCmsContentController extends AbstractAiCommerceController
 
     protected function translateError(string $key): string
     {
-        $glossaryFacade = $this->getFactory()->getGlossaryFacade();
-
-        // The error keys ship as Zed translation CSVs for the Symfony translator and may not exist in the
-        // runtime glossary store; fall back to the key itself so the response stays a clean 403/422.
-        if (!$glossaryFacade->hasTranslation($key)) {
-            return $key;
-        }
-
-        return $glossaryFacade->translate($key);
+        return $this->getFactory()->getTranslatorFacade()->trans($key);
     }
 
     protected function isValidCsrfToken(string $token): bool

@@ -20,7 +20,7 @@ use Generated\Shared\Transfer\ConversationHistoryCriteriaTransfer;
 use Generated\Shared\Transfer\ConversationHistoryTransfer;
 use Spryker\Shared\Log\LoggerTrait;
 use Spryker\Zed\AiFoundation\Business\AiFoundationFacadeInterface;
-use Spryker\Zed\Glossary\Business\GlossaryFacadeInterface;
+use Spryker\Zed\Translator\Business\TranslatorFacadeInterface;
 use SprykerFeature\Shared\AiCommerce\BackofficeAssistant\BackofficeAssistantEventType;
 use SprykerFeature\Zed\AiCommerce\Business\AiCommerceFacadeInterface;
 use SprykerFeature\Zed\AiCommerce\Communication\Attachment\AttachmentBuilderInterface;
@@ -54,7 +54,7 @@ class PromptProcessor implements PromptProcessorInterface
         protected SseEventEmitterInterface $eventEmitter,
         protected IntentRouterInterface $intentRouter,
         protected BackofficeAssistantPromptRequestValidatorInterface $promptRequestValidator,
-        protected GlossaryFacadeInterface $glossaryFacade,
+        protected TranslatorFacadeInterface $translatorFacade,
     ) {
     }
 
@@ -65,7 +65,7 @@ class PromptProcessor implements PromptProcessorInterface
 
             if ($validationErrors !== []) {
                 foreach ($validationErrors as $errorTransfer) {
-                    $this->eventEmitter->emit(BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => $this->glossaryFacade->translate((string)$errorTransfer->getMessage())]);
+                    $this->eventEmitter->emit(BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => $this->translatorFacade->trans((string)$errorTransfer->getMessage())]);
                 }
 
                 return;
@@ -101,7 +101,7 @@ class PromptProcessor implements PromptProcessorInterface
                 ['exception' => $throwable],
             );
 
-            $this->eventEmitter->emit(BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => $this->glossaryFacade->translate(static::MESSAGE_AI_SERVICE_UNAVAILABLE)]);
+            $this->eventEmitter->emit(BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => $this->translatorFacade->trans(static::MESSAGE_AI_SERVICE_UNAVAILABLE)]);
         }
     }
 
@@ -147,7 +147,7 @@ class PromptProcessor implements PromptProcessorInterface
         );
 
         if (!$intentRouterResponse) {
-            $this->eventEmitter->emit(BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => $this->glossaryFacade->translate(static::MESSAGE_AI_SERVICE_UNAVAILABLE)]);
+            $this->eventEmitter->emit(BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => $this->translatorFacade->trans(static::MESSAGE_AI_SERVICE_UNAVAILABLE)]);
 
             return;
         }
@@ -300,7 +300,7 @@ class PromptProcessor implements PromptProcessorInterface
 
             if (!$agentPlugin->isApplicable($agentRequest)) {
                 $this->eventEmitter->emit(BackofficeAssistantEventType::Error, [
-                    static::KEY_MESSAGE => $this->glossaryFacade->translate(static::MESSAGE_AI_SERVICE_UNAVAILABLE),
+                    static::KEY_MESSAGE => $this->translatorFacade->trans(static::MESSAGE_AI_SERVICE_UNAVAILABLE),
                 ]);
 
                 return;
@@ -310,7 +310,7 @@ class PromptProcessor implements PromptProcessorInterface
 
             if ($backofficeAssistantPromptResponse->getMessage() === null) {
                 $this->eventEmitter->emit(BackofficeAssistantEventType::Error, [
-                    static::KEY_MESSAGE => $this->glossaryFacade->translate(static::MESSAGE_AI_SERVICE_UNAVAILABLE),
+                    static::KEY_MESSAGE => $this->translatorFacade->trans(static::MESSAGE_AI_SERVICE_UNAVAILABLE),
                 ]);
 
                 break;

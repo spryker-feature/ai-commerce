@@ -24,7 +24,7 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
 
     public const string FACADE_DISCOUNT = 'FACADE_DISCOUNT';
 
-    public const string FACADE_GLOSSARY = 'FACADE_GLOSSARY';
+    public const string FACADE_TRANSLATOR = 'FACADE_TRANSLATOR';
 
     public const string FACADE_OMS = 'FACADE_OMS';
 
@@ -58,7 +58,7 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
         $container = parent::provideCommunicationLayerDependencies($container);
         $container = $this->addUserFacade($container);
         $container = $this->addCsrfProviderService($container);
-        $container = $this->addGlossaryFacade($container);
+        $container = $this->addTranslatorFacade($container);
         $container = $this->addAiFoundationFacade($container);
         $container = $this->addBackofficeAssistantAgentPlugins($container);
 
@@ -110,10 +110,10 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
         return $container;
     }
 
-    protected function addGlossaryFacade(Container $container): Container
+    protected function addTranslatorFacade(Container $container): Container
     {
-        $container->set(static::FACADE_GLOSSARY, function (Container $container) {
-            return $container->getLocator()->glossary()->facade();
+        $container->set(static::FACADE_TRANSLATOR, function (Container $container) {
+            return $container->getLocator()->translator()->facade();
         });
 
         return $container;

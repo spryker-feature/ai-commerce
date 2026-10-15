@@ -68,3 +68,14 @@ Generating…,Generating…
 "The attachments are too large in total.","The attachments are too large in total."
 "A file could not be read and was not attached.","A file could not be read and was not attached."
 "Remove attachment","Remove attachment"
+Form,Form
+"Page context","Page context"
+"AI assistant","AI assistant"
+"AI is processing your request","AI is processing your request"
+Apply,Apply
+Close,Close
+"Try again","Try again"
+"Translated to:","Translated to:"
+"Please fill in text to translate","Please fill in text to translate"
+"Please fill in the product image url","Please fill in the product image url"
+"Please fill in the product name and description for at least one locale","Please fill in the product name and description for at least one locale"

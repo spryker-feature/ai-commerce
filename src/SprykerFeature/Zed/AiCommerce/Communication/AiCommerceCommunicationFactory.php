@@ -11,8 +11,8 @@ namespace SprykerFeature\Zed\AiCommerce\Communication;
 
 use Spryker\Zed\AiFoundation\Business\AiFoundationFacadeInterface;
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolPluginInterface;
-use Spryker\Zed\Glossary\Business\GlossaryFacadeInterface;
 use Spryker\Zed\Kernel\Communication\AbstractCommunicationFactory;
+use Spryker\Zed\Translator\Business\TranslatorFacadeInterface;
 use Spryker\Zed\User\Business\UserFacadeInterface;
 use SprykerFeature\Zed\AiCommerce\AiCommerceDependencyProvider;
 use SprykerFeature\Zed\AiCommerce\Communication\Attachment\AttachmentBuilder;
@@ -63,7 +63,7 @@ class AiCommerceCommunicationFactory extends AbstractCommunicationFactory
             $this->createSseEventEmitter(),
             $this->createIntentRouter(),
             $this->createBackofficeAssistantPromptRequestValidator(),
-            $this->getGlossaryFacade(),
+            $this->getTranslatorFacade(),
         );
     }
 
@@ -199,8 +199,8 @@ class AiCommerceCommunicationFactory extends AbstractCommunicationFactory
         return new SmartCmsContentResponseMapper();
     }
 
-    public function getGlossaryFacade(): GlossaryFacadeInterface
+    public function getTranslatorFacade(): TranslatorFacadeInterface
     {
-        return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_GLOSSARY);
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_TRANSLATOR);
     }
 }

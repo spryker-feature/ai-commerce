@@ -57,7 +57,7 @@ class BackofficeAssistantPromptController extends AbstractController
     public function indexAction(Request $request): JsonResponse|StreamedResponse
     {
         if (!$this->getFactory()->getConfig()->isBackofficeAssistantEnabled()) {
-            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getGlossaryFacade()->translate(static::ERROR_BACKOFFICE_ASSISTANT_DISABLED)], 403);
+            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getTranslatorFacade()->trans(static::ERROR_BACKOFFICE_ASSISTANT_DISABLED)], 403);
         }
 
         $data = json_decode($request->getContent(), true) ?? [];
@@ -65,7 +65,7 @@ class BackofficeAssistantPromptController extends AbstractController
         $token = (string)($data[static::CSRF_TOKEN_PARAM] ?? '');
 
         if (!$this->isValidCsrfToken($token)) {
-            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getGlossaryFacade()->translate(static::ERROR_INVALID_CSRF_TOKEN)], 403);
+            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getTranslatorFacade()->trans(static::ERROR_INVALID_CSRF_TOKEN)], 403);
         }
 
         return new StreamedResponse(function () use ($data): void {

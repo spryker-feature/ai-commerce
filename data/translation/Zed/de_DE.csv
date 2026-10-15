@@ -68,3 +68,14 @@ Generating…,"Wird generiert…"
 "The attachments are too large in total.","Die Anhänge sind insgesamt zu groß."
 "A file could not be read and was not attached.","Eine Datei konnte nicht gelesen werden und wurde nicht angehängt."
 "Remove attachment","Anhang entfernen"
+Form,Formular
+"Page context",Seitenkontext
+"AI assistant",KI-Assistent
+"AI is processing your request","KI verarbeitet Ihre Anfrage"
+Apply,Übernehmen
+Close,Schließen
+"Try again","Erneut versuchen"
+"Translated to:","Übersetzt in:"
+"Please fill in text to translate","Bitte geben Sie den zu übersetzenden Text ein"
+"Please fill in the product image url","Bitte geben Sie die URL des Produktbilds ein"
+"Please fill in the product name and description for at least one locale","Bitte geben Sie den Produktnamen und die Beschreibung für mindestens eine Sprache ein"

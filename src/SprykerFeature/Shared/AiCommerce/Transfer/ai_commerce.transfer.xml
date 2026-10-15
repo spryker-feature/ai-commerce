@@ -11,6 +11,7 @@
         <property name="maxRetries" type="int" description="Maximum number of retry attempts for the request in case of failures. Defaults to 1."/>
         <property name="toolSetNames" type="string[]" singular="toolSetName" description="List of AI tool set names. Read by the Zed prompt path only; the Client streaming path uses toolNames."/>
         <property name="toolNames" type="string[]" singular="toolName" description="List of AI tool names resolved against the Client-side tool plugin stack. Read by the Client streaming path only."/>
+        <property name="systemPrompt" type="string" description="Overrides the system prompt of the resolved AI configuration when not empty."/>
     </transfer>
 
     <transfer name="PromptResponse" strict="true">
@@ -18,6 +19,8 @@
         <property name="structuredMessage" type="object" description="Transfer object containing the structured response data returned by the LLM."/>
         <property name="isSuccessful" type="bool"/>
         <property name="errors" type="Error[]" singular="error"/>
+        <property name="provider" type="string" description="Resolved AI provider name from configuration."/>
+        <property name="model" type="string" description="Resolved AI model name from provider configuration."/>
     </transfer>
 
     <transfer name="PromptMessage" strict="true">
@@ -207,6 +210,7 @@
         <property name="firstName" type="string"/>
         <property name="lastName" type="string"/>
         <property name="email" type="string"/>
+        <property name="customerReference" type="string"/>
     </transfer>
 
     <transfer name="ItemState">
@@ -218,6 +222,8 @@
         <property name="toolName" type="string"/>
         <property name="toolResult" type="string"/>
         <property name="toolArguments" type="array" singular="toolArgument"/>
+        <property name="toolCallId" type="string"/>
+        <property name="isExecutionAllowed" type="bool"/>
     </transfer>
 
     <transfer name="DiscountConfigurator">
@@ -342,6 +348,7 @@
         <property name="content" type="string"/>
         <property name="contentType" type="string"/>
         <property name="mediaType" type="string"/>
+        <property name="filename" type="string" description="Original filename for document attachments; only set for type=document and only when the provider/caller carries it."/>
     </transfer>
 
     <transfer name="QuickOrderItem">
@@ -564,21 +571,27 @@
     </transfer>
 
     <transfer name="CmsBlockGlossaryPlaceholder">
+        <property name="translations" type="CmsBlockGlossaryPlaceholderTranslation[]" singular="translation"/>
     </transfer>
 
     <transfer name="CmsBlockGlossaryPlaceholderTranslation">
+        <property name="translation" type="string"/>
     </transfer>
 
     <transfer name="CmsBlockGlossary">
+        <property name="glossaryPlaceholders" type="CmsBlockGlossaryPlaceholder[]" singular="glossaryPlaceholder"/>
     </transfer>
 
     <transfer name="CmsGlossaryAttributes">
+        <property name="translations" type="CmsPlaceholderTranslation[]" singular="translation"/>
     </transfer>
 
     <transfer name="CmsGlossary">
+        <property name="glossaryAttributes" type="CmsGlossaryAttributes[]" singular="glossaryAttribute"/>
     </transfer>
 
     <transfer name="CmsPlaceholderTranslation">
+        <property name="translation" type="string"/>
     </transfer>
 
     <transfer name="StorefrontAssistantProduct" strict="true">
@@ -730,6 +743,7 @@
         <property name="isActive" type="bool"/>
         <property name="nodeId" type="int"/>
         <property name="url" type="string"/>
+        <property name="children" type="CategoryNodeStorage[]" singular="children"/>
     </transfer>
 
     <transfer name="ConversationHistoryCollectionDeleteCriteria" strict="true">
@@ -738,6 +752,7 @@
 
     <transfer name="ConversationHistoryCollectionResponse" strict="true">
         <property name="isSuccessful" type="bool"/>
+        <property name="errors" type="Error[]" singular="error" description="List of errors encountered during the operation, if any."/>
     </transfer>
 
     <transfer name="PriceProductFilter">
@@ -809,6 +824,8 @@
     </transfer>
 
     <transfer name="PromptStreamChunk" strict="true">
+        <property name="content" type="string" description="Incremental payload. For type=text this is a text delta, not a cumulative message."/>
+        <property name="type" type="string" description="Chunk type: text, reasoning."/>
     </transfer>
 
     <transfer name="ProductLabelDictionaryItem">
@@ -888,6 +905,9 @@
 
     <transfer name="ProductView">
         <property name="idProductAbstract" type="int"/>
+        <property name="attributeMap" type="AttributeMapStorage"/>
+        <property name="sku" type="string"/>
+        <property name="name" type="string"/>
     </transfer>
 
     <transfer name="ProductAbstractCategoryStorage">
@@ -956,6 +976,10 @@
 
     <transfer name="ProductImageStorage">
         <property name="externalUrlSmall" type="string"/>
+    </transfer>
+
+    <transfer name="AttributeMapStorage">
+        <property name="productConcreteIds" type="array" singular="productConcreteIds"/>
     </transfer>
 
 </transfers>

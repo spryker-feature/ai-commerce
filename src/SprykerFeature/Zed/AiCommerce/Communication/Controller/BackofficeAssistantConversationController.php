@@ -59,7 +59,7 @@ class BackofficeAssistantConversationController extends AbstractController
     public function indexAction(): JsonResponse
     {
         if (!$this->getFactory()->getConfig()->isBackofficeAssistantEnabled()) {
-            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getGlossaryFacade()->translate(static::ERROR_BACKOFFICE_ASSISTANT_DISABLED)], 403);
+            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getTranslatorFacade()->trans(static::ERROR_BACKOFFICE_ASSISTANT_DISABLED)], 403);
         }
 
         $idUser = $this->getFactory()->getUserFacade()->getCurrentUser()->getIdUserOrFail();
@@ -103,13 +103,13 @@ class BackofficeAssistantConversationController extends AbstractController
     public function detailAction(Request $request): JsonResponse
     {
         if (!$this->getFactory()->getConfig()->isBackofficeAssistantEnabled()) {
-            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getGlossaryFacade()->translate(static::ERROR_BACKOFFICE_ASSISTANT_DISABLED)], 403);
+            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getTranslatorFacade()->trans(static::ERROR_BACKOFFICE_ASSISTANT_DISABLED)], 403);
         }
 
         $conversationReference = (string)$request->query->get(static::REQUEST_KEY_CONVERSATION_REFERENCE, '');
 
         if (!$conversationReference) {
-            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getGlossaryFacade()->translate(static::ERROR_MISSING_CONVERSATION_REFERENCE)], 400);
+            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getTranslatorFacade()->trans(static::ERROR_MISSING_CONVERSATION_REFERENCE)], 400);
         }
 
         $idUser = $this->getFactory()->getUserFacade()->getCurrentUser()->getIdUserOrFail();
@@ -125,7 +125,7 @@ class BackofficeAssistantConversationController extends AbstractController
         $collection = $this->getFacade()->getBackofficeAssistantConversationCollection($criteria);
 
         if ($collection->getBackofficeAssistantConversations()->count() === 0) {
-            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getGlossaryFacade()->translate(static::ERROR_CONVERSATION_NOT_FOUND)], 404);
+            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getTranslatorFacade()->trans(static::ERROR_CONVERSATION_NOT_FOUND)], 404);
         }
 
         /** @var \Generated\Shared\Transfer\BackofficeAssistantConversationTransfer $conversation */
@@ -145,7 +145,7 @@ class BackofficeAssistantConversationController extends AbstractController
     public function deleteAction(Request $request): JsonResponse
     {
         if (!$this->getFactory()->getConfig()->isBackofficeAssistantEnabled()) {
-            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getGlossaryFacade()->translate(static::ERROR_BACKOFFICE_ASSISTANT_DISABLED)], 403);
+            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getTranslatorFacade()->trans(static::ERROR_BACKOFFICE_ASSISTANT_DISABLED)], 403);
         }
 
         $data = json_decode($request->getContent(), true) ?? [];
@@ -153,13 +153,13 @@ class BackofficeAssistantConversationController extends AbstractController
         $token = (string)($data[static::CSRF_TOKEN_PARAM] ?? '');
 
         if (!$this->isValidCsrfToken($token)) {
-            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getGlossaryFacade()->translate(static::ERROR_INVALID_CSRF_TOKEN)], 403);
+            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getTranslatorFacade()->trans(static::ERROR_INVALID_CSRF_TOKEN)], 403);
         }
 
         $conversationReference = (string)($data[static::RESPONSE_KEY_CONVERSATION_REFERENCE] ?? '');
 
         if (!$conversationReference) {
-            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getGlossaryFacade()->translate(static::ERROR_MISSING_CONVERSATION_REFERENCE)], 400);
+            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getTranslatorFacade()->trans(static::ERROR_MISSING_CONVERSATION_REFERENCE)], 400);
         }
 
         $idUser = $this->getFactory()->getUserFacade()->getCurrentUser()->getIdUserOrFail();
@@ -174,7 +174,7 @@ class BackofficeAssistantConversationController extends AbstractController
         $collection = $this->getFacade()->getBackofficeAssistantConversationCollection($ownershipCriteria);
 
         if ($collection->getBackofficeAssistantConversations()->count() === 0) {
-            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getGlossaryFacade()->translate(static::ERROR_CONVERSATION_NOT_FOUND)], 404);
+            return $this->jsonResponse([static::RESPONSE_KEY_ERROR => $this->getFactory()->getTranslatorFacade()->trans(static::ERROR_CONVERSATION_NOT_FOUND)], 404);
         }
 
         $deleteCriteria = (new BackofficeAssistantConversationCollectionDeleteCriteriaTransfer())

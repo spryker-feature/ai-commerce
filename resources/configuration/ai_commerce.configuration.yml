@@ -404,7 +404,7 @@ features:
                         default_value: 'Identify the main product in this image and respond with only the most relevant product search term. One to three words maximum.'
                         enabled: true
                         secret: false
-                        storefront: false
+                        storefront: true
                         scopes:
                             - global
           - key: storefront_assistant
