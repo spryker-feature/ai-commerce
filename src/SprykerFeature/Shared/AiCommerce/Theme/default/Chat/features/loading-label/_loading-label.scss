@@ -1,0 +1,15 @@
+spryker-chat {
+    --chat-loading-label-color: var(--chat-color-text-muted);
+}
+
+chat-loading-label {
+    display: none;
+}
+
+.spryker-chat-message--loading .spryker-chat-message__loading-label {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--chat-loading-label-color);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

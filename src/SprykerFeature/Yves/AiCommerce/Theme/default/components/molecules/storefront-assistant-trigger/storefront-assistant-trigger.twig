@@ -1,0 +1,21 @@
+{% extends model('component') %}
+
+{% define config = {
+    name: 'storefront-assistant-trigger',
+    tag: 'storefront-assistant-trigger',
+} %}
+
+{% define data = {
+    label: 'ai_commerce.storefront_assistant.title' | trans,
+    placement: 'static',
+} %}
+
+{% block body %}
+    {% include '@AiCommerce/Chat/features/trigger/button.twig' with {
+        trigger: {
+            label: data.label,
+            placement: data.placement,
+            class: config.name ~ '__button',
+        },
+    } only %}
+{% endblock %}

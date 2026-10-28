@@ -55,15 +55,6 @@ class AiCommerceConfig extends AbstractBundleConfig
      */
     protected const string STOREFRONT_ASSISTANT_PROMPT_GROUP_PRODUCT_RESULTS = 'product_results';
 
-    /**
-     * @var non-empty-string
-     */
-    protected const string STOREFRONT_ASSISTANT_SUGGESTED_PROMPT_SEPARATOR = '|';
-
-    protected const int STOREFRONT_ASSISTANT_MAX_SUGGESTED_PROMPTS = 4;
-
-    protected const int STOREFRONT_ASSISTANT_MAX_SUGGESTED_PROMPT_LENGTH = 120;
-
     protected const array QUICK_ORDER_IMAGE_TO_CART_SUPPORTED_MIME_TYPES = [
         'image/jpeg',
         'image/jpg',
@@ -324,60 +315,37 @@ class AiCommerceConfig extends AbstractBundleConfig
 
     /**
      * Specification:
-     * - Returns the prompts offered to the customer, keyed by the page type they apply to, plus the
-     *   `product_results` follow-up set offered under product cards the assistant renders.
-     * - Reads each set from Configuration Management on every call so a Back Office change takes effect without a deployment.
-     * - Prompts are stored pre-written rather than generated per page view, so showing them costs no AI call and no latency.
-     * - A page type whose value is unset or blank contributes no prompts and simply shows no rail.
+     * - Returns the raw suggested prompt value configured for each prompt group, keyed by the page type it applies to,
+     *   plus the `product_results` follow-up group offered under product cards the assistant renders.
+     * - Reads each value from Configuration Management on every call so a Back Office change takes effect without a deployment.
+     * - Returns an empty string for a group whose value is not set.
      *
      * @api
      *
-     * @return array<string, list<string>>
+     * @return array<string, string>
      */
-    public function getStorefrontAssistantSuggestedPrompts(): array
+    public function getStorefrontAssistantSuggestedPromptValues(): array
     {
-        return [
-            StorefrontAssistantPageType::Product->value => $this->getSuggestedPromptSet(
-                static::CONFIGURATION_KEY_STOREFRONT_ASSISTANT_PRODUCT_PAGE_PROMPTS,
-            ),
-            StorefrontAssistantPageType::Category->value => $this->getSuggestedPromptSet(
-                static::CONFIGURATION_KEY_STOREFRONT_ASSISTANT_CATEGORY_PAGE_PROMPTS,
-            ),
-            StorefrontAssistantPageType::Search->value => $this->getSuggestedPromptSet(
-                static::CONFIGURATION_KEY_STOREFRONT_ASSISTANT_SEARCH_PAGE_PROMPTS,
-            ),
-            StorefrontAssistantPageType::Default->value => $this->getSuggestedPromptSet(
-                static::CONFIGURATION_KEY_STOREFRONT_ASSISTANT_DEFAULT_PROMPTS,
-            ),
-            static::STOREFRONT_ASSISTANT_PROMPT_GROUP_PRODUCT_RESULTS => $this->getSuggestedPromptSet(
-                static::CONFIGURATION_KEY_STOREFRONT_ASSISTANT_PRODUCT_RESULTS_PROMPTS,
-            ),
-        ];
+        $suggestedPromptValues = [];
+
+        foreach ($this->getSuggestedPromptConfigurationKeysByGroup() as $group => $configurationKey) {
+            $suggestedPromptValues[$group] = (string)$this->getModuleConfig($configurationKey, '');
+        }
+
+        return $suggestedPromptValues;
     }
 
     /**
-     * @return list<string>
+     * @return array<string, string>
      */
-    protected function getSuggestedPromptSet(string $configurationKey): array
+    protected function getSuggestedPromptConfigurationKeysByGroup(): array
     {
-        $configuredValue = (string)$this->getModuleConfig($configurationKey, '');
-
-        $suggestedPrompts = [];
-
-        foreach (explode(static::STOREFRONT_ASSISTANT_SUGGESTED_PROMPT_SEPARATOR, $configuredValue) as $suggestedPrompt) {
-            $suggestedPrompt = trim($suggestedPrompt);
-
-            if ($suggestedPrompt === '') {
-                continue;
-            }
-
-            $suggestedPrompts[] = mb_substr($suggestedPrompt, 0, static::STOREFRONT_ASSISTANT_MAX_SUGGESTED_PROMPT_LENGTH);
-
-            if (count($suggestedPrompts) === static::STOREFRONT_ASSISTANT_MAX_SUGGESTED_PROMPTS) {
-                break;
-            }
-        }
-
-        return $suggestedPrompts;
+        return [
+            StorefrontAssistantPageType::Product->value => static::CONFIGURATION_KEY_STOREFRONT_ASSISTANT_PRODUCT_PAGE_PROMPTS,
+            StorefrontAssistantPageType::Category->value => static::CONFIGURATION_KEY_STOREFRONT_ASSISTANT_CATEGORY_PAGE_PROMPTS,
+            StorefrontAssistantPageType::Search->value => static::CONFIGURATION_KEY_STOREFRONT_ASSISTANT_SEARCH_PAGE_PROMPTS,
+            StorefrontAssistantPageType::Default->value => static::CONFIGURATION_KEY_STOREFRONT_ASSISTANT_DEFAULT_PROMPTS,
+            static::STOREFRONT_ASSISTANT_PROMPT_GROUP_PRODUCT_RESULTS => static::CONFIGURATION_KEY_STOREFRONT_ASSISTANT_PRODUCT_RESULTS_PROMPTS,
+        ];
     }
 }

@@ -11,13 +11,23 @@ namespace SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Conversatio
 
 use Generated\Shared\Transfer\BackofficeAssistantConversationCollectionDeleteCriteriaTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCollectionResponseTransfer;
+use Generated\Shared\Transfer\BackofficeAssistantConversationConditionsTransfer;
+use Generated\Shared\Transfer\BackofficeAssistantConversationCriteriaTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationTransfer;
+use Generated\Shared\Transfer\ErrorTransfer;
+use Spryker\Zed\Kernel\Persistence\EntityManager\TransactionTrait;
 use SprykerFeature\Zed\AiCommerce\Persistence\AiCommerceEntityManagerInterface;
+use SprykerFeature\Zed\AiCommerce\Persistence\AiCommerceRepositoryInterface;
 
 class BackofficeAssistantConversationDeleter implements BackofficeAssistantConversationDeleterInterface
 {
+    use TransactionTrait;
+
+    protected const string ERROR_MESSAGE_CONVERSATION_NOT_FOUND = 'backoffice_assistant.error.conversation_not_found';
+
     public function __construct(
         protected AiCommerceEntityManagerInterface $entityManager,
+        protected AiCommerceRepositoryInterface $repository,
     ) {
     }
 
@@ -26,6 +36,21 @@ class BackofficeAssistantConversationDeleter implements BackofficeAssistantConve
     ): BackofficeAssistantConversationCollectionResponseTransfer {
         $responseTransfer = new BackofficeAssistantConversationCollectionResponseTransfer();
 
+        if (!$this->isOwnedByUser($deleteCriteriaTransfer)) {
+            return $responseTransfer->addError(
+                (new ErrorTransfer())->setMessage(static::ERROR_MESSAGE_CONVERSATION_NOT_FOUND),
+            );
+        }
+
+        return $this->getTransactionHandler()->handleTransaction(
+            fn (): BackofficeAssistantConversationCollectionResponseTransfer => $this->executeDeleteCollectionTransaction($deleteCriteriaTransfer, $responseTransfer),
+        );
+    }
+
+    protected function executeDeleteCollectionTransaction(
+        BackofficeAssistantConversationCollectionDeleteCriteriaTransfer $deleteCriteriaTransfer,
+        BackofficeAssistantConversationCollectionResponseTransfer $responseTransfer,
+    ): BackofficeAssistantConversationCollectionResponseTransfer {
         foreach ($deleteCriteriaTransfer->getConversationReferences() as $conversationReference) {
             $this->entityManager->deleteBackofficeAssistantConversation(
                 (new BackofficeAssistantConversationTransfer())
@@ -34,5 +59,31 @@ class BackofficeAssistantConversationDeleter implements BackofficeAssistantConve
         }
 
         return $responseTransfer;
+    }
+
+    protected function isOwnedByUser(BackofficeAssistantConversationCollectionDeleteCriteriaTransfer $deleteCriteriaTransfer): bool
+    {
+        $idUser = $deleteCriteriaTransfer->getIdUser();
+        $conversationReferences = $deleteCriteriaTransfer->getConversationReferences();
+
+        if ($idUser === null || $conversationReferences === []) {
+            return true;
+        }
+
+        $backofficeAssistantConversationCollectionTransfer = $this->repository->getBackofficeAssistantConversationCollection(
+            (new BackofficeAssistantConversationCriteriaTransfer())->setBackofficeAssistantConversationConditions(
+                (new BackofficeAssistantConversationConditionsTransfer())
+                    ->addIdUser($idUser)
+                    ->setConversationReferences($conversationReferences),
+            ),
+        );
+
+        $ownedConversationReferences = [];
+
+        foreach ($backofficeAssistantConversationCollectionTransfer->getBackofficeAssistantConversations() as $backofficeAssistantConversationTransfer) {
+            $ownedConversationReferences[] = $backofficeAssistantConversationTransfer->getConversationReference();
+        }
+
+        return array_diff($conversationReferences, $ownedConversationReferences) === [];
     }
 }

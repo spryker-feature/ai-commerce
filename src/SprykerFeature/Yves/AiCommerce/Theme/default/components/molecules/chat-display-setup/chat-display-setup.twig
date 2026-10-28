@@ -1,0 +1,16 @@
+{% extends model('component') %}
+
+{% define config = {
+    name: 'chat-display-setup',
+    tag: 'chat-display-setup',
+} %}
+
+{% block body %}
+    {% block setupTotal %}
+        <template data-block="setupTotal">
+            <p class="chat-display-setup__total"
+               data-text="{{ 'ai_commerce.storefront_assistant.setup.total' | trans({'%total%': '%total%', '%budget%': '%budget%'}) }}"
+               data-text-without-budget="{{ 'ai_commerce.storefront_assistant.setup.total_without_budget' | trans({'%total%': '%total%'}) }}"></p>
+        </template>
+    {% endblock %}
+{% endblock %}

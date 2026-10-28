@@ -20,6 +20,12 @@ interface StreamEventKey
 
     public const string MESSAGE_ID = 'messageId';
 
+    public const string MESSAGE_METADATA = 'messageMetadata';
+
+    public const string CONVERSATION_REFERENCE = 'conversationReference';
+
+    public const string AGENT = 'agent';
+
     public const string DELTA = 'delta';
 
     public const string TOOL_CALL_ID = 'toolCallId';
@@ -30,7 +36,13 @@ interface StreamEventKey
 
     public const string OUTPUT = 'output';
 
+    public const string RESULT = 'result';
+
     public const string ERROR_TEXT = 'errorText';
 
     public const string DATA = 'data';
+
+    public const string NAME = 'name';
+
+    public const string FIELDS = 'fields';
 }

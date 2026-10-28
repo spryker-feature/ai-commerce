@@ -1,0 +1,30 @@
+{% block featurePageContext %}
+    {% set rules = pageContext.rules ?? [] %}
+    <chat-page-context rules="{{ rules is iterable ? rules | json_encode(constant('JSON_THROW_ON_ERROR') b-or constant('JSON_INVALID_UTF8_SUBSTITUTE')) : rules }}"
+                       {% if pageContext.optIn ?? false %}opt-in{% endif %}
+                       {% if pageContext.singleTurn ?? false %}single-turn{% endif %}>
+        {% block pageContextChip %}
+            <template data-block="pageContextChip">
+                <span class="chat-page-context">
+                    <svg class="spryker-chat__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></g></svg>
+                    <span class="chat-page-context__label" data-ref="label"></span>
+                    <button type="button"
+                            class="chat-page-context__button"
+                            data-ref="attach"
+                            aria-label="{{ 'ai_commerce.storefront_assistant.page_context.attach' | trans }}"
+                            title="{{ 'ai_commerce.storefront_assistant.page_context.attach' | trans }}"
+                            hidden>
+                        <svg class="spryker-chat__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></g></svg>
+                    </button>
+                    <button type="button"
+                            class="chat-page-context__button"
+                            data-ref="remove"
+                            aria-label="{{ 'ai_commerce.storefront_assistant.page_context.remove' | trans }}"
+                            title="{{ 'ai_commerce.storefront_assistant.page_context.remove' | trans }}">
+                        <svg class="spryker-chat__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></g></svg>
+                    </button>
+                </span>
+            </template>
+        {% endblock %}
+    </chat-page-context>
+{% endblock %}

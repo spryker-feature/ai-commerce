@@ -1,0 +1,28 @@
+{% block featureFormContext %}
+    <chat-form-context excluded-form-names="{{ (formContext.excludedFormNames ?? getFormFillExcludedFormNames()) | json_encode(constant('JSON_THROW_ON_ERROR') b-or constant('JSON_INVALID_UTF8_SUBSTITUTE')) }}">
+        {% block formContext %}
+            <template data-block="formContext">
+                <span class="chat-form-context"
+                      data-label="{{ 'ai_commerce.backoffice_assistant.form_context.label' | trans({'%name%': '%name%'}) }}"
+                      data-attach-label="{{ 'ai_commerce.backoffice_assistant.form_context.attach' | trans({'%name%': '%name%'}) }}">
+                    <button type="button" class="chat-form-context__suggestion" data-ref="attach">
+                        <svg class="spryker-chat__icon chat-form-context__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></g></svg>
+                        <span class="chat-form-context__name" data-ref="attachLabel"></span>
+                        <svg class="spryker-chat__icon chat-form-context__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></g></svg>
+                    </button>
+                    <span class="chat-form-context__chip" data-ref="chip" hidden>
+                        <svg class="spryker-chat__icon chat-form-context__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></g></svg>
+                        <span class="chat-form-context__name" data-ref="chipLabel"></span>
+                        <button type="button"
+                                class="chat-form-context__remove"
+                                data-ref="remove"
+                                aria-label="{{ 'ai_commerce.backoffice_assistant.form_context.remove' | trans }}"
+                                title="{{ 'ai_commerce.backoffice_assistant.form_context.remove' | trans }}">
+                            <svg class="spryker-chat__icon chat-form-context__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></g></svg>
+                        </button>
+                    </span>
+                </span>
+            </template>
+        {% endblock %}
+    </chat-form-context>
+{% endblock %}

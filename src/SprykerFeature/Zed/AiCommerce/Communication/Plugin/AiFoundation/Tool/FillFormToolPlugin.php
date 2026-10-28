@@ -12,7 +12,8 @@ namespace SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool;
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolParameter;
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
-use SprykerFeature\Shared\AiCommerce\BackofficeAssistant\BackofficeAssistantEventType;
+use SprykerFeature\Shared\AiCommerce\Stream\StreamDataEventName;
+use SprykerFeature\Shared\AiCommerce\Stream\StreamEventKey;
 
 /**
  * @method \SprykerFeature\Zed\AiCommerce\AiCommerceConfig getConfig()
@@ -75,7 +76,7 @@ class FillFormToolPlugin extends AbstractPlugin implements ToolPluginInterface
 
     /**
      * {@inheritDoc}
-     * - Emits SSE event with type `FormFill`
+     * - Emits the `data-form-fill` stream event with the requested field values under `data.fields`.
      *
      * @api
      *
@@ -85,8 +86,8 @@ class FillFormToolPlugin extends AbstractPlugin implements ToolPluginInterface
     {
         $fields = $arguments[static::KEY_FIELDS] ?? [];
 
-        $this->getFactory()->createSseEventEmitter()->emit(BackofficeAssistantEventType::FormFill, [
-            static::KEY_FIELDS => $fields,
+        $this->getFactory()->createStreamEventEmitter()->emitDataEvent(StreamDataEventName::FORM_FILL, [
+            StreamEventKey::FIELDS => $fields,
         ]);
 
         return json_encode(['success' => true, 'filled_fields' => array_keys((array)$fields)], JSON_THROW_ON_ERROR);

@@ -1,0 +1,138 @@
+{% extends model('component') %}
+
+{% define config = {
+    name: 'chat-tool-products',
+    tag: 'chat-tool-products',
+} %}
+
+{% define data = {
+    searchUrl: path('search'),
+    promptGroup: 'product_results',
+    imageOrigins: [],
+} %}
+
+{% define attributes = {
+    'search-url': data.searchUrl,
+    'prompt-group': data.promptGroup,
+    'image-origins': data.imageOrigins | join(','),
+} %}
+
+{% block body %}
+    {% block productResult %}
+        <template data-block="productResult">
+            <div class="spryker-chat-message chat-tool-products__result"></div>
+        </template>
+    {% endblock %}
+    {% block productCarousel %}
+        <template data-block="productCarousel">
+            <div class="chat-tool-products__carousel"
+                 role="group"
+                 aria-label="{{ 'ai_commerce.storefront_assistant.activity.products_found' | trans }}">
+                <div class="chat-tool-products__carousel-track" data-ref="track"></div>
+                <button type="button"
+                        class="chat-tool-products__carousel-nav chat-tool-products__carousel-nav--previous"
+                        data-ref="previous"
+                        aria-label="{{ 'ai_commerce.storefront_assistant.product.previous' | trans }}"
+                        title="{{ 'ai_commerce.storefront_assistant.product.previous' | trans }}">
+                    <svg class="spryker-chat__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></g></svg>
+                </button>
+                <button type="button"
+                        class="chat-tool-products__carousel-nav chat-tool-products__carousel-nav--next"
+                        data-ref="next"
+                        aria-label="{{ 'ai_commerce.storefront_assistant.product.next' | trans }}"
+                        title="{{ 'ai_commerce.storefront_assistant.product.next' | trans }}">
+                    <svg class="spryker-chat__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></g></svg>
+                </button>
+            </div>
+        </template>
+    {% endblock %}
+    {% block productCard %}
+        <template data-block="productCard">
+            <article class="chat-tool-products__card">
+                <div class="chat-tool-products__card-media">
+                    <img class="chat-tool-products__card-image" data-ref="image" alt="" loading="lazy" hidden>
+                    <span class="chat-tool-products__card-badge" data-ref="badge" hidden></span>
+                </div>
+                <div class="chat-tool-products__card-body">
+                    <h4 class="chat-tool-products__card-name" data-ref="name"></h4>
+                    <p class="chat-tool-products__card-sku" data-ref="sku">{{ 'ai_commerce.storefront_assistant.product.sku' | trans }} <span data-ref="skuValue"></span></p>
+                    <p class="chat-tool-products__card-price" data-ref="price">
+                        <span class="chat-tool-products__card-price-current" data-ref="priceCurrent"></span>
+                        <span class="chat-tool-products__card-price-original" data-ref="priceOriginal" hidden></span>
+                        <span class="chat-tool-products__card-price-outlier" data-ref="priceOutlier" hidden>
+                            {{- 'ai_commerce.storefront_assistant.product.price_outlier' | trans -}}
+                        </span>
+                    </p>
+                    <p class="chat-tool-products__card-rating" data-ref="rating" hidden>
+                        <svg class="chat-tool-products__card-rating-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg>
+                        <span data-ref="ratingValue"></span><span data-ref="reviews" hidden> (<span data-ref="reviewCount"></span>)</span>
+                    </p>
+                    <p class="chat-tool-products__card-text" data-ref="reason" hidden></p>
+                    <p class="chat-tool-products__card-text" data-ref="description" hidden></p>
+                    <div class="chat-tool-products__card-actions">
+                        <a class="chat-tool-products__card-button chat-tool-products__card-view" data-ref="view" hidden>
+                            <span>{{ 'ai_commerce.storefront_assistant.product.view' | trans }}</span>
+                            <svg class="spryker-chat__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></g></svg>
+                        </a>
+                        <button type="button"
+                                class="chat-tool-products__card-button chat-tool-products__card-compare"
+                                data-ref="compare"
+                                aria-pressed="false"
+                                hidden>
+                            <svg class="spryker-chat__icon chat-tool-products__card-compare-check" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></g></svg>
+                            <span>{{ 'ai_commerce.storefront_assistant.product.compare' | trans }}</span>
+                        </button>
+                    </div>
+                </div>
+            </article>
+        </template>
+    {% endblock %}
+    {% block productPrompts %}
+        <template data-block="productPrompts">
+            <div class="chat-tool-products__prompts"
+                 role="group"
+                 aria-label="{{ 'ai_commerce.storefront_assistant.suggestions.label' | trans }}"></div>
+        </template>
+    {% endblock %}
+    {% block productPrompt %}
+        <template data-block="productPrompt">
+            <button type="button" class="chat-tool-products__prompt">
+                <span data-ref="text"></span>
+            </button>
+        </template>
+    {% endblock %}
+    {% block productSeeAll %}
+        <template data-block="productSeeAll">
+            <a class="chat-tool-products__see-all-link"
+               data-text="{{ 'ai_commerce.storefront_assistant.see_all' | trans({'%count%': '%count%'}) }}"></a>
+        </template>
+    {% endblock %}
+    {% block productRefinements %}
+        <template data-block="productRefinements">
+            <div class="chat-tool-products__refinements"
+                 data-select-text="{{ 'ai_commerce.storefront_assistant.refinement.select' | trans({'%label%': '%label%'}) }}"
+                 data-remove-text="{{ 'ai_commerce.storefront_assistant.refinement.remove' | trans({'%label%': '%label%'}) }}">
+                <div class="chat-tool-products__refinement-pills"
+                     data-ref="pills"
+                     role="group"
+                     aria-label="{{ 'ai_commerce.storefront_assistant.refinement.active_filters' | trans }}"
+                     hidden></div>
+                <div class="chat-tool-products__refinement-chips"
+                     data-ref="chips"
+                     role="group"
+                     aria-label="{{ 'ai_commerce.storefront_assistant.refinement.chips' | trans }}"
+                     hidden></div>
+            </div>
+        </template>
+    {% endblock %}
+    {% block productRefinementChip %}
+        <template data-block="productRefinementChip">
+            <button type="button" class="chat-tool-products__refinement-chip"><span><span data-ref="label"></span> (<span data-ref="count"></span>)</span></button>
+        </template>
+    {% endblock %}
+    {% block productFilterPill %}
+        <template data-block="productFilterPill">
+            <button type="button" class="chat-tool-products__filter-pill"><span data-ref="label"></span><span class="chat-tool-products__filter-pill-remove" aria-hidden="true">×</span></button>
+        </template>
+    {% endblock %}
+{% endblock %}

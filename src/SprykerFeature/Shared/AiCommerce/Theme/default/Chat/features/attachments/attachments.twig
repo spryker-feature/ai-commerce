@@ -1,0 +1,66 @@
+{% block featureAttachments %}
+    <chat-attachments accept="{{ features.attachments.accept }}"
+                      max-size-bytes="{{ features.attachments.maxSizeBytes }}"
+                      max-count="{{ features.attachments.maxCount }}">
+        {% block attachmentsControl %}
+            <template data-block="attachmentsControl">
+                <span class="chat-attachments__attach">
+                    <button type="button"
+                            class="chat-attachments__attach-button"
+                            data-ref="button"
+                            aria-label="{{ 'ai_commerce.storefront_assistant.action.attach' | trans }}"
+                            title="{{ 'ai_commerce.storefront_assistant.action.attach' | trans }}">
+                        <svg class="spryker-chat__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.234 20.252 21 12.3"/><path d="m16 6-8.414 8.586a2 2 0 0 0 0 2.828 2 2 0 0 0 2.828 0l8.414-8.586a4 4 0 0 0 0-5.656 4 4 0 0 0-5.656 0l-8.415 8.585a6 6 0 1 0 8.486 8.486"/></g></svg>
+                    </button>
+                    <input type="file"
+                           data-ref="input"
+                           accept="{{ features.attachments.accept }}"
+                           tabindex="-1"
+                           multiple
+                           hidden>
+                </span>
+            </template>
+        {% endblock %}
+        {% block attachmentsChip %}
+            <template data-block="attachmentsChip">
+                <span class="chat-attachments__chip">
+                    <svg class="spryker-chat__icon chat-attachments__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.234 20.252 21 12.3"/><path d="m16 6-8.414 8.586a2 2 0 0 0 0 2.828 2 2 0 0 0 2.828 0l8.414-8.586a4 4 0 0 0 0-5.656 4 4 0 0 0-5.656 0l-8.415 8.585a6 6 0 1 0 8.486 8.486"/></g></svg>
+                    <span class="chat-attachments__name" data-ref="name"></span>
+                    <button type="button"
+                            class="chat-attachments__remove"
+                            data-ref="remove"
+                            aria-label="{{ 'ai_commerce.storefront_assistant.attachment.remove' | trans }}"
+                            title="{{ 'ai_commerce.storefront_assistant.attachment.remove' | trans }}">
+                        <svg class="spryker-chat__icon chat-attachments__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></g></svg>
+                    </button>
+                </span>
+            </template>
+        {% endblock %}
+        {% block attachmentsPills %}
+            <template data-block="attachmentsPills">
+                <span class="chat-attachments__pills"></span>
+            </template>
+        {% endblock %}
+        {% block attachmentsPill %}
+            <template data-block="attachmentsPill">
+                <span class="chat-attachments__pill">
+                    <svg class="spryker-chat__icon chat-attachments__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.234 20.252 21 12.3"/><path d="m16 6-8.414 8.586a2 2 0 0 0 0 2.828 2 2 0 0 0 2.828 0l8.414-8.586a4 4 0 0 0 0-5.656 4 4 0 0 0-5.656 0l-8.415 8.585a6 6 0 1 0 8.486 8.486"/></g></svg>
+                    <span data-ref="name"></span>
+                </span>
+            </template>
+        {% endblock %}
+        {% block attachmentsNotice %}
+            <template data-block="attachmentsNotice">
+                <div class="spryker-chat-message chat-attachments__notice" role="alert">
+                    <p class="spryker-chat-message__text">
+                        <span data-ref="unsupportedType">{{ 'ai_commerce.storefront_assistant.attachment.unsupported_type' | trans({'%types%': features.attachments.accept}) }}</span>
+                        <span data-ref="tooLarge">{{ 'ai_commerce.storefront_assistant.attachment.too_large' | trans({'%maxBytes%': features.attachments.maxSizeBytes}) }}</span>
+                        <span data-ref="tooMany">{{ 'ai_commerce.storefront_assistant.attachment.too_many' | trans({'%maxCount%': features.attachments.maxCount}) }}</span>
+                        <span data-ref="readFailed">{{ 'ai_commerce.storefront_assistant.attachment.read_failed' | trans({'%name%': '%name%'}) }}</span>
+                        <span class="chat-attachments__notice-file" data-ref="fileName"></span>
+                    </p>
+                </div>
+            </template>
+        {% endblock %}
+    </chat-attachments>
+{% endblock %}

@@ -1,0 +1,102 @@
+{% block launcher %}
+    <template data-block="launcher">
+        <button type="button"
+                class="spryker-chat-launcher"
+                aria-label="{{ 'ai_commerce.storefront_assistant.action.open' | trans }}">
+            <span class="spryker-chat-launcher__icon">
+                <svg class="spryker-chat__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></g></svg>
+            </span>
+            <span class="spryker-chat-launcher__text">{{ 'ai_commerce.storefront_assistant.title' | trans }}</span>
+        </button>
+    </template>
+{% endblock %}
+
+{% block panel %}
+    <template data-block="panel">
+        <section class="spryker-chat-panel"
+                 role="dialog"
+                 aria-modal="true"
+                 aria-label="{{ 'ai_commerce.storefront_assistant.title' | trans }}">
+            <header class="spryker-chat-panel__header">
+                <div class="spryker-chat-panel__header-start" data-zone="headerStart">
+                    <span class="spryker-chat-panel__header-logo">
+                        <svg class="spryker-chat__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></g></svg>
+                    </span>
+                    <strong class="spryker-chat-panel__title">{{ 'ai_commerce.storefront_assistant.title' | trans }}</strong>
+                </div>
+                <div class="spryker-chat-panel__header-actions" data-zone="headerActions">
+                    {% if chat.header.moreMenu %}
+                        <div class="spryker-chat-panel__dropdown">
+                            <button type="button"
+                                    class="spryker-chat__icon-button"
+                                    data-ref="moreToggle"
+                                    aria-haspopup="menu"
+                                    aria-expanded="false"
+                                    aria-label="{{ 'ai_commerce.storefront_assistant.action.more_options' | trans }}"
+                                    title="{{ 'ai_commerce.storefront_assistant.action.more_options' | trans }}">
+                                <svg class="spryker-chat__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></g></svg>
+                            </button>
+                            <div class="spryker-chat-menu spryker-chat-menu--end"
+                                 data-ref="moreMenu"
+                                 data-zone="moreMenu"
+                                 role="menu"
+                                 aria-label="{{ 'ai_commerce.storefront_assistant.action.more_options' | trans }}"
+                                 hidden>
+                                <button type="button"
+                                        role="menuitem"
+                                        class="spryker-chat-menu__item"
+                                        data-ref="newConversation">
+                                    <svg class="spryker-chat__icon spryker-chat-menu__item-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M12 7v6"/><path d="M9 10h6"/></g></svg>
+                                    <span>{{ 'ai_commerce.storefront_assistant.action.new_chat' | trans }}</span>
+                                </button>
+                            </div>
+                        </div>
+                    {% else %}
+                        <button type="button"
+                                class="spryker-chat__icon-button"
+                                data-ref="newConversation"
+                                aria-label="{{ 'ai_commerce.storefront_assistant.action.new_chat' | trans }}"
+                                title="{{ 'ai_commerce.storefront_assistant.action.new_chat' | trans }}">
+                            <svg class="spryker-chat__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M12 7v6"/><path d="M9 10h6"/></g></svg>
+                        </button>
+                    {% endif %}
+                    {% if chat.header.expand %}
+                        <button type="button"
+                                class="spryker-chat__icon-button spryker-chat-panel__expand"
+                                data-ref="expand"
+                                aria-pressed="false"
+                                aria-label="{{ 'ai_commerce.storefront_assistant.action.expand' | trans }}"
+                                title="{{ 'ai_commerce.storefront_assistant.action.expand' | trans }}"
+                                data-label-expand="{{ 'ai_commerce.storefront_assistant.action.expand' | trans }}"
+                                data-label-collapse="{{ 'ai_commerce.storefront_assistant.action.collapse' | trans }}">
+                            <svg class="spryker-chat__icon spryker-chat-panel__expand-icon spryker-chat-panel__expand-icon--expand" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="m21 3-7 7"/><path d="m3 21 7-7"/><path d="M9 21H3v-6"/></g></svg>
+                            <svg class="spryker-chat__icon spryker-chat-panel__expand-icon spryker-chat-panel__expand-icon--collapse" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 10 7-7"/><path d="M20 10h-6V4"/><path d="m3 21 7-7"/><path d="M4 14h6v6"/></g></svg>
+                        </button>
+                    {% endif %}
+                    <button type="button"
+                            class="spryker-chat__icon-button"
+                            data-ref="close"
+                            aria-label="{{ 'ai_commerce.storefront_assistant.action.close' | trans }}"
+                            title="{{ 'ai_commerce.storefront_assistant.action.close' | trans }}">
+                        <svg class="spryker-chat__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></g></svg>
+                    </button>
+                </div>
+            </header>
+            <div class="spryker-chat-panel__views" data-zone="views"></div>
+            <div class="spryker-chat-transcript" data-ref="scroller">
+                <div class="spryker-chat-transcript__welcome">
+                    <p class="spryker-chat-transcript__welcome-text">
+                        {{- 'ai_commerce.storefront_assistant.greeting' | trans({'%userName%': chat.userName}) -}}
+                    </p>
+                </div>
+                <div class="spryker-chat-transcript__welcome-zone" data-ref="welcomeZone" data-zone="welcome"></div>
+                <div class="spryker-chat-transcript__messages"
+                     data-ref="transcript"
+                     aria-live="polite"
+                     aria-atomic="false"
+                     aria-busy="false"></div>
+            </div>
+            <div class="spryker-chat-panel__footer" data-zone="footer" data-ref="composer"></div>
+        </section>
+    </template>
+{% endblock %}

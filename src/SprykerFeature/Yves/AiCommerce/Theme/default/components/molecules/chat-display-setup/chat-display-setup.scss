@@ -1,0 +1,14 @@
+spryker-chat {
+    --chat-setup-total-color: var(--chat-color-text);
+}
+
+chat-display-setup {
+    display: none;
+}
+
+.chat-display-setup__total {
+    margin: 0;
+    color: var(--chat-setup-total-color);
+    font-size: var(--chat-font-size-medium);
+    font-weight: var(--chat-font-weight-bold);
+}

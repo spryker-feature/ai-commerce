@@ -12,6 +12,7 @@ namespace SprykerFeatureTest\Zed\AiCommerce\Business;
 use Codeception\Test\Unit;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCollectionDeleteCriteriaTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCollectionRequestTransfer;
+use Generated\Shared\Transfer\BackofficeAssistantConversationCollectionTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationConditionsTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCriteriaTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationTransfer;
@@ -192,5 +193,61 @@ class BackofficeAssistantConversationCrudTest extends Unit
         $collectionTransfer = $this->tester->getFacade()->getBackofficeAssistantConversationCollection($criteriaTransfer);
 
         $this->assertCount(0, $collectionTransfer->getBackofficeAssistantConversations());
+    }
+
+    public function testGivenAConversationOfAnotherUserWhenDeletingForAUserThenNothingIsDeletedAndAnErrorIsReturned(): void
+    {
+        // Arrange
+        $ownConversationTransfer = $this->tester->haveConversation([
+            BackofficeAssistantConversationTransfer::ID_USER => $this->tester->haveUser()->getIdUserOrFail(),
+        ]);
+        $foreignConversationTransfer = $this->tester->haveConversation([
+            BackofficeAssistantConversationTransfer::ID_USER => $this->tester->haveUser()->getIdUserOrFail(),
+        ]);
+
+        // Act
+        $responseTransfer = $this->tester->getFacade()->deleteBackofficeAssistantConversationCollection(
+            (new BackofficeAssistantConversationCollectionDeleteCriteriaTransfer())
+                ->setIdUser($ownConversationTransfer->getIdUserOrFail())
+                ->addConversationReference($ownConversationTransfer->getConversationReferenceOrFail())
+                ->addConversationReference($foreignConversationTransfer->getConversationReferenceOrFail()),
+        );
+
+        // Assert
+        $this->assertCount(1, $responseTransfer->getErrors());
+        $this->assertCount(2, $this->getConversationCollection([
+            $ownConversationTransfer->getConversationReferenceOrFail(),
+            $foreignConversationTransfer->getConversationReferenceOrFail(),
+        ])->getBackofficeAssistantConversations());
+    }
+
+    public function testGivenOwnConversationsWhenDeletingForTheUserThenTheConversationsAreDeleted(): void
+    {
+        // Arrange
+        $idUser = $this->tester->haveUser()->getIdUserOrFail();
+        $conversationTransfer = $this->tester->haveConversation([BackofficeAssistantConversationTransfer::ID_USER => $idUser]);
+
+        // Act
+        $responseTransfer = $this->tester->getFacade()->deleteBackofficeAssistantConversationCollection(
+            (new BackofficeAssistantConversationCollectionDeleteCriteriaTransfer())
+                ->setIdUser($idUser)
+                ->addConversationReference($conversationTransfer->getConversationReferenceOrFail()),
+        );
+
+        // Assert
+        $this->assertCount(0, $responseTransfer->getErrors());
+        $this->assertCount(0, $this->getConversationCollection([$conversationTransfer->getConversationReferenceOrFail()])->getBackofficeAssistantConversations());
+    }
+
+    /**
+     * @param list<string> $conversationReferences
+     */
+    protected function getConversationCollection(array $conversationReferences): BackofficeAssistantConversationCollectionTransfer
+    {
+        return $this->tester->getFacade()->getBackofficeAssistantConversationCollection(
+            (new BackofficeAssistantConversationCriteriaTransfer())->setBackofficeAssistantConversationConditions(
+                (new BackofficeAssistantConversationConditionsTransfer())->setConversationReferences($conversationReferences),
+            ),
+        );
     }
 }

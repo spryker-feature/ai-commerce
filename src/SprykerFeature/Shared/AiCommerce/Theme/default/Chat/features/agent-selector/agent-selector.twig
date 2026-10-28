@@ -1,0 +1,40 @@
+{% block featureAgentSelector %}
+    {# A JSON string (the current storefront widget) passes unencoded, for one release. #}
+    {% set agents = features.agentSelector.agents %}
+    <chat-agent-selector {% if features.agentSelector.loadAgents %}load-agents{% else %}agents="{{ agents is iterable ? agents | json_encode(constant('JSON_THROW_ON_ERROR') b-or constant('JSON_INVALID_UTF8_SUBSTITUTE')) : agents }}"{% endif %}
+                         storage-key="{{ features.agentSelector.storageKey }}">
+        {% block agentSelectorPicker %}
+            <template data-block="agentSelectorPicker">
+                <div class="chat-agent-selector"
+                     data-auto-label="{{ 'ai_commerce.storefront_assistant.agent.auto' | trans }}"
+                     data-auto-description="{{ 'ai_commerce.storefront_assistant.agent.auto_description' | trans }}"
+                     hidden>
+                    <button type="button"
+                            class="chat-agent-selector__toggle"
+                            data-ref="toggle"
+                            aria-haspopup="menu">
+                        <span class="chat-agent-selector__purpose">{{ 'ai_commerce.storefront_assistant.agent.select_label' | trans }}</span>
+                        <span class="chat-agent-selector__label" data-ref="label"></span>
+                        <svg class="spryker-chat__icon chat-agent-selector__chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></g></svg>
+                    </button>
+                    <div class="chat-agent-selector__menu"
+                         data-ref="menu"
+                         role="menu"
+                         aria-label="{{ 'ai_commerce.storefront_assistant.agent.select_label' | trans }}"
+                         hidden></div>
+                </div>
+            </template>
+        {% endblock %}
+        {% block agentSelectorOption %}
+            <template data-block="agentSelectorOption">
+                <button type="button" role="menuitemradio" aria-checked="false" class="chat-agent-selector__option">
+                    <span class="chat-agent-selector__option-text">
+                        <span class="chat-agent-selector__option-label" data-ref="label"></span>
+                        <span class="chat-agent-selector__option-description" data-ref="description"></span>
+                    </span>
+                    <svg class="spryker-chat__icon chat-agent-selector__option-check" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></g></svg>
+                </button>
+            </template>
+        {% endblock %}
+    </chat-agent-selector>
+{% endblock %}

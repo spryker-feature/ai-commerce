@@ -1,0 +1,70 @@
+{# First match wins: listing tiles also carry Product markup, so the catalog form is tested before the product scope. #}
+{% extends model('component') %}
+
+{% define config = {
+    name: 'chat-page-context',
+    tag: 'chat-page-context',
+} %}
+
+{% define data = {
+    rules: [
+        {
+            pageType: 'search',
+            label: '%searchQuery%',
+            when: '.js-catalog__form',
+            fields: {
+                searchQuery: { read: 'value', selector: 'input[name="q"]', required: true },
+                filters: {
+                    read: 'nameValue',
+                    selector: '.js-catalog__form input[type="checkbox"]:checked, .js-catalog__form input[type="radio"]:checked',
+                    list: true,
+                },
+            },
+        },
+        {
+            pageType: 'category',
+            label: '%categoryName%',
+            when: '.js-catalog__form',
+            fields: {
+                categoryName: { read: 'text', selector: 'h1', required: true },
+                filters: {
+                    read: 'nameValue',
+                    selector: '.js-catalog__form input[type="checkbox"]:checked, .js-catalog__form input[type="radio"]:checked',
+                    list: true,
+                },
+            },
+        },
+        {
+            pageType: 'product',
+            label: '%productName%',
+            when: '.product-detail',
+            scope: '[itemtype="https://schema.org/Product"]',
+            fields: {
+                productName: { read: 'attribute', selector: 'meta[itemprop="name"]', attribute: 'content', required: true },
+                productSku: { read: 'attribute', selector: 'meta[itemprop="abstractSku"]', attribute: 'content' },
+            },
+        },
+        {
+            pageType: 'category',
+            label: '%categoryName%',
+            when: '[itemtype="https://schema.org/Product"]',
+            unless: '.js-catalog__form, .product-detail',
+            minimumPathSegments: 3,
+            fields: {
+                categoryName: { read: 'text', selector: 'h1', required: true },
+            },
+        },
+    ],
+    optIn: false,
+    singleTurn: false,
+} %}
+
+{% block component %}
+    {% include '@AiCommerce/Chat/features/page-context/page-context.twig' with {
+        pageContext: {
+            rules: data.rules,
+            optIn: data.optIn,
+            singleTurn: data.singleTurn,
+        },
+    } only %}
+{% endblock %}

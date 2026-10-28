@@ -1,0 +1,25 @@
+// Measuring box for docking.ts, fixed so its percentage width resolves against the viewport like the panel's.
+chat-docking {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--chat-panel-width);
+    max-width: 100%;
+    height: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+:root[data-chat-expanded] body {
+    overflow: hidden;
+}
+
+:root[data-chat-dock-target='body'][data-chat-dock-animated] body {
+    transition: padding-right var(--chat-dock-duration) var(--chat-dock-easing);
+}
+
+// Kept while expanded: dropping the padding would re-flow the page and slide it back into view on collapse.
+:root[data-chat-dock-target='body'][data-chat-docked] body {
+    overflow-x: hidden;
+    padding-right: var(--chat-dock-width);
+}

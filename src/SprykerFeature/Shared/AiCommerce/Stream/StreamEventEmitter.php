@@ -26,7 +26,7 @@ class StreamEventEmitter implements StreamEventEmitterInterface
 
     protected const string ERROR_TEXT_ENCODE_FAILED = 'Failed to encode stream event.';
 
-    protected const string LOG_MESSAGE_ENCODE_FAILED = 'Storefront Assistant stream event could not be JSON-encoded and was replaced by an error event.';
+    protected const string LOG_MESSAGE_ENCODE_FAILED = 'Assistant stream event could not be JSON-encoded and was replaced by an error event.';
 
     public function emitEvent(StreamEventType $streamEventType, array $fields = []): void
     {

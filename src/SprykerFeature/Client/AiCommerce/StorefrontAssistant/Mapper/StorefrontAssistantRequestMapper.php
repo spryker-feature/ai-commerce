@@ -12,6 +12,7 @@ namespace SprykerFeature\Client\AiCommerce\StorefrontAssistant\Mapper;
 use Generated\Shared\Transfer\PromptMessageTransfer;
 use Generated\Shared\Transfer\PromptRequestTransfer;
 use Generated\Shared\Transfer\StorefrontAssistantChatRequestTransfer;
+use SprykerFeature\Shared\AiCommerce\Conversation\RegeneratedPromptMarker;
 
 class StorefrontAssistantRequestMapper implements StorefrontAssistantRequestMapperInterface
 {
@@ -25,6 +26,10 @@ class StorefrontAssistantRequestMapper implements StorefrontAssistantRequestMapp
      * @uses \Spryker\Shared\AiFoundation\AiFoundationConstants::MESSAGE_TYPE_USER
      */
     protected const string PROMPT_MESSAGE_TYPE_USER = 'user';
+
+    public function __construct(protected RegeneratedPromptMarker $regeneratedPromptMarker)
+    {
+    }
 
     /**
      * @param array<mixed> $payload
@@ -50,9 +55,10 @@ class StorefrontAssistantRequestMapper implements StorefrontAssistantRequestMapp
         array $toolNames = [],
         ?string $systemPrompt = null
     ): PromptRequestTransfer {
+        $message = (string)$storefrontAssistantChatRequestTransfer->getMessage();
         $promptMessageTransfer = (new PromptMessageTransfer())
             ->setType(static::PROMPT_MESSAGE_TYPE_USER)
-            ->setContent((string)$storefrontAssistantChatRequestTransfer->getMessage())
+            ->setContent($storefrontAssistantChatRequestTransfer->getIsRegeneration() ? $this->regeneratedPromptMarker->addMarker($message) : $message)
             ->setAttachments($storefrontAssistantChatRequestTransfer->getAttachments());
 
         return (new PromptRequestTransfer())

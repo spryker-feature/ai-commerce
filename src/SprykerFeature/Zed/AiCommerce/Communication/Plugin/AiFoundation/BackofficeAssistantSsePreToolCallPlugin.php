@@ -12,7 +12,6 @@ namespace SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation;
 use Generated\Shared\Transfer\AiToolCallTransfer;
 use Spryker\Zed\AiFoundation\Dependency\Plugin\PreToolCallPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
-use SprykerFeature\Shared\AiCommerce\BackofficeAssistant\BackofficeAssistantEventType;
 
 /**
  * @method \SprykerFeature\Zed\AiCommerce\AiCommerceConfig getConfig()
@@ -20,29 +19,17 @@ use SprykerFeature\Shared\AiCommerce\BackofficeAssistant\BackofficeAssistantEven
  */
 class BackofficeAssistantSsePreToolCallPlugin extends AbstractPlugin implements PreToolCallPluginInterface
 {
-    protected const string KEY_NAME = 'name';
-
-    protected const string KEY_ARGUMENTS = 'arguments';
-
     /**
      * {@inheritDoc}
-     * - Emits a tool call SSE event for backoffice assistant AI configurations before each tool call.
+     * - Emits the `tool-input-start` and `tool-input-available` stream events for backoffice assistant AI configurations before each tool call.
+     * - Closes the open content block first, so the tool events do not interrupt it.
+     * - Sets the resolved tool call ID on the returned transfer, so the post tool call plugin emits the output under the same ID.
+     * - Emits nothing for other AI configurations.
      *
      * @api
      */
     public function preToolCall(AiToolCallTransfer $aiToolCallTransfer): AiToolCallTransfer
     {
-        $configurationName = $aiToolCallTransfer->getPromptRequest()?->getAiConfigurationName();
-
-        if (!in_array($configurationName, $this->getConfig()->getBackofficeAssistantSseAiConfigurationNames(), true)) {
-            return $aiToolCallTransfer;
-        }
-
-        $this->getFactory()->createSseEventEmitter()->emit(BackofficeAssistantEventType::ToolCall, [
-            static::KEY_NAME => $aiToolCallTransfer->getToolName(),
-            static::KEY_ARGUMENTS => $aiToolCallTransfer->getToolArguments(),
-        ]);
-
-        return $aiToolCallTransfer;
+        return $this->getFactory()->createToolCallEventStreamer()->streamToolInput($aiToolCallTransfer);
     }
 }

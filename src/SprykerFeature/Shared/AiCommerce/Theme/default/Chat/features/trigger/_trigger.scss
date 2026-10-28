@@ -1,0 +1,127 @@
+:where(.chat-trigger) {
+    --chat-trigger-background: color-mix(in srgb, var(--chat-color-accent) 5%, var(--chat-color-background));
+    --chat-trigger-color: var(--chat-color-accent);
+    --chat-trigger-border: var(--chat-border-width) solid var(--chat-color-accent-border);
+    --chat-trigger-hover-background: var(--chat-color-accent-subtle);
+    --chat-trigger-pressed-background: var(--chat-color-accent);
+    --chat-trigger-pressed-color: var(--chat-color-accent-contrast);
+    // Re-derived from tier-1 values: the `--chat-launcher-*` tokens live on `spryker-chat`, which this sits outside.
+    --chat-trigger-fixed-background: linear-gradient(
+        to bottom right,
+        var(--chat-color-accent),
+        var(--chat-color-accent-strong)
+    );
+    --chat-trigger-fixed-color: var(--chat-color-accent-contrast);
+    --chat-trigger-fixed-shadow: var(--chat-shadow-launcher);
+    --chat-trigger-fixed-offset: var(--chat-space-extra-large);
+    --chat-trigger-fixed-icon-background: color-mix(in srgb, var(--chat-color-accent-contrast) 15%, transparent);
+    --chat-trigger-fixed-icon-ring: color-mix(in srgb, var(--chat-color-accent-contrast) 25%, transparent);
+}
+
+chat-trigger {
+    display: none;
+}
+
+spryker-chat[data-trigger-visible] .spryker-chat-launcher {
+    display: none;
+}
+
+.chat-trigger {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: var(--chat-space-medium);
+    min-height: var(--chat-size-control);
+    padding: 0 var(--chat-space-large);
+    border: var(--chat-trigger-border);
+    border-radius: var(--chat-radius-pill);
+    background: var(--chat-trigger-background);
+    color: var(--chat-trigger-color);
+    font-family: var(--chat-font);
+    font-size: var(--chat-font-size-medium);
+    font-weight: var(--chat-font-weight-medium);
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+        background-color var(--chat-duration-fast) var(--chat-easing),
+        border-color var(--chat-duration-fast) var(--chat-easing),
+        color var(--chat-duration-fast) var(--chat-easing);
+
+    // Outside the chat, so the `[hidden]` rule core/chat.scss scopes to `spryker-chat` does not reach it.
+    &[hidden] {
+        display: none;
+    }
+
+    &:hover {
+        background: var(--chat-trigger-hover-background);
+    }
+
+    &:focus-visible {
+        outline: var(--chat-focus-outline);
+        outline-offset: var(--chat-focus-width);
+    }
+
+    &__icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    &[aria-pressed='true'],
+    &[aria-pressed='true']:hover {
+        border-color: var(--chat-trigger-pressed-background);
+        background: var(--chat-trigger-pressed-background);
+        color: var(--chat-trigger-pressed-color);
+    }
+}
+
+.chat-trigger--fixed {
+    position: fixed;
+    right: var(--chat-trigger-fixed-offset);
+    bottom: var(--chat-trigger-fixed-offset);
+    z-index: calc(var(--chat-layer) - 1);
+    gap: calc(var(--chat-space-medium) + var(--chat-space-extra-small));
+    padding: var(--chat-space-medium-large) var(--chat-space-large);
+    border: 0;
+    background: var(--chat-trigger-fixed-background);
+    color: var(--chat-trigger-fixed-color);
+    box-shadow: var(--chat-trigger-fixed-shadow);
+    animation: spryker-chat-appear var(--chat-duration-medium) var(--chat-easing);
+    transition: transform var(--chat-duration-medium) var(--chat-easing);
+
+    &:hover,
+    &[aria-pressed='true'],
+    &[aria-pressed='true']:hover {
+        border-color: transparent;
+        background: var(--chat-trigger-fixed-background);
+        color: var(--chat-trigger-fixed-color);
+    }
+
+    &:hover {
+        transform: scale(var(--chat-scale-hover));
+    }
+
+    .chat-trigger__icon {
+        position: relative;
+        width: var(--chat-size-launcher-icon);
+        height: var(--chat-size-launcher-icon);
+        border-radius: var(--chat-radius-round);
+        background: var(--chat-trigger-fixed-icon-background);
+
+        .spryker-chat__icon {
+            width: var(--chat-size-icon-medium);
+            height: var(--chat-size-icon-medium);
+        }
+
+        &::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border: var(--chat-border-width) solid var(--chat-trigger-fixed-icon-ring);
+            border-top-color: transparent;
+            border-radius: var(--chat-radius-round);
+            animation: spryker-chat-spin var(--chat-duration-spin) linear infinite;
+        }
+    }
+}

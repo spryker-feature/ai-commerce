@@ -1,0 +1,41 @@
+spryker-chat {
+    --chat-scroll-latest-distance: var(--chat-scroll-follow-distance);
+    --chat-scroll-latest-size: calc(var(--chat-size-control) + var(--chat-space-small));
+    --chat-scroll-latest-background: var(--chat-color-background);
+    --chat-scroll-latest-hover-background: var(--chat-color-surface);
+    --chat-scroll-latest-color: var(--chat-color-text);
+    --chat-scroll-latest-border: var(--chat-border-width) solid var(--chat-color-border);
+    --chat-scroll-latest-shadow: var(--chat-shadow);
+}
+
+chat-scroll-latest {
+    display: none;
+}
+
+.chat-scroll-latest {
+    position: relative;
+    height: 0;
+}
+
+.chat-scroll-latest__button {
+    position: absolute;
+    bottom: var(--chat-space-medium);
+    left: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--chat-scroll-latest-size);
+    height: var(--chat-scroll-latest-size);
+    padding: 0;
+    border: var(--chat-scroll-latest-border);
+    border-radius: var(--chat-radius-round);
+    background: var(--chat-scroll-latest-background);
+    color: var(--chat-scroll-latest-color);
+    box-shadow: var(--chat-scroll-latest-shadow);
+    cursor: pointer;
+    transform: translateX(-50%);
+
+    &:hover {
+        background: var(--chat-scroll-latest-hover-background);
+    }
+}

@@ -1,0 +1,38 @@
+{% extends '@AiCommerce/Chat/features/page-context/page-context.twig' %}
+
+{% set pageContext = {
+    optIn: true,
+    singleTurn: true,
+    rules: [
+        {
+            pageType: 'order',
+            label: 'ai_commerce.backoffice_assistant.page_context.order' | trans,
+            pathPrefix: '/sales/detail',
+            fields: {
+                subject: { read: 'fixed', value: 'Order' },
+                reference: { read: 'queryParameter', parameter: 'id-sales-order', required: true },
+                url: { read: 'location' },
+            },
+        },
+        {
+            pageType: 'discount',
+            label: 'ai_commerce.backoffice_assistant.page_context.discount' | trans,
+            pathPrefix: '/discount/index/view',
+            fields: {
+                subject: { read: 'fixed', value: 'Discount' },
+                reference: { read: 'queryParameter', parameter: 'id-discount', required: true },
+                url: { read: 'location' },
+            },
+        },
+        {
+            pageType: 'discount',
+            label: 'ai_commerce.backoffice_assistant.page_context.discount' | trans,
+            pathPrefix: '/discount/index/edit',
+            fields: {
+                subject: { read: 'fixed', value: 'Discount' },
+                reference: { read: 'queryParameter', parameter: 'id-discount', required: true },
+                url: { read: 'location' },
+            },
+        },
+    ],
+} | merge(pageContext ?? {}) %}

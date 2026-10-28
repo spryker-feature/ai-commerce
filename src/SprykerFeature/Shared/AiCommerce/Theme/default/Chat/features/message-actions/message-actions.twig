@@ -1,0 +1,37 @@
+{% block featureMessageActions %}
+    <chat-message-actions>
+        {% block messageActions %}
+            <template data-block="messageActions">
+                <div class="chat-message-actions">
+                    <button type="button"
+                            class="chat-message-actions__button"
+                            data-ref="copy"
+                            aria-label="{{ 'ai_commerce.storefront_assistant.action.copy' | trans }}"
+                            title="{{ 'ai_commerce.storefront_assistant.action.copy' | trans }}">
+                        <svg class="spryker-chat__icon chat-message-actions__icon-idle" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></g></svg>
+                        <svg class="spryker-chat__icon chat-message-actions__icon-done" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></g></svg>
+                    </button>
+                    <button type="button"
+                            class="chat-message-actions__button"
+                            data-ref="regenerate"
+                            aria-label="{{ 'ai_commerce.storefront_assistant.action.regenerate' | trans }}"
+                            title="{{ 'ai_commerce.storefront_assistant.action.regenerate' | trans }}"
+                            hidden>
+                        <svg class="spryker-chat__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></g></svg>
+                    </button>
+                    <time class="chat-message-actions__time" data-ref="time" hidden></time>
+                    <span class="chat-message-actions__copy-status"
+                          data-ref="copyStatus"
+                          role="status"
+                          aria-live="polite"
+                          data-copied-text="{{ 'ai_commerce.storefront_assistant.action.copied' | trans }}"></span>
+                    <textarea class="chat-message-actions__copy-buffer"
+                              data-ref="copyBuffer"
+                              tabindex="-1"
+                              aria-hidden="true"
+                              readonly></textarea>
+                </div>
+            </template>
+        {% endblock %}
+    </chat-message-actions>
+{% endblock %}

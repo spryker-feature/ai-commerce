@@ -14,6 +14,7 @@ use Generated\Shared\Transfer\ConversationHistoryTransfer;
 use Generated\Shared\Transfer\PromptMessageTransfer;
 use Generated\Shared\Transfer\StorefrontAssistantConversationMessageTransfer;
 use Generated\Shared\Transfer\ToolInvocationTransfer;
+use SprykerFeature\Shared\AiCommerce\Conversation\RegeneratedPromptMarker;
 use SprykerFeature\Shared\AiCommerce\StorefrontAssistant\StorefrontAssistantMessageRole;
 
 class ConversationMessageExtractor implements ConversationMessageExtractorInterface
@@ -42,6 +43,10 @@ class ConversationMessageExtractor implements ConversationMessageExtractorInterf
 
     protected const string MESSAGE_TYPE_VENDOR_TOOL_RESULT = 'tool_call_result';
 
+    public function __construct(protected RegeneratedPromptMarker $regeneratedPromptMarker)
+    {
+    }
+
     public function extractConversationMessagesFromOriginalMessages(string $originalMessages): array
     {
         $decodedMessages = json_decode($originalMessages, true);
@@ -66,19 +71,40 @@ class ConversationMessageExtractor implements ConversationMessageExtractorInterf
             $storefrontAssistantConversationMessageTransfers[] = $storefrontAssistantConversationMessageTransfer;
         }
 
-        return $storefrontAssistantConversationMessageTransfers;
+        return $this->removeReplacedExchanges($storefrontAssistantConversationMessageTransfers);
     }
 
     public function extractConversationMessagesFromConversationHistory(
         ConversationHistoryTransfer $conversationHistoryTransfer
     ): array {
         if ($conversationHistoryTransfer->getMessages()->count() > 0) {
-            return $this->mapPromptMessages($conversationHistoryTransfer->getMessages()->getArrayCopy());
+            return $this->removeReplacedExchanges($this->mapPromptMessages($conversationHistoryTransfer->getMessages()->getArrayCopy()));
         }
 
         return $this->extractConversationMessagesFromOriginalMessages(
             (string)$conversationHistoryTransfer->getOriginalMessages(),
         );
+    }
+
+    /**
+     * @param array<int, \Generated\Shared\Transfer\StorefrontAssistantConversationMessageTransfer> $storefrontAssistantConversationMessageTransfers
+     *
+     * @return array<int, \Generated\Shared\Transfer\StorefrontAssistantConversationMessageTransfer>
+     */
+    protected function removeReplacedExchanges(array $storefrontAssistantConversationMessageTransfers): array
+    {
+        $keptMessageTransfers = $this->regeneratedPromptMarker->removeReplacedExchanges(
+            array_values($storefrontAssistantConversationMessageTransfers),
+            static fn (StorefrontAssistantConversationMessageTransfer $storefrontAssistantConversationMessageTransfer): ?string => $storefrontAssistantConversationMessageTransfer->getRole() === StorefrontAssistantMessageRole::User->value
+                ? (string)$storefrontAssistantConversationMessageTransfer->getContent()
+                : null,
+        );
+
+        foreach ($keptMessageTransfers as $keptMessageTransfer) {
+            $keptMessageTransfer->setContent($this->regeneratedPromptMarker->removeMarker((string)$keptMessageTransfer->getContent()));
+        }
+
+        return $keptMessageTransfers;
     }
 
     /**

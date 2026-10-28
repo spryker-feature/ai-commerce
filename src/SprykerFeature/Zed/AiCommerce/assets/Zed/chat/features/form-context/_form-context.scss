@@ -1,0 +1,70 @@
+spryker-chat {
+    --chat-form-context-background: var(--chat-color-background);
+    --chat-form-context-color: var(--chat-color-text);
+    --chat-form-context-suggestion-border: var(--chat-border-width) dashed var(--chat-color-border);
+    --chat-form-context-suggestion-color: var(--chat-color-text-muted);
+    --chat-form-context-suggestion-hover-color: var(--chat-color-accent);
+    --chat-form-context-chip-border: var(--chat-border-width) solid var(--chat-color-accent);
+    --chat-form-context-chip-background: var(--chat-color-accent-subtle);
+    --chat-form-context-name-max-width: var(--chat-size-label-max);
+    --chat-form-context-icon-size: var(--chat-size-icon-small);
+}
+
+chat-form-context {
+    display: none;
+}
+
+.chat-form-context {
+    display: inline-flex;
+    max-width: 100%;
+}
+
+.chat-form-context__suggestion,
+.chat-form-context__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--chat-space-small);
+    max-width: 100%;
+    padding: var(--chat-space-small) var(--chat-space-medium);
+    border-radius: var(--chat-radius);
+    font-size: var(--chat-font-size-small);
+}
+
+.chat-form-context__suggestion {
+    border: var(--chat-form-context-suggestion-border);
+    background: var(--chat-form-context-background);
+    color: var(--chat-form-context-suggestion-color);
+    cursor: pointer;
+
+    &:hover {
+        color: var(--chat-form-context-suggestion-hover-color);
+    }
+}
+
+.chat-form-context__chip {
+    border: var(--chat-form-context-chip-border);
+    background: var(--chat-form-context-chip-background);
+    color: var(--chat-form-context-color);
+}
+
+.chat-form-context__name {
+    max-width: var(--chat-form-context-name-max-width);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chat-form-context__icon {
+    flex-shrink: 0;
+    width: var(--chat-form-context-icon-size);
+    height: var(--chat-form-context-icon-size);
+}
+
+.chat-form-context__remove {
+    display: inline-flex;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}

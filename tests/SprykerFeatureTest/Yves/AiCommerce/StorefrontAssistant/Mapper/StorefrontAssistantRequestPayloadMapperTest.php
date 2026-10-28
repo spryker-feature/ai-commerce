@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace SprykerFeatureTest\Yves\AiCommerce\StorefrontAssistant\Mapper;
 
 use Codeception\Test\Unit;
+use SprykerFeature\Shared\AiCommerce\Conversation\RegeneratedPromptMarker;
 use SprykerFeature\Shared\AiCommerce\StorefrontAssistant\StorefrontAssistantPageType;
 use SprykerFeature\Yves\AiCommerce\AiCommerceFactory;
 
@@ -45,6 +46,38 @@ class StorefrontAssistantRequestPayloadMapperTest extends Unit
         $this->assertSame('', $storefrontAssistantChatRequestTransfer->getMessage());
         $this->assertSame('', $storefrontAssistantChatRequestTransfer->getConversationReference());
         $this->assertNull($storefrontAssistantChatRequestTransfer->getSelectedAgent());
+    }
+
+    public function testGivenARegenerationFlagWhenMappedThenTheRequestIsARegeneration(): void
+    {
+        // Arrange
+        $storefrontAssistantRequestPayloadMapper = (new AiCommerceFactory())->createStorefrontAssistantRequestPayloadMapper();
+
+        // Act
+        $storefrontAssistantChatRequestTransfer = $storefrontAssistantRequestPayloadMapper->mapPayloadToStorefrontAssistantChatRequestTransfer(
+            ['message' => 'Show me cameras', RegeneratedPromptMarker::PAYLOAD_KEY_REGENERATE => true],
+            static::CUSTOMER_REFERENCE,
+            static::LOCALE_NAME,
+        );
+
+        // Assert
+        $this->assertTrue($storefrontAssistantChatRequestTransfer->getIsRegeneration());
+    }
+
+    public function testGivenANonBooleanRegenerationFlagWhenMappedThenTheRequestIsNotARegeneration(): void
+    {
+        // Arrange
+        $storefrontAssistantRequestPayloadMapper = (new AiCommerceFactory())->createStorefrontAssistantRequestPayloadMapper();
+
+        // Act
+        $storefrontAssistantChatRequestTransfer = $storefrontAssistantRequestPayloadMapper->mapPayloadToStorefrontAssistantChatRequestTransfer(
+            ['message' => 'Show me cameras', RegeneratedPromptMarker::PAYLOAD_KEY_REGENERATE => 'true'],
+            static::CUSTOMER_REFERENCE,
+            static::LOCALE_NAME,
+        );
+
+        // Assert
+        $this->assertFalse($storefrontAssistantChatRequestTransfer->getIsRegeneration());
     }
 
     public function testGivenAValidChatPayloadWhenMappedThenTheRequestCarriesItWithTheSanitizedPageContext(): void

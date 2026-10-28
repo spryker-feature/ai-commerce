@@ -1,0 +1,97 @@
+{% use '@AiCommerce/Chat/core/panel/panel.twig' %}
+{% use '@AiCommerce/Chat/core/composer/composer.twig' %}
+{% use '@AiCommerce/Chat/core/transcript/transcript.twig' %}
+{% use '@AiCommerce/Chat/features/agent-selector/agent-selector.twig' %}
+{% use '@AiCommerce/Chat/features/histories/histories.twig' %}
+{% use '@AiCommerce/Chat/features/attachments/attachments.twig' %}
+{% use '@AiCommerce/Chat/features/suggested-prompts/suggested-prompts.twig' %}
+{% use '@AiCommerce/Chat/features/reasoning/reasoning.twig' %}
+{% use '@AiCommerce/Chat/features/tool-calls/tool-calls.twig' %}
+{% use '@AiCommerce/Chat/features/loading-label/loading-label.twig' %}
+{% use '@AiCommerce/Chat/features/message-actions/message-actions.twig' %}
+{% use '@AiCommerce/Chat/features/scroll-latest/scroll-latest.twig' %}
+{% use '@AiCommerce/Chat/features/session-persistence/session-persistence.twig' %}
+{% use '@AiCommerce/Chat/features/trigger/trigger.twig' %}
+{% use '@AiCommerce/Chat/features/docking/docking.twig' %}
+
+{% set chat = {
+    promptUrl: '',
+    conversationsUrl: '',
+    conversationMessagesUrl: '',
+    deleteConversationUrl: '',
+    csrfToken: '',
+    maxMessageLength: 0,
+    userName: '',
+} | merge(chat ?? {}) %}
+
+{% set chat = chat | merge({
+    header: {
+        moreMenu: true,
+        expand: true,
+    } | merge(chat.header ?? {}),
+}) %}
+
+{% set features = (features ?? {}) | merge({
+    agentSelector: {
+        agents: [],
+        loadAgents: false,
+        storageKey: 'spryker-chat-agent',
+    } | merge(features.agentSelector ?? {}),
+    attachments: {
+        accept: '',
+        maxSizeBytes: 0,
+        maxCount: 0,
+    } | merge(features.attachments ?? {}),
+    suggestedPrompts: {
+        prompts: {},
+        sections: {},
+        group: 'default',
+    } | merge(features.suggestedPrompts ?? {}),
+    toolCalls: {
+        toolLabels: {},
+        hideUnclaimedResults: false,
+    } | merge(features.toolCalls ?? {}),
+    sessionPersistence: {
+        storageKey: 'spryker-chat-session',
+    } | merge(features.sessionPersistence ?? {}),
+    docking: {
+        target: 'body',
+    } | merge(features.docking ?? {}),
+}) %}
+
+<spryker-chat class="spryker-chat"
+              prompt-url="{{ chat.promptUrl }}"
+              conversations-url="{{ chat.conversationsUrl }}"
+              conversation-messages-url="{{ chat.conversationMessagesUrl }}"
+              delete-conversation-url="{{ chat.deleteConversationUrl }}"
+              csrf-token="{{ chat.csrfToken }}"
+              max-message-length="{{ chat.maxMessageLength }}">
+    {{ block('launcher') }}
+    {{ block('panel') }}
+    {{ block('composer') }}
+    {{ block('messageUser') }}
+    {{ block('messageAssistant') }}
+    {{ block('messageError') }}
+    {{ block('loading') }}
+    {{ block('retry') }}
+
+    {# DOM order is initialization order and the order of insertions into a shared zone. #}
+    {{ block('featureAgentSelector') }}
+    {{ block('featureHistories') }}
+    {{ block('featureAttachments') }}
+    {{ block('featureSuggestedPrompts') }}
+    {{ block('featureReasoning') }}
+    {{ block('featureToolCalls') }}
+    {{ block('featureLoadingLabel') }}
+    {{ block('featureMessageActions') }}
+    {{ block('featureScrollLatest') }}
+    {{ block('featureSessionPersistence') }}
+    {{ block('featureTrigger') }}
+    {{ block('featureDocking') }}
+
+    {% block hostFeatures %}{% endblock %}
+
+    {% for feature in features.extra ?? [] %}
+        {% include feature.template with feature %}
+    {% endfor %}
+</spryker-chat>

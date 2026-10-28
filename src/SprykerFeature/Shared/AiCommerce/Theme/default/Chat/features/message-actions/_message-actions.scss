@@ -1,0 +1,90 @@
+spryker-chat {
+    --chat-message-actions-color: var(--chat-color-text-muted);
+    --chat-message-actions-hover-color: var(--chat-color-text);
+    --chat-message-actions-hover-background: var(--chat-color-surface);
+    --chat-message-actions-copied-color: var(--chat-color-success);
+    --chat-message-actions-copy-failed-color: var(--chat-color-error);
+    --chat-message-actions-size: calc(var(--chat-size-control) - var(--chat-space-small));
+    --chat-message-actions-opacity: 0.7;
+}
+
+chat-message-actions {
+    display: none;
+}
+
+.chat-message-actions {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--chat-space-extra-small);
+    margin-top: calc(-1 * var(--chat-space-small));
+    color: var(--chat-message-actions-color);
+    opacity: var(--chat-message-actions-opacity);
+    transition: opacity var(--chat-duration-fast) var(--chat-easing);
+
+    &:hover,
+    &:focus-within {
+        opacity: 1;
+    }
+}
+
+.chat-message-actions__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--chat-message-actions-size);
+    height: var(--chat-message-actions-size);
+    padding: 0;
+    border: 0;
+    border-radius: calc(var(--chat-radius) - var(--chat-space-extra-small));
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+
+    &:hover {
+        background: var(--chat-message-actions-hover-background);
+        color: var(--chat-message-actions-hover-color);
+    }
+
+    &[data-copied] {
+        color: var(--chat-message-actions-copied-color);
+    }
+
+    &[data-copy-failed] {
+        color: var(--chat-message-actions-copy-failed-color);
+    }
+}
+
+.chat-message-actions__icon-done,
+.chat-message-actions__button[data-copied] .chat-message-actions__icon-idle {
+    display: none;
+}
+
+.chat-message-actions__button[data-copied] .chat-message-actions__icon-done {
+    display: inline-block;
+}
+
+.chat-message-actions__time {
+    margin-left: var(--chat-space-small);
+    font-size: var(--chat-font-size-extra-small);
+    font-variant-numeric: tabular-nums;
+}
+
+.chat-message-actions__copy-status {
+    position: absolute;
+    width: var(--chat-border-width);
+    height: var(--chat-border-width);
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.chat-message-actions__copy-buffer {
+    position: absolute;
+    width: 0;
+    height: 0;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    pointer-events: none;
+}

@@ -17,6 +17,7 @@ use Generated\Shared\Transfer\ProductOfferStorageCollectionTransfer;
 use Spryker\Client\PriceProductStorage\PriceProductStorageClientInterface;
 use Spryker\Client\ProductOfferStorage\ProductOfferStorageClientInterface;
 use SprykerFeature\Client\AiCommerce\AiCommerceDependencyProvider;
+use SprykerFeature\Client\AiCommerce\AiCommerceFactory;
 use SprykerFeatureTest\Client\AiCommerce\AiCommerceClientTester;
 
 /**
@@ -147,6 +148,7 @@ class ProductDetailsToolPluginVolumePriceTest extends Unit
                     null,
                 ),
             ]),
+            AiCommerceFactory::class,
         );
 
         // Act
@@ -178,6 +180,7 @@ class ProductDetailsToolPluginVolumePriceTest extends Unit
                     default => $this->createCurrentProductPrice(static::PRICE_BASE, static::VOLUME_PRICE_DATA),
                 },
             ]),
+            AiCommerceFactory::class,
         );
 
         // Act
@@ -239,6 +242,7 @@ class ProductDetailsToolPluginVolumePriceTest extends Unit
                 'findProductOfferStorageByReference' => $productOfferStorageTransfer,
                 'findProductConcreteDefaultProductOffer' => static::DEFAULT_OFFER_REFERENCE,
             ]),
+            AiCommerceFactory::class,
         );
     }
 

@@ -9,7 +9,8 @@ declare(strict_types=1);
 
 namespace SprykerFeature\Client\AiCommerce\StorefrontAssistant\Search;
 
-interface DisplayProductRefinementExpanderInterface
+use SprykerFeature\Shared\AiCommerce\Stream\ToolResultExpanderInterface;
+
+interface DisplayProductRefinementExpanderInterface extends ToolResultExpanderInterface
 {
-    public function expandToolResult(string $toolName, string $toolResult): string;
 }

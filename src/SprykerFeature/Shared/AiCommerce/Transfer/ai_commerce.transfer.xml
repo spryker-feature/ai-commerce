@@ -73,6 +73,7 @@
 
     <transfer name="BackofficeAssistantConversationCollectionDeleteCriteria" strict="true">
         <property name="conversationReferences" type="string[]" singular="conversationReference"/>
+        <property name="idUser" type="int"/>
     </transfer>
 
     <transfer name="BackofficeAssistantPromptRequest" strict="true">
@@ -634,6 +635,7 @@
         <property name="attachments" type="Attachment[]" singular="attachment" description="Attachments validated server-side and safe to forward to the AI provider."/>
         <property name="selectedAgent" type="string" description="Customer pinned agent name for the conversation. Null means automatic selection."/>
         <property name="storefrontAssistantPageContext" type="StorefrontAssistantPageContext" description="Where the customer is in the storefront when the turn is sent. Collected client-side and never authorizing: it may only inform prompt text."/>
+        <property name="isRegeneration" type="bool" description="True when the turn answers an earlier message again, replacing the stored exchange of that message."/>
     </transfer>
 
     <transfer name="StorefrontAssistantPageContext" strict="true">

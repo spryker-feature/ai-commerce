@@ -59,6 +59,8 @@ use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Mapper\StorefrontAssistan
 use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Mapper\StorefrontAssistantRequestPayloadMapperInterface;
 use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Reader\StorefrontAssistantRequestPayloadReader;
 use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Reader\StorefrontAssistantRequestPayloadReaderInterface;
+use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Reader\StorefrontAssistantSuggestedPromptReader;
+use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Reader\StorefrontAssistantSuggestedPromptReaderInterface;
 use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Resolver\StorefrontAssistantValidationErrorResolver;
 use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Resolver\StorefrontAssistantValidationErrorResolverInterface;
 use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Sanitizer\StorefrontAssistantPageContextSanitizer;
@@ -327,6 +329,13 @@ class AiCommerceFactory extends AbstractFactory
     {
         return new StorefrontAssistantRequestPayloadReader(
             $this->createStorefrontAssistantRequestPayloadValidator(),
+        );
+    }
+
+    public function createStorefrontAssistantSuggestedPromptReader(): StorefrontAssistantSuggestedPromptReaderInterface
+    {
+        return new StorefrontAssistantSuggestedPromptReader(
+            $this->getConfig(),
         );
     }
 

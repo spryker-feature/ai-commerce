@@ -12,7 +12,6 @@ namespace SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation;
 use Generated\Shared\Transfer\AiToolCallTransfer;
 use Spryker\Zed\AiFoundation\Dependency\Plugin\PostToolCallPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
-use SprykerFeature\Shared\AiCommerce\BackofficeAssistant\BackofficeAssistantEventType;
 
 /**
  * @method \SprykerFeature\Zed\AiCommerce\AiCommerceConfig getConfig()
@@ -20,27 +19,17 @@ use SprykerFeature\Shared\AiCommerce\BackofficeAssistant\BackofficeAssistantEven
  */
 class BackofficeAssistantSsePostToolCallPlugin extends AbstractPlugin implements PostToolCallPluginInterface
 {
-    protected const string KEY_NAME = 'name';
-
-    protected const string KEY_RESULT = 'result';
-
     /**
      * {@inheritDoc}
-     * - Emits a tool call result SSE event for backoffice assistant AI configurations after each tool call.
+     * - Emits the `tool-output-available` stream event with the tool result under `output.result` for backoffice assistant AI configurations after each tool call.
+     * - Emits `tool-output-denied` with the tool call ID instead when the execution was not allowed.
+     * - Uses the tool call ID the pre tool call plugin set, so the output pairs with its input.
+     * - Emits nothing for other AI configurations.
      *
      * @api
      */
     public function postToolCall(AiToolCallTransfer $aiToolCallTransfer): void
     {
-        $configurationName = $aiToolCallTransfer->getPromptRequest()?->getAiConfigurationName();
-
-        if (!in_array($configurationName, $this->getConfig()->getBackofficeAssistantSseAiConfigurationNames(), true)) {
-            return;
-        }
-
-        $this->getFactory()->createSseEventEmitter()->emit(BackofficeAssistantEventType::ToolCallResult, [
-            static::KEY_NAME => $aiToolCallTransfer->getToolName(),
-            static::KEY_RESULT => $aiToolCallTransfer->getToolResult(),
-        ]);
+        $this->getFactory()->createToolCallEventStreamer()->streamToolOutput($aiToolCallTransfer);
     }
 }

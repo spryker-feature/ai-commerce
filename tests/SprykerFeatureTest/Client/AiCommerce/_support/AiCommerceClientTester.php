@@ -104,6 +104,7 @@ use Spryker\Zed\Locale\Communication\Plugin\Store\LocaleStoreCollectionExpanderP
 use Spryker\Zed\Store\StoreDependencyProvider as ZedStoreDependencyProvider;
 use SprykerFeature\Client\AiCommerce\AiCommerceClientInterface;
 use SprykerFeature\Client\AiCommerce\AiCommerceDependencyProvider;
+use SprykerFeature\Client\AiCommerce\AiCommerceFactory;
 use SprykerFeature\Client\AiCommerce\Plugin\AiFoundation\StorefrontAssistantSsePostToolCallPlugin;
 use SprykerFeature\Client\AiCommerce\Plugin\AiFoundation\StorefrontAssistantSsePreToolCallPlugin;
 use SprykerFeature\Client\AiCommerce\Plugin\AiFoundation\StorefrontAssistantSseStreamEventPlugin;
@@ -386,6 +387,7 @@ class AiCommerceClientTester extends Actor
         $this->setDependency(
             AiCommerceDependencyProvider::CLIENT_CATALOG,
             Stub::makeEmpty(CatalogClientInterface::class, ['catalogSearch' => $searchResult]),
+            AiCommerceFactory::class,
         );
     }
 
@@ -412,6 +414,7 @@ class AiCommerceClientTester extends Actor
                     'getSearchConfigExtension' => $searchConfigExtensionTransfer,
                 ]),
             ],
+            AiCommerceFactory::class,
         );
     }
 
@@ -500,6 +503,7 @@ class AiCommerceClientTester extends Actor
         $this->setDependency(
             AiCommerceDependencyProvider::CLIENT_CATALOG,
             Stub::makeEmpty(CatalogClientInterface::class, ['catalogSuggestSearch' => $suggestResult]),
+            AiCommerceFactory::class,
         );
     }
 
@@ -543,6 +547,7 @@ class AiCommerceClientTester extends Actor
                     return $searchResult;
                 },
             ]),
+            AiCommerceFactory::class,
         );
     }
 
@@ -677,10 +682,12 @@ class AiCommerceClientTester extends Actor
         $this->setDependency(
             AiCommerceDependencyProvider::CLIENT_AI_FOUNDATION,
             $recordingTranscriptAiFoundationClient,
+            AiCommerceFactory::class,
         );
         $this->setDependency(
             AiCommerceDependencyProvider::PLUGINS_STOREFRONT_ASSISTANT_AGENT,
             [new ProductDiscoveryAgentPlugin()],
+            AiCommerceFactory::class,
         );
         $this->setUpCurrentStore();
 
@@ -689,8 +696,8 @@ class AiCommerceClientTester extends Actor
 
     public function haveNoStorefrontAssistantAgentPlugin(): void
     {
-        $this->setDependency(AiCommerceDependencyProvider::CLIENT_AI_FOUNDATION, new RecordingTranscriptAiFoundationClient());
-        $this->setDependency(AiCommerceDependencyProvider::PLUGINS_STOREFRONT_ASSISTANT_AGENT, []);
+        $this->setDependency(AiCommerceDependencyProvider::CLIENT_AI_FOUNDATION, new RecordingTranscriptAiFoundationClient(), AiCommerceFactory::class);
+        $this->setDependency(AiCommerceDependencyProvider::PLUGINS_STOREFRONT_ASSISTANT_AGENT, [], AiCommerceFactory::class);
     }
 
     public function haveThrowingStorefrontAssistantAgentPlugin(): void
@@ -702,10 +709,12 @@ class AiCommerceClientTester extends Actor
                     throw new RuntimeException(static::MESSAGE_AI_PROVIDER_UNREACHABLE);
                 },
             ]),
+            AiCommerceFactory::class,
         );
         $this->setDependency(
             AiCommerceDependencyProvider::PLUGINS_STOREFRONT_ASSISTANT_AGENT,
             [new ProductDiscoveryAgentPlugin()],
+            AiCommerceFactory::class,
         );
         $this->setUpCurrentStore();
     }
@@ -717,10 +726,12 @@ class AiCommerceClientTester extends Actor
             Stub::makeEmpty(AiFoundationClientInterface::class, [
                 'streamPrompt' => fn (): PromptResponseTransfer => $this->createFailedPromptResponse($errorMessage),
             ]),
+            AiCommerceFactory::class,
         );
         $this->setDependency(
             AiCommerceDependencyProvider::PLUGINS_STOREFRONT_ASSISTANT_AGENT,
             [new ProductDiscoveryAgentPlugin()],
+            AiCommerceFactory::class,
         );
         $this->setUpCurrentStore();
     }
@@ -934,6 +945,7 @@ class AiCommerceClientTester extends Actor
             Stub::makeEmpty(GlossaryStorageClientInterface::class, [
                 'translate' => static fn (string $id): string => $id,
             ]),
+            AiCommerceFactory::class,
         );
     }
 
@@ -1232,6 +1244,7 @@ class AiCommerceClientTester extends Actor
                     return $searchResults[count($capturedCalls) - 1] ?? $searchResults[array_key_last($searchResults)] ?? [];
                 },
             ]),
+            AiCommerceFactory::class,
         );
     }
 
@@ -1352,6 +1365,7 @@ class AiCommerceClientTester extends Actor
                     );
                 },
             ]),
+            AiCommerceFactory::class,
         );
     }
 
@@ -1394,6 +1408,7 @@ class AiCommerceClientTester extends Actor
                     return in_array($idProductAbstract, $restrictedProductAbstractIds, true);
                 },
             ]),
+            AiCommerceFactory::class,
         );
     }
 
@@ -1412,6 +1427,7 @@ class AiCommerceClientTester extends Actor
                     );
                 },
             ]),
+            AiCommerceFactory::class,
         );
     }
 
@@ -1478,6 +1494,7 @@ class AiCommerceClientTester extends Actor
                     return (new PromptResponseTransfer())->setIsSuccessful(true);
                 },
             ]),
+            AiCommerceFactory::class,
         );
 
         /** @var \SprykerFeature\Client\AiCommerce\AiCommerceConfig $aiCommerceConfig */
@@ -1501,6 +1518,7 @@ class AiCommerceClientTester extends Actor
             Stub::makeEmpty(CategoryStorageClientInterface::class, [
                 'getCategories' => static fn (): ArrayObject => new ArrayObject($categoryNodeStorageTransfers),
             ]),
+            AiCommerceFactory::class,
         );
     }
 
@@ -1554,8 +1572,9 @@ class AiCommerceClientTester extends Actor
                     return (new PromptResponseTransfer())->setIsSuccessful(true);
                 },
             ]),
+            AiCommerceFactory::class,
         );
-        $this->setDependency(AiCommerceDependencyProvider::PLUGINS_STOREFRONT_ASSISTANT_AGENT, [new ProductDiscoveryAgentPlugin()]);
+        $this->setDependency(AiCommerceDependencyProvider::PLUGINS_STOREFRONT_ASSISTANT_AGENT, [new ProductDiscoveryAgentPlugin()], AiCommerceFactory::class);
         $this->enableStorefrontAssistant();
         $this->setUpCurrentStore();
 
@@ -1639,6 +1658,7 @@ class AiCommerceClientTester extends Actor
                 },
                 'isProductAbstractRestricted' => false,
             ]),
+            AiCommerceFactory::class,
         );
     }
 
@@ -1692,6 +1712,7 @@ class AiCommerceClientTester extends Actor
             Stub::makeEmpty(AvailabilityStorageClientInterface::class, [
                 'findProductAbstractAvailability' => $productAbstractAvailabilityTransfer,
             ]),
+            AiCommerceFactory::class,
         );
         $this->setDependency(
             AiCommerceDependencyProvider::CLIENT_PRODUCT_DISCONTINUED_STORAGE,
@@ -1702,6 +1723,7 @@ class AiCommerceClientTester extends Actor
                         : null;
                 },
             ]),
+            AiCommerceFactory::class,
         );
         $this->setDependency(
             AiCommerceDependencyProvider::CLIENT_PRODUCT_ALTERNATIVE_STORAGE,
@@ -1717,6 +1739,7 @@ class AiCommerceClientTester extends Actor
                     );
                 },
             ]),
+            AiCommerceFactory::class,
         );
     }
 
@@ -1764,6 +1787,7 @@ class AiCommerceClientTester extends Actor
                     return [$productAbstractOptionStorageTransfer->getIdProductAbstract() => $productAbstractOptionStorageTransfer];
                 },
             ]),
+            AiCommerceFactory::class,
         );
     }
 
@@ -1786,6 +1810,7 @@ class AiCommerceClientTester extends Actor
                     return $translations;
                 },
             ]),
+            AiCommerceFactory::class,
         );
     }
 
@@ -1839,6 +1864,7 @@ class AiCommerceClientTester extends Actor
                 'getProductOfferStoragesBySkus' => (new ProductOfferStorageCollectionTransfer())->setProductOffers(new ArrayObject($productOfferStorageTransfers)),
                 'findProductConcreteDefaultProductOffer' => null,
             ]),
+            AiCommerceFactory::class,
         );
     }
 
@@ -1870,6 +1896,7 @@ class AiCommerceClientTester extends Actor
             Stub::makeEmpty(MerchantStorageClientInterface::class, [
                 'findOne' => $merchantName !== null ? (new MerchantStorageTransfer())->setName($merchantName) : null,
             ]),
+            AiCommerceFactory::class,
         );
         $this->setDependency(
             AiCommerceDependencyProvider::CLIENT_PRICE_PRODUCT_STORAGE,
@@ -1877,6 +1904,7 @@ class AiCommerceClientTester extends Actor
                 'getResolvedCurrentProductPriceTransfer' => static fn (PriceProductFilterTransfer $priceProductFilterTransfer): CurrentProductPriceTransfer => (new CurrentProductPriceTransfer())
                     ->setPrice($priceByIdProductConcrete[(int)$priceProductFilterTransfer->getIdProduct()] ?? $price),
             ]),
+            AiCommerceFactory::class,
         );
     }
 
@@ -1891,6 +1919,7 @@ class AiCommerceClientTester extends Actor
                 'getResolvedCurrentProductPriceTransfer' => static fn (PriceProductFilterTransfer $priceProductFilterTransfer): CurrentProductPriceTransfer => $currentProductPriceByQuantity[(int)$priceProductFilterTransfer->getQuantity()]
                     ?? new CurrentProductPriceTransfer(),
             ]),
+            AiCommerceFactory::class,
         );
     }
 
@@ -1901,6 +1930,7 @@ class AiCommerceClientTester extends Actor
             Stub::makeEmpty(PermissionClientInterface::class, [
                 'can' => $canSeePrice,
             ]),
+            AiCommerceFactory::class,
         );
     }
 
@@ -1918,6 +1948,7 @@ class AiCommerceClientTester extends Actor
                     return $quoteTransfer->getStore() !== null && $quoteTransfer->getItems()->count() === 1 ? $upSellingProductAbstractIds : [];
                 },
             ]),
+            AiCommerceFactory::class,
         );
     }
 
@@ -1938,6 +1969,7 @@ class AiCommerceClientTester extends Actor
                     );
                 },
             ]),
+            AiCommerceFactory::class,
         );
     }
 
@@ -1974,6 +2006,7 @@ class AiCommerceClientTester extends Actor
                         ->addCategory((new ProductCategoryStorageTransfer())->setCategoryNodeId($categoryNodeId)->setName($categoryName)),
                 ],
             ]),
+            AiCommerceFactory::class,
         );
     }
 
@@ -2001,6 +2034,7 @@ class AiCommerceClientTester extends Actor
             Stub::makeEmpty(ProductCategoryStorageClientInterface::class, [
                 'findBulkProductAbstractCategory' => $productAbstractCategoryStorageTransfers,
             ]),
+            AiCommerceFactory::class,
         );
     }
 
@@ -2069,6 +2103,7 @@ class AiCommerceClientTester extends Actor
                     ));
                 },
             ]),
+            AiCommerceFactory::class,
         );
     }
 
@@ -2100,6 +2135,7 @@ class AiCommerceClientTester extends Actor
                     return (new ProductReviewStorageTransfer())->setAverageRating($averageRating)->setReviewCount($reviewCount);
                 },
             ]),
+            AiCommerceFactory::class,
         );
     }
 
@@ -2134,6 +2170,7 @@ class AiCommerceClientTester extends Actor
                 $productSetDataStorageTransfers,
             )],
             ]),
+            AiCommerceFactory::class,
         );
         $this->setDependency(
             AiCommerceDependencyProvider::CLIENT_PRODUCT_SET_STORAGE,
@@ -2148,6 +2185,7 @@ class AiCommerceClientTester extends Actor
                     return null;
                 },
             ]),
+            AiCommerceFactory::class,
         );
     }
 
@@ -2191,6 +2229,7 @@ class AiCommerceClientTester extends Actor
                     return $productBundleStorageTransfers;
                 },
             ]),
+            AiCommerceFactory::class,
         );
     }
 
@@ -2332,6 +2371,7 @@ class AiCommerceClientTester extends Actor
                     return $categoryNodeStorageTransfers;
                 },
             ]),
+            AiCommerceFactory::class,
         );
     }
 
@@ -2424,6 +2464,7 @@ class AiCommerceClientTester extends Actor
                 'getResolvedCurrentProductPriceTransfer' => static fn (PriceProductFilterTransfer $priceProductFilterTransfer): CurrentProductPriceTransfer => (new CurrentProductPriceTransfer())
                     ->setPrice($priceByIdProductAbstract[(int)$priceProductFilterTransfer->getIdProductAbstract()] ?? null),
             ]),
+            AiCommerceFactory::class,
         );
     }
 }

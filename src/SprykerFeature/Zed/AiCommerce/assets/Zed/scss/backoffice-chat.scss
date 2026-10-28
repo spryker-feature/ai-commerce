@@ -1,0 +1,61 @@
+// Loaded after the chat styles, so these tier-1 values win over the defaults declared on the same selector.
+
+@use '../chat/features/form-fill/form-fill';
+@use '../chat/features/form-context/form-context';
+
+:root {
+    --backoffice-chat-panel-width: min(clamp(320px, 30vw, 560px), 50%);
+}
+
+spryker-chat,
+.chat-trigger {
+    // Inspinia 2 prefixes its Bootstrap custom properties `ins-`, not `bs-`; a wrong prefix empties every chat token.
+    --chat-color-background: var(--ins-secondary-bg);
+    --chat-color-surface: var(--ins-tertiary-bg);
+    --chat-color-surface-secondary: var(--ins-light);
+    --chat-color-text: var(--ins-body-color);
+    --chat-color-text-muted: var(--ins-gray-700);
+    --chat-color-border: var(--ins-border-color);
+    --chat-color-accent: var(--bo-main-color, var(--green-default));
+    --chat-color-accent-contrast: var(--ins-white);
+    --chat-color-accent-subtle: color-mix(in sRGB, var(--chat-color-accent) 12%, var(--ins-white));
+    --chat-color-accent-border: color-mix(in sRGB, var(--chat-color-accent) 32%, var(--ins-white));
+    --chat-color-accent-hover: color-mix(in sRGB, var(--chat-color-accent) 85%, var(--ins-black));
+    --chat-color-accent-strong: color-mix(in sRGB, var(--chat-color-accent) 65%, var(--ins-black));
+    --chat-color-error: var(--ins-danger);
+    --chat-color-error-surface: var(--ins-danger-bg-subtle);
+    --chat-color-warning: var(--ins-warning);
+    --chat-color-success: var(--ins-success);
+    --chat-color-code-surface: var(--ins-dark);
+    --chat-color-code-text: var(--ins-light);
+    --chat-border-width: var(--ins-border-width);
+    --chat-font: var(--ins-body-font-family);
+    --chat-font-code: var(--ins-font-monospace);
+    --chat-shadow: var(--ins-box-shadow-lg);
+    --chat-size-panel-width: var(--backoffice-chat-panel-width);
+    --chat-layer: 1050;
+    --chat-tool-call-label-color: var(--chat-color-accent);
+    --chat-tool-call-background: color-mix(in sRGB, var(--chat-color-accent) 6%, var(--chat-color-background));
+    --chat-tool-call-border: var(--chat-border-width) solid var(--chat-color-accent-border);
+    --chat-tool-call-padding: var(--chat-space-medium) var(--chat-space-medium-large);
+    --chat-tool-call-max-width: var(--chat-size-bubble-max);
+}
+
+.chat-tool-calls__label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--chat-space-small);
+}
+
+.chat-tool-calls__icon {
+    width: var(--chat-size-icon-small);
+    height: var(--chat-size-icon-small);
+}
+
+// Couples to Back Office layout: .content-page (Gui Inspinia2 structure/_layout.scss), .app-topbar (_topbar.scss).
+:root[data-chat-docked] {
+    .content-page,
+    .app-topbar {
+        margin-right: var(--chat-dock-width);
+    }
+}

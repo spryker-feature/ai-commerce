@@ -1,0 +1,28 @@
+{% block featureToolCalls %}
+    <chat-tool-calls tool-labels="{{ features.toolCalls.toolLabels | json_encode(constant('JSON_THROW_ON_ERROR') b-or constant('JSON_INVALID_UTF8_SUBSTITUTE')) }}"
+                     {% if features.toolCalls.hideUnclaimedResults %}hide-unclaimed-results{% endif %}>
+        {% block toolCall %}
+            <template data-block="toolCall">
+                <div class="chat-tool-calls__card">
+                    <span class="chat-tool-calls__name" data-ref="name">
+                        {{- 'ai_commerce.storefront_assistant.activity.tool_result' | trans -}}
+                    </span>
+                    <button type="button" class="chat-tool-calls__toggle" data-ref="toggle">
+                        <span data-ref="showLabel">{{ 'ai_commerce.storefront_assistant.action.show_result' | trans }}</span>
+                        <span data-ref="hideLabel">{{ 'ai_commerce.storefront_assistant.action.hide_result' | trans }}</span>
+                    </button>
+                    <pre class="chat-tool-calls__result" data-ref="result"></pre>
+                </div>
+            </template>
+        {% endblock %}
+        {% block toolCallDenied %}
+            <template data-block="toolCallDenied">
+                <div class="spryker-chat-message spryker-chat-message--error" role="alert">
+                    <p class="spryker-chat-message__text">
+                        {{- 'ai_commerce.storefront_assistant.error.tool_failed' | trans -}}
+                    </p>
+                </div>
+            </template>
+        {% endblock %}
+    </chat-tool-calls>
+{% endblock %}

@@ -14,17 +14,34 @@ use Spryker\Zed\AiFoundation\Dependency\Tools\ToolPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractCommunicationFactory;
 use Spryker\Zed\Translator\Business\TranslatorFacadeInterface;
 use Spryker\Zed\User\Business\UserFacadeInterface;
+use SprykerFeature\Shared\AiCommerce\Conversation\RegeneratedPromptMarker;
+use SprykerFeature\Shared\AiCommerce\Stream\MessageStreamer;
+use SprykerFeature\Shared\AiCommerce\Stream\MessageStreamerInterface;
+use SprykerFeature\Shared\AiCommerce\Stream\StreamBlockTracker;
+use SprykerFeature\Shared\AiCommerce\Stream\StreamBlockTrackerInterface;
+use SprykerFeature\Shared\AiCommerce\Stream\StreamEventEmitter;
+use SprykerFeature\Shared\AiCommerce\Stream\StreamEventEmitterInterface;
+use SprykerFeature\Shared\AiCommerce\Stream\ToolCallEventStreamer;
+use SprykerFeature\Shared\AiCommerce\Stream\ToolCallEventStreamerInterface;
+use SprykerFeature\Shared\AiCommerce\Stream\ToolCallIdResolver;
+use SprykerFeature\Shared\AiCommerce\Stream\ToolCallIdResolverInterface;
 use SprykerFeature\Zed\AiCommerce\AiCommerceDependencyProvider;
 use SprykerFeature\Zed\AiCommerce\Communication\Attachment\AttachmentBuilder;
 use SprykerFeature\Zed\AiCommerce\Communication\Attachment\AttachmentBuilderInterface;
 use SprykerFeature\Zed\AiCommerce\Communication\Attachment\AttachmentValidator;
 use SprykerFeature\Zed\AiCommerce\Communication\Attachment\AttachmentValidatorInterface;
-use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Emitter\SseEventEmitter;
-use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Emitter\SseEventEmitterInterface;
+use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Chat\BackofficeAssistantAgentReader;
+use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Chat\BackofficeAssistantAgentReaderInterface;
+use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Chat\BackofficeAssistantChatMapper;
+use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Chat\BackofficeAssistantChatMapperInterface;
+use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Chat\BackofficeAssistantChatPayloadValidator;
+use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Chat\BackofficeAssistantChatPayloadValidatorInterface;
 use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\BackofficeAssistantPromptRequestValidator;
 use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\BackofficeAssistantPromptRequestValidatorInterface;
 use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\IntentRouter;
 use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\IntentRouterInterface;
+use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\PromptContextFormatter;
+use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\PromptContextFormatterInterface;
 use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\PromptProcessor;
 use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\PromptProcessorInterface;
 use SprykerFeature\Zed\AiCommerce\Communication\Plugin\AiFoundation\Tool\CreateDiscountToolPlugin;
@@ -53,6 +70,26 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
  */
 class AiCommerceCommunicationFactory extends AbstractCommunicationFactory
 {
+    public function createBackofficeAssistantChatMapper(): BackofficeAssistantChatMapperInterface
+    {
+        return new BackofficeAssistantChatMapper($this->createPromptContextFormatter(), $this->createRegeneratedPromptMarker());
+    }
+
+    public function createBackofficeAssistantChatPayloadValidator(): BackofficeAssistantChatPayloadValidatorInterface
+    {
+        return new BackofficeAssistantChatPayloadValidator();
+    }
+
+    public function createBackofficeAssistantAgentReader(): BackofficeAssistantAgentReaderInterface
+    {
+        return new BackofficeAssistantAgentReader($this->getBackofficeAssistantAgentPlugins());
+    }
+
+    public function createPromptContextFormatter(): PromptContextFormatterInterface
+    {
+        return new PromptContextFormatter($this->createRegeneratedPromptMarker());
+    }
+
     public function createPromptHandler(): PromptProcessorInterface
     {
         return new PromptProcessor(
@@ -60,10 +97,11 @@ class AiCommerceCommunicationFactory extends AbstractCommunicationFactory
             $this->getAiFoundationFacade(),
             $this->getBackofficeAssistantAgentPlugins(),
             $this->createAttachmentBuilder(),
-            $this->createSseEventEmitter(),
+            $this->createMessageStreamer(),
             $this->createIntentRouter(),
             $this->createBackofficeAssistantPromptRequestValidator(),
             $this->getTranslatorFacade(),
+            $this->createPromptContextFormatter(),
         );
     }
 
@@ -77,9 +115,37 @@ class AiCommerceCommunicationFactory extends AbstractCommunicationFactory
         return new AttachmentValidator($this->getConfig());
     }
 
-    public function createSseEventEmitter(): SseEventEmitterInterface
+    public function createStreamEventEmitter(): StreamEventEmitterInterface
     {
-        return new SseEventEmitter();
+        return new StreamEventEmitter();
+    }
+
+    public function createStreamBlockTracker(): StreamBlockTrackerInterface
+    {
+        return new StreamBlockTracker($this->createStreamEventEmitter());
+    }
+
+    public function createMessageStreamer(): MessageStreamerInterface
+    {
+        return new MessageStreamer(
+            $this->createStreamEventEmitter(),
+            $this->createStreamBlockTracker(),
+        );
+    }
+
+    public function createToolCallIdResolver(): ToolCallIdResolverInterface
+    {
+        return new ToolCallIdResolver();
+    }
+
+    public function createToolCallEventStreamer(): ToolCallEventStreamerInterface
+    {
+        return new ToolCallEventStreamer(
+            $this->createStreamEventEmitter(),
+            $this->createStreamBlockTracker(),
+            $this->createToolCallIdResolver(),
+            $this->getConfig()->getBackofficeAssistantSseAiConfigurationNames(),
+        );
     }
 
     public function createIntentRouter(): IntentRouterInterface
@@ -202,5 +268,10 @@ class AiCommerceCommunicationFactory extends AbstractCommunicationFactory
     public function getTranslatorFacade(): TranslatorFacadeInterface
     {
         return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_TRANSLATOR);
+    }
+
+    public function createRegeneratedPromptMarker(): RegeneratedPromptMarker
+    {
+        return new RegeneratedPromptMarker();
     }
 }

@@ -1,0 +1,189 @@
+spryker-chat {
+    --chat-launcher-background: linear-gradient(
+        to bottom right,
+        var(--chat-color-accent),
+        var(--chat-color-accent-strong)
+    );
+    --chat-launcher-color: var(--chat-color-accent-contrast);
+    --chat-launcher-shadow: var(--chat-shadow-launcher);
+    --chat-launcher-icon-background: color-mix(in srgb, var(--chat-color-accent-contrast) 15%, transparent);
+    --chat-launcher-icon-ring: color-mix(in srgb, var(--chat-color-accent-contrast) 25%, transparent);
+    --chat-launcher-offset: var(--chat-space-extra-large);
+    --chat-panel-width: var(--chat-size-panel-width);
+    --chat-panel-background: var(--chat-color-background);
+    --chat-panel-border: var(--chat-border-width) solid var(--chat-color-border);
+    --chat-panel-shadow: var(--chat-shadow-panel);
+    --chat-panel-padding-inline: calc(var(--chat-space-large) + var(--chat-space-small));
+    --chat-panel-transition-duration: var(--chat-duration-medium);
+    --chat-title-color: var(--chat-color-text);
+    --chat-icon-button-color: var(--chat-color-text-muted);
+    --chat-icon-button-hover-background: var(--chat-color-surface);
+    --chat-icon-button-hover-color: var(--chat-color-text);
+    --chat-header-logo-background: var(--chat-color-accent-subtle);
+    --chat-header-logo-color: var(--chat-color-accent);
+}
+
+.spryker-chat-launcher {
+    position: fixed;
+    right: var(--chat-launcher-offset);
+    bottom: var(--chat-launcher-offset);
+    z-index: var(--chat-layer);
+    display: inline-flex;
+    align-items: center;
+    gap: calc(var(--chat-space-medium) + var(--chat-space-extra-small));
+    padding: var(--chat-space-medium-large) var(--chat-space-large);
+    border: 0;
+    border-radius: var(--chat-radius-pill);
+    background: var(--chat-launcher-background);
+    color: var(--chat-launcher-color);
+    font-size: var(--chat-font-size-medium);
+    font-weight: var(--chat-font-weight-medium);
+    box-shadow: var(--chat-launcher-shadow);
+    cursor: pointer;
+    animation: spryker-chat-appear var(--chat-duration-medium) var(--chat-easing);
+    transition: transform var(--chat-duration-medium) var(--chat-easing);
+
+    &:hover {
+        transform: scale(var(--chat-scale-hover));
+    }
+}
+
+.spryker-chat-launcher__icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--chat-size-launcher-icon);
+    height: var(--chat-size-launcher-icon);
+    border-radius: var(--chat-radius-round);
+    background: var(--chat-launcher-icon-background);
+
+    .spryker-chat__icon {
+        width: var(--chat-size-icon-medium);
+        height: var(--chat-size-icon-medium);
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border: var(--chat-border-width) solid var(--chat-launcher-icon-ring);
+        border-top-color: transparent;
+        border-radius: var(--chat-radius-round);
+        animation: spryker-chat-spin var(--chat-duration-spin) linear infinite;
+    }
+}
+
+.spryker-chat-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: var(--chat-layer);
+    display: flex;
+    flex-direction: column;
+    width: var(--chat-panel-width);
+    max-width: 100%;
+    border-left: var(--chat-panel-border);
+    background: var(--chat-panel-background);
+    box-shadow: var(--chat-panel-shadow);
+    transition:
+        transform var(--chat-panel-transition-duration) var(--chat-easing),
+        visibility 0s linear 0s;
+}
+
+.spryker-chat--expanded .spryker-chat-panel {
+    width: 100%;
+    border-left: 0;
+}
+
+spryker-chat:not([data-open]) .spryker-chat-panel {
+    transform: translateX(100%);
+    visibility: hidden;
+    transition:
+        transform var(--chat-panel-transition-duration) var(--chat-easing),
+        visibility 0s linear var(--chat-panel-transition-duration);
+}
+
+.spryker-chat-panel__header {
+    position: relative;
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--chat-space-medium);
+    padding: var(--chat-space-medium-large) var(--chat-panel-padding-inline);
+}
+
+.spryker-chat-panel__header-start {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: var(--chat-space-medium);
+    min-width: 0;
+}
+
+.spryker-chat-panel__header-actions {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: var(--chat-space-extra-small);
+}
+
+.spryker-chat-panel__header-logo {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: var(--chat-size-logo);
+    height: var(--chat-size-logo);
+    border-radius: var(--chat-radius-round);
+    background: var(--chat-header-logo-background);
+    color: var(--chat-header-logo-color);
+
+    .spryker-chat__icon {
+        width: var(--chat-size-icon-medium);
+        height: var(--chat-size-icon-medium);
+    }
+}
+
+.spryker-chat-panel__title {
+    // Shrinks with the agent picker beside it, so a long title and a long agent name are both cut, not one of them.
+    min-width: 0;
+    overflow: hidden;
+    color: var(--chat-title-color);
+    font-size: var(--chat-font-size-medium);
+    font-weight: var(--chat-font-weight-bold);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.spryker-chat-panel__expand-icon--collapse {
+    display: none;
+}
+
+.spryker-chat--expanded {
+    .spryker-chat-panel__expand-icon--expand {
+        display: none;
+    }
+
+    .spryker-chat-panel__expand-icon--collapse {
+        display: inline-block;
+    }
+}
+
+.spryker-chat-panel__views:has(> :not([hidden])) {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.spryker-chat-panel__footer {
+    flex-shrink: 0;
+    padding: 0 var(--chat-panel-padding-inline) calc(var(--chat-space-medium) + var(--chat-space-extra-small));
+}
+
+.spryker-chat-panel__dropdown {
+    position: relative;
+}

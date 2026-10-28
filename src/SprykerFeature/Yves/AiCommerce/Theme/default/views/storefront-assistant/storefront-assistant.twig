@@ -1,0 +1,44 @@
+{% extends template('widget') %}
+
+{% define data = {
+    isEnabled: _widget.isEnabled,
+    promptUrl: _widget.promptUrl,
+    userName: _widget.userName,
+    supportedAttachmentMimeTypes: _widget.supportedAttachmentMimeTypes,
+    maxAttachmentSizeBytes: _widget.maxAttachmentSizeBytes,
+    maxAttachmentCount: _widget.maxAttachmentCount,
+    maxMessageLengthCharacters: _widget.maxMessageLengthCharacters,
+    conversationsUrl: _widget.conversationsUrl,
+    deleteConversationUrl: _widget.deleteConversationUrl,
+    conversationMessagesUrl: _widget.conversationMessagesUrl,
+    enabledAgents: _widget.enabledAgents,
+    suggestedPrompts: _widget.suggestedPrompts,
+    suggestedPromptSections: _widget.suggestedPromptSections,
+    toolNames: _widget.toolNames,
+} %}
+
+{% block template %}
+    {% if data.isEnabled %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+    {% include organism('storefront-assistant', 'AiCommerce') with {
+        data: {
+            promptUrl: data.promptUrl,
+            userName: data.userName,
+            supportedAttachmentMimeTypes: data.supportedAttachmentMimeTypes,
+            maxAttachmentSizeBytes: data.maxAttachmentSizeBytes,
+            maxAttachmentCount: data.maxAttachmentCount,
+            maxMessageLengthCharacters: data.maxMessageLengthCharacters,
+            conversationsUrl: data.conversationsUrl,
+            deleteConversationUrl: data.deleteConversationUrl,
+            conversationMessagesUrl: data.conversationMessagesUrl,
+            enabledAgents: data.enabledAgents,
+            suggestedPrompts: data.suggestedPrompts,
+            suggestedPromptSections: data.suggestedPromptSections,
+            toolNames: data.toolNames,
+        },
+    } only %}
+{% endblock %}

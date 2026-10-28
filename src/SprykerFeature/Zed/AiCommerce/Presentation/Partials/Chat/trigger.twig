@@ -1,0 +1,8 @@
+{% if isBackofficeAssistantEnabled() %}
+    {% include '@AiCommerce/Chat/features/trigger/button.twig' with {
+        trigger: {
+            label: 'ai_commerce.storefront_assistant.title' | trans,
+            placement: 'fixed',
+        } | merge(trigger ?? {}),
+    } only %}
+{% endif %}

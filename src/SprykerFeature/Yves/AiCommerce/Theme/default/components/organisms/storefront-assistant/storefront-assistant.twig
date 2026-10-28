@@ -1,0 +1,69 @@
+{% extends model('component') %}
+
+{% define config = {
+    name: 'storefront-assistant',
+    tag: 'storefront-assistant',
+} %}
+
+{% define data = {
+    promptUrl: required,
+    userName: '',
+    supportedAttachmentMimeTypes: '',
+    maxAttachmentSizeBytes: 0,
+    maxAttachmentCount: 0,
+    maxMessageLengthCharacters: 0,
+    conversationsUrl: '',
+    deleteConversationUrl: '',
+    conversationMessagesUrl: '',
+    enabledAgents: [],
+    suggestedPrompts: {},
+    suggestedPromptSections: {},
+    toolNames: [],
+} %}
+
+{% block body %}
+    {% set translatedToolLabels = {} %}
+    {% for toolName in data.toolNames %}
+        {% set translatedToolLabels = translatedToolLabels | merge({
+            (toolName): ('ai_commerce.storefront_assistant.tool.' ~ toolName) | trans,
+        }) %}
+    {% endfor %}
+
+    {% embed '@AiCommerce/Chat/core/chat.twig' with {
+        chat: {
+            promptUrl: data.promptUrl,
+            conversationsUrl: data.conversationsUrl,
+            conversationMessagesUrl: data.conversationMessagesUrl,
+            deleteConversationUrl: data.deleteConversationUrl,
+            csrfToken: csrf_token('storefront_assistant'),
+            maxMessageLength: data.maxMessageLengthCharacters,
+            userName: data.userName,
+        },
+        features: {
+            agentSelector: {
+                agents: data.enabledAgents,
+            },
+            attachments: {
+                accept: data.supportedAttachmentMimeTypes,
+                maxSizeBytes: data.maxAttachmentSizeBytes,
+                maxCount: data.maxAttachmentCount,
+            },
+            suggestedPrompts: {
+                prompts: data.suggestedPrompts,
+                sections: data.suggestedPromptSections,
+            },
+            toolCalls: {
+                toolLabels: translatedToolLabels,
+                hideUnclaimedResults: true,
+            },
+        },
+    } only %}
+        {% block hostFeatures %}
+            {% include molecule('chat-page-context', 'AiCommerce') only %}
+            {% include molecule('chat-tool-products', 'AiCommerce') only %}
+            {% include molecule('chat-tool-compare', 'AiCommerce') only %}
+            {% include molecule('chat-offer-choices', 'AiCommerce') only %}
+            {% include molecule('chat-display-setup', 'AiCommerce') only %}
+        {% endblock %}
+    {% endembed %}
+{% endblock %}

@@ -1,0 +1,5 @@
+{% block featureSessionPersistence %}
+    {% if chat.conversationMessagesUrl is not empty %}
+        <chat-session-persistence storage-key="{{ features.sessionPersistence.storageKey }}"></chat-session-persistence>
+    {% endif %}
+{% endblock %}

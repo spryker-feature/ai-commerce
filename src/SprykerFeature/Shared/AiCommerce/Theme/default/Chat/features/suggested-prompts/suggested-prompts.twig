@@ -1,0 +1,32 @@
+{% block featureSuggestedPrompts %}
+    {# A JSON string from the current storefront widget passes as it is, for one release. #}
+    {% set prompts = features.suggestedPrompts.prompts %}
+    {% set sections = features.suggestedPrompts.sections %}
+    <chat-suggested-prompts prompts="{{ prompts is iterable ? prompts | json_encode(constant('JSON_THROW_ON_ERROR') b-or constant('JSON_INVALID_UTF8_SUBSTITUTE')) : prompts }}"
+                            sections="{{ sections | json_encode(constant('JSON_THROW_ON_ERROR') b-or constant('JSON_INVALID_UTF8_SUBSTITUTE')) }}"
+                            group="{{ features.suggestedPrompts.group }}">
+        {% block suggestedPrompts %}
+            <template data-block="suggestedPrompts">
+                <div class="chat-suggested-prompts"
+                     role="group"
+                     aria-label="{{ 'ai_commerce.storefront_assistant.suggestions.label' | trans }}"
+                     hidden></div>
+            </template>
+        {% endblock %}
+        {% block suggestedPromptSection %}
+            <template data-block="suggestedPromptSection">
+                <div class="chat-suggested-prompts__section">
+                    <p class="chat-suggested-prompts__title" data-ref="title" hidden></p>
+                    <div class="chat-suggested-prompts__list" data-ref="list"></div>
+                </div>
+            </template>
+        {% endblock %}
+        {% block suggestedPrompt %}
+            <template data-block="suggestedPrompt">
+                <button type="button" class="chat-suggested-prompts__prompt">
+                    <span data-ref="text"></span>
+                </button>
+            </template>
+        {% endblock %}
+    </chat-suggested-prompts>
+{% endblock %}

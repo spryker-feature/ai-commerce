@@ -1,0 +1,24 @@
+{% extends model('component') %}
+
+{% define config = {
+    name: 'chat-offer-choices',
+    tag: 'chat-offer-choices',
+} %}
+
+{% block body %}
+    {% block offerChoices %}
+        <template data-block="offerChoices">
+            <div class="chat-offer-choices__choices">
+                <p class="chat-offer-choices__question" data-ref="question" hidden></p>
+                <div class="chat-offer-choices__chips" data-ref="choices" role="group"></div>
+            </div>
+        </template>
+    {% endblock %}
+    {% block offerChoice %}
+        <template data-block="offerChoice">
+            <button type="button" class="chat-offer-choices__chip" aria-pressed="false">
+                <span data-ref="text"></span>
+            </button>
+        </template>
+    {% endblock %}
+{% endblock %}

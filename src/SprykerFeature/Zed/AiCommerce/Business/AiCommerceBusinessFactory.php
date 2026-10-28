@@ -97,6 +97,7 @@ class AiCommerceBusinessFactory extends AbstractBusinessFactory
     {
         return new BackofficeAssistantConversationDeleter(
             $this->getEntityManager(),
+            $this->getRepository(),
         );
     }
 

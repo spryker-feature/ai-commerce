@@ -1,0 +1,14 @@
+@use './core/chat';
+@use '@shared/ai-commerce/Chat/features/agent-selector/agent-selector';
+@use '@shared/ai-commerce/Chat/features/histories/histories';
+@use '@shared/ai-commerce/Chat/features/attachments/attachments';
+@use '@shared/ai-commerce/Chat/features/suggested-prompts/suggested-prompts';
+@use '@shared/ai-commerce/Chat/features/reasoning/reasoning';
+@use '@shared/ai-commerce/Chat/features/tool-calls/tool-calls';
+@use '@shared/ai-commerce/Chat/features/loading-label/loading-label';
+@use '@shared/ai-commerce/Chat/features/message-actions/message-actions';
+@use '@shared/ai-commerce/Chat/features/scroll-latest/scroll-latest';
+@use '@shared/ai-commerce/Chat/features/session-persistence/session-persistence';
+@use '@shared/ai-commerce/Chat/features/trigger/trigger';
+@use '@shared/ai-commerce/Chat/features/docking/docking';
+@use '@shared/ai-commerce/Chat/features/page-context/page-context';

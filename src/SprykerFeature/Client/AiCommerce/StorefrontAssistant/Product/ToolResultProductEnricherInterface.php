@@ -9,7 +9,9 @@ declare(strict_types=1);
 
 namespace SprykerFeature\Client\AiCommerce\StorefrontAssistant\Product;
 
-interface ToolResultProductEnricherInterface
+use SprykerFeature\Shared\AiCommerce\Stream\ToolResultExpanderInterface;
+
+interface ToolResultProductEnricherInterface extends ToolResultExpanderInterface
 {
     public function enrich(string $toolResult): string;
 }

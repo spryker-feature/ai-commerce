@@ -1,0 +1,46 @@
+{% block composer %}
+    <template data-block="composer">
+        <div class="spryker-chat-composer__area">
+            <div class="spryker-chat-composer">
+                <div class="spryker-chat-composer__start" data-zone="composerStart"></div>
+                <textarea class="spryker-chat-composer__input"
+                          data-ref="input"
+                          rows="1"
+                          aria-label="{{ 'ai_commerce.storefront_assistant.form.message.label' | trans }}"
+                          placeholder="{{ 'ai_commerce.storefront_assistant.form.message.placeholder' | trans }}"></textarea>
+                <div class="spryker-chat-composer__row">
+                    <div class="spryker-chat-composer__actions" data-zone="composerActions"></div>
+                    <span class="spryker-chat-composer__hint">{{ 'ai_commerce.storefront_assistant.composer.hint' | trans }}</span>
+                    <button type="button"
+                            class="spryker-chat-composer__send"
+                            data-ref="send"
+                            aria-label="{{ 'ai_commerce.storefront_assistant.action.send' | trans }}"
+                            title="{{ 'ai_commerce.storefront_assistant.action.send' | trans }}">
+                        <svg class="spryker-chat__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.714 3.048a.498.498 0 0 0-.683.627l2.843 7.627a2 2 0 0 1 0 1.396l-2.842 7.627a.498.498 0 0 0 .682.627l18-8.5a.5.5 0 0 0 0-.904z"/><path d="M6 12h16"/></g></svg>
+                    </button>
+                    <button type="button"
+                            class="spryker-chat-composer__stop"
+                            data-ref="stop"
+                            aria-label="{{ 'ai_commerce.storefront_assistant.action.stop' | trans }}"
+                            title="{{ 'ai_commerce.storefront_assistant.action.stop' | trans }}"
+                            hidden>
+                        <svg class="spryker-chat__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg>
+                    </button>
+                </div>
+            </div>
+            <p class="spryker-chat-composer__limit" data-ref="limit" role="alert" hidden>
+                {{- 'ai_commerce.storefront_assistant.validation.message_too_long' | trans({'%max%': chat.maxMessageLength}) -}}
+            </p>
+            {# EU AI Act Article 50(1): always rendered; an empty or untranslated glossary value falls back to the default. #}
+            {% set aiDisclosureKey = 'ai_commerce.storefront_assistant.composer.ai_disclosure' %}
+            {% set aiDisclosure = aiDisclosureKey | trans | trim %}
+            {% if aiDisclosure is empty or aiDisclosure == aiDisclosureKey %}
+                {% set aiDisclosure = 'AI-generated responses. Review before acting.' %}
+            {% endif %}
+            <p class="spryker-chat-composer__ai-disclosure" data-ref="disclosure">
+                <svg class="spryker-chat__icon spryker-chat-composer__ai-disclosure-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></g></svg>
+                <span class="spryker-chat-composer__ai-disclosure-text">{{ aiDisclosure }}</span>
+            </p>
+        </div>
+    </template>
+{% endblock %}

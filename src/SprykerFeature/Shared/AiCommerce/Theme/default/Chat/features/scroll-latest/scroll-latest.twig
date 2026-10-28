@@ -1,0 +1,17 @@
+{% block featureScrollLatest %}
+    <chat-scroll-latest>
+        {% block scrollLatest %}
+            <template data-block="scrollLatest">
+                <div class="chat-scroll-latest">
+                    <button type="button"
+                            class="chat-scroll-latest__button"
+                            data-ref="button"
+                            aria-label="{{ 'ai_commerce.storefront_assistant.action.scroll_latest' | trans }}"
+                            title="{{ 'ai_commerce.storefront_assistant.action.scroll_latest' | trans }}">
+                        <svg class="spryker-chat__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></g></svg>
+                    </button>
+                </div>
+            </template>
+        {% endblock %}
+    </chat-scroll-latest>
+{% endblock %}

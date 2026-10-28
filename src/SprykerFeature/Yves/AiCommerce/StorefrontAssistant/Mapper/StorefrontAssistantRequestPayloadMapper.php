@@ -17,6 +17,7 @@ use Generated\Shared\Transfer\StorefrontAssistantConversationDeleteConditionsTra
 use Generated\Shared\Transfer\StorefrontAssistantConversationMessageCollectionCriteriaTransfer;
 use Generated\Shared\Transfer\StorefrontAssistantConversationMessageConditionsTransfer;
 use Generated\Shared\Transfer\StorefrontAssistantPageContextTransfer;
+use SprykerFeature\Shared\AiCommerce\Conversation\RegeneratedPromptMarker;
 use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Sanitizer\StorefrontAssistantPageContextSanitizerInterface;
 
 class StorefrontAssistantRequestPayloadMapper implements StorefrontAssistantRequestPayloadMapperInterface
@@ -57,7 +58,8 @@ class StorefrontAssistantRequestPayloadMapper implements StorefrontAssistantRequ
             ->setLocaleName($localeName)
             ->setSelectedAgent($selectedAgent !== '' ? $selectedAgent : null)
             ->setStorefrontAssistantPageContext($this->mapPageContext($payload[static::KEY_PAGE_CONTEXT] ?? null))
-            ->setRawAttachments(is_array($rawAttachments) ? $rawAttachments : []);
+            ->setRawAttachments(is_array($rawAttachments) ? $rawAttachments : [])
+            ->setIsRegeneration(($payload[RegeneratedPromptMarker::PAYLOAD_KEY_REGENERATE] ?? false) === true);
     }
 
     /**

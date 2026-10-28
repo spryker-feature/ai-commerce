@@ -1,0 +1,52 @@
+{% block messageUser %}
+    <template data-block="messageUser">
+        <div class="spryker-chat-message spryker-chat-message--user">
+            <p class="spryker-chat-message__text" data-ref="text"></p>
+        </div>
+    </template>
+{% endblock %}
+
+{% block messageAssistant %}
+    <template data-block="messageAssistant">
+        <div class="spryker-chat-message spryker-chat-message--assistant">
+            <div class="spryker-chat-markdown" data-ref="content"></div>
+        </div>
+    </template>
+{% endblock %}
+
+{% block messageError %}
+    <template data-block="messageError">
+        <div class="spryker-chat-message spryker-chat-message--error" role="alert">
+            <p class="spryker-chat-message__text" data-ref="text">
+                {{- 'ai_commerce.storefront_assistant.error.generic' | trans -}}
+            </p>
+        </div>
+    </template>
+{% endblock %}
+
+{% block loading %}
+    <template data-block="loading">
+        <div class="spryker-chat-message spryker-chat-message--loading">
+            <span class="spryker-chat-message__loading-icon">
+                <svg class="spryker-chat__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></g></svg>
+            </span>
+            <span class="spryker-chat-message__typing">
+                <span class="spryker-chat-message__typing-dot"></span>
+                <span class="spryker-chat-message__typing-dot"></span>
+                <span class="spryker-chat-message__typing-dot"></span>
+            </span>
+            <span class="spryker-chat-message__loading-label" data-ref="label" hidden></span>
+            <span class="spryker-chat__visually-hidden" data-ref="status">
+                {{- 'ai_commerce.storefront_assistant.activity.answering' | trans -}}
+            </span>
+        </div>
+    </template>
+{% endblock %}
+
+{% block retry %}
+    <template data-block="retry">
+        <button type="button" class="spryker-chat-transcript__retry">
+            {{- 'ai_commerce.storefront_assistant.action.retry' | trans -}}
+        </button>
+    </template>
+{% endblock %}

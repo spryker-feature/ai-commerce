@@ -1,0 +1,355 @@
+spryker-chat {
+    --chat-carousel-background: var(--chat-color-surface);
+    --chat-carousel-nav-background: var(--chat-color-surface-secondary);
+    --chat-carousel-nav-color: var(--chat-color-text);
+    --chat-carousel-nav-size: calc(var(--chat-size-control) - var(--chat-space-small));
+    --chat-carousel-nav-shadow: 0 1px 2px rgb(0 0 0 / 10%);
+    --chat-carousel-nav-hover-background: var(--chat-color-border);
+    --chat-product-card-width: var(--chat-size-card-width);
+    --chat-product-card-background: var(--chat-color-background);
+    --chat-product-card-border: var(--chat-border-width) solid var(--chat-color-border);
+    --chat-product-card-media-height: var(--chat-size-card-media);
+    --chat-product-card-image-height: calc(
+        var(--chat-size-card-media) - var(--chat-space-extra-large) - var(--chat-space-medium)
+    );
+    --chat-product-card-muted-color: var(--chat-color-text-muted);
+    --chat-product-card-rating-color: var(--chat-color-warning);
+    --chat-product-card-badge-background: var(--chat-color-surface-secondary);
+    --chat-product-card-outlier-background: var(--chat-color-error-surface);
+    --chat-product-card-outlier-color: var(--chat-color-error);
+    --chat-product-card-button-border: var(--chat-border-width) solid var(--chat-color-border);
+    --chat-product-card-button-hover-background: var(--chat-color-surface);
+    --chat-product-card-compare-active-background: var(--chat-color-accent);
+    --chat-product-card-compare-active-color: var(--chat-color-accent-contrast);
+    --chat-product-chip-background: var(--chat-color-surface);
+    --chat-product-chip-border: var(--chat-border-width) solid var(--chat-color-border);
+    --chat-product-chip-color: var(--chat-color-text-muted);
+    --chat-product-chip-hover-color: var(--chat-color-text);
+    --chat-product-chip-hover-background: var(--chat-color-surface-secondary);
+    --chat-filter-pill-background: var(--chat-color-accent-subtle);
+    --chat-filter-pill-border: var(--chat-border-width) solid var(--chat-color-accent-border);
+    --chat-filter-pill-hover-background: color-mix(in sRGB, var(--chat-color-accent) 5%, var(--chat-color-background));
+    --chat-filter-pill-color: var(--chat-color-accent);
+    --chat-see-all-color: var(--chat-color-accent);
+}
+
+chat-tool-products {
+    display: none;
+}
+
+.chat-tool-products__result {
+    display: flex;
+    flex-direction: column;
+    gap: var(--chat-space-medium);
+    align-self: stretch;
+}
+
+.chat-tool-products__carousel {
+    position: relative;
+    padding: var(--chat-space-medium-large);
+    border-radius: var(--chat-radius-large);
+    background: var(--chat-carousel-background);
+}
+
+.chat-tool-products__carousel-track {
+    display: flex;
+    gap: var(--chat-space-medium-large);
+    padding-bottom: var(--chat-space-small);
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+}
+
+.chat-tool-products__carousel-nav {
+    position: absolute;
+    top: 50%;
+    z-index: 1;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--chat-carousel-nav-size);
+    height: var(--chat-carousel-nav-size);
+    padding: 0;
+    border: 0;
+    border-radius: var(--chat-radius-round);
+    background: var(--chat-carousel-nav-background);
+    color: var(--chat-carousel-nav-color);
+    box-shadow: var(--chat-carousel-nav-shadow);
+    cursor: pointer;
+    transform: translateY(-50%);
+
+    &:hover:not(:disabled) {
+        background: var(--chat-carousel-nav-hover-background);
+    }
+
+    &:disabled {
+        opacity: var(--chat-opacity-muted);
+        cursor: default;
+    }
+}
+
+.chat-tool-products__carousel-nav--previous {
+    left: var(--chat-space-small);
+}
+
+.chat-tool-products__carousel-nav--next {
+    right: var(--chat-space-small);
+}
+
+// Touch screens have no hover, so they always show the arrows; a pointer sees them only over the carousel.
+.chat-tool-products__carousel[data-scrollable]:is(:hover, :focus-within) .chat-tool-products__carousel-nav {
+    display: flex;
+}
+
+@media (width < 768px) {
+    .chat-tool-products__carousel[data-scrollable] .chat-tool-products__carousel-nav {
+        display: flex;
+    }
+}
+
+.chat-tool-products__card {
+    display: flex;
+    flex: 0 0 var(--chat-product-card-width);
+    flex-direction: column;
+    overflow: hidden;
+    border: var(--chat-product-card-border);
+    border-radius: var(--chat-radius);
+    background: var(--chat-product-card-background);
+    color: var(--chat-color-text);
+    scroll-snap-align: start;
+}
+
+.chat-tool-products__card-media {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--chat-product-card-media-height);
+    border-bottom: var(--chat-product-card-border);
+}
+
+.chat-tool-products__card-image {
+    max-width: 90%;
+    height: var(--chat-product-card-image-height);
+    object-fit: contain;
+}
+
+.chat-tool-products__card-badge {
+    position: absolute;
+    top: var(--chat-space-medium);
+    left: var(--chat-space-medium);
+    display: inline-flex;
+    align-items: center;
+    height: calc(var(--chat-space-large) + var(--chat-space-small));
+    padding: 0 var(--chat-space-medium);
+    border-radius: var(--chat-radius-pill);
+    background: var(--chat-product-card-badge-background);
+    font-size: var(--chat-font-size-extra-small);
+    font-weight: var(--chat-font-weight-medium);
+    white-space: nowrap;
+
+    &[hidden] {
+        display: none;
+    }
+}
+
+.chat-tool-products__card-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: calc(var(--chat-space-small) + var(--chat-space-extra-small));
+    padding: var(--chat-space-medium-large);
+}
+
+.chat-tool-products__card-name {
+    margin: 0;
+    font-size: var(--chat-font-size-medium);
+    font-weight: var(--chat-font-weight-medium);
+    line-height: 1.375;
+}
+
+.chat-tool-products__card-sku,
+.chat-tool-products__card-rating,
+.chat-tool-products__card-text {
+    margin: 0;
+    color: var(--chat-product-card-muted-color);
+    font-size: var(--chat-font-size-small);
+}
+
+.chat-tool-products__card-price {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: calc(var(--chat-space-small) + var(--chat-space-extra-small));
+    margin: 0;
+    font-size: var(--chat-font-size-medium);
+}
+
+.chat-tool-products__card-price-current {
+    font-weight: var(--chat-font-weight-semibold);
+}
+
+.chat-tool-products__card-price-original {
+    color: var(--chat-product-card-muted-color);
+    font-size: var(--chat-font-size-small);
+    text-decoration: line-through;
+}
+
+.chat-tool-products__card-price-outlier {
+    padding: 0 calc(var(--chat-space-small) + var(--chat-space-extra-small));
+    border-radius: var(--chat-radius-pill);
+    background: var(--chat-product-card-outlier-background);
+    color: var(--chat-product-card-outlier-color);
+    font-size: var(--chat-font-size-extra-small);
+}
+
+.chat-tool-products__card-rating {
+    display: flex;
+    align-items: center;
+    gap: var(--chat-space-small);
+}
+
+.chat-tool-products__card-rating-icon {
+    width: var(--chat-size-icon-small);
+    height: var(--chat-size-icon-small);
+    color: var(--chat-product-card-rating-color);
+}
+
+.chat-tool-products__card-text {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.chat-tool-products__card-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--chat-space-medium);
+    margin-top: auto;
+    padding-top: calc(var(--chat-space-small) + var(--chat-space-extra-small));
+}
+
+.chat-tool-products__card-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--chat-space-small);
+    height: var(--chat-size-control);
+    padding: 0 var(--chat-space-medium-large);
+    border: var(--chat-product-card-button-border);
+    border-radius: var(--chat-radius-pill);
+    background: var(--chat-product-card-background);
+    color: var(--chat-color-text);
+    font: inherit;
+    font-size: var(--chat-font-size-small);
+    font-weight: var(--chat-font-weight-medium);
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:hover {
+        background: var(--chat-product-card-button-hover-background);
+    }
+
+    &:disabled {
+        opacity: var(--chat-opacity-muted);
+        cursor: not-allowed;
+    }
+}
+
+.chat-tool-products__card-button .spryker-chat__icon {
+    width: var(--chat-size-icon-medium);
+    height: var(--chat-size-icon-medium);
+}
+
+.chat-tool-products__card-view {
+    flex: 1;
+    padding: 0 calc(var(--chat-space-medium) + var(--chat-space-extra-small));
+}
+
+.chat-tool-products__card-compare-check {
+    display: none;
+}
+
+.chat-tool-products__card-compare[aria-pressed='true'] {
+    border-color: var(--chat-product-card-compare-active-background);
+    background: var(--chat-product-card-compare-active-background);
+    color: var(--chat-product-card-compare-active-color);
+
+    .chat-tool-products__card-compare-check {
+        display: inline-block;
+    }
+}
+
+.chat-tool-products__prompts,
+.chat-tool-products__refinements,
+.chat-tool-products__refinement-pills,
+.chat-tool-products__refinement-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: calc(var(--chat-space-small) + var(--chat-space-extra-small));
+}
+
+.chat-tool-products__refinements {
+    flex-direction: column;
+    gap: calc(var(--chat-space-small) + var(--chat-space-extra-small));
+}
+
+.chat-tool-products__prompt,
+.chat-tool-products__refinement-chip,
+.chat-tool-products__filter-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(var(--chat-space-small) + var(--chat-space-extra-small));
+    height: calc(var(--chat-size-control) - var(--chat-space-small));
+    padding: 0 var(--chat-space-medium-large);
+    border: var(--chat-product-chip-border);
+    border-radius: var(--chat-radius-pill);
+    background: var(--chat-product-chip-background);
+    color: var(--chat-product-chip-color);
+    font: inherit;
+    font-size: var(--chat-font-size-small);
+    font-weight: var(--chat-font-weight-medium);
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+        background: var(--chat-product-chip-hover-background);
+        color: var(--chat-product-chip-hover-color);
+    }
+}
+
+.chat-tool-products__filter-pill {
+    border: var(--chat-filter-pill-border);
+    background: var(--chat-filter-pill-background);
+    color: var(--chat-filter-pill-color);
+
+    &:hover,
+    &:focus-visible {
+        background: var(--chat-filter-pill-hover-background);
+        color: var(--chat-filter-pill-color);
+    }
+}
+
+.chat-tool-products__filter-pill-remove {
+    font-weight: var(--chat-font-weight-semibold);
+}
+
+.chat-tool-products__see-all-link {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    color: var(--chat-see-all-color);
+    font-size: var(--chat-font-size-small);
+    font-weight: var(--chat-font-weight-medium);
+    text-decoration: none;
+    text-underline-offset: var(--chat-space-extra-small);
+
+    &:hover {
+        text-decoration: underline;
+    }
+}

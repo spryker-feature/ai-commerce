@@ -1,0 +1,34 @@
+spryker-chat {
+    --chat-reasoning-color: var(--chat-color-text-muted);
+    --chat-reasoning-rule: var(--chat-focus-width) solid var(--chat-color-border);
+    --chat-reasoning-font-size: var(--chat-font-size-body-small);
+}
+
+chat-reasoning {
+    display: none;
+}
+
+.chat-reasoning {
+    align-self: stretch;
+    padding: var(--chat-space-extra-small) 0 var(--chat-space-extra-small)
+        calc(var(--chat-space-medium) + var(--chat-space-extra-small));
+    border-left: var(--chat-reasoning-rule);
+    color: var(--chat-reasoning-color);
+    font-size: var(--chat-reasoning-font-size);
+    line-height: var(--chat-line-height);
+    animation: spryker-chat-appear var(--chat-panel-transition-duration) var(--chat-easing);
+}
+
+.chat-reasoning__summary {
+    font-weight: var(--chat-font-weight-medium);
+    cursor: pointer;
+}
+
+.chat-reasoning__content {
+    margin-top: var(--chat-space-small);
+    font-style: italic;
+}
+
+.chat-reasoning__part + .chat-reasoning__part {
+    margin-top: var(--chat-space-medium);
+}

@@ -1,0 +1,482 @@
+spryker-chat {
+    --chat-compare-tray-background: var(--chat-color-surface);
+    --chat-compare-tray-border: var(--chat-border-width) solid var(--chat-color-border);
+    --chat-compare-chip-background: var(--chat-color-background);
+    --chat-compare-chip-image-size: calc(var(--chat-size-icon) + var(--chat-space-small));
+    --chat-compare-chip-name-max-width: 110px;
+    --chat-compare-submit-background: var(--chat-color-accent);
+    --chat-compare-submit-color: var(--chat-color-accent-contrast);
+    --chat-comparison-card-background: var(--chat-color-background);
+    --chat-comparison-card-border: var(--chat-border-width) solid var(--chat-color-border);
+    --chat-comparison-card-image-size: calc(var(--chat-size-icon) + var(--chat-space-medium));
+    --chat-comparison-view-background: var(--chat-color-surface);
+    --chat-comparison-head-background: var(--chat-color-surface);
+    --chat-comparison-label-background: var(--chat-color-background);
+    --chat-comparison-section-background: var(--chat-color-surface-secondary);
+    --chat-comparison-stripe-background: var(--chat-color-surface);
+    --chat-comparison-border: var(--chat-border-width) solid var(--chat-color-border);
+    --chat-comparison-label-width: 140px;
+    --chat-comparison-column-width: 180px;
+    --chat-comparison-product-image-size: 44px;
+    --chat-comparison-empty-opacity: 0.7;
+    --chat-comparison-price-font-size: var(--chat-font-size-large);
+    --chat-switch-knob-size: calc(var(--chat-size-icon) - var(--chat-space-extra-small));
+    --chat-switch-track-width: var(--chat-size-control);
+    --chat-switch-track-height: calc(var(--chat-switch-knob-size) + var(--chat-space-small));
+    --chat-switch-track-background: var(--chat-color-border);
+    --chat-switch-track-active-background: var(--chat-color-accent);
+    --chat-switch-knob-background: var(--chat-color-background);
+}
+
+chat-tool-compare {
+    display: none;
+}
+
+.chat-tool-compare__tray {
+    display: flex;
+    flex-direction: column;
+    gap: var(--chat-space-medium);
+    margin: 0 calc(-1 * var(--chat-panel-padding-inline));
+    padding: calc(var(--chat-space-medium) + var(--chat-space-extra-small)) var(--chat-space-medium-large);
+    border-top: var(--chat-compare-tray-border);
+    background: var(--chat-compare-tray-background);
+}
+
+.chat-tool-compare__tray-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.chat-tool-compare__tray-count {
+    margin: 0;
+    color: var(--chat-color-text-muted);
+    font-size: var(--chat-font-size-small);
+    font-weight: var(--chat-font-weight-medium);
+}
+
+.chat-tool-compare__tray-clear {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--chat-color-text-muted);
+    font: inherit;
+    font-size: var(--chat-font-size-small);
+    font-weight: var(--chat-font-weight-medium);
+    cursor: pointer;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.chat-tool-compare__tray-chips {
+    display: flex;
+    gap: var(--chat-space-medium);
+    padding-bottom: var(--chat-space-extra-small);
+    overflow-x: auto;
+}
+
+.chat-tool-compare__chip {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: calc(var(--chat-space-small) + var(--chat-space-extra-small));
+    padding: var(--chat-space-small) var(--chat-space-medium) var(--chat-space-small) var(--chat-space-small);
+    border: var(--chat-compare-tray-border);
+    border-radius: var(--chat-radius-pill);
+    background: var(--chat-compare-chip-background);
+    color: var(--chat-color-text);
+    font-size: var(--chat-font-size-small);
+}
+
+.chat-tool-compare__chip-image {
+    flex-shrink: 0;
+    width: var(--chat-compare-chip-image-size);
+    height: var(--chat-compare-chip-image-size);
+    border-radius: var(--chat-radius-round);
+    object-fit: contain;
+}
+
+.chat-tool-compare__chip-name {
+    max-width: var(--chat-compare-chip-name-max-width);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chat-tool-compare__chip-remove {
+    display: inline-flex;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--chat-color-text-muted);
+    cursor: pointer;
+
+    .spryker-chat__icon {
+        width: var(--chat-size-icon-small);
+        height: var(--chat-size-icon-small);
+    }
+}
+
+.chat-tool-compare__tray-submit,
+.chat-tool-compare__open {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--chat-size-control);
+    padding: 0 var(--chat-space-medium-large);
+    border: 0;
+    border-radius: var(--chat-radius-pill);
+    background: var(--chat-compare-submit-background);
+    color: var(--chat-compare-submit-color);
+    font: inherit;
+    font-size: var(--chat-font-size-body-small);
+    font-weight: var(--chat-font-weight-medium);
+    cursor: pointer;
+
+    &:disabled {
+        opacity: var(--chat-opacity-muted);
+        cursor: not-allowed;
+    }
+}
+
+.chat-tool-compare__card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--chat-space-medium);
+    align-self: stretch;
+    padding: var(--chat-space-medium);
+    border: var(--chat-comparison-card-border);
+    border-radius: var(--chat-radius-large);
+    background: var(--chat-comparison-card-background);
+}
+
+.chat-tool-compare__card-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--chat-space-medium);
+}
+
+.chat-tool-compare__card-title {
+    font-weight: var(--chat-font-weight-bold);
+}
+
+.chat-tool-compare__card-count {
+    color: var(--chat-color-text-muted);
+    font-size: var(--chat-font-size-small);
+}
+
+.chat-tool-compare__card-products {
+    display: flex;
+    flex-direction: column;
+    gap: var(--chat-space-small);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.chat-tool-compare__card-product {
+    display: flex;
+    align-items: center;
+    gap: var(--chat-space-medium);
+    min-width: 0;
+    font-size: var(--chat-font-size-small);
+}
+
+.chat-tool-compare__card-product-image {
+    flex-shrink: 0;
+    width: var(--chat-comparison-card-image-size);
+    height: var(--chat-comparison-card-image-size);
+    border: var(--chat-comparison-card-border);
+    border-radius: var(--chat-radius);
+    object-fit: contain;
+}
+
+.chat-tool-compare__card-product-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chat-tool-compare__card-product-price {
+    flex-shrink: 0;
+    margin-left: auto;
+    font-weight: var(--chat-font-weight-bold);
+}
+
+.chat-tool-compare__card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--chat-space-medium);
+}
+
+.chat-tool-compare__link,
+.chat-tool-compare__product-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--chat-space-small);
+    height: var(--chat-size-control);
+    padding: 0 calc(var(--chat-space-medium) + var(--chat-space-extra-small));
+    border: var(--chat-comparison-card-border);
+    border-radius: var(--chat-radius-pill);
+    color: var(--chat-color-text);
+    font-size: var(--chat-font-size-small);
+    font-weight: var(--chat-font-weight-medium);
+    text-decoration: none;
+    white-space: nowrap;
+
+    .spryker-chat__icon {
+        width: var(--chat-size-icon-medium);
+        height: var(--chat-size-icon-medium);
+    }
+}
+
+.chat-tool-compare__view {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.chat-tool-compare__view-header {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--chat-space-medium);
+    padding: var(--chat-space-medium) var(--chat-space-large);
+    border-bottom: var(--chat-comparison-border);
+}
+
+.chat-tool-compare__view-title {
+    display: flex;
+    align-items: center;
+    gap: var(--chat-space-medium);
+    min-width: 0;
+    font-size: var(--chat-font-size-medium);
+    font-weight: var(--chat-font-weight-bold);
+}
+
+.chat-tool-compare__view-heading {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.chat-tool-compare__view-count {
+    color: var(--chat-color-text-muted);
+    font-size: var(--chat-font-size-small);
+    font-weight: var(--chat-font-weight-medium);
+}
+
+.chat-tool-compare__switch {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--chat-space-medium);
+    color: var(--chat-color-text-muted);
+    font-size: var(--chat-font-size-small);
+    cursor: pointer;
+}
+
+.chat-tool-compare__switch-input {
+    position: absolute;
+    width: var(--chat-border-width);
+    height: var(--chat-border-width);
+    opacity: 0;
+}
+
+.chat-tool-compare__switch-track {
+    position: relative;
+    flex-shrink: 0;
+    width: var(--chat-switch-track-width);
+    height: var(--chat-switch-track-height);
+    border-radius: var(--chat-radius-pill);
+    background: var(--chat-switch-track-background);
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: var(--chat-space-extra-small);
+        left: var(--chat-space-extra-small);
+        width: var(--chat-switch-knob-size);
+        height: var(--chat-switch-knob-size);
+        border-radius: var(--chat-radius-round);
+        background: var(--chat-switch-knob-background);
+        transition: transform var(--chat-duration-fast) var(--chat-easing);
+    }
+}
+
+.chat-tool-compare__switch-input:checked + .chat-tool-compare__switch-track {
+    background: var(--chat-switch-track-active-background);
+
+    &::after {
+        transform: translateX(var(--chat-switch-knob-size));
+    }
+}
+
+.chat-tool-compare__switch-input:focus-visible + .chat-tool-compare__switch-track {
+    outline: var(--chat-focus-outline);
+    outline-offset: var(--chat-focus-width);
+}
+
+.chat-tool-compare__view-body {
+    flex: 1;
+    overflow: auto;
+    background: var(--chat-comparison-view-background);
+}
+
+.chat-tool-compare__table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: var(--chat-font-size-medium);
+}
+
+.chat-tool-compare__corner,
+.chat-tool-compare__head-cell {
+    position: sticky;
+    top: 0;
+    border-bottom: var(--chat-comparison-border);
+    background: var(--chat-comparison-head-background);
+    text-align: left;
+}
+
+.chat-tool-compare__corner {
+    left: 0;
+    z-index: 3;
+    min-width: var(--chat-comparison-label-width);
+    padding: var(--chat-space-medium-large);
+    border-right: var(--chat-comparison-border);
+    color: var(--chat-color-text-muted);
+    font-size: var(--chat-font-size-small);
+    font-weight: var(--chat-font-weight-medium);
+    vertical-align: bottom;
+}
+
+.chat-tool-compare__head-cell {
+    z-index: 2;
+    min-width: var(--chat-comparison-column-width);
+    padding: calc(var(--chat-space-small) + var(--chat-space-extra-small))
+        calc(var(--chat-space-small) + var(--chat-space-extra-small)) var(--chat-space-medium-large);
+    vertical-align: top;
+}
+
+.chat-tool-compare__product {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: calc(var(--chat-space-medium) + var(--chat-space-extra-small));
+    height: 100%;
+    padding: var(--chat-space-large);
+    border: var(--chat-comparison-border);
+    border-radius: var(--chat-radius-medium);
+    background: var(--chat-color-background);
+    text-align: center;
+}
+
+.chat-tool-compare__product-image {
+    display: block;
+    width: var(--chat-comparison-product-image-size);
+    height: var(--chat-comparison-product-image-size);
+    margin: 0 auto;
+    padding: calc(var(--chat-space-small) + var(--chat-space-extra-small));
+    border: var(--chat-comparison-border);
+    border-radius: calc(var(--chat-radius) - var(--chat-space-extra-small));
+    background: var(--chat-color-background);
+    object-fit: contain;
+
+    &[hidden] {
+        display: none;
+    }
+}
+
+.chat-tool-compare__product-name,
+.chat-tool-compare__product-sku,
+.chat-tool-compare__product-price {
+    margin: 0;
+}
+
+.chat-tool-compare__product-name {
+    overflow: hidden;
+    font-size: var(--chat-font-size-small);
+    font-weight: var(--chat-font-weight-semibold);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chat-tool-compare__product-sku {
+    color: var(--chat-color-text-muted);
+    font-size: var(--chat-font-size-tiny);
+}
+
+.chat-tool-compare__product-price {
+    font-size: var(--chat-comparison-price-font-size);
+    font-weight: var(--chat-font-weight-bold);
+}
+
+.chat-tool-compare__product-link {
+    width: 100%;
+    height: calc(var(--chat-size-control) - var(--chat-space-small));
+    margin-top: auto;
+    font-size: var(--chat-font-size-extra-small);
+}
+
+.chat-tool-compare__section > th {
+    position: sticky;
+    left: 0;
+    padding: calc(var(--chat-space-small) + var(--chat-space-extra-small)) var(--chat-space-medium-large);
+    border-bottom: var(--chat-comparison-border);
+    background: var(--chat-comparison-section-background);
+    color: var(--chat-color-text-muted);
+    font-size: var(--chat-font-size-small);
+    font-weight: var(--chat-font-weight-semibold);
+    text-align: left;
+}
+
+.chat-tool-compare__row {
+    &:nth-child(odd) {
+        background: var(--chat-comparison-stripe-background);
+    }
+
+    > th {
+        position: sticky;
+        left: 0;
+        z-index: 1;
+        padding: var(--chat-space-medium-large);
+        border-right: var(--chat-comparison-border);
+        background: var(--chat-comparison-label-background);
+        color: var(--chat-color-text-muted);
+        font-size: var(--chat-font-size-small);
+        font-weight: var(--chat-font-weight-medium);
+        text-align: left;
+        white-space: normal;
+    }
+
+    > td {
+        padding: var(--chat-space-medium-large);
+        font-size: var(--chat-font-size-small);
+        vertical-align: top;
+    }
+
+    &[data-different] > td {
+        font-weight: var(--chat-font-weight-semibold);
+    }
+}
+
+.chat-tool-compare__value--empty {
+    color: var(--chat-color-text-muted);
+    font-style: italic;
+    opacity: var(--chat-comparison-empty-opacity);
+}
+
+.chat-tool-compare__view[data-differences-only] {
+    .chat-tool-compare__row:not([data-different]),
+    .chat-tool-compare__section[data-same] {
+        display: none;
+    }
+}

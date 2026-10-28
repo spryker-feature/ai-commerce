@@ -1,33 +1,9 @@
-"Open AI Assistant","KI-Assistenten öffnen"
 Assistant,Assistent
-"AI Assistant",KI-Assistent
-"Chat history",Chatverlauf
-"New conversation","Neues Gespräch"
 "Backoffice Assistant",Backoffice-Assistent
-"Select agent","Agent auswählen"
 Auto,Automatisch
-"Close AI Assistant","KI-Assistent schließen"
-"No conversations yet. Start a new one!","Noch keine Unterhaltungen. Starten Sie eine neue!"
 "Attach file","Datei anhängen"
-"Ask me anything...","Fragen Sie mich alles..."
-"Message input",Nachrichteneingabe
-"Send message","Nachricht senden"
 Retry,"Erneut versuchen"
-"Show result","Ergebnis anzeigen"
-"Hide result","Ergebnis ausblenden"
-"Unsupported file type: ","Nicht unterstützter Dateityp: "
-"File too large (max 5 MB): ","Datei zu groß (max. 5 MB): "
-"Failed to load conversations.","Unterhaltungen konnten nicht geladen werden."
-"Delete conversation","Unterhaltung löschen"
-"Hello, %userName%! How can I help you today?","Hallo, %userName%! Wie kann ich Ihnen heute helfen?"
-"Request failed with status ","Anfrage fehlgeschlagen mit Status "
-"Request interrupted.","Anfrage unterbrochen."
-"Connection error. Please try again.","Verbindungsfehler. Bitte versuchen Sie es erneut."
-"No response received.","Keine Antwort erhalten."
 "Error: ","Fehler: "
-"Failed to load conversation history.","Unterhaltungsverlauf konnte nicht geladen werden."
-"Tool Result",Werkzeugergebnis
-"Running %toolName%…","%toolName% wird ausgeführt…"
 backoffice_assistant.validation.prompt_required,"Eingabe ist erforderlich."
 backoffice_assistant.validation.user_id_required,"Benutzer ist nicht identifiziert."
 backoffice_assistant.validation.attachment_unsupported_media_type,"Ein oder mehrere Anhänge haben einen nicht unterstützten Dateityp."
@@ -40,6 +16,8 @@ backoffice_assistant.error.invalid_csrf_token,"Ungültiges oder fehlendes CSRF-T
 backoffice_assistant.error.missing_conversation_reference,"Gesprächsreferenz fehlt."
 backoffice_assistant.error.conversation_not_found,"Gespräch nicht gefunden."
 backoffice_assistant.error.ai_service_unavailable,"KI-Dienst nicht verfügbar."
+backoffice_assistant.error.invalid_payload,"Die Anfrage konnte nicht gelesen werden."
+backoffice_assistant.error.method_not_allowed,"Die Anfragemethode ist nicht erlaubt."
 ai_commerce.smart_pim.ai_assistant,KI-Assistent
 ai_commerce.smart_pim.please_select_option,"Bitte wählen Sie eine der folgenden Optionen."
 ai_commerce.smart_pim.translate_content,"Inhalt übersetzen"
@@ -68,6 +46,68 @@ Generating…,"Wird generiert…"
 "The attachments are too large in total.","Die Anhänge sind insgesamt zu groß."
 "A file could not be read and was not attached.","Eine Datei konnte nicht gelesen werden und wurde nicht angehängt."
 "Remove attachment","Anhang entfernen"
+ai_commerce.backoffice_assistant.form_context.attach,"Formular #%name% an die nächste Nachricht anhängen"
+ai_commerce.backoffice_assistant.form_context.label,"Formular #%name%"
+ai_commerce.backoffice_assistant.form_context.remove,"Formularkontext entfernen"
+ai_commerce.backoffice_assistant.form_fill.skipped,"Der Assistent konnte diese Felder nicht ausfüllen, bitte selbst ausfüllen:"
+ai_commerce.backoffice_assistant.page_context.discount,"Rabatt #%reference%"
+ai_commerce.backoffice_assistant.page_context.order,"Bestellung #%reference%"
+ai_commerce.storefront_assistant.action.attach,"Datei anhängen"
+ai_commerce.storefront_assistant.action.close,"Assistent schließen"
+ai_commerce.storefront_assistant.action.collapse,"Assistent verkleinern"
+ai_commerce.storefront_assistant.action.copied,Kopiert
+ai_commerce.storefront_assistant.action.copy,"Antwort kopieren"
+ai_commerce.storefront_assistant.action.expand,"Assistent maximieren"
+ai_commerce.storefront_assistant.action.hide_result,"Ergebnis ausblenden"
+ai_commerce.storefront_assistant.action.history,Chatverlauf
+ai_commerce.storefront_assistant.action.more_options,"Weitere Optionen"
+ai_commerce.storefront_assistant.action.new_chat,"Neue Unterhaltung"
+ai_commerce.storefront_assistant.action.open,"KI-Assistenten öffnen"
+ai_commerce.storefront_assistant.action.regenerate,"Antwort neu erstellen"
+ai_commerce.storefront_assistant.action.retry,"Erneut versuchen"
+ai_commerce.storefront_assistant.action.scroll_latest,"Zu den neuesten Nachrichten scrollen"
+ai_commerce.storefront_assistant.action.send,Senden
+ai_commerce.storefront_assistant.action.show_result,"Ergebnis anzeigen"
+ai_commerce.storefront_assistant.action.stop,Stopp
+ai_commerce.storefront_assistant.activity.tool_result,Werkzeugergebnis
+ai_commerce.storefront_assistant.agent.auto,Automatisch
+ai_commerce.storefront_assistant.agent.auto_description,"Der Assistent wählt für jede Frage automatisch den passenden Spezialisten."
+ai_commerce.storefront_assistant.agent.select_label,"Agent auswählen"
+ai_commerce.storefront_assistant.attachment.remove,"Anhang entfernen"
+ai_commerce.storefront_assistant.attachment.too_large,"Datei ist zu groß. Maximale Größe: %maxBytes% Bytes."
+ai_commerce.storefront_assistant.attachment.too_many,"Zu viele Anhänge. Maximal %maxCount% Dateien erlaubt."
+ai_commerce.storefront_assistant.attachment.unsupported_type,"Nicht unterstützter Dateityp. Unterstützte Typen: %types%."
+ai_commerce.storefront_assistant.attachment.read_failed,"Die Datei %name% konnte nicht gelesen werden."
+ai_commerce.storefront_assistant.composer.hint,"Enter zum Senden · Umschalt + Enter für eine neue Zeile"
+ai_commerce.storefront_assistant.composer.ai_disclosure,"KI-generierte Antworten. Vor dem Handeln prüfen."
+ai_commerce.storefront_assistant.error.conversation_delete_failed,"Diese Unterhaltung konnte nicht gelöscht werden. Bitte versuchen Sie es erneut."
+ai_commerce.storefront_assistant.error.generic,"Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
+ai_commerce.storefront_assistant.error.tool_failed,"Ein Werkzeugaufruf ist fehlgeschlagen. Die Antwort ist möglicherweise unvollständig."
+ai_commerce.storefront_assistant.form.message.label,Nachrichteneingabe
+ai_commerce.storefront_assistant.form.message.placeholder,"Fragen Sie mich alles..."
+ai_commerce.storefront_assistant.greeting,"Hallo, %userName%! Wie kann ich Ihnen heute helfen?"
+ai_commerce.storefront_assistant.histories.cancel,Abbrechen
+ai_commerce.storefront_assistant.histories.close,"Chatverlauf schließen"
+ai_commerce.storefront_assistant.histories.current,Aktuell
+ai_commerce.storefront_assistant.histories.delete,Löschen
+ai_commerce.storefront_assistant.histories.delete_confirm,"Diese Unterhaltung löschen?"
+ai_commerce.storefront_assistant.histories.delete_item,"Unterhaltung %name% löschen"
+ai_commerce.storefront_assistant.histories.delete_selected_confirm,"Die ausgewählten Unterhaltungen löschen?"
+ai_commerce.storefront_assistant.histories.empty,"Noch keine Unterhaltungen. Starten Sie eine neue!"
+ai_commerce.storefront_assistant.histories.load_error,"Unterhaltungen konnten nicht geladen werden. Bitte versuchen Sie es erneut."
+ai_commerce.storefront_assistant.histories.select,Auswählen
+ai_commerce.storefront_assistant.histories.select_all,"Alle auswählen"
+ai_commerce.storefront_assistant.histories.select_item,"Unterhaltung %name% auswählen"
+ai_commerce.storefront_assistant.histories.start_new,"Neuen Chat starten"
+ai_commerce.storefront_assistant.histories.untitled,"Unbenannte Unterhaltung"
+ai_commerce.storefront_assistant.page_context.attach,"Diese Seite in der nächsten Nachricht verwenden"
+ai_commerce.storefront_assistant.page_context.remove,"Diese Seite nicht verwenden"
+ai_commerce.storefront_assistant.reasoning.title,Überlegungen
+ai_commerce.storefront_assistant.suggestions.label,"Vorgeschlagene Fragen"
+ai_commerce.storefront_assistant.title,Backoffice-Assistent
+ai_commerce.storefront_assistant.validation.message_too_long,"Ihre Nachricht ist zu lang. Maximale Länge: %max% Zeichen."
+ai_commerce.storefront_assistant.activity.answering,"Der Assistent antwortet …"
+ai_commerce.storefront_assistant.activity.running_tool,%toolName%…
 Form,Formular
 "Page context",Seitenkontext
 "AI assistant",KI-Assistent

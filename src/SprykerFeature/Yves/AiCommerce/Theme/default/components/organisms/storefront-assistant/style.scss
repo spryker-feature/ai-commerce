@@ -1,0 +1,39 @@
+@include helper-import(organism, storefront-assistant) {
+    $storefront-assistant-panel-width: clamp(400px, 28vw, 480px);
+    $storefront-assistant-alert: map.get($setting-color-actions, alert);
+
+    storefront-assistant spryker-chat,
+    .chat-trigger {
+        --chat-color-background: #{$setting-color-white};
+        --chat-color-surface: #{$setting-color-lightest};
+        --chat-color-text: #{$setting-color-text};
+        --chat-color-text-muted: #{$setting-color-darker};
+        --chat-color-border: #{$setting-color-light};
+        --chat-color-accent: #{$setting-color-main};
+        --chat-color-accent-contrast: #{$setting-color-white};
+        --chat-color-accent-subtle: #{helper-color-light($setting-color-main, 90)};
+        --chat-color-accent-border: #{helper-color-light($setting-color-main, 70)};
+        --chat-color-accent-hover: #{helper-color-dark($setting-color-main, 10)};
+        --chat-color-accent-strong: #{helper-color-dark($setting-color-main, 35)};
+        --chat-color-surface-secondary: #{$setting-color-lighter};
+        --chat-color-error: #{$storefront-assistant-alert};
+        --chat-color-error-surface: #{helper-color-light(meta.inspect($storefront-assistant-alert), 92)};
+        --chat-color-success: #{map.get($setting-color-actions, success)};
+        --chat-color-warning: #{map.get($setting-color-actions, warning)};
+        --chat-color-code-surface: #{$setting-color-darkest};
+        --chat-color-code-text: #{$setting-color-light};
+        --chat-font: #{$setting-font-family};
+        --chat-font-code: #{$setting-font-family-code};
+        --chat-duration-medium: #{$setting-effect-default-duration};
+        --chat-layer: #{$setting-zi-popup};
+        --chat-size-panel-width: #{$storefront-assistant-panel-width};
+        --chat-size-panel-width-narrow: #{$storefront-assistant-panel-width};
+    }
+
+    @include helper-breakpoint(sm, sm) {
+        storefront-assistant spryker-chat {
+            --chat-size-panel-width: 100%;
+            --chat-size-panel-width-narrow: 100%;
+        }
+    }
+}

@@ -1,0 +1,173 @@
+{% extends model('component') %}
+
+{% define config = {
+    name: 'chat-tool-compare',
+    tag: 'chat-tool-compare',
+} %}
+
+{% define data = {
+    maxProducts: 4,
+} %}
+
+{% define attributes = {
+    'max-products': data.maxProducts,
+} %}
+
+{% block body %}
+    {% block compareTray %}
+        <template data-block="compareTray">
+            <div class="chat-tool-compare__tray"
+                 data-selected-one="{{ 'ai_commerce.storefront_assistant.compare.selected_one' | trans }}"
+                 data-selected-many="{{ 'ai_commerce.storefront_assistant.compare.selected_many' | trans({'%count%': '%count%'}) }}"
+                 data-remove-label="{{ 'ai_commerce.storefront_assistant.compare.remove' | trans({'%name%': '%name%'}) }}"
+                 data-message="{{ 'ai_commerce.storefront_assistant.compare.message' | trans({'%products%': '%products%'}) }}"
+                 data-product-format="%name% (%sku%)"
+                 data-product-separator=", "
+                 hidden>
+                <div class="chat-tool-compare__tray-head">
+                    <p class="chat-tool-compare__tray-count" data-ref="count"></p>
+                    <button type="button" class="chat-tool-compare__tray-clear" data-ref="clear">
+                        {{- 'ai_commerce.storefront_assistant.compare.clear' | trans -}}
+                    </button>
+                </div>
+                <div class="chat-tool-compare__tray-chips" data-ref="chips"></div>
+                <button type="button" class="chat-tool-compare__tray-submit" data-ref="submit" disabled>
+                    {{- 'ai_commerce.storefront_assistant.compare.submit' | trans -}}
+                </button>
+            </div>
+        </template>
+    {% endblock %}
+    {% block compareChip %}
+        <template data-block="compareChip">
+            <span class="chat-tool-compare__chip">
+                <img class="chat-tool-compare__chip-image" data-ref="image" alt="" hidden>
+                <span class="chat-tool-compare__chip-name" data-ref="name"></span>
+                <button type="button" class="chat-tool-compare__chip-remove" data-ref="remove">
+                    <svg class="spryker-chat__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></g></svg>
+                </button>
+            </span>
+        </template>
+    {% endblock %}
+    {% block comparisonCard %}
+        <template data-block="comparisonCard">
+            <div class="spryker-chat-message chat-tool-compare__card"
+                 data-count-text="{{ 'ai_commerce.storefront_assistant.comparison.products_count' | trans({'%count%': '%count%'}) }}">
+                <div class="chat-tool-compare__card-head">
+                    <span class="chat-tool-compare__card-title">{{ 'ai_commerce.storefront_assistant.comparison.title' | trans }}</span>
+                    <span class="chat-tool-compare__card-count" data-ref="count"></span>
+                </div>
+                <ul class="chat-tool-compare__card-products" data-ref="products"></ul>
+                <div class="chat-tool-compare__card-actions">
+                    <button type="button" class="chat-tool-compare__open" data-ref="open">
+                        {{- 'ai_commerce.storefront_assistant.comparison.open' | trans -}}
+                    </button>
+                    <a class="chat-tool-compare__link" data-ref="link" hidden>
+                        {{- 'ai_commerce.storefront_assistant.comparison.full_comparison' | trans -}}
+                    </a>
+                </div>
+            </div>
+        </template>
+    {% endblock %}
+    {% block comparisonCardProduct %}
+        <template data-block="comparisonCardProduct">
+            <li class="chat-tool-compare__card-product">
+                <img class="chat-tool-compare__card-product-image" data-ref="image" alt="" loading="lazy" hidden>
+                <span class="chat-tool-compare__card-product-name" data-ref="name"></span>
+                <span class="chat-tool-compare__card-product-price" data-ref="price"></span>
+            </li>
+        </template>
+    {% endblock %}
+    {% block comparisonView %}
+        <template data-block="comparisonView">
+            <section class="chat-tool-compare__view"
+                     aria-label="{{ 'ai_commerce.storefront_assistant.comparison.view_title' | trans }}"
+                     data-count-text="{{ 'ai_commerce.storefront_assistant.comparison.products_count' | trans({'%count%': '%count%'}) }}">
+                <div class="chat-tool-compare__view-header">
+                    <div class="chat-tool-compare__view-title">
+                        <button type="button"
+                                class="spryker-chat__icon-button"
+                                data-ref="back"
+                                aria-label="{{ 'ai_commerce.storefront_assistant.action.back' | trans }}"
+                                title="{{ 'ai_commerce.storefront_assistant.action.back' | trans }}">
+                            <svg class="spryker-chat__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></g></svg>
+                        </button>
+                        <div class="chat-tool-compare__view-heading">
+                            <span>{{ 'ai_commerce.storefront_assistant.comparison.view_title' | trans }}</span>
+                            <span class="chat-tool-compare__view-count" data-ref="count"></span>
+                        </div>
+                    </div>
+                    <label class="chat-tool-compare__switch">
+                        <span>{{ 'ai_commerce.storefront_assistant.comparison.differences_only' | trans }}</span>
+                        <input type="checkbox" role="switch" class="chat-tool-compare__switch-input" data-ref="differences">
+                        <span class="chat-tool-compare__switch-track" aria-hidden="true"></span>
+                    </label>
+                </div>
+                <div class="chat-tool-compare__view-body" data-ref="body"></div>
+            </section>
+        </template>
+    {% endblock %}
+    {% block comparisonTable %}
+        <template data-block="comparisonTable">
+            <table class="chat-tool-compare__table"
+                   data-overview="{{ 'ai_commerce.storefront_assistant.comparison.overview' | trans }}"
+                   data-specifications="{{ 'ai_commerce.storefront_assistant.comparison.specifications' | trans }}"
+                   data-rating="{{ 'ai_commerce.storefront_assistant.comparison.rating' | trans }}"
+                   data-availability="{{ 'ai_commerce.storefront_assistant.comparison.availability' | trans }}"
+                   data-available="{{ 'ai_commerce.storefront_assistant.comparison.available' | trans }}"
+                   data-unavailable="{{ 'ai_commerce.storefront_assistant.comparison.unavailable' | trans }}"
+                   data-rating-format="%rating% ★"
+                   data-rating-with-reviews-format="%rating% ★ (%count%)">
+                <thead>
+                    <tr data-ref="head">
+                        <th class="chat-tool-compare__corner" scope="col">
+                            {{- 'ai_commerce.storefront_assistant.comparison.attribute' | trans -}}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody data-ref="body"></tbody>
+            </table>
+        </template>
+    {% endblock %}
+    {% block comparisonHeadCell %}
+        <template data-block="comparisonHeadCell">
+            <th class="chat-tool-compare__head-cell" scope="col">
+                <div class="chat-tool-compare__product">
+                    <img class="chat-tool-compare__product-image" data-ref="image" alt="" loading="lazy" hidden>
+                    <p class="chat-tool-compare__product-name" data-ref="name"></p>
+                    <p class="chat-tool-compare__product-sku" data-ref="sku">{{ 'ai_commerce.storefront_assistant.product.sku' | trans }} <span data-ref="skuValue"></span></p>
+                    <p class="chat-tool-compare__product-price" data-ref="price"></p>
+                    <a class="chat-tool-compare__product-link" data-ref="link" hidden>
+                        <span>{{ 'ai_commerce.storefront_assistant.product.view' | trans }}</span>
+                        <svg class="spryker-chat__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></g></svg>
+                    </a>
+                </div>
+            </th>
+        </template>
+    {% endblock %}
+    {% block comparisonSection %}
+        <template data-block="comparisonSection">
+            <tr class="chat-tool-compare__section">
+                <th scope="colgroup" data-ref="label"></th>
+            </tr>
+        </template>
+    {% endblock %}
+    {% block comparisonRow %}
+        <template data-block="comparisonRow">
+            <tr class="chat-tool-compare__row">
+                <th scope="row" data-ref="label"></th>
+            </tr>
+        </template>
+    {% endblock %}
+    {% block comparisonValue %}
+        <template data-block="comparisonValue">
+            <td class="chat-tool-compare__value"></td>
+        </template>
+    {% endblock %}
+    {% block comparisonEmptyValue %}
+        <template data-block="comparisonEmptyValue">
+            <td class="chat-tool-compare__value chat-tool-compare__value--empty">
+                {{- 'ai_commerce.storefront_assistant.comparison.not_provided' | trans -}}
+            </td>
+        </template>
+    {% endblock %}
+{% endblock %}

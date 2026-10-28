@@ -12,6 +12,9 @@ namespace SprykerFeature\Zed\AiCommerce;
 use Spryker\Zed\Kernel\AbstractBundleConfig;
 use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
 
+/**
+ * @method \SprykerFeature\Shared\AiCommerce\AiCommerceConfig getSharedConfig()
+ */
 class AiCommerceConfig extends AbstractBundleConfig
 {
     protected const string CONFIGURATION_KEY_AI_COMMERCE_BACKOFFICE_ASSISTANT_GENERAL_IS_ENABLED = 'ai_commerce:backoffice_assistant:general:is_enabled';

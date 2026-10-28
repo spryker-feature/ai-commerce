@@ -1,0 +1,134 @@
+spryker-chat {
+    --chat-inline-code-background: var(--chat-color-surface);
+    --chat-inline-code-color: var(--chat-color-text);
+    --chat-code-background: var(--chat-color-code-surface);
+    --chat-code-color: var(--chat-color-code-text);
+    --chat-link-color: var(--chat-color-accent);
+    --chat-quote-border: var(--chat-focus-width) solid var(--chat-color-border);
+    --chat-quote-color: var(--chat-color-text-muted);
+    --chat-table-border: var(--chat-border-width) solid var(--chat-color-border);
+    --chat-table-head-background: var(--chat-color-surface);
+}
+
+.spryker-chat-markdown {
+    // Set here, not inherited: host themes size headings for pages (Bootstrap h1 is 2.5rem in the Back Office).
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        margin: var(--chat-space-medium) 0 var(--chat-space-small);
+        font-size: var(--chat-font-size-body-small);
+        font-weight: var(--chat-font-weight-semibold);
+        line-height: var(--chat-line-height-heading);
+
+        &:first-child {
+            margin-top: 0;
+        }
+    }
+
+    h1 {
+        font-size: var(--chat-font-size-heading-first);
+    }
+
+    h2 {
+        font-size: var(--chat-font-size-heading-second);
+    }
+
+    h3 {
+        font-size: var(--chat-font-size-heading-third);
+    }
+
+    h4 {
+        font-size: var(--chat-font-size-medium);
+    }
+
+    p {
+        margin: 0 0 var(--chat-space-medium);
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+
+    // Set here, not inherited: one host theme resets list markers and another keeps them.
+    ul,
+    ol {
+        margin: var(--chat-space-small) 0 var(--chat-space-medium);
+        padding-left: calc(var(--chat-space-large) + var(--chat-space-small));
+    }
+
+    ul {
+        list-style: disc;
+    }
+
+    ol {
+        list-style: decimal;
+    }
+
+    a {
+        color: var(--chat-link-color);
+        text-decoration: underline;
+    }
+
+    // The sanitizer drops model images; this keeps media a feature puts here in bounds.
+    img,
+    table {
+        max-width: 100%;
+    }
+
+    blockquote {
+        margin: var(--chat-space-medium) 0;
+        padding-left: var(--chat-space-medium);
+        border-left: var(--chat-quote-border);
+        color: var(--chat-quote-color);
+    }
+
+    table {
+        display: block;
+        margin: var(--chat-space-medium) 0;
+        overflow-x: auto;
+        border-collapse: collapse;
+        font-size: var(--chat-font-size-small);
+    }
+
+    th,
+    td {
+        padding: var(--chat-space-small) var(--chat-space-medium);
+        border: var(--chat-table-border);
+        text-align: left;
+    }
+
+    th {
+        background: var(--chat-table-head-background);
+    }
+
+    strong {
+        font-weight: var(--chat-font-weight-semibold);
+    }
+
+    code {
+        padding: var(--chat-space-hairline) var(--chat-space-small);
+        border-radius: var(--chat-radius-small);
+        background: var(--chat-inline-code-background);
+        color: var(--chat-inline-code-color);
+        font-family: var(--chat-font-code);
+        font-size: var(--chat-font-size-small);
+    }
+
+    pre {
+        max-height: var(--chat-size-code-max);
+        margin: var(--chat-space-medium) 0;
+        padding: var(--chat-space-medium) var(--chat-space-large);
+        overflow-x: auto;
+        border-radius: var(--chat-radius);
+        background: var(--chat-code-background);
+
+        code {
+            padding: 0;
+            background: none;
+            color: var(--chat-code-color);
+        }
+    }
+}

@@ -1,0 +1,127 @@
+{% block featureHistories %}
+    {% if chat.conversationsUrl is not empty %}
+        <chat-histories>
+            {% block historiesToggle %}
+                <template data-block="historiesToggle">
+                    <button type="button"
+                            class="spryker-chat__icon-button"
+                            aria-label="{{ 'ai_commerce.storefront_assistant.action.history' | trans }}"
+                            title="{{ 'ai_commerce.storefront_assistant.action.history' | trans }}">
+                        <svg class="spryker-chat__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></g></svg>
+                    </button>
+                </template>
+            {% endblock %}
+            {% block historiesMenuItem %}
+                <template data-block="historiesMenuItem">
+                    <button type="button" role="menuitem" class="spryker-chat-menu__item">
+                        <svg class="spryker-chat__icon spryker-chat-menu__item-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></g></svg>
+                        <span>{{ 'ai_commerce.storefront_assistant.action.history' | trans }}</span>
+                    </button>
+                </template>
+            {% endblock %}
+            {% block historiesView %}
+                <template data-block="historiesView">
+                    <section class="chat-histories"
+                             aria-label="{{ 'ai_commerce.storefront_assistant.action.history' | trans }}"
+                             data-confirm-delete="{{ 'ai_commerce.storefront_assistant.histories.delete_confirm' | trans }}"
+                             data-confirm-delete-selected="{{ 'ai_commerce.storefront_assistant.histories.delete_selected_confirm' | trans }}">
+                        <div class="chat-histories__header">
+                            <div class="chat-histories__title">
+                                <svg class="spryker-chat__icon chat-histories__title-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2z"/><path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"/></g></svg>
+                                <span>{{ 'ai_commerce.storefront_assistant.action.history' | trans }}</span>
+                                <span class="chat-histories__count" data-ref="count" hidden></span>
+                            </div>
+                            <div class="chat-histories__actions">
+                                <button type="button"
+                                        class="chat-histories__text-button"
+                                        data-ref="select"
+                                        aria-pressed="false"
+                                        hidden>
+                                    <span data-ref="selectLabel">{{ 'ai_commerce.storefront_assistant.histories.select' | trans }}</span>
+                                    <span data-ref="cancelLabel" hidden>{{ 'ai_commerce.storefront_assistant.histories.cancel' | trans }}</span>
+                                </button>
+                                <button type="button"
+                                        class="spryker-chat__icon-button"
+                                        data-ref="close"
+                                        aria-label="{{ 'ai_commerce.storefront_assistant.histories.close' | trans }}"
+                                        title="{{ 'ai_commerce.storefront_assistant.histories.close' | trans }}">
+                                    <svg class="spryker-chat__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></g></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chat-histories__start">
+                            <button type="button" class="chat-histories__new" data-ref="startNew">
+                                <svg class="spryker-chat__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M12 7v6"/><path d="M9 10h6"/></g></svg>
+                                <span>{{ 'ai_commerce.storefront_assistant.histories.start_new' | trans }}</span>
+                            </button>
+                        </div>
+                        <div class="chat-histories__body">
+                            <p class="chat-histories__error" data-ref="deleteError" role="alert" hidden>
+                                {{- 'ai_commerce.storefront_assistant.error.conversation_delete_failed' | trans -}}
+                            </p>
+                            <p class="chat-histories__loading" data-ref="loading" hidden>
+                                <span class="spryker-chat-message__typing-dot"></span>
+                                <span class="spryker-chat-message__typing-dot"></span>
+                                <span class="spryker-chat-message__typing-dot"></span>
+                            </p>
+                            <ul class="chat-histories__list" data-ref="list"></ul>
+                            <p class="chat-histories__empty" data-ref="empty" hidden>
+                                {{- 'ai_commerce.storefront_assistant.histories.empty' | trans -}}
+                            </p>
+                        </div>
+                        <div class="chat-histories__footer" data-ref="footer" hidden>
+                            <button type="button"
+                                    class="chat-histories__text-button"
+                                    data-ref="selectAll"
+                                    aria-pressed="false">
+                                {{- 'ai_commerce.storefront_assistant.histories.select_all' | trans -}}
+                            </button>
+                            <button type="button" class="chat-histories__delete-selected" data-ref="deleteSelected" disabled>
+                                {{- 'ai_commerce.storefront_assistant.histories.delete' | trans -}}
+                            </button>
+                        </div>
+                    </section>
+                </template>
+            {% endblock %}
+            {% block historiesItem %}
+                <template data-block="historiesItem">
+                    <li class="chat-histories__item">
+                        <input type="checkbox"
+                               class="chat-histories__item-checkbox"
+                               data-ref="checkbox"
+                               data-label="{{ 'ai_commerce.storefront_assistant.histories.select_item' | trans({'%name%': '%name%'}) }}">
+                        <button type="button" class="chat-histories__item-open" data-ref="open">
+                            <span class="chat-histories__item-text">
+                                <span class="chat-histories__item-title">
+                                    <span class="chat-histories__item-name" data-ref="name">
+                                        {{- 'ai_commerce.storefront_assistant.histories.untitled' | trans -}}
+                                    </span>
+                                    <span class="chat-histories__item-current" data-ref="current" hidden>
+                                        {{- 'ai_commerce.storefront_assistant.histories.current' | trans -}}
+                                    </span>
+                                </span>
+                                <span class="chat-histories__item-agent" data-ref="agent" hidden></span>
+                            </span>
+                            <span class="chat-histories__item-time" data-ref="time"></span>
+                        </button>
+                        <button type="button"
+                                class="spryker-chat__icon-button chat-histories__item-delete"
+                                data-ref="delete"
+                                data-label="{{ 'ai_commerce.storefront_assistant.histories.delete_item' | trans({'%name%': '%name%'}) }}">
+                            <svg class="spryker-chat__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><path d="M10 11v6"/><path d="M14 11v6"/></g></svg>
+                        </button>
+                    </li>
+                </template>
+            {% endblock %}
+            {% block historiesError %}
+                <template data-block="historiesError">
+                    <div class="spryker-chat-message spryker-chat-message--error" role="alert">
+                        <p class="spryker-chat-message__text">
+                            {{- 'ai_commerce.storefront_assistant.histories.load_error' | trans -}}
+                        </p>
+                    </div>
+                </template>
+            {% endblock %}
+        </chat-histories>
+    {% endif %}
+{% endblock %}

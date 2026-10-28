@@ -1,0 +1,13 @@
+{% block featureFormFill %}
+    <chat-form-fill>
+        {% block formFillSkipped %}
+            <template data-block="formFillSkipped">
+                <div class="spryker-chat-message spryker-chat-message--error" role="alert">
+                    <p class="spryker-chat-message__text">
+                        {{- 'ai_commerce.backoffice_assistant.form_fill.skipped' | trans }} <span data-ref="fields"></span>
+                    </p>
+                </div>
+            </template>
+        {% endblock %}
+    </chat-form-fill>
+{% endblock %}

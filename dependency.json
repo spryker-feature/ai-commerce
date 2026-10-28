@@ -7,7 +7,9 @@
         "spryker/customer": "Provides the storefront session customer identity for the Storefront Assistant.",
         "spryker/storage": "Provides the key-value storage used by the Storefront Assistant.",
         "spryker/store": "Provides the current storefront store used to scope Storefront Assistant catalog lookups.",
-        "spryker-shop/shop-ui": "Provides ShopUi molecules used in Twig templates (ajax-provider, ajax-loader, main-popup).",
+        "spryker-shop/shop-ui": "Provides ShopUi molecules used in Twig templates (ajax-provider, ajax-loader, main-popup) and the `@shared/<module>/*` alias that the Yves frontend build uses for the shared chat core.",
+        "spryker/gui": "Provides the `@shared/<module>/*` alias that the Back Office frontend build uses for the shared chat core.",
+        "spryker/twig": "Provides the `SharedThemeTwigLoaderPlugin` that loads the shared chat templates (`@AiCommerce/Chat/...`) in Yves, the Back Office and the Merchant Portal.",
         "spryker/transfer": "Provides transfer objects definition with strict types and `::get*OrFail()` functionality."
     }
 }

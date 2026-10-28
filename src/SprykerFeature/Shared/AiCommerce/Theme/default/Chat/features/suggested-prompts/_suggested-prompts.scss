@@ -1,0 +1,58 @@
+spryker-chat {
+    --chat-suggestion-background: color-mix(in srgb, var(--chat-color-accent) 8%, var(--chat-color-background));
+    --chat-suggestion-hover-background: color-mix(in srgb, var(--chat-color-accent) 15%, var(--chat-color-background));
+    --chat-suggestion-color: var(--chat-color-accent-strong);
+    --chat-suggestion-title-color: var(--chat-color-text);
+}
+
+chat-suggested-prompts {
+    display: none;
+}
+
+.chat-suggested-prompts {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--chat-space-large) + var(--chat-space-small));
+}
+
+.chat-suggested-prompts__section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--chat-space-medium);
+}
+
+.chat-suggested-prompts__title {
+    margin: 0;
+    color: var(--chat-suggestion-title-color);
+    font-size: var(--chat-font-size-medium);
+    font-weight: var(--chat-font-weight-semibold);
+}
+
+.chat-suggested-prompts__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--chat-space-medium);
+}
+
+.chat-suggested-prompts__prompt {
+    max-width: 100%;
+    padding: calc(var(--chat-space-small) + var(--chat-space-extra-small))
+        calc(var(--chat-space-medium-large) + var(--chat-space-extra-small));
+    border: 0;
+    border-radius: var(--chat-radius-pill);
+    background: var(--chat-suggestion-background);
+    color: var(--chat-suggestion-color);
+    font: inherit;
+    font-size: var(--chat-font-size-small);
+    text-align: left;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+        background: var(--chat-suggestion-hover-background);
+    }
+
+    &:disabled {
+        opacity: var(--chat-opacity-muted);
+        cursor: not-allowed;
+    }
+}

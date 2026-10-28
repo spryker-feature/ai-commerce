@@ -13,8 +13,6 @@ use Generated\Shared\Transfer\AiToolCallTransfer;
 use Spryker\Client\AiFoundation\Dependency\Plugin\PostToolCallPluginInterface;
 use Spryker\Client\Kernel\AbstractPlugin;
 use Spryker\Client\Kernel\BundleConfigResolverAwareTrait;
-use SprykerFeature\Shared\AiCommerce\Stream\StreamEventKey;
-use SprykerFeature\Shared\AiCommerce\Stream\StreamEventType;
 
 /**
  * @method \SprykerFeature\Client\AiCommerce\AiCommerceConfig getConfig()
@@ -23,8 +21,6 @@ use SprykerFeature\Shared\AiCommerce\Stream\StreamEventType;
 class StorefrontAssistantSsePostToolCallPlugin extends AbstractPlugin implements PostToolCallPluginInterface
 {
     use BundleConfigResolverAwareTrait;
-
-    protected const string OUTPUT_KEY_RESULT = 'result';
 
     /**
      * {@inheritDoc}
@@ -37,42 +33,6 @@ class StorefrontAssistantSsePostToolCallPlugin extends AbstractPlugin implements
      */
     public function postToolCall(AiToolCallTransfer $aiToolCallTransfer): void
     {
-        $configurationName = $aiToolCallTransfer->getPromptRequest()?->getAiConfigurationName();
-
-        if (!in_array($configurationName, $this->getConfig()->getStorefrontAssistantSseAiConfigurationNames(), true)) {
-            return;
-        }
-
-        $toolName = (string)$aiToolCallTransfer->getToolName();
-
-        if (!in_array($toolName, $this->getConfig()->getStorefrontAssistantCustomerFacingToolNames(), true)) {
-            return;
-        }
-
-        $toolCallId = $this->getFactory()->createToolCallIdResolver()->resolveToolCallId(
-            $toolName,
-            $aiToolCallTransfer->getToolCallId(),
-        );
-
-        if ($aiToolCallTransfer->getIsExecutionAllowed() === false) {
-            $this->getFactory()->createStreamEventEmitter()->emitEvent(StreamEventType::ToolOutputDenied, [
-                StreamEventKey::TOOL_CALL_ID => $toolCallId,
-            ]);
-
-            return;
-        }
-
-        $this->getFactory()->createStreamEventEmitter()->emitEvent(StreamEventType::ToolOutputAvailable, [
-            StreamEventKey::TOOL_CALL_ID => $toolCallId,
-            StreamEventKey::OUTPUT => [
-                static::OUTPUT_KEY_RESULT => $this->getFactory()
-                    ->createToolResultProductEnricher()
-                    ->enrich(
-                        $this->getFactory()
-                            ->createDisplayProductRefinementExpander()
-                            ->expandToolResult($toolName, (string)$aiToolCallTransfer->getToolResult()),
-                    ),
-            ],
-        ]);
+        $this->getFactory()->createToolCallEventStreamer()->streamToolOutput($aiToolCallTransfer);
     }
 }

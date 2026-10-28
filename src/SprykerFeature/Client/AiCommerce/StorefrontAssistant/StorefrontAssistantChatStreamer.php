@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace SprykerFeature\Client\AiCommerce\StorefrontAssistant;
 
 use ArrayObject;
+use Error;
 use Exception;
 use Generated\Shared\Transfer\ErrorTransfer;
 use Generated\Shared\Transfer\PromptResponseTransfer;
@@ -26,10 +27,7 @@ use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Storage\ConversationSto
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Translation\StorefrontAssistantTranslatorInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Validator\StorefrontAssistantChatRequestValidationResult;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Validator\StorefrontAssistantChatRequestValidatorInterface;
-use SprykerFeature\Shared\AiCommerce\Stream\StreamBlockTrackerInterface;
-use SprykerFeature\Shared\AiCommerce\Stream\StreamEventEmitterInterface;
-use SprykerFeature\Shared\AiCommerce\Stream\StreamEventKey;
-use SprykerFeature\Shared\AiCommerce\Stream\StreamEventType;
+use SprykerFeature\Shared\AiCommerce\Stream\MessageStreamerInterface;
 
 class StorefrontAssistantChatStreamer implements StorefrontAssistantChatStreamerInterface
 {
@@ -47,18 +45,11 @@ class StorefrontAssistantChatStreamer implements StorefrontAssistantChatStreamer
 
     protected const string MESSAGE_TURN_FAILED = 'ai_commerce.storefront_assistant.error.turn_failed';
 
-    protected const string MESSAGE_ID_FORMAT = 'msg_%s';
-
-    protected const string DATA_EVENT_AGENT = 'agent';
-
-    protected const string DATA_PART_KEY_NAME = 'name';
-
     public function __construct(
         protected StorefrontAssistantChatRequestValidatorInterface $storefrontAssistantChatRequestValidator,
         protected ConversationStorageInterface $conversationStorage,
         protected AgentSelectorInterface $agentSelector,
-        protected StreamEventEmitterInterface $streamEventEmitter,
-        protected StreamBlockTrackerInterface $streamBlockTracker,
+        protected MessageStreamerInterface $messageStreamer,
         protected StorefrontAssistantTranslatorInterface $storefrontAssistantTranslator,
         protected ShownProductRegistryInterface $shownProductRegistry,
         protected CatalogSearchResultRegistryInterface $catalogSearchResultRegistry,
@@ -97,23 +88,11 @@ class StorefrontAssistantChatStreamer implements StorefrontAssistantChatStreamer
     public function executeStorefrontAssistantChat(
         StorefrontAssistantChatRequestTransfer $storefrontAssistantChatRequestTransfer
     ): void {
-        $this->startMessage();
+        $streamMessageState = $this->messageStreamer->startTurn();
+        $this->messageStreamer->startMessage($streamMessageState);
 
         try {
-            $storefrontAssistantChatRequestValidationResult = $this->storefrontAssistantChatRequestValidator
-                ->validate($storefrontAssistantChatRequestTransfer);
-
-            if (!$storefrontAssistantChatRequestValidationResult->isValid()) {
-                $this->emitValidationErrors($storefrontAssistantChatRequestValidationResult, $storefrontAssistantChatRequestTransfer->getLocaleName());
-
-                return;
-            }
-
-            $storefrontAssistantChatRequestTransfer->setAttachments(
-                new ArrayObject($storefrontAssistantChatRequestValidationResult->getAttachments()),
-            );
-
-            $this->executeTurn($storefrontAssistantChatRequestTransfer);
+            $this->processTurn($storefrontAssistantChatRequestTransfer);
         } catch (Exception $exception) {
             $this->getLogger()->error(
                 sprintf(static::LOG_MESSAGE_TURN_FAILED, $exception->getMessage()),
@@ -123,10 +102,39 @@ class StorefrontAssistantChatStreamer implements StorefrontAssistantChatStreamer
             $this->emitErrorMessage(
                 $this->translateWithGlossaryKeyFallback(static::MESSAGE_TURN_FAILED, $storefrontAssistantChatRequestTransfer->getLocaleName()),
             );
+        } catch (Error $error) {
+            // An \Error ends the stream without `finish` and `[DONE]`, so the chat reports a cut stream with a retry. It is not rethrown, as the error handler would write an HTML error page into the open stream.
+            $this->getLogger()->error(
+                sprintf(static::LOG_MESSAGE_TURN_FAILED, $error->getMessage()),
+                ['exception' => $error],
+            );
+            $this->messageStreamer->abortTurn();
+
+            return;
         } finally {
-            $this->finishMessage();
             $this->clearTurnState();
         }
+
+        $this->messageStreamer->finishMessage($streamMessageState);
+    }
+
+    protected function processTurn(StorefrontAssistantChatRequestTransfer $storefrontAssistantChatRequestTransfer): void
+    {
+        $storefrontAssistantChatRequestValidationResult = $this->storefrontAssistantChatRequestValidator
+            ->validate($storefrontAssistantChatRequestTransfer);
+
+        // Returning here, not from the caller's `try`, keeps the `finish` after a validation failure.
+        if (!$storefrontAssistantChatRequestValidationResult->isValid()) {
+            $this->emitValidationErrors($storefrontAssistantChatRequestValidationResult, $storefrontAssistantChatRequestTransfer->getLocaleName());
+
+            return;
+        }
+
+        $storefrontAssistantChatRequestTransfer->setAttachments(
+            new ArrayObject($storefrontAssistantChatRequestValidationResult->getAttachments()),
+        );
+
+        $this->executeTurn($storefrontAssistantChatRequestTransfer);
     }
 
     protected function emitValidationErrors(
@@ -162,9 +170,7 @@ class StorefrontAssistantChatStreamer implements StorefrontAssistantChatStreamer
             $storefrontAssistantAgentPlugin->getName(),
         );
 
-        $this->streamEventEmitter->emitDataEvent(static::DATA_EVENT_AGENT, [
-            static::DATA_PART_KEY_NAME => $storefrontAssistantAgentPlugin->getName(),
-        ]);
+        $this->messageStreamer->emitAgent($storefrontAssistantAgentPlugin->getName());
 
         $promptResponseTransfer = $storefrontAssistantAgentPlugin->executeAgent($storefrontAssistantChatRequestTransfer);
 
@@ -234,27 +240,7 @@ class StorefrontAssistantChatStreamer implements StorefrontAssistantChatStreamer
 
     protected function emitErrorMessage(string $errorMessage): void
     {
-        $this->streamBlockTracker->closeOpenBlock();
-
-        $this->streamEventEmitter->emitEvent(StreamEventType::Error, [
-            StreamEventKey::ERROR_TEXT => $errorMessage,
-        ]);
-    }
-
-    protected function startMessage(): void
-    {
-        $this->streamBlockTracker->resetBlocks();
-
-        $this->streamEventEmitter->emitEvent(StreamEventType::Start, [
-            StreamEventKey::MESSAGE_ID => sprintf(static::MESSAGE_ID_FORMAT, uniqid()),
-        ]);
-    }
-
-    protected function finishMessage(): void
-    {
-        $this->streamBlockTracker->closeOpenBlock();
-        $this->streamEventEmitter->emitEvent(StreamEventType::Finish);
-        $this->streamEventEmitter->emitDone();
+        $this->messageStreamer->emitError($errorMessage);
     }
 
     protected function saveConversationMetadata(

@@ -13,8 +13,11 @@ use Codeception\Test\Unit;
 use Generated\Shared\Transfer\BackofficeAssistantPromptRequestTransfer;
 use RuntimeException;
 use Spryker\Zed\Translator\Business\TranslatorFacadeInterface;
-use SprykerFeature\Shared\AiCommerce\BackofficeAssistant\BackofficeAssistantEventType;
-use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Emitter\SseEventEmitterInterface;
+use SprykerFeature\Shared\AiCommerce\Stream\MessageStreamer;
+use SprykerFeature\Shared\AiCommerce\Stream\StreamBlockTracker;
+use SprykerFeature\Shared\AiCommerce\Stream\StreamEventEmitterInterface;
+use SprykerFeature\Shared\AiCommerce\Stream\StreamEventKey;
+use SprykerFeature\Shared\AiCommerce\Stream\StreamEventType;
 use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\IntentRouterInterface;
 use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\PromptProcessor;
 use SprykerFeature\Zed\AiCommerce\Communication\BackofficeAssistant\Prompt\PromptProcessorInterface;
@@ -33,8 +36,6 @@ use SprykerFeatureTest\Zed\AiCommerce\AiCommerceCommunicationTester;
  */
 class PromptProcessorTest extends Unit
 {
-    protected const string KEY_MESSAGE = 'message';
-
     protected const string GLOSSARY_KEY_PROMPT_REQUIRED = 'backoffice_assistant.validation.prompt_required';
 
     protected const string GLOSSARY_KEY_USER_ID_REQUIRED = 'backoffice_assistant.validation.user_id_required';
@@ -60,9 +61,9 @@ class PromptProcessorTest extends Unit
     public function testProcessEmitsTranslatedValidationErrorsWhenPromptAndUserAreMissing(): void
     {
         // Arrange
-        $emittedEvents = [];
+        $emittedErrorTexts = [];
         $promptProcessor = $this->createPromptProcessor(
-            $this->createRecordingSseEventEmitter($emittedEvents),
+            $this->createErrorRecordingStreamEventEmitter($emittedErrorTexts),
             $this->createMock(IntentRouterInterface::class),
         );
 
@@ -71,51 +72,45 @@ class PromptProcessorTest extends Unit
 
         // Assert
         $this->assertSame([
-            [BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => static::MESSAGE_PROMPT_REQUIRED]],
-            [BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => static::MESSAGE_USER_ID_REQUIRED]],
-        ], $emittedEvents);
+            static::MESSAGE_PROMPT_REQUIRED,
+            static::MESSAGE_USER_ID_REQUIRED,
+        ], $emittedErrorTexts);
     }
 
     public function testProcessEmitsTranslatedAiServiceUnavailableErrorWhenIntentRouterFails(): void
     {
         // Arrange
-        $emittedEvents = [];
+        $emittedErrorTexts = [];
         $intentRouterMock = $this->createMock(IntentRouterInterface::class);
         $intentRouterMock->method('route')->willThrowException(new RuntimeException());
 
-        $promptProcessor = $this->createPromptProcessor($this->createRecordingSseEventEmitter($emittedEvents), $intentRouterMock);
+        $promptProcessor = $this->createPromptProcessor($this->createErrorRecordingStreamEventEmitter($emittedErrorTexts), $intentRouterMock);
 
         // Act
         $promptProcessor->process($this->createPromptRequestTransfer());
 
         // Assert
-        $this->assertSame(
-            [[BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => static::MESSAGE_AI_SERVICE_UNAVAILABLE]]],
-            $emittedEvents,
-        );
+        $this->assertSame([static::MESSAGE_AI_SERVICE_UNAVAILABLE], $emittedErrorTexts);
     }
 
     public function testProcessEmitsTranslatedAiServiceUnavailableErrorWhenIntentRouterReturnsNoResponse(): void
     {
         // Arrange
-        $emittedEvents = [];
+        $emittedErrorTexts = [];
         $intentRouterMock = $this->createMock(IntentRouterInterface::class);
         $intentRouterMock->method('route')->willReturn(null);
 
-        $promptProcessor = $this->createPromptProcessor($this->createRecordingSseEventEmitter($emittedEvents), $intentRouterMock);
+        $promptProcessor = $this->createPromptProcessor($this->createErrorRecordingStreamEventEmitter($emittedErrorTexts), $intentRouterMock);
 
         // Act
         $promptProcessor->process($this->createPromptRequestTransfer());
 
         // Assert
-        $this->assertSame(
-            [[BackofficeAssistantEventType::Error, [static::KEY_MESSAGE => static::MESSAGE_AI_SERVICE_UNAVAILABLE]]],
-            $emittedEvents,
-        );
+        $this->assertSame([static::MESSAGE_AI_SERVICE_UNAVAILABLE], $emittedErrorTexts);
     }
 
     protected function createPromptProcessor(
-        SseEventEmitterInterface $sseEventEmitter,
+        StreamEventEmitterInterface $streamEventEmitter,
         IntentRouterInterface $intentRouter,
     ): PromptProcessorInterface {
         /** @var \SprykerFeature\Zed\AiCommerce\Communication\AiCommerceCommunicationFactory $communicationFactory */
@@ -126,10 +121,11 @@ class PromptProcessorTest extends Unit
             $communicationFactory->getAiFoundationFacade(),
             [],
             $communicationFactory->createAttachmentBuilder(),
-            $sseEventEmitter,
+            new MessageStreamer($streamEventEmitter, new StreamBlockTracker($streamEventEmitter)),
             $intentRouter,
             $communicationFactory->createBackofficeAssistantPromptRequestValidator(),
             $this->createTranslatorFacadeMock(),
+            $communicationFactory->createPromptContextFormatter(),
         );
     }
 
@@ -144,18 +140,22 @@ class PromptProcessorTest extends Unit
     }
 
     /**
-     * @param array<int, array{0: \SprykerFeature\Shared\AiCommerce\BackofficeAssistant\BackofficeAssistantEventType, 1: array<string, mixed>}> $emittedEvents
+     * @param array<int, string> $emittedErrorTexts
      */
-    protected function createRecordingSseEventEmitter(array &$emittedEvents): SseEventEmitterInterface
+    protected function createErrorRecordingStreamEventEmitter(array &$emittedErrorTexts): StreamEventEmitterInterface
     {
-        $sseEventEmitterMock = $this->createMock(SseEventEmitterInterface::class);
-        $sseEventEmitterMock->method('emit')->willReturnCallback(
-            function (BackofficeAssistantEventType $type, array $payload) use (&$emittedEvents): void {
-                $emittedEvents[] = [$type, $payload];
+        $streamEventEmitterMock = $this->createMock(StreamEventEmitterInterface::class);
+        $streamEventEmitterMock->method('emitEvent')->willReturnCallback(
+            function (StreamEventType $streamEventType, array $fields = []) use (&$emittedErrorTexts): void {
+                if ($streamEventType !== StreamEventType::Error) {
+                    return;
+                }
+
+                $emittedErrorTexts[] = $fields[StreamEventKey::ERROR_TEXT];
             },
         );
 
-        return $sseEventEmitterMock;
+        return $streamEventEmitterMock;
     }
 
     protected function createPromptRequestTransfer(): BackofficeAssistantPromptRequestTransfer

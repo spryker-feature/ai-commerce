@@ -1,0 +1,19 @@
+{% block featureReasoning %}
+    <chat-reasoning>
+        {% block reasoningBlock %}
+            <template data-block="reasoningBlock">
+                <details class="chat-reasoning" open>
+                    <summary class="chat-reasoning__summary">
+                        {{- 'ai_commerce.storefront_assistant.reasoning.title' | trans -}}
+                    </summary>
+                    <div class="spryker-chat-markdown chat-reasoning__content" data-ref="content"></div>
+                </details>
+            </template>
+        {% endblock %}
+        {% block reasoningPart %}
+            <template data-block="reasoningPart">
+                <div class="chat-reasoning__part"></div>
+            </template>
+        {% endblock %}
+    </chat-reasoning>
+{% endblock %}

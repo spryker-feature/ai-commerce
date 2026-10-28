@@ -104,6 +104,7 @@ interface AiCommerceFacadeInterface
      * Specification:
      * - Deletes conversation records matching the given delete criteria.
      * - Deletes by BackofficeAssistantConversationCollectionDeleteCriteriaTransfer.conversationReferences when provided.
+     * - When BackofficeAssistantConversationCollectionDeleteCriteriaTransfer.idUser is provided, deletes nothing and returns an error when any of the conversations does not belong to that user.
      * - Returns BackofficeAssistantConversationCollectionResponseTransfer.
      *
      * @api

@@ -176,10 +176,15 @@ use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Validator\ConversationR
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Validator\ConversationReferenceValidatorInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Validator\StorefrontAssistantChatRequestValidator;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Validator\StorefrontAssistantChatRequestValidatorInterface;
+use SprykerFeature\Shared\AiCommerce\Conversation\RegeneratedPromptMarker;
+use SprykerFeature\Shared\AiCommerce\Stream\MessageStreamer;
+use SprykerFeature\Shared\AiCommerce\Stream\MessageStreamerInterface;
 use SprykerFeature\Shared\AiCommerce\Stream\StreamBlockTracker;
 use SprykerFeature\Shared\AiCommerce\Stream\StreamBlockTrackerInterface;
 use SprykerFeature\Shared\AiCommerce\Stream\StreamEventEmitter;
 use SprykerFeature\Shared\AiCommerce\Stream\StreamEventEmitterInterface;
+use SprykerFeature\Shared\AiCommerce\Stream\ToolCallEventStreamer;
+use SprykerFeature\Shared\AiCommerce\Stream\ToolCallEventStreamerInterface;
 use SprykerFeature\Shared\AiCommerce\Stream\ToolCallIdResolver;
 use SprykerFeature\Shared\AiCommerce\Stream\ToolCallIdResolverInterface;
 
@@ -211,9 +216,32 @@ class AiCommerceFactory extends AbstractFactory
         return new StreamBlockTracker($this->createStreamEventEmitter());
     }
 
+    public function createMessageStreamer(): MessageStreamerInterface
+    {
+        return new MessageStreamer(
+            $this->createStreamEventEmitter(),
+            $this->createStreamBlockTracker(),
+        );
+    }
+
     public function createToolCallIdResolver(): ToolCallIdResolverInterface
     {
         return new ToolCallIdResolver();
+    }
+
+    public function createToolCallEventStreamer(): ToolCallEventStreamerInterface
+    {
+        return new ToolCallEventStreamer(
+            $this->createStreamEventEmitter(),
+            $this->createStreamBlockTracker(),
+            $this->createToolCallIdResolver(),
+            $this->getConfig()->getStorefrontAssistantSseAiConfigurationNames(),
+            $this->getConfig()->getStorefrontAssistantCustomerFacingToolNames(),
+            [
+                $this->createDisplayProductRefinementExpander(),
+                $this->createToolResultProductEnricher(),
+            ],
+        );
     }
 
     public function createStorefrontAssistantChatStreamer(): StorefrontAssistantChatStreamerInterface
@@ -222,8 +250,7 @@ class AiCommerceFactory extends AbstractFactory
             $this->createStorefrontAssistantChatRequestValidator(),
             $this->createConversationStorage(),
             $this->createAgentSelector(),
-            $this->createStreamEventEmitter(),
-            $this->createStreamBlockTracker(),
+            $this->createMessageStreamer(),
             $this->createStorefrontAssistantTranslator(),
             $this->createShownProductRegistry(),
             $this->createCatalogSearchResultRegistry(),
@@ -901,7 +928,7 @@ class AiCommerceFactory extends AbstractFactory
 
     public function createStorefrontAssistantRequestMapper(): StorefrontAssistantRequestMapperInterface
     {
-        return new StorefrontAssistantRequestMapper();
+        return new StorefrontAssistantRequestMapper($this->createRegeneratedPromptMarker());
     }
 
     public function createProductDiscoveryPromptRequestBuilder(): ProductDiscoveryPromptRequestBuilderInterface
@@ -963,7 +990,7 @@ class AiCommerceFactory extends AbstractFactory
 
     public function createConversationMessageExtractor(): ConversationMessageExtractorInterface
     {
-        return new ConversationMessageExtractor();
+        return new ConversationMessageExtractor($this->createRegeneratedPromptMarker());
     }
 
     public function createShownProductRegistry(): ShownProductRegistryInterface
@@ -989,5 +1016,10 @@ class AiCommerceFactory extends AbstractFactory
     public function getAiFoundationClient(): AiFoundationClientInterface
     {
         return $this->getProvidedDependency(AiCommerceDependencyProvider::CLIENT_AI_FOUNDATION);
+    }
+
+    public function createRegeneratedPromptMarker(): RegeneratedPromptMarker
+    {
+        return new RegeneratedPromptMarker();
     }
 }
