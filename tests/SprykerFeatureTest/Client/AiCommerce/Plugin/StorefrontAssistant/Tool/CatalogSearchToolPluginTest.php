@@ -1072,7 +1072,7 @@ class CatalogSearchToolPluginTest extends Unit
         // Arrange
         $this->tester->setUpCurrentStore();
         $idProductAbstract = $this->tester->getIdProductAbstractFromStorage();
-        $expectedPrice = $this->tester->findDisplayedProductPrice($idProductAbstract) ?? static::SEARCH_HIT_PRICE;
+        $this->tester->havePriceProductStorageClientReturningByQuantity([]);
         $this->tester->setUpCatalogSearchResult(
             $this->tester->createCatalogSearchResultWithPrice($idProductAbstract, static::SEARCH_HIT_PRICE),
         );
@@ -1083,7 +1083,7 @@ class CatalogSearchToolPluginTest extends Unit
 
         // Assert
         $product = $result[static::KEY_PRODUCTS][0];
-        $this->assertSame(round($expectedPrice / static::PRICE_PRECISION, 2), $product[static::KEY_PRICE]);
+        $this->assertSame(round(static::SEARCH_HIT_PRICE / static::PRICE_PRECISION, 2), $product[static::KEY_PRICE]);
         $this->assertArrayNotHasKey(static::KEY_URL, $product);
         $this->assertArrayNotHasKey(static::KEY_PRICE_MODE, $product);
         $this->assertArrayNotHasKey(static::KEY_CURRENCY_ISO_CODE, $product);

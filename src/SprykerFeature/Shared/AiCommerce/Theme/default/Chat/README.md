@@ -114,7 +114,12 @@ a host that passes `false` keeps header buttons): a feature asks `zones.has(CORE
 `role="menuitem"` button there, or a header button into `headerActions` otherwise, as `chat-histories` does. The core
 closes the menu after any item is chosen. `chat.header.expand` (default `true`) renders the expand button: the panel
 takes the full width under the `spryker-chat--expanded` class, which the host styles against next to `data-open`; `panel.setExpanded()` and
-the `panel:expand` event carry the state, and `chat-session-persistence` restores it.
+the `panel:expand` event carry the state, and `chat-session-persistence` restores it. The expanded panel stacks at
+`--chat-layer-expanded` (default: `--chat-layer`), which a host raises above its own header. `chat.owner` (default
+empty) is an opaque token of the signed-in user: `chat-session-persistence` stores it with the session and, when it
+differs on the next page, removes the session and the keys in `features.sessionPersistence.clearStorageKeys`
+(default empty) instead of restoring them; the storefront passes its `agentSelector` storage key there. An empty owner
+keeps the session for any user, as the Back Office does. Only `chat-session-persistence` reads or removes these keys.
 
 ```ts
 context.zones.insert(CORE_ZONE.composerStart, chip.root, 'start');
@@ -361,5 +366,6 @@ that has them all; `label` is the chip text with `%field%` placeholders.
 
 The prompt then carries `pageContext: { pageType, …fields }` while the chip is attached, and the suggested prompts
 switch to the group named like the page type. `optIn` offers the context (the chip's `attach` button shows
-while it is offered), `singleTurn` detaches it after one turn. A host may pass the rules as JSON text instead of a list. Consequence: the core never knows a host's pages; a
+while it is offered), `singleTurn` detaches it after one turn. A detached context stays offered, so the customer can
+attach it again. A host may pass the rules as JSON text instead of a list. Consequence: the core never knows a host's pages; a
 retemplated page only changes the rules, and a malformed rule fails start-up once, naming every rule, field and fix.

@@ -1,5 +1,5 @@
 :where(.chat-trigger) {
-    --chat-trigger-background: color-mix(in srgb, var(--chat-color-accent) 5%, var(--chat-color-background));
+    --chat-trigger-background: color-mix(in sRGB, var(--chat-color-accent) 5%, var(--chat-color-background));
     --chat-trigger-color: var(--chat-color-accent);
     --chat-trigger-border: var(--chat-border-width) solid var(--chat-color-accent-border);
     --chat-trigger-hover-background: var(--chat-color-accent-subtle);
@@ -14,8 +14,8 @@
     --chat-trigger-fixed-color: var(--chat-color-accent-contrast);
     --chat-trigger-fixed-shadow: var(--chat-shadow-launcher);
     --chat-trigger-fixed-offset: var(--chat-space-extra-large);
-    --chat-trigger-fixed-icon-background: color-mix(in srgb, var(--chat-color-accent-contrast) 15%, transparent);
-    --chat-trigger-fixed-icon-ring: color-mix(in srgb, var(--chat-color-accent-contrast) 25%, transparent);
+    --chat-trigger-fixed-icon-background: color-mix(in sRGB, var(--chat-color-accent-contrast) 15%, transparent);
+    --chat-trigger-fixed-icon-ring: color-mix(in sRGB, var(--chat-color-accent-contrast) 25%, transparent);
 }
 
 chat-trigger {
@@ -123,5 +123,21 @@ spryker-chat[data-trigger-visible] .spryker-chat-launcher {
             border-radius: var(--chat-radius-round);
             animation: spryker-chat-spin var(--chat-duration-spin) linear infinite;
         }
+    }
+}
+
+@media (width < 768px) {
+    .chat-trigger {
+        justify-content: center;
+        min-width: var(--chat-size-control);
+        padding: 0;
+    }
+
+    .chat-trigger--fixed {
+        padding: var(--chat-space-medium-large);
+    }
+
+    .chat-trigger__text {
+        display: none;
     }
 }

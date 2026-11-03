@@ -423,11 +423,10 @@ export class ChatPageContext extends HTMLElement implements ChatFeature {
 
         const label = this.detected?.label ?? '';
         const attach = chip.find(ATTACH_REFERENCE);
-        const isOffered = this.hasAttribute(OPT_IN_ATTRIBUTE) && attach !== null;
 
         chip.references.label.textContent = label;
         chip.root.toggleAttribute(ATTACHED_ATTRIBUTE, this.isAttached);
-        chip.root.hidden = label === '' || (!this.isAttached && !isOffered);
+        chip.root.hidden = label === '' || (!this.isAttached && attach === null);
         chip.references.remove.hidden = !this.isAttached;
 
         if (attach !== null) {

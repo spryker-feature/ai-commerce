@@ -71,7 +71,7 @@ class StorefrontAssistantRequestPayloadMapper implements StorefrontAssistantRequ
     ): StorefrontAssistantConversationCollectionCriteriaTransfer {
         $storefrontAssistantConversationConditionsTransfer = (new StorefrontAssistantConversationConditionsTransfer())
             ->setCustomerReference($customerReference)
-            ->setConversationReferences($this->extractConversationReferences($payload));
+            ->setConversationReferences($this->mapPayloadToConversationReferences($payload));
 
         return (new StorefrontAssistantConversationCollectionCriteriaTransfer())
             ->setStorefrontAssistantConversationConditions($storefrontAssistantConversationConditionsTransfer);
@@ -86,7 +86,7 @@ class StorefrontAssistantRequestPayloadMapper implements StorefrontAssistantRequ
     ): StorefrontAssistantConversationCollectionDeleteCriteriaTransfer {
         $storefrontAssistantConversationDeleteConditionsTransfer = (new StorefrontAssistantConversationDeleteConditionsTransfer())
             ->setCustomerReference($customerReference)
-            ->setConversationReferences($this->extractConversationReferences($payload));
+            ->setConversationReferences($this->mapPayloadToConversationReferences($payload));
 
         return (new StorefrontAssistantConversationCollectionDeleteCriteriaTransfer())
             ->setStorefrontAssistantConversationDeleteConditions($storefrontAssistantConversationDeleteConditionsTransfer);
@@ -109,30 +109,33 @@ class StorefrontAssistantRequestPayloadMapper implements StorefrontAssistantRequ
 
     /**
      * @param array<mixed> $payload
+     *
+     * @return list<string>
+     */
+    public function mapPayloadToConversationReferences(array $payload): array
+    {
+        $conversationReferences = $payload[static::KEY_CONVERSATION_REFERENCES] ?? null;
+
+        if (is_array($conversationReferences) && $conversationReferences !== []) {
+            return array_values(array_filter(
+                $conversationReferences,
+                static fn (mixed $conversationReference): bool => is_string($conversationReference) && $conversationReference !== '',
+            ));
+        }
+
+        $conversationReference = $this->extractString($payload, static::KEY_CONVERSATION_REFERENCE);
+
+        return $conversationReference !== '' ? [$conversationReference] : [];
+    }
+
+    /**
+     * @param array<mixed> $payload
      */
     protected function extractString(array $payload, string $key): string
     {
         $value = $payload[$key] ?? null;
 
         return is_string($value) ? $value : '';
-    }
-
-    /**
-     * @param array<mixed> $payload
-     *
-     * @return list<string>
-     */
-    protected function extractConversationReferences(array $payload): array
-    {
-        $conversationReferences = $payload[static::KEY_CONVERSATION_REFERENCES] ?? null;
-
-        if (is_array($conversationReferences) && $conversationReferences !== []) {
-            return array_values(array_filter($conversationReferences, 'is_string'));
-        }
-
-        $conversationReference = $this->extractString($payload, static::KEY_CONVERSATION_REFERENCE);
-
-        return $conversationReference !== '' ? [$conversationReference] : [];
     }
 
     protected function mapPageContext(mixed $pageContext): ?StorefrontAssistantPageContextTransfer

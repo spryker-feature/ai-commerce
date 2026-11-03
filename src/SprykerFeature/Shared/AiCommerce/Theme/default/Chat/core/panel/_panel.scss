@@ -6,8 +6,8 @@ spryker-chat {
     );
     --chat-launcher-color: var(--chat-color-accent-contrast);
     --chat-launcher-shadow: var(--chat-shadow-launcher);
-    --chat-launcher-icon-background: color-mix(in srgb, var(--chat-color-accent-contrast) 15%, transparent);
-    --chat-launcher-icon-ring: color-mix(in srgb, var(--chat-color-accent-contrast) 25%, transparent);
+    --chat-launcher-icon-background: color-mix(in sRGB, var(--chat-color-accent-contrast) 15%, transparent);
+    --chat-launcher-icon-ring: color-mix(in sRGB, var(--chat-color-accent-contrast) 25%, transparent);
     --chat-launcher-offset: var(--chat-space-extra-large);
     --chat-panel-width: var(--chat-size-panel-width);
     --chat-panel-background: var(--chat-color-background);
@@ -93,6 +93,7 @@ spryker-chat {
 }
 
 .spryker-chat--expanded .spryker-chat-panel {
+    z-index: var(--chat-layer-expanded);
     width: 100%;
     border-left: 0;
 }
@@ -121,6 +122,13 @@ spryker-chat:not([data-open]) .spryker-chat-panel {
     align-items: center;
     gap: var(--chat-space-medium);
     min-width: 0;
+}
+
+@media (width < 768px) {
+    .spryker-chat-panel__header-start {
+        flex-wrap: wrap;
+        row-gap: var(--chat-space-small);
+    }
 }
 
 .spryker-chat-panel__header-actions {

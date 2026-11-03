@@ -4,14 +4,17 @@ import { announceFeature } from '@shared/ai-commerce/Chat/core/contracts/access'
 
 const SOURCE_FILE = 'Shared/AiCommerce/Theme/default/Chat/features/session-persistence/session-persistence.ts';
 const STORAGE_KEY_ATTRIBUTE = 'storage-key';
+const OWNER_ATTRIBUTE = 'owner';
+const CLEAR_STORAGE_KEYS_ATTRIBUTE = 'clear-storage-keys';
 
 interface StoredSession {
+    readonly owner: string;
     readonly conversationReference: string | null;
     readonly isOpen: boolean;
     readonly isExpanded: boolean;
 }
 
-const EMPTY_SESSION: StoredSession = { conversationReference: null, isOpen: false, isExpanded: false };
+const EMPTY_SESSION: StoredSession = { owner: '', conversationReference: null, isOpen: false, isExpanded: false };
 
 let isStorageFailureReported = false;
 
@@ -92,6 +95,7 @@ export class ChatSessionPersistence extends HTMLElement implements ChatFeature {
 
     private read(): StoredSession {
         const storageKey = this.requireStorageKey();
+        const owner = this.getAttribute(OWNER_ATTRIBUTE) ?? '';
         let stored: unknown;
 
         try {
@@ -99,16 +103,23 @@ export class ChatSessionPersistence extends HTMLElement implements ChatFeature {
         } catch (error) {
             reportStorageFailure(storageKey, 'read', error);
 
-            return EMPTY_SESSION;
+            return { ...EMPTY_SESSION, owner };
         }
 
         if (!isRecord(stored)) {
-            return EMPTY_SESSION;
+            return { ...EMPTY_SESSION, owner };
+        }
+
+        if (owner !== '' && stored.owner !== owner) {
+            this.clearStorage(storageKey);
+
+            return { ...EMPTY_SESSION, owner };
         }
 
         const conversationReference = stored.conversationReference;
 
         return {
+            owner,
             conversationReference:
                 typeof conversationReference === 'string' && conversationReference !== ''
                     ? conversationReference
@@ -116,6 +127,22 @@ export class ChatSessionPersistence extends HTMLElement implements ChatFeature {
             isOpen: stored.isOpen === true,
             isExpanded: stored.isExpanded === true,
         };
+    }
+
+    private clearStorage(storageKey: string): void {
+        const clearStorageKeys = (this.getAttribute(CLEAR_STORAGE_KEYS_ATTRIBUTE) ?? '').split(' ');
+
+        for (const key of [storageKey, ...clearStorageKeys]) {
+            if (key === '') {
+                continue;
+            }
+
+            try {
+                localStorage.removeItem(key);
+            } catch (error) {
+                reportStorageFailure(key, 'clear', error);
+            }
+        }
     }
 
     private write(session: StoredSession): void {

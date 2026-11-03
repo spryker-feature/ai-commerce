@@ -546,6 +546,7 @@ class ProductDetailsToolPluginTest extends Unit
     public function testGivenBundleProductWhenDetailsRequestedThenEveryBundledProductIsListedWithQuantity(): void
     {
         // Arrange
+        $this->tester->haveStoreRoutingEnabled(false);
         $idProductAbstract = $this->tester->getUnknownIdProductAbstract();
         $this->haveBundleWithTwoProducts($idProductAbstract);
         $this->tester->haveProductBundleStorageClientReturning([301 => [118 => 2, 140 => 1]]);

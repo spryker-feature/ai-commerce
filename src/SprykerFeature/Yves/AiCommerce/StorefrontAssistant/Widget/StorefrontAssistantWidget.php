@@ -35,6 +35,10 @@ class StorefrontAssistantWidget extends AbstractWidget
 
     protected const string PARAMETER_USER_NAME = 'userName';
 
+    protected const string PARAMETER_CHAT_OWNER_TOKEN = 'chatOwnerToken';
+
+    protected const string CHAT_OWNER_TOKEN_ALGORITHM = 'sha256';
+
     protected const string PARAMETER_SUPPORTED_ATTACHMENT_MIME_TYPES = 'supportedAttachmentMimeTypes';
 
     protected const string PARAMETER_MAX_ATTACHMENT_SIZE_BYTES = 'maxAttachmentSizeBytes';
@@ -60,20 +64,41 @@ class StorefrontAssistantWidget extends AbstractWidget
     public function __construct()
     {
         $customerTransfer = $this->getFactory()->getCustomerClient()->getCustomer();
-        $isEnabled = $this->getConfig()->isStorefrontAssistantEnabled()
-            && $customerTransfer?->getCustomerReference() !== null;
+        $customerReference = (string)$customerTransfer?->getCustomerReference();
+        $enabledAgents = $this->getEnabledAgents($customerReference);
+        $isEnabled = $enabledAgents !== [];
 
         $this->addIsEnabledParameter($isEnabled);
+        $this->addChatOwnerTokenParameter($customerReference);
         $this->addPromptUrlParameter($isEnabled);
-        $this->addUserNameParameter($isEnabled ? (string)$customerTransfer->getFirstName() : '');
+        $this->addUserNameParameter($isEnabled ? (string)$customerTransfer?->getFirstName() : '');
         $this->addSupportedAttachmentMimeTypesParameter();
         $this->addMaxAttachmentSizeBytesParameter();
         $this->addMaxMessageLengthCharactersParameter();
         $this->addMaxAttachmentCountParameter();
         $this->addConversationUrlParameters($isEnabled);
-        $this->addEnabledAgentsParameter($isEnabled);
+        $this->addEnabledAgentsParameter($enabledAgents);
         $this->addSuggestedPromptsParameter($isEnabled);
         $this->addToolNamesParameter();
+    }
+
+    /**
+     * @return array<int, array<string, string>>
+     */
+    protected function getEnabledAgents(string $customerReference): array
+    {
+        if (!$this->getConfig()->isStorefrontAssistantEnabled() || $customerReference === '') {
+            return [];
+        }
+
+        return $this->getClient()->getStorefrontAssistantEnabledAgents();
+    }
+
+    protected function addChatOwnerTokenParameter(string $customerReference): void
+    {
+        $chatOwnerToken = $customerReference !== '' ? hash(static::CHAT_OWNER_TOKEN_ALGORITHM, $customerReference) : '';
+
+        $this->addParameter(static::PARAMETER_CHAT_OWNER_TOKEN, $chatOwnerToken);
     }
 
     /**
@@ -97,10 +122,11 @@ class StorefrontAssistantWidget extends AbstractWidget
         ]);
     }
 
-    protected function addEnabledAgentsParameter(bool $isEnabled): void
+    /**
+     * @param array<int, array<string, string>> $enabledAgents
+     */
+    protected function addEnabledAgentsParameter(array $enabledAgents): void
     {
-        $enabledAgents = $isEnabled ? $this->getClient()->getStorefrontAssistantEnabledAgents() : [];
-
         $this->addParameter(static::PARAMETER_ENABLED_AGENTS, $enabledAgents);
     }
 

@@ -343,6 +343,8 @@ class AiCommerceFactory extends AbstractFactory
     {
         return new StorefrontAssistantRequestPayloadValidator(
             $this->getConfig(),
+            $this->getClient(),
+            $this->createStorefrontAssistantRequestPayloadMapper(),
         );
     }
 

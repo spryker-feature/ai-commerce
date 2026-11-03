@@ -44,6 +44,8 @@ class StorefrontAssistantWidgetTest extends Unit
 
     protected const string PARAMETER_SUGGESTED_PROMPT_SECTIONS = 'suggestedPromptSections';
 
+    protected const string PARAMETER_CHAT_OWNER_TOKEN = 'chatOwnerToken';
+
     /**
      * @var array<int, array<string, string>>
      */
@@ -164,13 +166,58 @@ class StorefrontAssistantWidgetTest extends Unit
         $this->assertContains(ProductDetailsToolPlugin::TOOL_NAME, $parameters[static::PARAMETER_TOOL_NAMES]);
     }
 
-    protected function createWidget(bool $isEnabled, ?CustomerTransfer $customerTransfer): StorefrontAssistantWidget
+    public function testGivenNoEnabledAgentWhenBuiltThenWidgetIsDisabled(): void
     {
+        // Arrange
+        $customerTransfer = (new CustomerTransfer())
+            ->setCustomerReference(static::CUSTOMER_REFERENCE)
+            ->setFirstName(static::CUSTOMER_FIRST_NAME);
+
+        // Act
+        $parameters = $this->createWidget(true, $customerTransfer, [])->getParameters();
+
+        // Assert
+        $this->assertFalse($parameters[static::PARAMETER_IS_ENABLED]);
+        $this->assertSame('', $parameters[static::PARAMETER_PROMPT_URL]);
+        $this->assertSame([], $parameters[static::PARAMETER_ENABLED_AGENTS]);
+    }
+
+    public function testGivenAuthenticatedCustomerWhenBuiltThenChatOwnerTokenIsTheHashedCustomerReference(): void
+    {
+        // Arrange
+        $customerTransfer = (new CustomerTransfer())->setCustomerReference(static::CUSTOMER_REFERENCE);
+
+        // Act
+        $parameters = $this->createWidget(true, $customerTransfer)->getParameters();
+
+        // Assert
+        $this->assertSame(hash('sha256', static::CUSTOMER_REFERENCE), $parameters[static::PARAMETER_CHAT_OWNER_TOKEN]);
+        $this->assertStringNotContainsString(static::CUSTOMER_REFERENCE, $parameters[static::PARAMETER_CHAT_OWNER_TOKEN]);
+    }
+
+    public function testGivenGuestWhenBuiltThenChatOwnerTokenIsEmpty(): void
+    {
+        // Act
+        $parameters = $this->createWidget(true, null)->getParameters();
+
+        // Assert
+        $this->assertFalse($parameters[static::PARAMETER_IS_ENABLED]);
+        $this->assertSame('', $parameters[static::PARAMETER_CHAT_OWNER_TOKEN]);
+    }
+
+    /**
+     * @param array<int, array<string, string>> $enabledAgents
+     */
+    protected function createWidget(
+        bool $isEnabled,
+        ?CustomerTransfer $customerTransfer,
+        array $enabledAgents = self::ENABLED_AGENTS
+    ): StorefrontAssistantWidget {
         return $this->tester->createStorefrontAssistantWidget(
             $isEnabled,
             $customerTransfer,
             static::PROMPT_URL,
-            static::ENABLED_AGENTS,
+            $enabledAgents,
         );
     }
 }

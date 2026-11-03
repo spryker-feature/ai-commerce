@@ -118,14 +118,14 @@ class StorefrontAssistantRequestPayloadMapperTest extends Unit
         );
     }
 
-    public function testGivenConversationReferencesWithNonStringsWhenListCriteriaAreMappedThenOnlyStringsAreKept(): void
+    public function testGivenConversationReferencesWithNonStringsAndEmptyStringsWhenListCriteriaAreMappedThenOnlyNonEmptyStringsAreKept(): void
     {
         // Arrange
         $storefrontAssistantRequestPayloadMapper = (new AiCommerceFactory())->createStorefrontAssistantRequestPayloadMapper();
 
         // Act
         $storefrontAssistantConversationCollectionCriteriaTransfer = $storefrontAssistantRequestPayloadMapper
-            ->mapPayloadToConversationCollectionCriteriaTransfer(['conversationReferences' => [static::CONVERSATION_REFERENCE, ['x'], 7]], static::CUSTOMER_REFERENCE);
+            ->mapPayloadToConversationCollectionCriteriaTransfer(['conversationReferences' => [static::CONVERSATION_REFERENCE, ['x'], 7, '']], static::CUSTOMER_REFERENCE);
 
         // Assert
         $this->assertSame(

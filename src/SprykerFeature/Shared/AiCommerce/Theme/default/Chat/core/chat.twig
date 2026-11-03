@@ -22,6 +22,7 @@
     csrfToken: '',
     maxMessageLength: 0,
     userName: '',
+    owner: '',
 } | merge(chat ?? {}) %}
 
 {% set chat = chat | merge({
@@ -53,6 +54,7 @@
     } | merge(features.toolCalls ?? {}),
     sessionPersistence: {
         storageKey: 'spryker-chat-session',
+        clearStorageKeys: [],
     } | merge(features.sessionPersistence ?? {}),
     docking: {
         target: 'body',

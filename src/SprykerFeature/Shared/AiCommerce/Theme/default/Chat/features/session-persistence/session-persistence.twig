@@ -1,5 +1,7 @@
 {% block featureSessionPersistence %}
     {% if chat.conversationMessagesUrl is not empty %}
-        <chat-session-persistence storage-key="{{ features.sessionPersistence.storageKey }}"></chat-session-persistence>
+        <chat-session-persistence storage-key="{{ features.sessionPersistence.storageKey }}"
+                                  clear-storage-keys="{{ features.sessionPersistence.clearStorageKeys | join(' ') }}"
+                                  {%- if chat.owner is not empty %} owner="{{ chat.owner }}"{% endif %}></chat-session-persistence>
     {% endif %}
 {% endblock %}

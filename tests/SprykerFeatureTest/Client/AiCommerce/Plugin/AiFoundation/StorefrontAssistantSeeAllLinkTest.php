@@ -109,6 +109,7 @@ class StorefrontAssistantSeeAllLinkTest extends Unit
     public function testGivenCategorySearchWhenProductsDisplayedThenSeeAllLinksToTheCategoryPageWithTheOtherFilters(): void
     {
         // Arrange
+        $this->tester->haveStoreRoutingEnabled(false);
         $this->tester->haveCategoryStorageClientWithCategoryNodeUrls([static::ID_CATEGORY_NODE_NOTEBOOKS => static::CATEGORY_URL_NOTEBOOKS]);
         $this->haveSearchInTurn(24, ['category' => static::ID_CATEGORY_NODE_NOTEBOOKS, 'label' => [static::LABEL_SALE]]);
 

@@ -97,6 +97,7 @@ use Spryker\Client\StorageRedis\Plugin\StorageRedisPlugin;
 use Spryker\Client\Store\StoreClientInterface;
 use Spryker\Client\Store\StoreDependencyProvider as ClientStoreDependencyProvider;
 use Spryker\Client\StoreStorage\Plugin\Store\StoreStorageStoreExpanderPlugin;
+use Spryker\Shared\Locale\LocaleConstants;
 use Spryker\Shared\ProductStorage\ProductStorageConfig as SharedProductStorageConfig;
 use Spryker\Zed\Country\Communication\Plugin\Store\CountryStoreCollectionExpanderPlugin;
 use Spryker\Zed\Currency\Communication\Plugin\Store\CurrencyStoreCollectionExpanderPlugin;
@@ -1923,6 +1924,16 @@ class AiCommerceClientTester extends Actor
         );
     }
 
+    public function haveStoreRoutingEnabled(bool $isStoreRoutingEnabled): void
+    {
+        $this->setConfig(LocaleConstants::IS_STORE_ROUTING_ENABLED, $isStoreRoutingEnabled);
+    }
+
+    public function haveProductComparisonPageEnabled(bool $isProductComparisonPageEnabled): void
+    {
+        $this->mockConfigMethod('isStorefrontAssistantProductComparisonPageEnabled', $isProductComparisonPageEnabled);
+    }
+
     public function havePricePermission(bool $canSeePrice): void
     {
         $this->setDependency(
@@ -2150,7 +2161,10 @@ class AiCommerceClientTester extends Actor
             $this->getFactory()->createComparisonRegistry()->clear();
         }
 
-        return (new CompareProductsToolPlugin())->execute($arguments);
+        $compareProductsToolPlugin = new CompareProductsToolPlugin();
+        $compareProductsToolPlugin->setFactory($this->getFactory());
+
+        return $compareProductsToolPlugin->execute($arguments);
     }
 
     /**

@@ -21,6 +21,7 @@ use Spryker\Client\MerchantStorage\MerchantStorageClientInterface;
 use Spryker\Client\Money\MoneyClientInterface;
 use Spryker\Client\Permission\PermissionClientInterface;
 use Spryker\Client\Price\PriceClientInterface;
+use Spryker\Client\PriceProduct\PriceProductClientInterface;
 use Spryker\Client\PriceProductStorage\PriceProductStorageClientInterface;
 use Spryker\Client\ProductAlternativeStorage\ProductAlternativeStorageClientInterface;
 use Spryker\Client\ProductBundleStorage\ProductBundleStorageClientInterface;
@@ -59,6 +60,8 @@ class AiCommerceDependencyProvider extends AbstractDependencyProvider
     public const string CLIENT_MONEY = 'CLIENT_MONEY';
 
     public const string CLIENT_PRICE = 'CLIENT_PRICE';
+
+    public const string CLIENT_PRICE_PRODUCT = 'CLIENT_PRICE_PRODUCT';
 
     public const string CLIENT_CURRENCY = 'CLIENT_CURRENCY';
 
@@ -141,6 +144,7 @@ class AiCommerceDependencyProvider extends AbstractDependencyProvider
         $container = $this->addProductOfferStorageClient($container);
         $container = $this->addMoneyClient($container);
         $container = $this->addPriceClient($container);
+        $container = $this->addPriceProductClient($container);
         $container = $this->addCurrencyClient($container);
         $container = $this->addProductLabelStorageClient($container);
         $container = $this->addAvailabilityStorageClient($container);
@@ -274,6 +278,15 @@ class AiCommerceDependencyProvider extends AbstractDependencyProvider
     {
         $container->set(static::CLIENT_PRICE, function (Container $container): PriceClientInterface {
             return $container->getLocator()->price()->client();
+        });
+
+        return $container;
+    }
+
+    protected function addPriceProductClient(Container $container): Container
+    {
+        $container->set(static::CLIENT_PRICE_PRODUCT, function (Container $container): PriceProductClientInterface {
+            return $container->getLocator()->priceProduct()->client();
         });
 
         return $container;

@@ -75,6 +75,7 @@ ai_commerce.storefront_assistant.agent.auto_description,"Der Assistent wählt f�
 ai_commerce.storefront_assistant.agent.select_label,"Agent auswählen"
 ai_commerce.storefront_assistant.attachment.remove,"Anhang entfernen"
 ai_commerce.storefront_assistant.attachment.too_large,"Datei ist zu groß. Maximale Größe: %maxBytes% Bytes."
+ai_commerce.storefront_assistant.attachment.too_large_size,"Datei ist zu groß. Maximale Größe: %maxSize%."
 ai_commerce.storefront_assistant.attachment.too_many,"Zu viele Anhänge. Maximal %maxCount% Dateien erlaubt."
 ai_commerce.storefront_assistant.attachment.unsupported_type,"Nicht unterstützter Dateityp. Unterstützte Typen: %types%."
 ai_commerce.storefront_assistant.attachment.read_failed,"Die Datei %name% konnte nicht gelesen werden."

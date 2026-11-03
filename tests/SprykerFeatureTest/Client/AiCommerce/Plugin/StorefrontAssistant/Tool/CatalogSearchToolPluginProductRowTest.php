@@ -237,7 +237,7 @@ class CatalogSearchToolPluginProductRowTest extends Unit
         $this->assertSame(1, $bulkReadCount);
     }
 
-    public function testGivenSearchHitWhenExecutedThenThePriceIsStillResolvedForItsFirstConcrete(): void
+    public function testGivenSearchHitWhenExecutedThenThePriceIsStillResolvedAsOnTheProductDetailPage(): void
     {
         // Arrange
         $this->tester->setUpProductStorageClientReadingPublishedData();

@@ -48,4 +48,11 @@ interface StorefrontAssistantRequestPayloadMapperInterface
         array $payload,
         string $customerReference
     ): StorefrontAssistantConversationMessageCollectionCriteriaTransfer;
+
+    /**
+     * @param array<mixed> $payload
+     *
+     * @return list<string>
+     */
+    public function mapPayloadToConversationReferences(array $payload): array;
 }

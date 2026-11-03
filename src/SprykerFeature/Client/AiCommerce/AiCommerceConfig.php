@@ -8,6 +8,7 @@
 namespace SprykerFeature\Client\AiCommerce;
 
 use Spryker\Client\Kernel\AbstractBundleConfig;
+use Spryker\Shared\Locale\LocaleConstants;
 use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
 
 /**
@@ -32,6 +33,8 @@ class AiCommerceConfig extends AbstractBundleConfig
     protected const float STOREFRONT_ASSISTANT_PRICE_OUTLIER_FACTOR = 5.0;
 
     protected const bool STOREFRONT_ASSISTANT_IS_REASONING_STREAMED = true;
+
+    protected const bool IS_STOREFRONT_ASSISTANT_PRODUCT_COMPARISON_PAGE_ENABLED = false;
 
     protected const string CONFIGURATION_KEY_STOREFRONT_ASSISTANT_GENERAL_IS_PRODUCT_DISCOVERY_AGENT_ENABLED = 'ai_commerce:storefront_assistant:general:is_product_discovery_agent_enabled';
 
@@ -230,6 +233,32 @@ class AiCommerceConfig extends AbstractBundleConfig
     public function getStorefrontAssistantPriceOutlierFactor(): float
     {
         return static::STOREFRONT_ASSISTANT_PRICE_OUTLIER_FACTOR;
+    }
+
+    /**
+     * Specification:
+     * - Returns true when the shop has the product comparison page (`/product-comparison`).
+     * - When true, a Storefront Assistant comparison links to that page as `comparisonUrl`.
+     * - Returns false by default, so a comparison has no `comparisonUrl`: the product comparison page is an optional feature that a shop may not install.
+     *
+     * @api
+     */
+    public function isStorefrontAssistantProductComparisonPageEnabled(): bool
+    {
+        return static::IS_STOREFRONT_ASSISTANT_PRODUCT_COMPARISON_PAGE_ENABLED;
+    }
+
+    /**
+     * Specification:
+     * - Returns true when Yves routes carry the store prefix, for example `/DE/en/<url-key>`.
+     * - Uses the store routing flag of the Locale module, which the Yves router enhancers follow.
+     * - When true, the Storefront Assistant prefixes the root-relative shop URLs it returns with the current store name, the same way Yves generates a path for a storage URL.
+     *
+     * @api
+     */
+    public function isStorefrontAssistantStoreRoutingEnabled(): bool
+    {
+        return (bool)$this->get(LocaleConstants::IS_STORE_ROUTING_ENABLED, false);
     }
 
     /**

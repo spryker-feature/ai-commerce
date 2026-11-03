@@ -12,6 +12,7 @@ namespace SprykerFeature\Client\AiCommerce\StorefrontAssistant\Search;
 use Spryker\Client\CategoryStorage\CategoryStorageClientInterface;
 use Spryker\Client\Locale\LocaleClientInterface;
 use Spryker\Client\Store\StoreClientInterface;
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Mapper\StorefrontAssistantStoreUrlMapperInterface;
 
 class SeeAllLinkBuilder implements SeeAllLinkBuilderInterface
 {
@@ -38,7 +39,8 @@ class SeeAllLinkBuilder implements SeeAllLinkBuilderInterface
         protected CategoryStorageClientInterface $categoryStorageClient,
         protected LocaleClientInterface $localeClient,
         protected StoreClientInterface $storeClient,
-        protected int $maxDisplayedProducts
+        protected int $maxDisplayedProducts,
+        protected StorefrontAssistantStoreUrlMapperInterface $storefrontAssistantStoreUrlMapper
     ) {
     }
 
@@ -106,7 +108,7 @@ class SeeAllLinkBuilder implements SeeAllLinkBuilderInterface
 
         foreach ($categoryNodeStorageTransfers as $categoryNodeStorageTransfer) {
             if ($categoryNodeStorageTransfer->getNodeId() === $idCategoryNode && (string)$categoryNodeStorageTransfer->getUrl() !== '') {
-                return (string)$categoryNodeStorageTransfer->getUrl();
+                return $this->storefrontAssistantStoreUrlMapper->mapUrlToStoreUrl((string)$categoryNodeStorageTransfer->getUrl());
             }
         }
 

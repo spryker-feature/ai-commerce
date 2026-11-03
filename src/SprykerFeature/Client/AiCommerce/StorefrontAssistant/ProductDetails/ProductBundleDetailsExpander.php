@@ -15,6 +15,7 @@ use Generated\Shared\Transfer\ProductForProductBundleStorageTransfer;
 use Generated\Shared\Transfer\StorefrontAssistantProductDetailsRequestTransfer;
 use Spryker\Client\ProductBundleStorage\ProductBundleStorageClientInterface;
 use Spryker\Client\ProductStorage\ProductStorageClientInterface;
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Mapper\StorefrontAssistantStoreUrlMapperInterface;
 
 class ProductBundleDetailsExpander implements ProductDetailsExpanderInterface
 {
@@ -40,7 +41,8 @@ class ProductBundleDetailsExpander implements ProductDetailsExpanderInterface
 
     public function __construct(
         protected ProductBundleStorageClientInterface $productBundleStorageClient,
-        protected ProductStorageClientInterface $productStorageClient
+        protected ProductStorageClientInterface $productStorageClient,
+        protected StorefrontAssistantStoreUrlMapperInterface $storefrontAssistantStoreUrlMapper
     ) {
     }
 
@@ -136,7 +138,7 @@ class ProductBundleDetailsExpander implements ProductDetailsExpanderInterface
             static::KEY_SKU => (string)$productForProductBundleStorageTransfer->getSku(),
             static::KEY_NAME => trim((string)($productConcreteStorageData[static::STORAGE_KEY_NAME] ?? $productForProductBundleStorageTransfer->getName())),
             static::KEY_QUANTITY => (int)$productForProductBundleStorageTransfer->getQuantity(),
-            static::KEY_URL => trim((string)($productConcreteStorageData[static::STORAGE_KEY_URL] ?? $productForProductBundleStorageTransfer->getUrl())),
+            static::KEY_URL => $this->storefrontAssistantStoreUrlMapper->mapUrlToStoreUrl(trim((string)($productConcreteStorageData[static::STORAGE_KEY_URL] ?? $productForProductBundleStorageTransfer->getUrl()))),
         ], static fn (string|int $value): bool => $value !== '');
     }
 

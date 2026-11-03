@@ -53,6 +53,7 @@ class ReadShopPageToolPluginTest extends Unit
     public function testGivenActivePolicyPageWhenReadThenPlainTextAndUrlAreReturned(): void
     {
         // Arrange
+        $this->tester->haveStoreRoutingEnabled(false);
         $this->tester->haveCmsStorageClientReturning([$this->createCmsPageStorage(['content' => '<p>Return within <b>30 days</b> of receipt.</p>'])]);
 
         // Act

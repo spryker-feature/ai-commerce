@@ -32,6 +32,7 @@
         "spryker/oms": "^11.0.0",
         "spryker/permission": "^1.0.0",
         "spryker/price": "^5.0.0",
+        "spryker/price-product": "^4.40.0",
         "spryker/price-product-storage": "^4.0.0",
         "spryker/product-alternative-storage": "^1.0.0",
         "spryker/product-bundle-storage": "^1.0.0",
@@ -77,6 +78,7 @@
         "spryker/testify": "*"
     },
     "suggest": {
+        "spryker-shop/product-comparison-page": "When the Storefront Assistant links a product comparison to the full comparison page (enable AiCommerceConfig::isStorefrontAssistantProductComparisonPageEnabled())",
         "spryker/container": "When using BackofficeAssistant",
         "spryker/product": "When using AI-based product management features",
         "spryker/product-category": "When using category suggestions in product management.",

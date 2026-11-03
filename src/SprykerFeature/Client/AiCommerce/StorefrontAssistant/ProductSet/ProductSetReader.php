@@ -15,6 +15,7 @@ use Spryker\Client\ProductSetPageSearch\ProductSetPageSearchClientInterface;
 use Spryker\Client\ProductSetStorage\ProductSetStorageClientInterface;
 use Spryker\Client\ProductStorage\ProductStorageClientInterface;
 use Spryker\Client\Store\StoreClientInterface;
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Mapper\StorefrontAssistantStoreUrlMapperInterface;
 
 class ProductSetReader implements ProductSetReaderInterface
 {
@@ -46,7 +47,8 @@ class ProductSetReader implements ProductSetReaderInterface
         protected ProductSetStorageClientInterface $productSetStorageClient,
         protected ProductStorageClientInterface $productStorageClient,
         protected StoreClientInterface $storeClient,
-        protected LocaleClientInterface $localeClient
+        protected LocaleClientInterface $localeClient,
+        protected StorefrontAssistantStoreUrlMapperInterface $storefrontAssistantStoreUrlMapper
     ) {
     }
 
@@ -69,7 +71,7 @@ class ProductSetReader implements ProductSetReaderInterface
             $productSets[] = [
                 static::RESULT_KEY_ID_PRODUCT_SET => (int)$productSetDataStorageTransfer->getIdProductSet(),
                 static::RESULT_KEY_NAME => (string)$productSetDataStorageTransfer->getName(),
-                static::RESULT_KEY_URL => (string)$productSetDataStorageTransfer->getUrl(),
+                static::RESULT_KEY_URL => $this->storefrontAssistantStoreUrlMapper->mapUrlToStoreUrl((string)$productSetDataStorageTransfer->getUrl()),
                 static::RESULT_KEY_ITEMS => $items,
             ];
         }
@@ -166,7 +168,7 @@ class ProductSetReader implements ProductSetReaderInterface
             $items[] = [
                 static::RESULT_KEY_ID_PRODUCT_ABSTRACT => $idProductAbstract,
                 static::RESULT_KEY_NAME => $name,
-                static::RESULT_KEY_URL => $url,
+                static::RESULT_KEY_URL => $this->storefrontAssistantStoreUrlMapper->mapUrlToStoreUrl($url),
             ];
         }
 

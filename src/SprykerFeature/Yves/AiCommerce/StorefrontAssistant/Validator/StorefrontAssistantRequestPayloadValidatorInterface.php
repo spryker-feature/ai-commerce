@@ -14,4 +14,14 @@ use Symfony\Component\HttpFoundation\Request;
 interface StorefrontAssistantRequestPayloadValidatorInterface
 {
     public function isRequestPayloadValid(Request $request): bool;
+
+    /**
+     * @param array<mixed> $payload
+     */
+    public function isChatPayloadValid(array $payload): bool;
+
+    /**
+     * @param array<mixed> $payload
+     */
+    public function isConversationDeletePayloadValid(array $payload): bool;
 }

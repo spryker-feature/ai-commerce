@@ -75,6 +75,7 @@ ai_commerce.storefront_assistant.agent.auto_description,"Let the assistant pick 
 ai_commerce.storefront_assistant.agent.select_label,"Select agent"
 ai_commerce.storefront_assistant.attachment.remove,"Remove attachment"
 ai_commerce.storefront_assistant.attachment.too_large,"File is too large. Maximum size is %maxBytes% bytes."
+ai_commerce.storefront_assistant.attachment.too_large_size,"File is too large. Maximum size is %maxSize%."
 ai_commerce.storefront_assistant.attachment.too_many,"Too many attachments. Maximum is %maxCount% files."
 ai_commerce.storefront_assistant.attachment.unsupported_type,"Unsupported file type. Supported types: %types%."
 ai_commerce.storefront_assistant.attachment.read_failed,"The file %name% could not be read."

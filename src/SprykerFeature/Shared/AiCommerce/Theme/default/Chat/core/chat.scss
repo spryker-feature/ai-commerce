@@ -95,10 +95,7 @@ spryker-chat,
     --chat-opacity-muted: 0.5;
     --chat-scale-hover: 1.05;
     --chat-layer: 1000;
-}
-
-spryker-chat {
-    --chat-focus-outline: var(--chat-focus-width) solid var(--chat-color-accent);
+    --chat-layer-expanded: var(--chat-layer);
 }
 
 // Custom properties do not work in media queries, so the breakpoint is a literal.
@@ -109,6 +106,7 @@ spryker-chat {
 }
 
 spryker-chat {
+    --chat-focus-outline: var(--chat-focus-width) solid var(--chat-color-accent);
     display: block;
     font-family: var(--chat-font);
 

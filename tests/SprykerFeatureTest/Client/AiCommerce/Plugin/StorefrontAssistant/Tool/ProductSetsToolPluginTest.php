@@ -90,6 +90,7 @@ class ProductSetsToolPluginTest extends Unit
      */
     protected function haveProductSets(array $productSets): void
     {
+        $this->tester->haveStoreRoutingEnabled(false);
         $productSetDataStorageTransfers = [];
 
         foreach ($productSets as $idProductSet => [$name, $url, $productAbstractIds]) {

@@ -50,11 +50,19 @@
             </template>
         {% endblock %}
         {% block attachmentsNotice %}
+            {% set maxSizeBytes = features.attachments.maxSizeBytes %}
+            {% set maxSize = maxSizeBytes >= 1048576
+                ? (maxSizeBytes / 1048576) | round(1) ~ ' MB'
+                : (maxSizeBytes >= 1024 ? (maxSizeBytes / 1024) | round(1) ~ ' KB' : maxSizeBytes ~ ' B') %}
+            {% set types = features.attachments.accept
+                | split(',')
+                | map(type => type | trim | split('/') | last | split('+') | first | trim('.') | upper)
+                | join(', ') %}
             <template data-block="attachmentsNotice">
                 <div class="spryker-chat-message chat-attachments__notice" role="alert">
                     <p class="spryker-chat-message__text">
-                        <span data-ref="unsupportedType">{{ 'ai_commerce.storefront_assistant.attachment.unsupported_type' | trans({'%types%': features.attachments.accept}) }}</span>
-                        <span data-ref="tooLarge">{{ 'ai_commerce.storefront_assistant.attachment.too_large' | trans({'%maxBytes%': features.attachments.maxSizeBytes}) }}</span>
+                        <span data-ref="unsupportedType">{{ 'ai_commerce.storefront_assistant.attachment.unsupported_type' | trans({'%types%': types}) }}</span>
+                        <span data-ref="tooLarge">{{ 'ai_commerce.storefront_assistant.attachment.too_large_size' | trans({'%maxSize%': maxSize}) }}</span>
                         <span data-ref="tooMany">{{ 'ai_commerce.storefront_assistant.attachment.too_many' | trans({'%maxCount%': features.attachments.maxCount}) }}</span>
                         <span data-ref="readFailed">{{ 'ai_commerce.storefront_assistant.attachment.read_failed' | trans({'%name%': '%name%'}) }}</span>
                         <span class="chat-attachments__notice-file" data-ref="fileName"></span>

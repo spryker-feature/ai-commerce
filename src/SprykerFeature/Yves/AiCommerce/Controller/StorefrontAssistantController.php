@@ -73,7 +73,7 @@ class StorefrontAssistantController extends AbstractController
 
         $payload = $this->getFactory()->createStorefrontAssistantRequestPayloadReader()->findRequestPayload($request);
 
-        if ($payload === null) {
+        if ($payload === null || !$this->getFactory()->createStorefrontAssistantRequestPayloadValidator()->isChatPayloadValid($payload)) {
             return $this->createErrorResponse(static::GLOSSARY_KEY_ERROR_INVALID_PAYLOAD, Response::HTTP_BAD_REQUEST);
         }
 
@@ -186,7 +186,7 @@ class StorefrontAssistantController extends AbstractController
 
         $payload = $this->getFactory()->createStorefrontAssistantRequestPayloadReader()->findRequestPayload($request);
 
-        if ($payload === null) {
+        if ($payload === null || !$this->getFactory()->createStorefrontAssistantRequestPayloadValidator()->isConversationDeletePayloadValid($payload)) {
             return $this->createErrorResponse(static::GLOSSARY_KEY_ERROR_INVALID_PAYLOAD, Response::HTTP_BAD_REQUEST);
         }
 

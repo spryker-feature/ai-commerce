@@ -12,6 +12,7 @@ namespace SprykerFeature\Client\AiCommerce\StorefrontAssistant\Comparison;
 use Spryker\Client\GlossaryStorage\GlossaryStorageClientInterface;
 use Spryker\Client\Locale\LocaleClientInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Mapper\StorefrontAssistantProductMapper;
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Mapper\StorefrontAssistantStoreUrlMapperInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\ProductDetails\ProductAttributeDetailsExpander;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\ProductDetails\ProductAvailabilityDetailsExpander;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\ProductDetails\ProductDetailsReader;
@@ -81,7 +82,9 @@ class ProductComparisonBuilder implements ProductComparisonBuilderInterface
         protected ProductDetailsReaderInterface $productDetailsReader,
         protected GlossaryStorageClientInterface $glossaryStorageClient,
         protected LocaleClientInterface $localeClient,
-        protected ComparisonRegistryInterface $comparisonRegistry
+        protected ComparisonRegistryInterface $comparisonRegistry,
+        protected StorefrontAssistantStoreUrlMapperInterface $storefrontAssistantStoreUrlMapper,
+        protected bool $isProductComparisonPageEnabled
     ) {
     }
 
@@ -326,6 +329,10 @@ class ProductComparisonBuilder implements ProductComparisonBuilderInterface
      */
     protected function buildComparisonUrl(array $productDetailsList): ?string
     {
+        if (!$this->isProductComparisonPageEnabled) {
+            return null;
+        }
+
         $concreteSkus = [];
 
         foreach ($productDetailsList as $productDetails) {
@@ -340,7 +347,9 @@ class ProductComparisonBuilder implements ProductComparisonBuilderInterface
             return null;
         }
 
-        return sprintf(static::COMPARISON_URL, implode(static::COMPARISON_URL_SKU_SEPARATOR, $concreteSkus));
+        return $this->storefrontAssistantStoreUrlMapper->mapUrlToStoreUrl(
+            sprintf(static::COMPARISON_URL, implode(static::COMPARISON_URL_SKU_SEPARATOR, $concreteSkus)),
+        );
     }
 
     /**

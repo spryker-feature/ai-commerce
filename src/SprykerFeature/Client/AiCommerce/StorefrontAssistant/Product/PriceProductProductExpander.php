@@ -18,6 +18,7 @@ use Generated\Shared\Transfer\StorefrontAssistantProductTransfer;
 use Spryker\Client\Currency\CurrencyClientInterface;
 use Spryker\Client\Money\MoneyClientInterface;
 use Spryker\Client\Price\PriceClientInterface;
+use Spryker\Client\PriceProduct\PriceProductClientInterface;
 use Spryker\Client\PriceProductStorage\PriceProductStorageClientInterface;
 use Spryker\Client\ProductOfferStorage\ProductOfferStorageClientInterface;
 
@@ -32,7 +33,8 @@ class PriceProductProductExpander implements ProductExpanderInterface
         protected ProductOfferStorageClientInterface $productOfferStorageClient,
         protected MoneyClientInterface $moneyClient,
         protected PriceClientInterface $priceClient,
-        protected CurrencyClientInterface $currencyClient
+        protected CurrencyClientInterface $currencyClient,
+        protected PriceProductClientInterface $priceProductClient
     ) {
     }
 
@@ -64,23 +66,22 @@ class PriceProductProductExpander implements ProductExpanderInterface
     ): void {
         $idProductAbstract = $storefrontAssistantProductTransfer->getIdProductAbstract();
 
-        $idProductConcrete = $storefrontAssistantProductTransfer->getIdProductConcrete();
-
-        if ($idProductAbstract === null || $idProductAbstract <= 0 || $idProductConcrete === null || $idProductConcrete <= 0) {
+        if ($idProductAbstract === null || $idProductAbstract <= 0) {
             return;
         }
 
         $priceProductFilterTransfer = (new PriceProductFilterTransfer())
             ->setIdProductAbstract($idProductAbstract)
-            ->setIdProduct($idProductConcrete)
             ->setQuantity(static::DEFAULT_QUANTITY)
             ->setStoreName($storeName)
             ->setCurrencyIsoCode($currencyIsoCode)
-            ->setPriceMode($priceMode)
-            ->setProductOfferReference($this->findDefaultProductOfferReference((string)$storefrontAssistantProductTransfer->getConcreteSku()));
+            ->setPriceMode($priceMode);
 
-        $currentProductPriceTransfer = $this->priceProductStorageClient
-            ->getResolvedCurrentProductPriceTransfer($priceProductFilterTransfer);
+        $currentProductPriceTransfer = $this->resolveCurrentProductPrice(
+            $storefrontAssistantProductTransfer,
+            $priceProductFilterTransfer,
+            $storeName,
+        );
 
         $storefrontAssistantProductTransfer
             ->setCurrentProductPrice($currentProductPriceTransfer)
@@ -98,6 +99,36 @@ class PriceProductProductExpander implements ProductExpanderInterface
             ->setPriceFormatted($this->formatAmount($price, $currencyIsoCode));
 
         $this->expandProductWithOriginalPrice($storefrontAssistantProductTransfer, $currentProductPriceTransfer, $price, $currencyIsoCode);
+    }
+
+    protected function resolveCurrentProductPrice(
+        StorefrontAssistantProductTransfer $storefrontAssistantProductTransfer,
+        PriceProductFilterTransfer $priceProductFilterTransfer,
+        string $storeName
+    ): CurrentProductPriceTransfer {
+        $idProductConcrete = $storefrontAssistantProductTransfer->getIdProductConcrete();
+
+        if ($idProductConcrete === null || $idProductConcrete <= 0 || $this->hasSelectableVariants($storefrontAssistantProductTransfer)) {
+            return $this->priceProductClient->resolveProductPriceTransferByPriceProductFilter(
+                $this->priceProductStorageClient->getPriceProductAbstractTransfers(
+                    (int)$priceProductFilterTransfer->getIdProductAbstract(),
+                    $storeName,
+                ),
+                $priceProductFilterTransfer,
+            );
+        }
+
+        $priceProductFilterTransfer
+            ->setIdProduct($idProductConcrete)
+            ->setProductOfferReference($this->findDefaultProductOfferReference((string)$storefrontAssistantProductTransfer->getConcreteSku()));
+
+        return $this->priceProductStorageClient->getResolvedCurrentProductPriceTransfer($priceProductFilterTransfer);
+    }
+
+    protected function hasSelectableVariants(StorefrontAssistantProductTransfer $storefrontAssistantProductTransfer): bool
+    {
+        return (int)$storefrontAssistantProductTransfer->getVariantCount() > 1
+            && $storefrontAssistantProductTransfer->getVariants() !== [];
     }
 
     protected function expandProductWithOriginalPrice(

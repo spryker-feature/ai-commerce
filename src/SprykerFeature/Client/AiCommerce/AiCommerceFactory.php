@@ -20,6 +20,7 @@ use Spryker\Client\MerchantStorage\MerchantStorageClientInterface;
 use Spryker\Client\Money\MoneyClientInterface;
 use Spryker\Client\Permission\PermissionClientInterface;
 use Spryker\Client\Price\PriceClientInterface;
+use Spryker\Client\PriceProduct\PriceProductClientInterface;
 use Spryker\Client\PriceProductStorage\PriceProductStorageClientInterface;
 use Spryker\Client\ProductAlternativeStorage\ProductAlternativeStorageClientInterface;
 use Spryker\Client\ProductBundleStorage\ProductBundleStorageClientInterface;
@@ -80,6 +81,8 @@ use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Mapper\StorefrontAssist
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Mapper\StorefrontAssistantProductMapperInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Mapper\StorefrontAssistantRequestMapper;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Mapper\StorefrontAssistantRequestMapperInterface;
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Mapper\StorefrontAssistantStoreUrlMapper;
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Mapper\StorefrontAssistantStoreUrlMapperInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\PageContext\PageContextProductResolver;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\PageContext\PageContextProductResolverInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Price\StorefrontAssistantPriceFormatter;
@@ -99,6 +102,7 @@ use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Product\ProductExpander
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Product\ProductImageProductExpander;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Product\ProductLabelProductExpander;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Product\ProductStorageProductExpander;
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Product\StoreUrlProductExpander;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Product\ToolResultProductEnricher;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Product\ToolResultProductEnricherInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Product\ToolResultProductExpander;
@@ -339,6 +343,7 @@ class AiCommerceFactory extends AbstractFactory
             $this->createProductLabelProductExpander(),
             $this->createProductImageProductExpander(),
             $this->createPriceProductProductExpander(),
+            $this->createStoreUrlProductExpander(),
         ];
     }
 
@@ -357,6 +362,19 @@ class AiCommerceFactory extends AbstractFactory
         return new ProductImageProductExpander($this->getProductImageStorageClient());
     }
 
+    public function createStoreUrlProductExpander(): ProductExpanderInterface
+    {
+        return new StoreUrlProductExpander($this->createStorefrontAssistantStoreUrlMapper());
+    }
+
+    public function createStorefrontAssistantStoreUrlMapper(): StorefrontAssistantStoreUrlMapperInterface
+    {
+        return new StorefrontAssistantStoreUrlMapper(
+            $this->getStoreClient(),
+            $this->getConfig()->isStorefrontAssistantStoreRoutingEnabled(),
+        );
+    }
+
     public function createPriceProductProductExpander(): ProductExpanderInterface
     {
         return new PriceProductProductExpander(
@@ -365,6 +383,7 @@ class AiCommerceFactory extends AbstractFactory
             $this->getMoneyClient(),
             $this->getPriceClient(),
             $this->getCurrencyClient(),
+            $this->getPriceProductClient(),
         );
     }
 
@@ -395,7 +414,7 @@ class AiCommerceFactory extends AbstractFactory
 
     public function createSuggestionResultFormatter(): SuggestionResultFormatterInterface
     {
-        return new SuggestionResultFormatter();
+        return new SuggestionResultFormatter($this->createStorefrontAssistantStoreUrlMapper());
     }
 
     public function createCatalogSearchReader(): CatalogSearchReaderInterface
@@ -455,6 +474,7 @@ class AiCommerceFactory extends AbstractFactory
             $this->getLocaleClient(),
             $this->getStoreClient(),
             DisplayProductReader::MAX_PRODUCTS,
+            $this->createStorefrontAssistantStoreUrlMapper(),
         );
     }
 
@@ -603,6 +623,7 @@ class AiCommerceFactory extends AbstractFactory
         return new ProductBundleDetailsExpander(
             $this->getProductBundleStorageClient(),
             $this->getProductStorageClient(),
+            $this->createStorefrontAssistantStoreUrlMapper(),
         );
     }
 
@@ -614,6 +635,7 @@ class AiCommerceFactory extends AbstractFactory
             $this->getProductStorageClient(),
             $this->getStoreClient(),
             $this->getLocaleClient(),
+            $this->createStorefrontAssistantStoreUrlMapper(),
         );
     }
 
@@ -672,6 +694,8 @@ class AiCommerceFactory extends AbstractFactory
             $this->getGlossaryStorageClient(),
             $this->getLocaleClient(),
             $this->createComparisonRegistry(),
+            $this->createStorefrontAssistantStoreUrlMapper(),
+            $this->getConfig()->isStorefrontAssistantProductComparisonPageEnabled(),
         );
     }
 
@@ -754,6 +778,7 @@ class AiCommerceFactory extends AbstractFactory
             $this->createShopPageTextExtractor(),
             $this->getStoreClient(),
             $this->getLocaleClient(),
+            $this->createStorefrontAssistantStoreUrlMapper(),
         );
     }
 
@@ -816,6 +841,11 @@ class AiCommerceFactory extends AbstractFactory
     public function getPriceClient(): PriceClientInterface
     {
         return $this->getProvidedDependency(AiCommerceDependencyProvider::CLIENT_PRICE);
+    }
+
+    public function getPriceProductClient(): PriceProductClientInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::CLIENT_PRICE_PRODUCT);
     }
 
     public function getCurrencyClient(): CurrencyClientInterface

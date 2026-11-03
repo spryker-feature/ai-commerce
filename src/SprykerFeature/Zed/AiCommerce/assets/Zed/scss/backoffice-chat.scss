@@ -5,6 +5,7 @@
 
 :root {
     --backoffice-chat-panel-width: min(clamp(320px, 30vw, 560px), 50%);
+    --backoffice-chat-save-bar-clearance: 64px;
 }
 
 spryker-chat,
@@ -58,4 +59,8 @@ spryker-chat,
     .app-topbar {
         margin-right: var(--chat-dock-width);
     }
+}
+
+:root:has(#config-save-bar[style*='block']) .chat-trigger--fixed {
+    bottom: calc(var(--chat-trigger-fixed-offset) + var(--backoffice-chat-save-bar-clearance));
 }

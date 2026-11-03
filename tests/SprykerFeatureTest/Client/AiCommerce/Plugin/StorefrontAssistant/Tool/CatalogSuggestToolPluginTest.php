@@ -95,6 +95,7 @@ class CatalogSuggestToolPluginTest extends Unit
     {
         // Arrange
         $this->tester->setUpCurrentStore();
+        $this->tester->haveStoreRoutingEnabled(false);
         $this->tester->setUpCatalogSuggestResult(
             $this->tester->createCatalogSuggestResult([], [
                 static::TYPE_CMS_PAGE => [

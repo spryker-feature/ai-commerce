@@ -15,6 +15,7 @@ use Generated\Shared\Transfer\CmsPageStorageTransfer;
 use Spryker\Client\CmsStorage\CmsStorageClientInterface;
 use Spryker\Client\Locale\LocaleClientInterface;
 use Spryker\Client\Store\StoreClientInterface;
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Mapper\StorefrontAssistantStoreUrlMapperInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Tool\ToolArgumentNormalizerInterface;
 
 class ShopPageReader implements ShopPageReaderInterface
@@ -44,7 +45,8 @@ class ShopPageReader implements ShopPageReaderInterface
         protected CmsStorageClientInterface $cmsStorageClient,
         protected ShopPageTextExtractorInterface $shopPageTextExtractor,
         protected StoreClientInterface $storeClient,
-        protected LocaleClientInterface $localeClient
+        protected LocaleClientInterface $localeClient,
+        protected StorefrontAssistantStoreUrlMapperInterface $storefrontAssistantStoreUrlMapper
     ) {
     }
 
@@ -77,7 +79,7 @@ class ShopPageReader implements ShopPageReaderInterface
             static::RESULT_KEY_FOUND => true,
             static::RESULT_KEY_ID_CMS_PAGE => $idCmsPage,
             static::RESULT_KEY_NAME => (string)$cmsPageStorageTransfer->getName(),
-            static::RESULT_KEY_URL => (string)$cmsPageStorageTransfer->getUrl(),
+            static::RESULT_KEY_URL => $this->storefrontAssistantStoreUrlMapper->mapUrlToStoreUrl((string)$cmsPageStorageTransfer->getUrl()),
             static::RESULT_KEY_TEXT => $text,
         ];
     }

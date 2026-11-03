@@ -1,5 +1,6 @@
 @include helper-import(organism, storefront-assistant) {
     $storefront-assistant-panel-width: clamp(400px, 28vw, 480px);
+    $storefront-assistant-layer-expanded: $setting-zi-side-drawer !default;
     $storefront-assistant-alert: map.get($setting-color-actions, alert);
 
     storefront-assistant spryker-chat,
@@ -26,6 +27,7 @@
         --chat-font-code: #{$setting-font-family-code};
         --chat-duration-medium: #{$setting-effect-default-duration};
         --chat-layer: #{$setting-zi-popup};
+        --chat-layer-expanded: #{$storefront-assistant-layer-expanded};
         --chat-size-panel-width: #{$storefront-assistant-panel-width};
         --chat-size-panel-width-narrow: #{$storefront-assistant-panel-width};
     }

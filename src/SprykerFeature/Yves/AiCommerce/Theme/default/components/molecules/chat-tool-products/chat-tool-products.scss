@@ -323,6 +323,15 @@ chat-tool-products {
     }
 }
 
+.chat-tool-products__prompt {
+    max-width: 100%;
+    height: auto;
+    min-height: calc(var(--chat-size-control) - var(--chat-space-small));
+    padding-block: var(--chat-space-small);
+    line-height: var(--chat-line-height-compact);
+    white-space: normal;
+}
+
 .chat-tool-products__filter-pill {
     border: var(--chat-filter-pill-border);
     background: var(--chat-filter-pill-background);

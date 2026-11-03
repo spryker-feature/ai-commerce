@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace SprykerFeature\Client\AiCommerce\StorefrontAssistant\Search;
 
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Mapper\StorefrontAssistantStoreUrlMapperInterface;
+
 class SuggestionResultFormatter implements SuggestionResultFormatterInterface
 {
     public const string TYPE_PRODUCT_ABSTRACT = 'product_abstract';
@@ -77,6 +79,10 @@ class SuggestionResultFormatter implements SuggestionResultFormatterInterface
         ],
     ];
 
+    public function __construct(protected StorefrontAssistantStoreUrlMapperInterface $storefrontAssistantStoreUrlMapper)
+    {
+    }
+
     /**
      * @param array<string, mixed> $suggestionsByType
      *
@@ -134,6 +140,16 @@ class SuggestionResultFormatter implements SuggestionResultFormatterInterface
 
     /**
      * @param array<string, mixed> $row
+     */
+    protected function resolveUrl(array $row): ?string
+    {
+        $url = $this->resolveString($row, static::SOURCE_KEY_URL);
+
+        return $url !== null ? $this->storefrontAssistantStoreUrlMapper->mapUrlToStoreUrl($url) : null;
+    }
+
+    /**
+     * @param array<string, mixed> $row
      * @param array<string, mixed> $projection
      *
      * @return array<string, mixed>
@@ -149,7 +165,7 @@ class SuggestionResultFormatter implements SuggestionResultFormatterInterface
         $formattedRow = [
             static::RESULT_KEY_ID => $this->resolveInt($row, $projection[static::PROJECTION_KEY_ID]),
             static::RESULT_KEY_NAME => $name,
-            static::RESULT_KEY_URL => $this->resolveString($row, static::SOURCE_KEY_URL),
+            static::RESULT_KEY_URL => $this->resolveUrl($row),
         ];
 
         foreach ($projection[static::PROJECTION_KEY_EXTRA] as $resultKey => $sourceKey) {

@@ -159,6 +159,8 @@ class CompareProductsToolPluginTest extends Unit
     public function testGivenTwoProductsWhenComparedThenComparisonUrlCarriesAnInStockConcreteSkuOfEach(): void
     {
         // Arrange
+        $this->tester->haveProductComparisonPageEnabled(true);
+        $this->tester->haveStoreRoutingEnabled(false);
         [$idFirst, $idSecond] = $this->haveTwoComparableProducts([static::CONCRETE_SKU_FIRST => 5, static::CONCRETE_SKU_SECOND_SOLD_OUT => 0, static::CONCRETE_SKU_SECOND_IN_STOCK => 2]);
 
         // Act
@@ -167,6 +169,38 @@ class CompareProductsToolPluginTest extends Unit
         // Assert
         $this->assertSame(
             sprintf('/product-comparison?skus=%s,%s', static::CONCRETE_SKU_FIRST, static::CONCRETE_SKU_SECOND_IN_STOCK),
+            $comparison[static::KEY_COMPARISON_URL],
+        );
+    }
+
+    public function testGivenProductComparisonPageDisabledWhenComparedThenTheComparisonHasNoComparisonUrl(): void
+    {
+        // Arrange
+        $this->tester->haveProductComparisonPageEnabled(false);
+        [$idFirst, $idSecond] = $this->haveTwoComparableProducts([static::CONCRETE_SKU_FIRST => 5, static::CONCRETE_SKU_SECOND_SOLD_OUT => 0, static::CONCRETE_SKU_SECOND_IN_STOCK => 2]);
+
+        // Act
+        $comparison = $this->tester->executeCompareProductsTool([static::PARAMETER_ID_PRODUCT_ABSTRACTS => [$idFirst, $idSecond]]);
+
+        // Assert
+        $this->assertArrayHasKey(static::KEY_COMPARED_PRODUCTS, $comparison);
+        $this->assertArrayNotHasKey(static::KEY_COMPARISON_URL, $comparison);
+    }
+
+    public function testGivenStoreRoutingWhenComparedThenComparisonUrlCarriesTheCurrentStorePrefix(): void
+    {
+        // Arrange
+        $storeName = $this->tester->setUpCurrentStore();
+        $this->tester->haveProductComparisonPageEnabled(true);
+        $this->tester->haveStoreRoutingEnabled(true);
+        [$idFirst, $idSecond] = $this->haveTwoComparableProducts([static::CONCRETE_SKU_FIRST => 5, static::CONCRETE_SKU_SECOND_SOLD_OUT => 0, static::CONCRETE_SKU_SECOND_IN_STOCK => 2]);
+
+        // Act
+        $comparison = $this->tester->executeCompareProductsTool([static::PARAMETER_ID_PRODUCT_ABSTRACTS => [$idFirst, $idSecond]]);
+
+        // Assert
+        $this->assertSame(
+            sprintf('/%s/product-comparison?skus=%s,%s', $storeName, static::CONCRETE_SKU_FIRST, static::CONCRETE_SKU_SECOND_IN_STOCK),
             $comparison[static::KEY_COMPARISON_URL],
         );
     }
@@ -271,6 +305,8 @@ class CompareProductsToolPluginTest extends Unit
     public function testGivenTwoPublishedProductsWhenComparedThenRealStorageResolvesTheirPricesAndConcreteSkus(): void
     {
         // Arrange
+        $this->tester->haveProductComparisonPageEnabled(true);
+        $this->tester->haveStoreRoutingEnabled(false);
         [$idFirst] = $this->tester->getProductAbstractStorageDataMatching(
             static fn (array $productData): bool => ($productData[static::STORAGE_KEY_ATTRIBUTE_MAP][static::STORAGE_KEY_PRODUCT_CONCRETE_IDS] ?? []) !== [],
             'with a concrete product',
