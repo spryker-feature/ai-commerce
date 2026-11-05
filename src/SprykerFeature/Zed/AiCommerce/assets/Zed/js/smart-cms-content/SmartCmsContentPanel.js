@@ -26,7 +26,7 @@ export class SmartCmsContentPanel {
         attachmentTemplate: '.js-smart-cms-attachment-template',
         attachmentName: '.js-smart-cms-panel__attachment-name',
         attachmentRemove: '.js-smart-cms-panel__attachment-remove',
-        editor: 'textarea.html-editor',
+        editor: 'textarea.html-editor, textarea[data-spryker-rich-text-editor]',
         widgetInfoBlock: '.ibox',
         widgetInfoTitle: '.ibox-title',
         widgetInfoContent: '.ibox-content',
@@ -168,7 +168,9 @@ export class SmartCmsContentPanel {
 
             this.#applyPlaceholders(data.placeholders ?? []);
             this.#showMessage(data.explanation || this.#messages.done, SmartCmsContentPanel.#messageType.success);
-        } catch {
+        } catch (error) {
+            // Also reached by a failure while applying the content to the editors, which is not a connection error.
+            console.error('Smart CMS content: the request or applying its content failed.', error);
             this.#showMessage(this.#messages.connectionError, SmartCmsContentPanel.#messageType.error);
         } finally {
             this.#setBusy(false);
@@ -470,6 +472,13 @@ export class SmartCmsContentPanel {
     }
 
     #getEditorContent(editor) {
+        // A field the Tiptap editor owns has no Summernote instance; the registry returns its current HTML.
+        const richTextEditorHtml = window.SprykerRichTextEditor?.readHtml(editor);
+
+        if (typeof richTextEditorHtml === 'string') {
+            return richTextEditorHtml;
+        }
+
         const $editor = window.jQuery(editor);
 
         if ($editor.next('.note-editor').length) {
@@ -480,6 +489,10 @@ export class SmartCmsContentPanel {
     }
 
     #setEditorContent(editor, content) {
+        if (window.SprykerRichTextEditor?.writeHtml(editor, content)) {
+            return;
+        }
+
         const $editor = window.jQuery(editor);
 
         if ($editor.next('.note-editor').length) {
