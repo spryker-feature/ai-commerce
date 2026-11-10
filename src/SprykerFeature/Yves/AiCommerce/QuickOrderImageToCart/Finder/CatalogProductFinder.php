@@ -101,7 +101,7 @@ class CatalogProductFinder implements CatalogProductFinderInterface
         }
 
         $concreteIds = array_map(
-            static fn (mixed $id): int => (int)$id,
+            static fn (mixed $idProductConcrete): int => (int)$idProductConcrete,
             array_values($attributeMap->getProductConcreteIds()),
         );
 
