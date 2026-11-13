@@ -61,6 +61,7 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
         $container = $this->addTranslatorFacade($container);
         $container = $this->addAiFoundationFacade($container);
         $container = $this->addBackofficeAssistantAgentPlugins($container);
+        $container = $this->addLocaleFacade($container);
 
         return $container;
     }

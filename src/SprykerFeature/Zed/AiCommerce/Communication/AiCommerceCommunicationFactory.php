@@ -12,6 +12,7 @@ namespace SprykerFeature\Zed\AiCommerce\Communication;
 use Spryker\Zed\AiFoundation\Business\AiFoundationFacadeInterface;
 use Spryker\Zed\AiFoundation\Dependency\Tools\ToolPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractCommunicationFactory;
+use Spryker\Zed\Locale\Business\LocaleFacadeInterface;
 use Spryker\Zed\Translator\Business\TranslatorFacadeInterface;
 use Spryker\Zed\User\Business\UserFacadeInterface;
 use SprykerFeature\Shared\AiCommerce\Conversation\RegeneratedPromptMarker;
@@ -268,6 +269,11 @@ class AiCommerceCommunicationFactory extends AbstractCommunicationFactory
     public function getTranslatorFacade(): TranslatorFacadeInterface
     {
         return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_TRANSLATOR);
+    }
+
+    public function getLocaleFacade(): LocaleFacadeInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_LOCALE);
     }
 
     public function createRegeneratedPromptMarker(): RegeneratedPromptMarker

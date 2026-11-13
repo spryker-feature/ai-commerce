@@ -57,8 +57,6 @@ class StorefrontAssistantWidget extends AbstractWidget
 
     protected const string PARAMETER_SUGGESTED_PROMPTS = 'suggestedPrompts';
 
-    protected const string PARAMETER_SUGGESTED_PROMPT_SECTIONS = 'suggestedPromptSections';
-
     protected const string PARAMETER_TOOL_NAMES = 'toolNames';
 
     public function __construct()
@@ -132,12 +130,9 @@ class StorefrontAssistantWidget extends AbstractWidget
 
     protected function addSuggestedPromptsParameter(bool $isEnabled): void
     {
-        $storefrontAssistantSuggestedPromptReader = $this->getFactory()->createStorefrontAssistantSuggestedPromptReader();
-        $suggestedPrompts = $isEnabled ? $storefrontAssistantSuggestedPromptReader->getSuggestedPrompts() : [];
-        $suggestedPromptSections = $isEnabled ? $storefrontAssistantSuggestedPromptReader->getSuggestedPromptSections() : [];
+        $suggestedPrompts = $isEnabled ? $this->getFactory()->createStorefrontAssistantSuggestedPromptReader()->getSuggestedPrompts() : [];
 
         $this->addParameter(static::PARAMETER_SUGGESTED_PROMPTS, $suggestedPrompts);
-        $this->addParameter(static::PARAMETER_SUGGESTED_PROMPT_SECTIONS, $suggestedPromptSections);
     }
 
     protected function addConversationUrlParameters(bool $isEnabled): void

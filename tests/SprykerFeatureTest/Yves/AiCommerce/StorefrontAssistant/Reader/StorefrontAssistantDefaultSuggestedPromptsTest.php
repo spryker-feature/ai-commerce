@@ -9,12 +9,10 @@ declare(strict_types=1);
 
 namespace SprykerFeatureTest\Yves\AiCommerce\StorefrontAssistant\Reader;
 
-use Codeception\Stub;
 use Codeception\Test\Unit;
 use SprykerFeature\Shared\AiCommerce\StorefrontAssistant\StorefrontAssistantPageType;
-use SprykerFeature\Yves\AiCommerce\AiCommerceConfig;
-use SprykerFeature\Yves\AiCommerce\AiCommerceFactory;
 use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Reader\StorefrontAssistantSuggestedPromptReaderInterface;
+use SprykerFeatureTest\Yves\AiCommerce\AiCommerceYvesTester;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -39,12 +37,18 @@ class StorefrontAssistantDefaultSuggestedPromptsTest extends Unit
 
     protected const string CONFIGURATION_KEY_PRODUCT_PAGE_PROMPTS = 'ai_commerce:storefront_assistant:suggested_prompts:product_page_prompts';
 
+    protected const string LOCALE_NAME_EN = 'en_US';
+
+    protected const string LOCALE_NAME_DE = 'de_DE';
+
     protected const string UNANSWERABLE_CHIP_PATTERN = '/\b(specs?|specifications?|fit|before buying)\b/i';
+
+    protected AiCommerceYvesTester $tester;
 
     public function testGivenModuleDefaultsWhenProductPagePromptsAreReadThenNoChipAsksForSpecsFitOrBeforeBuying(): void
     {
         // Arrange
-        $storefrontAssistantSuggestedPromptReader = $this->createReaderWithModuleDefaultProductPagePrompts();
+        $storefrontAssistantSuggestedPromptReader = $this->createReaderWithModuleDefaultProductPagePrompts(static::LOCALE_NAME_EN);
 
         // Act
         $productPagePrompts = $storefrontAssistantSuggestedPromptReader->getSuggestedPrompts()[StorefrontAssistantPageType::Product->value];
@@ -55,10 +59,13 @@ class StorefrontAssistantDefaultSuggestedPromptsTest extends Unit
         }
     }
 
-    public function testGivenModuleDefaultsWhenProductPagePromptsAreReadThenAtLeastTwoChipsAreOffered(): void
+    /**
+     * @dataProvider provideDefaultLocaleNames
+     */
+    public function testGivenModuleDefaultsWhenProductPagePromptsAreReadThenAtLeastTwoChipsAreOffered(string $localeName): void
     {
         // Arrange
-        $storefrontAssistantSuggestedPromptReader = $this->createReaderWithModuleDefaultProductPagePrompts();
+        $storefrontAssistantSuggestedPromptReader = $this->createReaderWithModuleDefaultProductPagePrompts($localeName);
 
         // Act
         $productPagePrompts = $storefrontAssistantSuggestedPromptReader->getSuggestedPrompts()[StorefrontAssistantPageType::Product->value];
@@ -67,28 +74,42 @@ class StorefrontAssistantDefaultSuggestedPromptsTest extends Unit
         $this->assertGreaterThanOrEqual(2, count($productPagePrompts));
     }
 
-    protected function createReaderWithModuleDefaultProductPagePrompts(): StorefrontAssistantSuggestedPromptReaderInterface
+    public function testGivenModuleDefaultsWhenProductPagePromptsAreReadInGermanThenTheyDifferFromTheEnglishPrompts(): void
     {
-        $configurationValues = [
-            static::CONFIGURATION_KEY_PRODUCT_PAGE_PROMPTS => $this->getModuleDefaultProductPagePrompts(),
-        ];
+        // Arrange
+        $germanReader = $this->createReaderWithModuleDefaultProductPagePrompts(static::LOCALE_NAME_DE);
+        $englishReader = $this->createReaderWithModuleDefaultProductPagePrompts(static::LOCALE_NAME_EN);
 
-        /**
-         * @var \SprykerFeature\Yves\AiCommerce\AiCommerceConfig $aiCommerceConfig
-         */
-        $aiCommerceConfig = Stub::construct(AiCommerceConfig::class, [], [
-            'getModuleConfig' => function (string $key, mixed $default = null) use ($configurationValues): mixed {
-                return $configurationValues[$key] ?? $default;
-            },
-        ]);
+        // Act
+        $germanPrompts = $germanReader->getSuggestedPrompts()[StorefrontAssistantPageType::Product->value];
+        $englishPrompts = $englishReader->getSuggestedPrompts()[StorefrontAssistantPageType::Product->value];
 
-        $aiCommerceFactory = new AiCommerceFactory();
-        $aiCommerceFactory->setConfig($aiCommerceConfig);
-
-        return $aiCommerceFactory->createStorefrontAssistantSuggestedPromptReader();
+        // Assert
+        $this->assertNotSame($englishPrompts, $germanPrompts);
     }
 
-    protected function getModuleDefaultProductPagePrompts(): string
+    /**
+     * @return array<string, array<string>>
+     */
+    public static function provideDefaultLocaleNames(): array
+    {
+        return [
+            static::LOCALE_NAME_EN => [static::LOCALE_NAME_EN],
+            static::LOCALE_NAME_DE => [static::LOCALE_NAME_DE],
+        ];
+    }
+
+    protected function createReaderWithModuleDefaultProductPagePrompts(string $localeName): StorefrontAssistantSuggestedPromptReaderInterface
+    {
+        return $this->tester->createStorefrontAssistantSuggestedPromptReader([
+            static::CONFIGURATION_KEY_PRODUCT_PAGE_PROMPTS => json_encode($this->getModuleDefaultProductPagePrompts(), JSON_THROW_ON_ERROR),
+        ], $localeName);
+    }
+
+    /**
+     * @return array<string, list<string>>
+     */
+    protected function getModuleDefaultProductPagePrompts(): array
     {
         $configuration = Yaml::parseFile(dirname(__DIR__, 6) . DIRECTORY_SEPARATOR . static::MODULE_CONFIGURATION_FILE);
 
@@ -97,7 +118,7 @@ class StorefrontAssistantDefaultSuggestedPromptsTest extends Unit
         $group = $this->findByKey($tab['groups'], static::GROUP_KEY);
         $setting = $this->findByKey($group['settings'], static::SETTING_KEY);
 
-        $this->assertIsString($setting['default_value']);
+        $this->assertIsArray($setting['default_value']);
 
         return $setting['default_value'];
     }

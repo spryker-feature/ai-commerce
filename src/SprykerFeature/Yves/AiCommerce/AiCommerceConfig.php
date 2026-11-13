@@ -315,24 +315,47 @@ class AiCommerceConfig extends AbstractBundleConfig
 
     /**
      * Specification:
-     * - Returns the raw suggested prompt value configured for each prompt group, keyed by the page type it applies to,
-     *   plus the `product_results` follow-up group offered under product cards the assistant renders.
+     * - Returns the suggested prompts configured for each prompt group in the given locale, keyed by the page type
+     *   it applies to, plus the `product_results` follow-up group offered under product cards the assistant renders.
+     * - Expects each configuration value as a JSON object keyed by the locale name with a list of prompts as each value,
+     *   for example `{"en_US": ["What is new?", "What is on sale?"], "de_DE": ["Was ist neu?"]}`.
+     * - Returns an empty list for a group whose value is not set, is not such a JSON object, or has no list for the given locale.
+     * - Returns only the text entries of the list of the given locale.
+     * - A project adds the group of a project page type in `getSuggestedPromptConfigurationKeysByGroup()`.
      * - Reads each value from Configuration Management on every call so a Back Office change takes effect without a deployment.
-     * - Returns an empty string for a group whose value is not set.
      *
      * @api
      *
-     * @return array<string, string>
+     * @return array<string, list<string>>
      */
-    public function getStorefrontAssistantSuggestedPromptValues(): array
+    public function getStorefrontAssistantSuggestedPrompts(string $localeName): array
     {
-        $suggestedPromptValues = [];
+        $suggestedPrompts = [];
 
         foreach ($this->getSuggestedPromptConfigurationKeysByGroup() as $group => $configurationKey) {
-            $suggestedPromptValues[$group] = (string)$this->getModuleConfig($configurationKey, '');
+            $suggestedPrompts[$group] = $this->resolveLocalizedSuggestedPrompts(
+                $this->getModuleConfig($configurationKey, ''),
+                $localeName,
+            );
         }
 
-        return $suggestedPromptValues;
+        return $suggestedPrompts;
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function resolveLocalizedSuggestedPrompts(mixed $suggestedPromptValue, string $localeName): array
+    {
+        $localizedSuggestedPrompts = is_string($suggestedPromptValue)
+            ? json_decode($suggestedPromptValue, true)
+            : $suggestedPromptValue;
+
+        if (!is_array($localizedSuggestedPrompts) || !is_array($localizedSuggestedPrompts[$localeName] ?? null)) {
+            return [];
+        }
+
+        return array_values(array_filter($localizedSuggestedPrompts[$localeName], 'is_string'));
     }
 
     /**

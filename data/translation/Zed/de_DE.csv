@@ -120,3 +120,6 @@ Close,Schließen
 "Please fill in text to translate","Bitte geben Sie den zu übersetzenden Text ein"
 "Please fill in the product image url","Bitte geben Sie die URL des Produktbilds ein"
 "Please fill in the product name and description for at least one locale","Bitte geben Sie den Produktnamen und die Beschreibung für mindestens eine Sprache ein"
+"Enter a JSON object with a locale name as each key and a list of the prompts of that locale as each value, for example {""en_US"": [""What is new?"", ""What is on sale?""]}.","Geben Sie ein JSON-Objekt mit einem Locale-Namen als Schlüssel und einer Liste der Prompts dieses Locales als Wert ein, zum Beispiel {""de_DE"": [""Was ist neu?"", ""Was ist im Angebot?""]}."
+"The locale ""{{ locale }}"" is not assigned to any store.","Das Locale ""{{ locale }}"" ist keinem Store zugewiesen."
+"Enter the prompts of the locale ""{{ locale }}"" as a list of text values.","Geben Sie die Prompts des Locales ""{{ locale }}"" als eine Liste von Textwerten ein."

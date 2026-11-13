@@ -42,7 +42,7 @@ class StorefrontAssistantWidgetTest extends Unit
 
     protected const string PARAMETER_TOOL_NAMES = 'toolNames';
 
-    protected const string PARAMETER_SUGGESTED_PROMPT_SECTIONS = 'suggestedPromptSections';
+    protected const string PARAMETER_SUGGESTED_PROMPTS = 'suggestedPrompts';
 
     protected const string PARAMETER_CHAT_OWNER_TOKEN = 'chatOwnerToken';
 
@@ -97,16 +97,16 @@ class StorefrontAssistantWidgetTest extends Unit
         $this->assertSame([], $widget->getParameters()[static::PARAMETER_ENABLED_AGENTS]);
     }
 
-    public function testGivenDisabledWhenBuiltThenSuggestedPromptSectionsParameterIsAnEmptyMap(): void
+    public function testGivenDisabledWhenBuiltThenSuggestedPromptsParameterIsAnEmptyMap(): void
     {
         // Act
         $widget = $this->createWidget(false, new CustomerTransfer());
 
         // Assert
-        $this->assertSame([], $widget->getParameters()[static::PARAMETER_SUGGESTED_PROMPT_SECTIONS]);
+        $this->assertSame([], $widget->getParameters()[static::PARAMETER_SUGGESTED_PROMPTS]);
     }
 
-    public function testGivenEnabledWhenBuiltThenSuggestedPromptSectionsParameterHoldsEveryPromptGroup(): void
+    public function testGivenEnabledWhenBuiltThenSuggestedPromptsParameterHoldsEveryPromptGroup(): void
     {
         // Arrange
         $customerTransfer = (new CustomerTransfer())->setCustomerReference(static::CUSTOMER_REFERENCE);
@@ -115,7 +115,7 @@ class StorefrontAssistantWidgetTest extends Unit
         $parameters = $this->createWidget(true, $customerTransfer)->getParameters();
 
         // Assert
-        $this->assertArrayHasKey(StorefrontAssistantPageType::Default->value, $parameters[static::PARAMETER_SUGGESTED_PROMPT_SECTIONS]);
+        $this->assertArrayHasKey(StorefrontAssistantPageType::Default->value, $parameters[static::PARAMETER_SUGGESTED_PROMPTS]);
     }
 
     public function testGivenDisabledWhenBuiltThenUserNameIsEmptyAndPromptUrlIsEmpty(): void

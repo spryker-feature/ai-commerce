@@ -336,6 +336,7 @@ class AiCommerceFactory extends AbstractFactory
     {
         return new StorefrontAssistantSuggestedPromptReader(
             $this->getConfig(),
+            $this->getLocaleClient(),
         );
     }
 

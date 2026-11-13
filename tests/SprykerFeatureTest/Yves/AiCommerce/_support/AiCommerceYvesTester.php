@@ -18,6 +18,7 @@ use Generated\Shared\Transfer\SearchByImageRequestTransfer;
 use Spryker\Client\AiFoundation\AiFoundationClientInterface;
 use Spryker\Client\Customer\CustomerClientInterface;
 use Spryker\Client\Kernel\Container;
+use Spryker\Client\Locale\LocaleClientInterface;
 use Spryker\Client\Storage\StorageDependencyProvider;
 use Spryker\Client\StorageRedis\Plugin\StorageRedisPlugin;
 use Spryker\Yves\Kernel\Container as YvesContainer;
@@ -30,6 +31,7 @@ use SprykerFeature\Shared\AiCommerce\AiCommerceConfig as AiCommerceSharedConfig;
 use SprykerFeature\Yves\AiCommerce\AiCommerceConfig as AiCommerceYvesConfig;
 use SprykerFeature\Yves\AiCommerce\AiCommerceDependencyProvider as AiCommerceYvesDependencyProvider;
 use SprykerFeature\Yves\AiCommerce\AiCommerceFactory as AiCommerceYvesFactory;
+use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Reader\StorefrontAssistantSuggestedPromptReaderInterface;
 use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Widget\StorefrontAssistantWidget;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -94,6 +96,7 @@ class AiCommerceYvesTester extends Actor
             AiCommerceYvesDependencyProvider::SERVICE_ROUTER,
             Stub::makeEmpty(UrlGeneratorInterface::class, ['generate' => $promptUrl]),
         );
+        $yvesContainer->set(AiCommerceYvesDependencyProvider::CLIENT_LOCALE, $this->createLocaleClient(static::DEFAULT_LOCALE_NAME));
 
         $sharedAiCommerceConfig = new AiCommerceSharedConfig();
 
@@ -123,6 +126,28 @@ class AiCommerceYvesTester extends Actor
     }
 
     /**
+     * @param array<string, mixed> $moduleConfigValues
+     */
+    public function createStorefrontAssistantSuggestedPromptReader(
+        array $moduleConfigValues,
+        string $localeName = self::DEFAULT_LOCALE_NAME
+    ): StorefrontAssistantSuggestedPromptReaderInterface {
+        /** @var \SprykerFeature\Yves\AiCommerce\AiCommerceConfig $aiCommerceYvesConfig */
+        $aiCommerceYvesConfig = Stub::construct(AiCommerceYvesConfig::class, [], [
+            'getModuleConfig' => fn (string $key, mixed $default = null): mixed => $moduleConfigValues[$key] ?? $default,
+        ]);
+
+        $yvesContainer = new YvesContainer();
+        $yvesContainer->set(AiCommerceYvesDependencyProvider::CLIENT_LOCALE, $this->createLocaleClient($localeName));
+
+        $yvesFactory = new AiCommerceYvesFactory();
+        $yvesFactory->setConfig($aiCommerceYvesConfig);
+        $yvesFactory->setContainer($yvesContainer);
+
+        return $yvesFactory->createStorefrontAssistantSuggestedPromptReader();
+    }
+
+    /**
      * @param array<int, array<string, string>> $enabledAgents
      */
     public function createAiCommerceClientWithEnabledAgents(array $enabledAgents): AiCommerceClient
@@ -133,6 +158,14 @@ class AiCommerceYvesTester extends Actor
         ]);
 
         return $aiCommerceClient;
+    }
+
+    protected function createLocaleClient(string $localeName): LocaleClientInterface
+    {
+        /** @var \Spryker\Client\Locale\LocaleClientInterface $localeClient */
+        $localeClient = Stub::makeEmpty(LocaleClientInterface::class, ['getCurrentLocale' => $localeName]);
+
+        return $localeClient;
     }
 
     protected function createStubbedAiCommerceConfig(): AiCommerceConfig

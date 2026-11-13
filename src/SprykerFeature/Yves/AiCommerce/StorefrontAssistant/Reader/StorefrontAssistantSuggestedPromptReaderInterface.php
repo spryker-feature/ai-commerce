@@ -15,9 +15,4 @@ interface StorefrontAssistantSuggestedPromptReaderInterface
      * @return array<string, list<string>>
      */
     public function getSuggestedPrompts(): array;
-
-    /**
-     * @return array<string, list<array{title: string, prompts: list<string>}>>
-     */
-    public function getSuggestedPromptSections(): array;
 }
