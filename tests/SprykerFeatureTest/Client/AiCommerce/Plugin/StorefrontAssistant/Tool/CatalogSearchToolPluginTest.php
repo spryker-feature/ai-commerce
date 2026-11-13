@@ -10,9 +10,9 @@ declare(strict_types=1);
 namespace SprykerFeatureTest\Client\AiCommerce\Plugin\StorefrontAssistant\Tool;
 
 use Codeception\Test\Unit;
-use Spryker\Client\AiFoundation\Dependency\Tools\ToolParameterInterface;
-use Spryker\Client\AiFoundation\Dependency\Tools\ToolPluginInterface;
-use Spryker\Shared\AiFoundation\Tools\ToolParameterType;
+use Spryker\Client\AiFoundationExtension\Dependency\Tools\ToolParameterInterface;
+use Spryker\Client\AiFoundationExtension\Dependency\Tools\ToolPluginInterface;
+use Spryker\Shared\AiFoundationExtension\Tools\ToolParameterType;
 use SprykerFeature\Client\AiCommerce\Plugin\StorefrontAssistant\Tool\CatalogSearchToolPlugin;
 use SprykerFeatureTest\Client\AiCommerce\AiCommerceClientTester;
 
@@ -285,7 +285,7 @@ class CatalogSearchToolPluginTest extends Unit
     }
 
     /**
-     * @param array<\Spryker\Client\AiFoundation\Dependency\Tools\ToolParameterInterface> $parameters
+     * @param array<\Spryker\Client\AiFoundationExtension\Dependency\Tools\ToolParameterInterface> $parameters
      */
     protected function findParameter(array $parameters, string $name): ?ToolParameterInterface
     {

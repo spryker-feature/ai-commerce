@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace SprykerFeatureTest\Client\AiCommerce\Plugin\StorefrontAssistant\Tool;
 
 use Codeception\Test\Unit;
-use Spryker\Client\AiFoundation\Dependency\Tools\ToolParameterInterface;
+use Spryker\Client\AiFoundationExtension\Dependency\Tools\ToolParameterInterface;
 use SprykerFeature\Client\AiCommerce\Plugin\StorefrontAssistant\Tool\OfferChoicesToolPlugin;
 use SprykerFeatureTest\Client\AiCommerce\AiCommerceClientTester;
 

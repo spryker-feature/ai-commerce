@@ -9,8 +9,8 @@ declare(strict_types=1);
 
 namespace SprykerFeature\Client\AiCommerce\StorefrontAssistant\Tool;
 
-use Spryker\Client\AiFoundation\Dependency\Tools\ToolParameterInterface;
-use Spryker\Shared\AiFoundation\Tools\ToolParameterType;
+use Spryker\Client\AiFoundationExtension\Dependency\Tools\ToolParameterInterface;
+use Spryker\Shared\AiFoundationExtension\Tools\ToolParameterType;
 
 class ToolParameter implements ToolParameterInterface
 {

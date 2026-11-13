@@ -9,9 +9,9 @@ declare(strict_types=1);
 
 namespace SprykerFeature\Client\AiCommerce\Plugin\StorefrontAssistant\Tool;
 
-use Spryker\Client\AiFoundation\Dependency\Tools\ToolPluginInterface;
+use Spryker\Client\AiFoundationExtension\Dependency\Tools\ToolPluginInterface;
 use Spryker\Client\Kernel\AbstractPlugin;
-use Spryker\Shared\AiFoundation\Tools\ToolParameterType;
+use Spryker\Shared\AiFoundationExtension\Tools\ToolParameterType;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\ProductRelation\ProductRelationReader;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Tool\ToolParameter;
 
@@ -55,7 +55,7 @@ class ProductRelationsToolPlugin extends AbstractPlugin implements ToolPluginInt
      *
      * @api
      *
-     * @return array<\Spryker\Client\AiFoundation\Dependency\Tools\ToolParameterInterface>
+     * @return array<\Spryker\Client\AiFoundationExtension\Dependency\Tools\ToolParameterInterface>
      */
     public function getParameters(): array
     {
