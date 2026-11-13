@@ -128,7 +128,7 @@ class StorefrontAssistantSuggestedPromptsConstraintValidatorTest extends Unit
         $this->configureModuleTranslations(static::LOCALE_NAME_DE);
 
         // Act
-        $constraintViolationList = $this->validateWithTranslator('{"xx_XX": ["What is new?"]}');
+        $constraintViolationList = $this->validateWithTranslator('{"xx_XX": ["What is new?"]}', static::LOCALE_NAME_DE);
 
         // Assert
         $this->assertCount(1, $constraintViolationList);
@@ -141,7 +141,7 @@ class StorefrontAssistantSuggestedPromptsConstraintValidatorTest extends Unit
         $this->configureModuleTranslations(static::LOCALE_NAME_DE);
 
         // Act
-        $constraintViolationList = $this->validateWithTranslator('What is new?|What is on sale?');
+        $constraintViolationList = $this->validateWithTranslator('What is new?|What is on sale?', static::LOCALE_NAME_DE);
 
         // Assert
         $this->assertCount(1, $constraintViolationList);
@@ -158,10 +158,13 @@ class StorefrontAssistantSuggestedPromptsConstraintValidatorTest extends Unit
         $this->tester->setConfig(TranslatorConstants::TRANSLATION_ZED_DEBUG_ENABLED, true);
     }
 
-    protected function validateWithTranslator(string $value): ConstraintViolationListInterface
+    protected function validateWithTranslator(string $value, string $localeName): ConstraintViolationListInterface
     {
+        $translatorFacade = $this->tester->getLocator()->translator()->facade();
+        $translatorFacade->setLocale($localeName);
+
         return Validation::createValidatorBuilder()
-            ->setTranslator($this->tester->getLocator()->translator()->facade())
+            ->setTranslator($translatorFacade)
             ->getValidator()
             ->validate($value, new StorefrontAssistantSuggestedPromptsConstraint());
     }
