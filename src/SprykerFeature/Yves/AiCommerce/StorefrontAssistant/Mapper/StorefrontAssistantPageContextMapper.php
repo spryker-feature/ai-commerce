@@ -25,6 +25,7 @@ class StorefrontAssistantPageContextMapper implements StorefrontAssistantPageCon
             ->setProductSku($pageContext[StorefrontAssistantPageContextSanitizer::KEY_PRODUCT_SKU])
             ->setCategoryName($pageContext[StorefrontAssistantPageContextSanitizer::KEY_CATEGORY_NAME])
             ->setSearchQuery($pageContext[StorefrontAssistantPageContextSanitizer::KEY_SEARCH_QUERY])
-            ->setFilters($pageContext[StorefrontAssistantPageContextSanitizer::KEY_FILTERS]);
+            ->setFilters($pageContext[StorefrontAssistantPageContextSanitizer::KEY_FILTERS])
+            ->setCustomFields($pageContext[StorefrontAssistantPageContextSanitizer::KEY_CUSTOM_FIELDS] ?? []);
     }
 }

@@ -25,10 +25,13 @@ use Codeception\Actor;
  * @method void comment($description)
  * @method void pause($vars = [])
  * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceFacadeInterface getFacade()
+ * @method \SprykerFeature\Zed\AiCommerce\Business\AiCommerceBusinessFactory getFactory()
  * @method \Generated\Shared\Transfer\BackofficeAssistantConversationTransfer haveConversation(array $seed = [])
  * @method \Generated\Shared\Transfer\UserTransfer haveUser(array $override = [])
  * @method \Generated\Shared\Transfer\ContentTransfer haveSmartCmsContentItem(string $name, string $contentTypeKey)
  * @method \Generated\Shared\Transfer\SmartCmsContentItemTransfer|null findSmartCmsContentItemByKey(\Generated\Shared\Transfer\SmartCmsContentItemCollectionTransfer $smartCmsContentItemCollectionTransfer, ?string $key)
+ * @method \Generated\Shared\Transfer\KnowledgeDocumentTransfer haveKnowledgeDocument(array $seed = [])
+ * @method \Generated\Shared\Transfer\KnowledgeDocumentTransfer|null findKnowledgeDocument(string $sourceType, string $sourceIdentifier)
  * @SuppressWarnings(PHPMD)
  */
 class AiCommerceBusinessTester extends Actor

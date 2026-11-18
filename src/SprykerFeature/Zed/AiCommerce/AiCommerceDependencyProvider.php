@@ -9,13 +9,22 @@ declare(strict_types=1);
 
 namespace SprykerFeature\Zed\AiCommerce;
 
+use Aws\BedrockAgent\BedrockAgentClient;
 use Orm\Zed\Content\Persistence\SpyContentQuery;
 use Orm\Zed\Discount\Persistence\SpyDiscountQuery;
 use Orm\Zed\Sales\Persistence\SpySalesOrderItemQuery;
 use Spryker\Zed\Kernel\AbstractBundleDependencyProvider;
 use Spryker\Zed\Kernel\Container;
+use SprykerFeature\Shared\AiCommerce\BedrockKnowledgeBase\Logger\BedrockKnowledgeBaseRequestLogMiddleware;
+use SprykerFeature\Zed\AiCommerce\Communication\Plugin\KnowledgeStore\BedrockKnowledgeBaseKnowledgeStorePlugin;
+use SprykerFeature\Zed\AiCommerce\Dependency\KnowledgeStore\KnowledgeStorePluginInterface;
+use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
+/**
+ * @method \SprykerFeature\Zed\AiCommerce\AiCommerceConfig getConfig()
+ */
 class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
 {
     public const string FACADE_AI_FOUNDATION = 'FACADE_AI_FOUNDATION';
@@ -48,6 +57,18 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
 
     public const string PLUGINS_CONTENT_GUI_EDITOR = 'PLUGINS_CONTENT_GUI_EDITOR';
 
+    public const string FACADE_PRODUCT_ATTACHMENT = 'FACADE_PRODUCT_ATTACHMENT';
+
+    public const string CLIENT_QUEUE = 'CLIENT_QUEUE';
+
+    public const string HTTP_CLIENT = 'HTTP_CLIENT';
+
+    public const string PLUGINS_KNOWLEDGE_DOCUMENT_SOURCE = 'PLUGINS_KNOWLEDGE_DOCUMENT_SOURCE';
+
+    public const string PLUGIN_KNOWLEDGE_STORE = 'PLUGIN_KNOWLEDGE_STORE';
+
+    public const string BEDROCK_AGENT_CLIENT = 'BEDROCK_AGENT_CLIENT';
+
     /**
      * @uses \Spryker\Zed\Form\Communication\Plugin\Application\FormApplicationPlugin::SERVICE_FORM_CSRF_PROVIDER
      */
@@ -79,6 +100,12 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
         $container = $this->addLocaleFacade($container);
         $container = $this->addUtilEncodingService($container);
         $container = $this->addContentGuiEditorPlugins($container);
+        $container = $this->addProductAttachmentFacade($container);
+        $container = $this->addQueueClient($container);
+        $container = $this->addHttpClient($container);
+        $container = $this->addKnowledgeDocumentSourcePlugins($container);
+        $container = $this->addKnowledgeStorePlugin($container);
+        $container = $this->addBedrockAgentClient($container);
 
         return $container;
     }
@@ -235,6 +262,76 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
         });
 
         return $container;
+    }
+
+    protected function addProductAttachmentFacade(Container $container): Container
+    {
+        $container->set(static::FACADE_PRODUCT_ATTACHMENT, function (Container $container) {
+            return $container->getLocator()->productAttachment()->facade();
+        });
+
+        return $container;
+    }
+
+    protected function addQueueClient(Container $container): Container
+    {
+        $container->set(static::CLIENT_QUEUE, function (Container $container) {
+            return $container->getLocator()->queue()->client();
+        });
+
+        return $container;
+    }
+
+    protected function addHttpClient(Container $container): Container
+    {
+        $container->set(static::HTTP_CLIENT, function (): HttpClientInterface {
+            return HttpClient::create();
+        });
+
+        return $container;
+    }
+
+    protected function addKnowledgeDocumentSourcePlugins(Container $container): Container
+    {
+        $container->set(static::PLUGINS_KNOWLEDGE_DOCUMENT_SOURCE, function (): array {
+            return $this->getKnowledgeDocumentSourcePlugins();
+        });
+
+        return $container;
+    }
+
+    protected function addKnowledgeStorePlugin(Container $container): Container
+    {
+        $container->set(static::PLUGIN_KNOWLEDGE_STORE, function (): KnowledgeStorePluginInterface {
+            return $this->getKnowledgeStorePlugin();
+        });
+
+        return $container;
+    }
+
+    protected function addBedrockAgentClient(Container $container): Container
+    {
+        $container->set(static::BEDROCK_AGENT_CLIENT, function (): BedrockAgentClient {
+            $bedrockAgentClient = new BedrockAgentClient($this->getConfig()->getBedrockKnowledgeBaseAwsClientConfiguration());
+            $bedrockAgentClient->getHandlerList()->appendSign(new BedrockKnowledgeBaseRequestLogMiddleware(), BedrockKnowledgeBaseRequestLogMiddleware::NAME);
+
+            return $bedrockAgentClient;
+        });
+
+        return $container;
+    }
+
+    protected function getKnowledgeStorePlugin(): KnowledgeStorePluginInterface
+    {
+        return new BedrockKnowledgeBaseKnowledgeStorePlugin();
+    }
+
+    /**
+     * @return list<\SprykerFeature\Zed\AiCommerce\Dependency\KnowledgeDocument\KnowledgeDocumentSourcePluginInterface>
+     */
+    protected function getKnowledgeDocumentSourcePlugins(): array
+    {
+        return [];
     }
 
     /**

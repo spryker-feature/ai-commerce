@@ -7,6 +7,7 @@
 
 namespace SprykerFeature\Client\AiCommerce;
 
+use Aws\BedrockAgentRuntime\BedrockAgentRuntimeClient;
 use Spryker\Client\AiFoundation\AiFoundationClientInterface;
 use Spryker\Client\AvailabilityStorage\AvailabilityStorageClientInterface;
 use Spryker\Client\Catalog\CatalogClientInterface;
@@ -23,6 +24,7 @@ use Spryker\Client\Price\PriceClientInterface;
 use Spryker\Client\PriceProduct\PriceProductClientInterface;
 use Spryker\Client\PriceProductStorage\PriceProductStorageClientInterface;
 use Spryker\Client\ProductAlternativeStorage\ProductAlternativeStorageClientInterface;
+use Spryker\Client\ProductAttachmentStorage\ProductAttachmentStorageClientInterface;
 use Spryker\Client\ProductBundleStorage\ProductBundleStorageClientInterface;
 use Spryker\Client\ProductCategoryStorage\ProductCategoryStorageClientInterface;
 use Spryker\Client\ProductDiscontinuedStorage\ProductDiscontinuedStorageClientInterface;
@@ -37,6 +39,27 @@ use Spryker\Client\ProductSetStorage\ProductSetStorageClientInterface;
 use Spryker\Client\ProductStorage\ProductStorageClientInterface;
 use Spryker\Client\Storage\StorageClientInterface;
 use Spryker\Client\Store\StoreClientInterface;
+use SprykerFeature\Client\AiCommerce\BedrockKnowledgeBase\Mapper\BedrockKnowledgeBasePassageMapper;
+use SprykerFeature\Client\AiCommerce\BedrockKnowledgeBase\Mapper\BedrockKnowledgeBasePassageMapperInterface;
+use SprykerFeature\Client\AiCommerce\BedrockKnowledgeBase\Query\BedrockKnowledgeBaseRetrievalFilterBuilder;
+use SprykerFeature\Client\AiCommerce\BedrockKnowledgeBase\Query\BedrockKnowledgeBaseRetrievalFilterBuilderInterface;
+use SprykerFeature\Client\AiCommerce\BedrockKnowledgeBase\Reader\BedrockKnowledgeBasePassageReader;
+use SprykerFeature\Client\AiCommerce\BedrockKnowledgeBase\Reader\BedrockKnowledgeBasePassageReaderInterface;
+use SprykerFeature\Client\AiCommerce\BedrockKnowledgeBase\Reader\BedrockKnowledgeBaseReferenceReader;
+use SprykerFeature\Client\AiCommerce\BedrockKnowledgeBase\Reader\BedrockKnowledgeBaseReferenceReaderInterface;
+use SprykerFeature\Client\AiCommerce\Dependency\KnowledgeSearch\KnowledgeSearchPluginInterface;
+use SprykerFeature\Client\AiCommerce\KnowledgeDocument\KnowledgeDocumentPassageFilter;
+use SprykerFeature\Client\AiCommerce\KnowledgeDocument\KnowledgeDocumentPassageFilterInterface;
+use SprykerFeature\Client\AiCommerce\KnowledgeDocument\KnowledgeDocumentScopeResolver;
+use SprykerFeature\Client\AiCommerce\KnowledgeDocument\KnowledgeDocumentScopeResolverInterface;
+use SprykerFeature\Client\AiCommerce\KnowledgeDocument\KnowledgeDocumentSearcher;
+use SprykerFeature\Client\AiCommerce\KnowledgeDocument\KnowledgeDocumentSearcherInterface;
+use SprykerFeature\Client\AiCommerce\KnowledgeDocument\KnowledgeDocumentSearchRequestValidator;
+use SprykerFeature\Client\AiCommerce\KnowledgeDocument\KnowledgeDocumentSearchRequestValidatorInterface;
+use SprykerFeature\Client\AiCommerce\KnowledgeDocument\KnowledgeDocumentSearchResultBuilder;
+use SprykerFeature\Client\AiCommerce\KnowledgeDocument\KnowledgeDocumentSearchResultBuilderInterface;
+use SprykerFeature\Client\AiCommerce\ProductAttachmentKnowledgeDocument\ProductAttachmentDocumentScopeResolver;
+use SprykerFeature\Client\AiCommerce\ProductAttachmentKnowledgeDocument\ProductAttachmentDocumentScopeResolverInterface;
 use SprykerFeature\Client\AiCommerce\SearchByImage\AiSearchByImageTermResolver;
 use SprykerFeature\Client\AiCommerce\SearchByImage\AiSearchByImageTermResolverInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Action\ActionItemOfferResolver;
@@ -77,6 +100,8 @@ use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Conversation\ShownProdu
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Conversation\ShownProductReaderInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Conversation\ShownProductRegistry;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Conversation\ShownProductRegistryInterface;
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Document\DocumentSearchReader;
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Document\DocumentSearchReaderInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Gate\StorefrontAssistantFeatureGate;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Gate\StorefrontAssistantFeatureGateInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Mapper\StorefrontAssistantProductMapper;
@@ -398,7 +423,7 @@ class AiCommerceFactory extends AbstractFactory
 
     public function createPageContextSystemPromptComposer(): PageContextSystemPromptComposerInterface
     {
-        return new PageContextSystemPromptComposer($this->createCategoryTreeFormatter());
+        return new PageContextSystemPromptComposer($this->createCategoryTreeFormatter(), $this->getConfig());
     }
 
     public function createPageContextProductResolver(): PageContextProductResolverInterface
@@ -912,6 +937,37 @@ class AiCommerceFactory extends AbstractFactory
         return $this->getProvidedDependency(AiCommerceDependencyProvider::CLIENT_STORE);
     }
 
+    public function createBedrockKnowledgeBasePassageReader(): BedrockKnowledgeBasePassageReaderInterface
+    {
+        return new BedrockKnowledgeBasePassageReader(
+            $this->getBedrockAgentRuntimeClient(),
+            $this->createBedrockKnowledgeBaseReferenceReader(),
+            $this->createBedrockKnowledgeBaseRetrievalFilterBuilder(),
+            $this->createBedrockKnowledgeBasePassageMapper(),
+            $this->getConfig(),
+        );
+    }
+
+    public function createBedrockKnowledgeBaseReferenceReader(): BedrockKnowledgeBaseReferenceReaderInterface
+    {
+        return new BedrockKnowledgeBaseReferenceReader($this->getConfig());
+    }
+
+    public function createBedrockKnowledgeBaseRetrievalFilterBuilder(): BedrockKnowledgeBaseRetrievalFilterBuilderInterface
+    {
+        return new BedrockKnowledgeBaseRetrievalFilterBuilder();
+    }
+
+    public function createBedrockKnowledgeBasePassageMapper(): BedrockKnowledgeBasePassageMapperInterface
+    {
+        return new BedrockKnowledgeBasePassageMapper();
+    }
+
+    public function getBedrockAgentRuntimeClient(): BedrockAgentRuntimeClient
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::BEDROCK_AGENT_RUNTIME_CLIENT);
+    }
+
     public function getLocaleClient(): LocaleClientInterface
     {
         return $this->getProvidedDependency(AiCommerceDependencyProvider::CLIENT_LOCALE);
@@ -1082,5 +1138,74 @@ class AiCommerceFactory extends AbstractFactory
     public function createRegeneratedPromptMarker(): RegeneratedPromptMarker
     {
         return new RegeneratedPromptMarker();
+    }
+
+    public function createKnowledgeDocumentSearcher(): KnowledgeDocumentSearcherInterface
+    {
+        return new KnowledgeDocumentSearcher(
+            $this->createKnowledgeDocumentSearchRequestValidator(),
+            $this->createKnowledgeDocumentScopeResolver(),
+            $this->createKnowledgeDocumentSearchResultBuilder(),
+            $this->createKnowledgeDocumentPassageFilter(),
+            $this->getKnowledgeSearchPlugin(),
+            $this->getLocaleClient(),
+            $this->getStoreClient(),
+            $this->getConfig(),
+        );
+    }
+
+    public function createKnowledgeDocumentSearchRequestValidator(): KnowledgeDocumentSearchRequestValidatorInterface
+    {
+        return new KnowledgeDocumentSearchRequestValidator($this->getConfig());
+    }
+
+    public function createKnowledgeDocumentScopeResolver(): KnowledgeDocumentScopeResolverInterface
+    {
+        return new KnowledgeDocumentScopeResolver($this->getKnowledgeDocumentScopeResolverPlugins());
+    }
+
+    public function createKnowledgeDocumentSearchResultBuilder(): KnowledgeDocumentSearchResultBuilderInterface
+    {
+        return new KnowledgeDocumentSearchResultBuilder();
+    }
+
+    public function createKnowledgeDocumentPassageFilter(): KnowledgeDocumentPassageFilterInterface
+    {
+        return new KnowledgeDocumentPassageFilter($this->getConfig());
+    }
+
+    public function createProductAttachmentDocumentScopeResolver(): ProductAttachmentDocumentScopeResolverInterface
+    {
+        return new ProductAttachmentDocumentScopeResolver(
+            $this->createProductAbstractIdResolver(),
+            $this->getProductStorageClient(),
+            $this->getProductAttachmentStorageClient(),
+        );
+    }
+
+    public function createDocumentSearchReader(): DocumentSearchReaderInterface
+    {
+        return new DocumentSearchReader(
+            $this->createToolArgumentNormalizer(),
+            $this->createKnowledgeDocumentSearcher(),
+        );
+    }
+
+    /**
+     * @return list<\SprykerFeature\Client\AiCommerce\Dependency\KnowledgeDocument\KnowledgeDocumentScopeResolverPluginInterface>
+     */
+    public function getKnowledgeDocumentScopeResolverPlugins(): array
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::PLUGINS_KNOWLEDGE_DOCUMENT_SCOPE_RESOLVER);
+    }
+
+    public function getKnowledgeSearchPlugin(): KnowledgeSearchPluginInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::PLUGIN_KNOWLEDGE_SEARCH);
+    }
+
+    public function getProductAttachmentStorageClient(): ProductAttachmentStorageClientInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::CLIENT_PRODUCT_ATTACHMENT_STORAGE);
     }
 }

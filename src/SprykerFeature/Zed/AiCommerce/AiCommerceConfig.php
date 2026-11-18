@@ -14,6 +14,8 @@ use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
 
 /**
  * @method \SprykerFeature\Shared\AiCommerce\AiCommerceConfig getSharedConfig()
+ *
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
  */
 class AiCommerceConfig extends AbstractBundleConfig
 {
@@ -101,6 +103,34 @@ class AiCommerceConfig extends AbstractBundleConfig
         'image/jpeg',
         'image/gif',
         'image/webp',
+    ];
+
+    protected const int KNOWLEDGE_DOCUMENT_MAX_FILE_SIZE_BYTES = 52428800;
+
+    protected const int KNOWLEDGE_DOCUMENT_INDEX_MAX_ATTEMPTS = 3;
+
+    protected const int KNOWLEDGE_DOCUMENT_DOWNLOAD_TIMEOUT_SECONDS = 30;
+
+    protected const int KNOWLEDGE_DOCUMENT_INDEX_QUEUE_CHUNK_SIZE = 10;
+
+    protected const int KNOWLEDGE_DOCUMENT_REINDEX_PAGE_SIZE = 100;
+
+    protected const int KNOWLEDGE_DOCUMENT_STATUS_REFRESH_PAGE_SIZE = 100;
+
+    protected const int BEDROCK_KNOWLEDGE_BASE_MAX_INLINE_DOCUMENT_SIZE_BYTES = 5242880;
+
+    protected const int BEDROCK_KNOWLEDGE_BASE_SETUP_STATUS_CHECK_ATTEMPTS = 60;
+
+    protected const int BEDROCK_KNOWLEDGE_BASE_SETUP_STATUS_CHECK_INTERVAL_SECONDS = 5;
+
+    protected const array BEDROCK_KNOWLEDGE_BASE_INLINE_TEXT_MIME_TYPES = [
+        'text/plain',
+        'text/markdown',
+        'text/csv',
+    ];
+
+    protected const array BEDROCK_KNOWLEDGE_BASE_MEDIA_EXTRACTION_CONFIGURATION = [
+        'imageExtractionConfiguration' => ['imageExtractionStatus' => 'ENABLED'],
     ];
 
     protected const string ERROR_CODE_AI_PROVIDER_REQUEST_ERROR = 'AI_PROVIDER_REQUEST_ERROR';
@@ -593,5 +623,181 @@ class AiCommerceConfig extends AbstractBundleConfig
     public function getImageFetchAllowedMediaTypes(): array
     {
         return static::IMAGE_FETCH_ALLOWED_MEDIA_TYPES;
+    }
+
+    /**
+     * Specification:
+     * - Returns the maximum size in bytes of a knowledge document.
+     *
+     * @api
+     */
+    public function getKnowledgeDocumentMaxFileSize(): int
+    {
+        return static::KNOWLEDGE_DOCUMENT_MAX_FILE_SIZE_BYTES;
+    }
+
+    /**
+     * Specification:
+     * - Returns the number of attempts to index a document after temporary failures. The document is marked as failed after the last attempt.
+     *
+     * @api
+     */
+    public function getKnowledgeDocumentIndexMaxAttempts(): int
+    {
+        return static::KNOWLEDGE_DOCUMENT_INDEX_MAX_ATTEMPTS;
+    }
+
+    /**
+     * Specification:
+     * - Returns the timeout in seconds of a knowledge document download.
+     *
+     * @api
+     */
+    public function getKnowledgeDocumentDownloadTimeout(): int
+    {
+        return static::KNOWLEDGE_DOCUMENT_DOWNLOAD_TIMEOUT_SECONDS;
+    }
+
+    /**
+     * Specification:
+     * - Returns the number of messages the `knowledge_document.index` queue worker reads in one chunk.
+     *
+     * @api
+     */
+    public function getKnowledgeDocumentIndexQueueChunkSize(): int
+    {
+        return static::KNOWLEDGE_DOCUMENT_INDEX_QUEUE_CHUNK_SIZE;
+    }
+
+    /**
+     * Specification:
+     * - Returns the number of sources read in one page during a knowledge document re-index.
+     *
+     * @api
+     */
+    public function getKnowledgeDocumentReindexPageSize(): int
+    {
+        return static::KNOWLEDGE_DOCUMENT_REINDEX_PAGE_SIZE;
+    }
+
+    /**
+     * Specification:
+     * - Returns the number of `processing` documents read in one page during a knowledge document status refresh.
+     *
+     * @api
+     */
+    public function getKnowledgeDocumentStatusRefreshPageSize(): int
+    {
+        return static::KNOWLEDGE_DOCUMENT_STATUS_REFRESH_PAGE_SIZE;
+    }
+
+    /**
+     * Specification:
+     * - Returns the `mediaExtractionConfiguration` of the custom data source.
+     * - Enables the image extraction by default: the knowledge base indexes the content of standalone image files and of the images in PDF, Word and PowerPoint files.
+     * - The setup adds the value when it creates the data source, and updates an existing data source that does not have it.
+     * - An empty array keeps the media extraction of the data source unchanged.
+     *
+     * @api
+     *
+     * @return array<string, mixed>
+     */
+    public function getBedrockKnowledgeBaseMediaExtractionConfiguration(): array
+    {
+        return static::BEDROCK_KNOWLEDGE_BASE_MEDIA_EXTRACTION_CONFIGURATION;
+    }
+
+    /**
+     * Specification:
+     * - Returns the maximum size in bytes of a document that is sent inline to the Amazon Bedrock knowledge base.
+     *
+     * @api
+     */
+    public function getBedrockKnowledgeBaseMaxInlineDocumentSize(): int
+    {
+        return static::BEDROCK_KNOWLEDGE_BASE_MAX_INLINE_DOCUMENT_SIZE_BYTES;
+    }
+
+    /**
+     * Specification:
+     * - Returns the MIME types that are sent as inline text. Other MIME types are sent as inline bytes.
+     *
+     * @api
+     *
+     * @return array<string>
+     */
+    public function getBedrockKnowledgeBaseInlineTextMimeTypes(): array
+    {
+        return static::BEDROCK_KNOWLEDGE_BASE_INLINE_TEXT_MIME_TYPES;
+    }
+
+    /**
+     * Specification:
+     * - Returns how many times the knowledge store setup reads the status of the knowledge base or the data source before it fails.
+     *
+     * @api
+     */
+    public function getBedrockKnowledgeBaseSetupStatusCheckAttempts(): int
+    {
+        return static::BEDROCK_KNOWLEDGE_BASE_SETUP_STATUS_CHECK_ATTEMPTS;
+    }
+
+    /**
+     * Specification:
+     * - Returns the wait time in seconds between two status reads of the knowledge store setup.
+     *
+     * @api
+     */
+    public function getBedrockKnowledgeBaseSetupStatusCheckInterval(): int
+    {
+        return static::BEDROCK_KNOWLEDGE_BASE_SETUP_STATUS_CHECK_INTERVAL_SECONDS;
+    }
+
+    /**
+     * Specification:
+     * - Returns the AWS region of the Amazon Bedrock knowledge base.
+     *
+     * @api
+     */
+    public function getBedrockKnowledgeBaseAwsRegion(): string
+    {
+        return $this->getSharedConfig()->getBedrockKnowledgeBaseAwsRegion();
+    }
+
+    /**
+     * Specification:
+     * - Returns the constructor arguments of the AWS SDK client of the Amazon Bedrock knowledge base.
+     *
+     * @api
+     *
+     * @return array<string, mixed>
+     */
+    public function getBedrockKnowledgeBaseAwsClientConfiguration(): array
+    {
+        return $this->getSharedConfig()->getBedrockKnowledgeBaseAwsClientConfiguration();
+    }
+
+    /**
+     * Specification:
+     * - Returns the configured ID of the Amazon Bedrock knowledge base, or an empty string.
+     *
+     * @api
+     */
+    public function getBedrockKnowledgeBaseId(): string
+    {
+        return $this->getSharedConfig()->getBedrockKnowledgeBaseId();
+    }
+
+    /**
+     * Specification:
+     * - Returns the configured IDs of the custom data sources of the Amazon Bedrock knowledge base, keyed by knowledge document source type.
+     *
+     * @api
+     *
+     * @return array<string, string>
+     */
+    public function getBedrockKnowledgeBaseDataSourceIds(): array
+    {
+        return $this->getSharedConfig()->getBedrockKnowledgeBaseDataSourceIds();
     }
 }

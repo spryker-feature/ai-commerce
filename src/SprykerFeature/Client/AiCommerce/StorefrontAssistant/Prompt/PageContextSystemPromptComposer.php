@@ -11,6 +11,7 @@ namespace SprykerFeature\Client\AiCommerce\StorefrontAssistant\Prompt;
 
 use Generated\Shared\Transfer\StorefrontAssistantChatRequestTransfer;
 use Generated\Shared\Transfer\StorefrontAssistantPageContextTransfer;
+use SprykerFeature\Client\AiCommerce\AiCommerceConfig;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Category\CategoryTreeFormatterInterface;
 use SprykerFeature\Shared\AiCommerce\StorefrontAssistant\StorefrontAssistantPageType;
 
@@ -22,9 +23,9 @@ class PageContextSystemPromptComposer implements PageContextSystemPromptComposer
 
     protected const string CONTEXT_PRODUCT_LABELS = 'Its labels: %s.';
 
-    protected const string PRODUCT_PAGE_GUIDANCE = 'The customer is on this product\'s page and already sees it, so "this", "it" or "this product" means it. Never search the catalog to identify it; when a tool takes an idProductAbstract, pass the one given here. Answer questions about its specifications, variants, stock, whether it is still sold, add-on options, sellers and their prices with `product_details` and that idProductAbstract, never with `catalog_search`. For similar products, accessories or a replacement, call `product_relations`. For cheaper alternatives, read its price with `product_details` first, then search its category with that price as `priceMax`. Do not show it back with `display_products` unless the customer asks to compare it with other products. A product labelled Discontinued is discontinued and must never be called available.';
+    protected const string PRODUCT_PAGE_GUIDANCE = 'The customer is on this product\'s page and already sees it, so "this", "it" or "this product" means it. Never search the catalog to identify it; when a tool takes an idProductAbstract, pass the one given here. Answer questions about its specifications, variants, stock, whether it is still sold, add-on options, sellers and their prices with `product_details` and that idProductAbstract, never with `catalog_search`. For installation, operation, maintenance, troubleshooting, warranty, certificates or a value its attributes do not list, call `product_knowledge_search` with its SKU, in the same step as `product_details` when you need both. For similar products, accessories or a replacement, call `product_relations`. For cheaper alternatives, read its price with `product_details` first, then search its category with that price as `priceMax`. Do not show it back with `display_products` unless the customer asks to compare it with other products. A product labelled Discontinued is discontinued and must never be called available.';
 
-    protected const string CATALOG_LANGUAGE = 'Catalog language: %s. Every `catalog_search` and `catalog_suggest` argument is in it: translate the customer\'s words first, such as German "Kopfhörer" to "headphones" for English. Reply in the customer\'s language.';
+    protected const string CATALOG_LANGUAGE = 'Catalog language: %s. Every `catalog_search`, `catalog_suggest`, `ssp_asset_compatible_products` and `product_knowledge_search` query is in it: translate the customer\'s words first, such as German "Kopfhörer" to "headphones" for English. Reply in the customer\'s language, also when a tool result is in another language, and write document and product names as the tool gives them.';
 
     protected const string CONTEXT_CATEGORY = 'The customer is browsing the category %s.';
 
@@ -41,7 +42,7 @@ class PageContextSystemPromptComposer implements PageContextSystemPromptComposer
         - For anything that is not a product — delivery, returns or warranty pages, a whole category, a curated set — use `catalog_suggest`. Use it too when a word found nothing: a term absent from its `matchingTerms` is not worth searching again.
         GUIDANCE;
 
-    protected const string OFF_TOPIC_GUIDANCE = 'A question unrelated to this shop, its products or its pages — such as the weather, the news, general knowledge or homework — is outside your role: politely decline in one short reply without calling any tool, and offer to help with shopping instead.';
+    protected const string OFF_TOPIC_GUIDANCE = 'A question unrelated to this shop, its products, their documents, the customer\'s assets or the shop pages — such as the weather, the news, general knowledge or homework — is outside your role: politely decline in one short reply without calling any tool, and offer to help with shopping instead.';
 
     protected const string CATEGORY_ID_SOURCE_INLINE = 'Take it from the category list below or from `availableRefinements`.';
 
@@ -75,10 +76,14 @@ class PageContextSystemPromptComposer implements PageContextSystemPromptComposer
 
     protected const string NARROWING_ANSWER_TAP_PATTERN = '/^[^\[\]()]{1,80} \(\d+\)$/u';
 
+    protected const string CUSTOM_FIELD_PLACEHOLDER_PATTERN = '/%(\w+)%/';
+
     protected const int UNTRUSTED_VALUE_JSON_FLAGS = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE;
 
-    public function __construct(protected CategoryTreeFormatterInterface $categoryTreeFormatter)
-    {
+    public function __construct(
+        protected CategoryTreeFormatterInterface $categoryTreeFormatter,
+        protected AiCommerceConfig $aiCommerceConfig,
+    ) {
     }
 
     public function composeSystemPrompt(
@@ -158,7 +163,7 @@ class PageContextSystemPromptComposer implements PageContextSystemPromptComposer
 
         $filters = $this->extractFilters($storefrontAssistantPageContextTransfer);
 
-        if ($filters !== []) {
+        if ($filters !== [] && $this->isCatalogPageType((string)$storefrontAssistantPageContextTransfer->getPageType())) {
             $contextLines[] = sprintf(
                 static::CONTEXT_FILTERS,
                 implode(static::FILTER_SEPARATOR, array_map($this->quoteUntrustedValue(...), $filters)),
@@ -203,7 +208,7 @@ class PageContextSystemPromptComposer implements PageContextSystemPromptComposer
         );
 
         if ($storefrontAssistantPageType === null) {
-            return null;
+            return $this->composeCustomPageLine($storefrontAssistantPageContextTransfer);
         }
 
         return match ($storefrontAssistantPageType) {
@@ -271,6 +276,46 @@ class PageContextSystemPromptComposer implements PageContextSystemPromptComposer
         }
 
         return sprintf(static::CONTEXT_CATEGORY_WITH_ID, $this->quoteUntrustedValue($categoryName), $idCategoryNode);
+    }
+
+    protected function isCatalogPageType(string $pageType): bool
+    {
+        return in_array($pageType, [StorefrontAssistantPageType::Category->value, StorefrontAssistantPageType::Search->value], true);
+    }
+
+    protected function composeCustomPageLine(
+        StorefrontAssistantPageContextTransfer $storefrontAssistantPageContextTransfer
+    ): ?string {
+        $promptLines = $this->aiCommerceConfig->getStorefrontAssistantCustomPageContextPromptLines()[(string)$storefrontAssistantPageContextTransfer->getPageType()] ?? [];
+        $customFields = array_map('trim', $storefrontAssistantPageContextTransfer->getCustomFields());
+
+        foreach ($promptLines as $promptLine) {
+            if ($this->hasAllPlaceholderValues($promptLine, $customFields)) {
+                return (string)preg_replace_callback(
+                    static::CUSTOM_FIELD_PLACEHOLDER_PATTERN,
+                    fn (array $matches): string => $this->quoteUntrustedValue($customFields[$matches[1]]),
+                    $promptLine,
+                );
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param array<string, string> $customFields
+     */
+    protected function hasAllPlaceholderValues(string $promptLine, array $customFields): bool
+    {
+        preg_match_all(static::CUSTOM_FIELD_PLACEHOLDER_PATTERN, $promptLine, $matches);
+
+        foreach ($matches[1] as $fieldName) {
+            if (($customFields[$fieldName] ?? '') === '') {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     protected function composeNamedLine(string $template, string $value): ?string

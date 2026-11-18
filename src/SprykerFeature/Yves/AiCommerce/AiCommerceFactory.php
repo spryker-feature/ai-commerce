@@ -309,7 +309,7 @@ class AiCommerceFactory extends AbstractFactory
 
     public function createStorefrontAssistantPageContextSanitizer(): StorefrontAssistantPageContextSanitizerInterface
     {
-        return new StorefrontAssistantPageContextSanitizer();
+        return new StorefrontAssistantPageContextSanitizer($this->getConfig());
     }
 
     public function createStorefrontAssistantPageContextMapper(): StorefrontAssistantPageContextMapperInterface

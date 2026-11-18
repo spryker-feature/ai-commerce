@@ -22,7 +22,7 @@ class DisplaySetupToolPlugin extends AbstractPlugin implements ToolPluginInterfa
 {
     public const string TOOL_NAME = 'display_setup';
 
-    protected const string TOOL_DESCRIPTION = 'Shows 2 to 4 product cards with their total against one budget, using the prices the customer sees. For different products under one budget ("home office under €1,500") use it instead of `display_products`: search each item in its own category and pick good matches, not the cheapest. Over budget, nothing is shown: swap the priciest item for a cheaper one. For any swap, call it again with the full list.';
+    protected const string TOOL_DESCRIPTION = 'Shows 2 to 4 product cards with their total against one budget, using the prices the customer sees. For different products under one budget ("home office under €1,500") use it instead of `display_products`: search all items in one step, each in its own category, and pick good matches, not the cheapest. Over budget, nothing is shown: swap the priciest item for a cheaper one. For any swap, call it again with the full list. The prices are in the `priceMode` of the products: when the customer gives a net budget and the prices are gross, or the reverse, say so.';
 
     /**
      * {@inheritDoc}

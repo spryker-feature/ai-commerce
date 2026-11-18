@@ -315,6 +315,23 @@ class AiCommerceConfig extends AbstractBundleConfig
 
     /**
      * Specification:
+     * - Returns the field names of each project page type that the Storefront Assistant page context accepts, keyed by the page type.
+     * - The `chat-page-context` molecule detects the page type and reads the fields from the page; a rule in its `additionalRules` names them.
+     * - Only the listed fields are kept, as trimmed strings of at most 120 characters, in `StorefrontAssistantPageContextTransfer::customFields`.
+     * - A page type of the core (product, category, search) is never treated as a project page type.
+     * - Returns an empty list by default: the core knows no project page types.
+     *
+     * @api
+     *
+     * @return array<string, list<string>>
+     */
+    public function getStorefrontAssistantCustomPageContextFields(): array
+    {
+        return [];
+    }
+
+    /**
+     * Specification:
      * - Returns the suggested prompts configured for each prompt group in the given locale, keyed by the page type
      *   it applies to, plus the `product_results` follow-up group offered under product cards the assistant renders.
      * - Expects each configuration value as a JSON object keyed by the locale name with a list of prompts as each value,

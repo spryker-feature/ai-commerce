@@ -1,4 +1,4 @@
-{# First match wins: listing tiles also carry Product markup, so the catalog form is tested before the product scope. #}
+{# First match wins: listing tiles also carry Product markup, so the catalog form is tested before the product scope. A project page type goes in additionalRules, which are tested before these rules. #}
 {% extends model('component') %}
 
 {% define config = {
@@ -55,6 +55,7 @@
             },
         },
     ],
+    additionalRules: [],
     optIn: false,
     singleTurn: false,
 } %}
@@ -62,7 +63,7 @@
 {% block component %}
     {% include '@AiCommerce/Chat/features/page-context/page-context.twig' with {
         pageContext: {
-            rules: data.rules,
+            rules: data.additionalRules | merge(data.rules),
             optIn: data.optIn,
             singleTurn: data.singleTurn,
         },

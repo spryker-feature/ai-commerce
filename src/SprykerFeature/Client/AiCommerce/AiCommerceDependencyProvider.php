@@ -7,6 +7,7 @@
 
 namespace SprykerFeature\Client\AiCommerce;
 
+use Aws\BedrockAgentRuntime\BedrockAgentRuntimeClient;
 use Spryker\Client\AiFoundation\AiFoundationClientInterface;
 use Spryker\Client\AvailabilityStorage\AvailabilityStorageClientInterface;
 use Spryker\Client\Catalog\CatalogClientInterface;
@@ -24,6 +25,7 @@ use Spryker\Client\Price\PriceClientInterface;
 use Spryker\Client\PriceProduct\PriceProductClientInterface;
 use Spryker\Client\PriceProductStorage\PriceProductStorageClientInterface;
 use Spryker\Client\ProductAlternativeStorage\ProductAlternativeStorageClientInterface;
+use Spryker\Client\ProductAttachmentStorage\ProductAttachmentStorageClientInterface;
 use Spryker\Client\ProductBundleStorage\ProductBundleStorageClientInterface;
 use Spryker\Client\ProductCategoryStorage\ProductCategoryStorageClientInterface;
 use Spryker\Client\ProductDiscontinuedStorage\ProductDiscontinuedStorageClientInterface;
@@ -38,7 +40,12 @@ use Spryker\Client\ProductSetStorage\ProductSetStorageClientInterface;
 use Spryker\Client\ProductStorage\ProductStorageClientInterface;
 use Spryker\Client\Storage\StorageClientInterface;
 use Spryker\Client\Store\StoreClientInterface;
+use SprykerFeature\Client\AiCommerce\Dependency\KnowledgeSearch\KnowledgeSearchPluginInterface;
+use SprykerFeature\Client\AiCommerce\Plugin\KnowledgeSearch\BedrockKnowledgeBaseKnowledgeSearchPlugin;
 
+/**
+ * @method \SprykerFeature\Client\AiCommerce\AiCommerceConfig getConfig()
+ */
 class AiCommerceDependencyProvider extends AbstractDependencyProvider
 {
     public const string CLIENT_AI_FOUNDATION = 'CLIENT_AI_FOUNDATION';
@@ -128,6 +135,26 @@ class AiCommerceDependencyProvider extends AbstractDependencyProvider
      */
     public const string PLUGINS_STOREFRONT_ASSISTANT_PRODUCT_COLLECTION_EXPANDER = 'PLUGINS_STOREFRONT_ASSISTANT_PRODUCT_COLLECTION_EXPANDER';
 
+    /**
+     * @api
+     */
+    public const string PLUGINS_KNOWLEDGE_DOCUMENT_SCOPE_RESOLVER = 'PLUGINS_KNOWLEDGE_DOCUMENT_SCOPE_RESOLVER';
+
+    /**
+     * @api
+     */
+    public const string CLIENT_PRODUCT_ATTACHMENT_STORAGE = 'CLIENT_PRODUCT_ATTACHMENT_STORAGE';
+
+    /**
+     * @api
+     */
+    public const string PLUGIN_KNOWLEDGE_SEARCH = 'PLUGIN_KNOWLEDGE_SEARCH';
+
+    /**
+     * @api
+     */
+    public const string BEDROCK_AGENT_RUNTIME_CLIENT = 'BEDROCK_AGENT_RUNTIME_CLIENT';
+
     public function provideServiceLayerDependencies(Container $container): Container
     {
         $container = parent::provideServiceLayerDependencies($container);
@@ -163,6 +190,10 @@ class AiCommerceDependencyProvider extends AbstractDependencyProvider
         $container = $this->addStorefrontAssistantAgentPlugins($container);
         $container = $this->addStorefrontAssistantProductCollectionExpanderPlugins($container);
         $container = $this->addSearchConfigExpanderPlugins($container);
+        $container = $this->addProductAttachmentStorageClient($container);
+        $container = $this->addKnowledgeDocumentScopeResolverPlugins($container);
+        $container = $this->addKnowledgeSearchPlugin($container);
+        $container = $this->addBedrockAgentRuntimeClient($container);
 
         return $container;
     }
@@ -477,5 +508,54 @@ class AiCommerceDependencyProvider extends AbstractDependencyProvider
         });
 
         return $container;
+    }
+
+    protected function addKnowledgeSearchPlugin(Container $container): Container
+    {
+        $container->set(static::PLUGIN_KNOWLEDGE_SEARCH, function (): KnowledgeSearchPluginInterface {
+            return $this->getKnowledgeSearchPlugin();
+        });
+
+        return $container;
+    }
+
+    protected function addBedrockAgentRuntimeClient(Container $container): Container
+    {
+        $container->set(static::BEDROCK_AGENT_RUNTIME_CLIENT, function (): BedrockAgentRuntimeClient {
+            return new BedrockAgentRuntimeClient($this->getConfig()->getBedrockKnowledgeBaseAwsClientConfiguration());
+        });
+
+        return $container;
+    }
+
+    protected function addProductAttachmentStorageClient(Container $container): Container
+    {
+        $container->set(static::CLIENT_PRODUCT_ATTACHMENT_STORAGE, function (Container $container): ProductAttachmentStorageClientInterface {
+            return $container->getLocator()->productAttachmentStorage()->client();
+        });
+
+        return $container;
+    }
+
+    protected function addKnowledgeDocumentScopeResolverPlugins(Container $container): Container
+    {
+        $container->set(static::PLUGINS_KNOWLEDGE_DOCUMENT_SCOPE_RESOLVER, function (): array {
+            return $this->getKnowledgeDocumentScopeResolverPlugins();
+        });
+
+        return $container;
+    }
+
+    /**
+     * @return list<\SprykerFeature\Client\AiCommerce\Dependency\KnowledgeDocument\KnowledgeDocumentScopeResolverPluginInterface>
+     */
+    protected function getKnowledgeDocumentScopeResolverPlugins(): array
+    {
+        return [];
+    }
+
+    protected function getKnowledgeSearchPlugin(): KnowledgeSearchPluginInterface
+    {
+        return new BedrockKnowledgeBaseKnowledgeSearchPlugin();
     }
 }

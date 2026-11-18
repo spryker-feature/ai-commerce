@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace SprykerFeature\Zed\AiCommerce\Persistence;
 
 use Generated\Shared\Transfer\BackofficeAssistantConversationTransfer;
+use Generated\Shared\Transfer\KnowledgeDocumentTransfer;
 
 interface AiCommerceEntityManagerInterface
 {
@@ -24,4 +25,15 @@ interface AiCommerceEntityManagerInterface
     public function deleteBackofficeAssistantConversation(
         BackofficeAssistantConversationTransfer $conversationTransfer,
     ): void;
+
+    public function saveKnowledgeDocument(
+        KnowledgeDocumentTransfer $knowledgeDocumentTransfer,
+    ): KnowledgeDocumentTransfer;
+
+    /**
+     * @param list<\Generated\Shared\Transfer\KnowledgeDocumentTransfer> $knowledgeDocumentTransfers
+     */
+    public function saveKnowledgeDocumentCollection(string $sourceType, array $knowledgeDocumentTransfers): void;
+
+    public function deleteKnowledgeDocument(KnowledgeDocumentTransfer $knowledgeDocumentTransfer): void;
 }

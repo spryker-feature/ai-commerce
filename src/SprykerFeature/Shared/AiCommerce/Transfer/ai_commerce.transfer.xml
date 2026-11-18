@@ -556,6 +556,7 @@
 
     <transfer name="Pagination">
         <property name="limit" type="int"/>
+        <property name="offset" type="int"/>
     </transfer>
 
     <transfer name="ContentWidgetTemplate">
@@ -639,7 +640,7 @@
     </transfer>
 
     <transfer name="StorefrontAssistantPageContext" strict="true">
-        <property name="pageType" type="string" description="Storefront page the turn was sent from. One of product, category or search."/>
+        <property name="pageType" type="string" description="Storefront page the turn was sent from. One of product, category or search, or a project page type that AiCommerceConfig::getStorefrontAssistantCustomPageContextFields() configures."/>
         <property name="productName" type="string" description="Name of the product the customer is viewing on a product page."/>
         <property name="productSku" type="string" description="Abstract SKU of the product the customer is viewing on a product page."/>
         <property name="categoryName" type="string" description="Name of the category the customer is browsing on a category page."/>
@@ -647,6 +648,7 @@
         <property name="filters" type="string[]" singular="filter" description="Facets the customer has selected on a category or search page, each as the filter parameter name and the selected value."/>
         <property name="idProductAbstract" type="int" description="Abstract product the viewed SKU resolves to in the catalog. Resolved server-side, never mapped from the payload."/>
         <property name="productLabels" type="string[]" singular="productLabel" description="Names of the labels of the viewed product. Resolved server-side, never mapped from the payload."/>
+        <property name="customFields" type="string[]" associative="true" singular="customField" description="Values of a project page type, keyed by the field names that AiCommerceConfig::getStorefrontAssistantCustomPageContextFields() configures. Never authorizing: it may only inform prompt text."/>
     </transfer>
 
     <transfer name="StorefrontAssistantProductDetailsRequest" strict="true">
@@ -960,14 +962,6 @@
         <property name="url" type="string"/>
     </transfer>
 
-
-
-
-
-
-
-
-
     <transfer name="ProductAbstractImageStorage">
         <property name="imageSets" singular="imageSet" type="ProductImageSetStorage[]"/>
     </transfer>
@@ -984,4 +978,250 @@
         <property name="productConcreteIds" type="array" singular="productConcreteIds"/>
     </transfer>
 
+    <transfer name="KnowledgeDocument" strict="true">
+        <property name="idKnowledgeDocument" type="int"/>
+        <property name="sourceType" type="string"/>
+        <property name="sourceIdentifier" type="string"/>
+        <property name="documentName" type="string"/>
+        <property name="localeName" type="string" description="Null means the document applies to all locales."/>
+        <property name="status" type="string" description="One of pending, processing, indexed, failed."/>
+        <property name="contentHash" type="string" description="Hash of the content bytes."/>
+        <property name="attemptCount" type="int"/>
+        <property name="errorMessage" type="string"/>
+        <property name="indexedAt" type="string"/>
+    </transfer>
+
+    <transfer name="KnowledgeDocumentCriteria" strict="true">
+        <property name="knowledgeDocumentConditions" type="KnowledgeDocumentConditions"/>
+        <property name="sortCollection" type="Sort[]" singular="sort"/>
+        <property name="pagination" type="Pagination"/>
+    </transfer>
+
+    <transfer name="KnowledgeDocumentConditions" strict="true">
+        <property name="sourceTypes" type="string[]" singular="sourceType"/>
+        <property name="sourceIdentifiers" type="string[]" singular="sourceIdentifier"/>
+        <property name="statuses" type="string[]" singular="status"/>
+    </transfer>
+
+    <transfer name="KnowledgeDocumentCollection" strict="true">
+        <property name="knowledgeDocuments" type="KnowledgeDocument[]" singular="knowledgeDocument"/>
+        <property name="pagination" type="Pagination"/>
+    </transfer>
+
+    <transfer name="KnowledgeDocumentSource" strict="true">
+        <property name="sourceType" type="string"/>
+        <property name="sourceIdentifier" type="string"/>
+        <property name="documentName" type="string"/>
+        <property name="localeName" type="string" description="Null means the document applies to all locales."/>
+        <property name="url" type="string" description="Set by URL based sources."/>
+        <property name="metadata" type="array" singular="metadataItem"/>
+        <property name="maxContentSize" type="int" description="Maximum number of content bytes that the knowledge store accepts. The indexer sets it before it reads the content."/>
+    </transfer>
+
+    <transfer name="KnowledgeDocumentSourceCriteria" strict="true">
+        <property name="knowledgeDocumentSourceConditions" type="KnowledgeDocumentSourceConditions"/>
+        <property name="sortCollection" type="Sort[]" singular="sort"/>
+        <property name="pagination" type="Pagination" description="Used by the full re-index when no source identifiers are set."/>
+    </transfer>
+
+    <transfer name="KnowledgeDocumentSourceConditions" strict="true">
+        <property name="sourceIdentifiers" type="string[]" singular="sourceIdentifier"/>
+    </transfer>
+
+    <transfer name="KnowledgeDocumentSourceCollection" strict="true">
+        <property name="knowledgeDocumentSources" type="KnowledgeDocumentSource[]" singular="knowledgeDocumentSource"/>
+    </transfer>
+
+    <transfer name="KnowledgeDocumentContent" strict="true">
+        <property name="knowledgeDocumentSource" type="KnowledgeDocumentSource"/>
+        <property name="content" type="string" description="Raw bytes of the document."/>
+        <property name="mimeType" type="string"/>
+        <property name="isSuccessful" type="bool"/>
+        <property name="isTemporaryFailure" type="bool" description="True when a retry can succeed, for example a network timeout."/>
+        <property name="errors" type="Error[]" singular="error"/>
+    </transfer>
+
+    <transfer name="KnowledgeDocumentReindexRequest" strict="true">
+        <property name="sourceTypes" type="string[]" singular="sourceType" description="All source types when empty."/>
+        <property name="isForced" type="bool" description="Clears the content hash so all documents are indexed again."/>
+    </transfer>
+
+    <transfer name="KnowledgeDocumentReindexResponse" strict="true">
+        <property name="queuedDocumentCount" type="int"/>
+        <property name="queuedDocumentCountsBySourceType" type="int[]" associative="true" singular="queuedDocumentCountBySourceType" description="Number of queued documents, keyed by source type."/>
+        <property name="queuedDeletedSourceDocumentCount" type="int" description="Number of queued documents whose source no longer exists. The index queue deletes them."/>
+        <property name="isSuccessful" type="bool"/>
+        <property name="errors" type="Error[]" singular="error"/>
+    </transfer>
+
+    <transfer name="KnowledgeDocumentScopeRequest" strict="true">
+        <property name="scopeReferences" type="array" associative="true" singular="scopeReference" description="Lists of entity references, keyed by scope reference type, for example abstract_sku. Each scope resolver plugin reads its own reference types."/>
+        <property name="sourceIdentifiers" type="string[]" singular="sourceIdentifier"/>
+        <property name="localeName" type="string"/>
+        <property name="storeName" type="string"/>
+    </transfer>
+
+    <transfer name="KnowledgeDocumentScope" strict="true">
+        <property name="documentKeys" type="string[]" singular="documentKey"/>
+        <property name="messages" type="string[]" singular="message" description="Customer safe reasons, for example a product that is not available."/>
+    </transfer>
+
+    <transfer name="KnowledgeDocumentSearchRequest" strict="true">
+        <property name="query" type="string"/>
+        <property name="knowledgeDocumentScopeRequest" type="KnowledgeDocumentScopeRequest"/>
+        <property name="sourceTypes" type="string[]" singular="sourceType"/>
+        <property name="documentName" type="string"/>
+        <property name="limit" type="int"/>
+    </transfer>
+
+    <transfer name="KnowledgeDocumentSearchResponse" strict="true">
+        <property name="knowledgeDocumentSearchResults" type="KnowledgeDocumentSearchResult[]" singular="knowledgeDocumentSearchResult"/>
+        <property name="messages" type="string[]" singular="message"/>
+        <property name="isSuccessful" type="bool"/>
+    </transfer>
+
+    <transfer name="KnowledgeDocumentSearchResult" strict="true">
+        <property name="sourceType" type="string"/>
+        <property name="sourceIdentifier" type="string"/>
+        <property name="documentName" type="string"/>
+        <property name="content" type="string"/>
+        <property name="score" type="float"/>
+        <property name="metadata" type="array" singular="metadataItem"/>
+    </transfer>
+
+    <transfer name="KnowledgePassage" strict="true">
+        <property name="id" type="string" description="Identifier of the passage in the knowledge store."/>
+        <property name="documentKey" type="string" description="Key of the knowledge document that the passage belongs to."/>
+        <property name="sourceType" type="string"/>
+        <property name="locale" type="string"/>
+        <property name="documentName" type="string"/>
+        <property name="chunkIndex" type="int"/>
+        <property name="content" type="string"/>
+        <property name="metadata" type="array" singular="metadataItem"/>
+        <property name="score" type="float" description="Set on search results only."/>
+    </transfer>
+
+    <transfer name="KnowledgeSearchCriteria" strict="true">
+        <property name="knowledgeSearchConditions" type="KnowledgeSearchConditions"/>
+        <property name="sortCollection" type="Sort[]" singular="sort"/>
+        <property name="pagination" type="Pagination" description="pagination.limit is the maximum number of returned passages."/>
+    </transfer>
+
+    <transfer name="KnowledgeSearchConditions" strict="true">
+        <property name="ids" type="string[]" singular="id"/>
+        <property name="queryText" type="string" description="Query text. The knowledge store makes the query vector from it."/>
+        <property name="documentKeys" type="string[]" singular="documentKey"/>
+        <property name="sourceTypes" type="string[]" singular="sourceType"/>
+        <property name="locales" type="string[]" singular="locale"/>
+        <property name="documentName" type="string"/>
+    </transfer>
+
+    <transfer name="KnowledgePassageCollection" strict="true">
+        <property name="knowledgePassages" type="KnowledgePassage[]" singular="knowledgePassage"/>
+        <property name="isSuccessful" type="bool"/>
+        <property name="errors" type="Error[]" singular="error"/>
+    </transfer>
+
+    <transfer name="ProductAttachmentStorageCriteria" strict="true">
+        <property name="idProductAbstract" type="int"/>
+        <property name="locale" type="string"/>
+    </transfer>
+
+    <transfer name="ProductAbstractAttachmentStorage" strict="true">
+        <property name="idProductAbstract" type="int"/>
+        <property name="attachments" type="ProductAttachmentStorage[]" singular="attachment"/>
+    </transfer>
+
+    <transfer name="ProductAttachmentStorage" strict="true">
+        <property name="idProductAttachment" type="int"/>
+        <property name="label" type="string"/>
+    </transfer>
+
+    <transfer name="KnowledgeDocumentIndexResponse" strict="true">
+        <property name="isSuccessful" type="bool"/>
+        <property name="status" type="string" description="On success: indexed when the store has the document, processing when the store indexes it later."/>
+        <property name="isTemporaryFailure" type="bool" description="True when a retry can succeed."/>
+        <property name="errors" type="Error[]" singular="error"/>
+    </transfer>
+
+    <transfer name="KnowledgeDocumentCollectionResponse" strict="true">
+        <property name="knowledgeDocuments" type="KnowledgeDocument[]" singular="knowledgeDocument"/>
+        <property name="isSuccessful" type="bool"/>
+        <property name="isTemporaryFailure" type="bool" description="False when a retry cannot succeed, for example a configuration error. Null is handled as true."/>
+        <property name="errors" type="Error[]" singular="error"/>
+    </transfer>
+
+    <transfer name="KnowledgeDocumentStatusRefreshResponse" strict="true">
+        <property name="checkedDocumentCount" type="int"/>
+        <property name="indexedDocumentCount" type="int"/>
+        <property name="failedDocumentCount" type="int"/>
+        <property name="isSuccessful" type="bool"/>
+        <property name="errors" type="Error[]" singular="error"/>
+    </transfer>
+
+    <transfer name="BedrockKnowledgeBaseReference" strict="true">
+        <property name="knowledgeBaseId" type="string"/>
+        <property name="dataSourceIdsBySourceType" type="string[]" associative="true" singular="dataSourceIdBySourceType" description="IDs of the custom data sources, keyed by knowledge document source type."/>
+    </transfer>
+
+    <transfer name="KnowledgeStoreSetupRequest" strict="true">
+        <property name="sourceTypes" type="string[]" singular="sourceType" description="The knowledge document source types that the store must accept."/>
+        <property name="isIndexRecreated" type="bool" description="Deletes the stored documents of the knowledge store when the store supports it. Run the forced re-index after it."/>
+    </transfer>
+
+    <transfer name="KnowledgeStoreSetupResponse" strict="true">
+        <property name="knowledgeStoreName" type="string"/>
+        <property name="isSuccessful" type="bool"/>
+        <property name="isSkipped" type="bool" description="True when the knowledge store is not configured."/>
+        <property name="steps" type="string[]" singular="step" description="The setup steps that ran, in order, also when a later step failed."/>
+        <property name="messages" type="string[]" singular="message" description="The result of the setup, or the reason of the skip."/>
+        <property name="errors" type="Error[]" singular="error"/>
+    </transfer>
+
+    <transfer name="EventEntity">
+        <property name="id" type="int"/>
+    </transfer>
+
+    <transfer name="QueueSendMessage">
+        <property name="body" type="string"/>
+    </transfer>
+
+    <transfer name="QueueReceiveMessage">
+        <property name="queueMessage" type="QueueSendMessage"/>
+        <property name="acknowledge" type="bool"/>
+        <property name="reject" type="bool"/>
+        <property name="hasError" type="bool"/>
+        <property name="routingKey" type="string"/>
+    </transfer>
+
+    <transfer name="ProductAttachment" strict="true">
+        <property name="idProductAttachment" type="int"/>
+        <property name="fkLocale" type="int"/>
+        <property name="label" type="string"/>
+        <property name="url" type="string"/>
+    </transfer>
+
+    <transfer name="ProductAttachmentCriteria" strict="true">
+        <property name="productAttachmentCondition" type="ProductAttachmentCondition"/>
+        <property name="filter" type="Filter"/>
+        <property name="sortCollection" type="Sort[]" singular="sort"/>
+    </transfer>
+
+    <transfer name="ProductAttachmentCondition" strict="true">
+        <property name="productAttachmentIds" type="int[]" singular="idProductAttachment"/>
+    </transfer>
+
+    <transfer name="ProductAttachmentCollection" strict="true">
+        <property name="productAttachments" type="ProductAttachment[]" singular="productAttachment"/>
+    </transfer>
+
+    <transfer name="Filter">
+        <property name="offset" type="int"/>
+        <property name="limit" type="int"/>
+    </transfer>
+
+    <transfer name="Locale">
+        <property name="idLocale" type="int"/>
+        <property name="localeName" type="string"/>
+    </transfer>
 </transfers>

@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<database xmlns="spryker:schema-01"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          name="zed"
+          xsi:schemaLocation="spryker:schema-01 https://static.spryker.com/schema-01.xsd"
+          namespace="Orm\Zed\AiCommerce\Persistence"
+          package="src.Orm.Zed.AiCommerce.Persistence">
+
+    <table name="spy_knowledge_document" idMethod="native" phpName="SpyKnowledgeDocument">
+        <column name="id_knowledge_document" type="INTEGER" required="true" primaryKey="true" autoIncrement="true"/>
+        <column name="source_type" type="VARCHAR" size="64" required="true"/>
+        <column name="source_identifier" type="VARCHAR" size="255" required="true"/>
+        <column name="document_name" type="VARCHAR" size="255" required="false"/>
+        <column name="locale_name" type="VARCHAR" size="16" required="false"/>
+        <column name="status" type="VARCHAR" size="32" required="true" default="pending"/>
+        <column name="content_hash" type="VARCHAR" size="64" required="false"/>
+        <column name="attempt_count" type="INTEGER" required="true" default="0"/>
+        <column name="error_message" type="VARCHAR" size="1024" required="false"/>
+        <column name="indexed_at" type="TIMESTAMP" required="false"/>
+
+        <unique name="spy_knowledge_document-unique-source">
+            <unique-column name="source_type"/>
+            <unique-column name="source_identifier"/>
+        </unique>
+
+        <index name="spy_knowledge_document-status">
+            <index-column name="status"/>
+        </index>
+
+        <behavior name="timestampable"/>
+
+        <id-method-parameter value="spy_knowledge_document_pk_seq"/>
+    </table>
+
+</database>

@@ -11,6 +11,8 @@ namespace SprykerFeature\Zed\AiCommerce\Persistence;
 
 use Generated\Shared\Transfer\BackofficeAssistantConversationCollectionTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCriteriaTransfer;
+use Generated\Shared\Transfer\KnowledgeDocumentCollectionTransfer;
+use Generated\Shared\Transfer\KnowledgeDocumentCriteriaTransfer;
 use Generated\Shared\Transfer\SmartCmsContentItemCollectionTransfer;
 use Generated\Shared\Transfer\SmartCmsContentItemCriteriaTransfer;
 
@@ -46,4 +48,8 @@ interface AiCommerceRepositoryInterface
     public function findProcessAndStateNamesByOrderReference(string $orderReference): array;
 
     public function existsDiscountByDisplayName(string $displayName): bool;
+
+    public function getKnowledgeDocumentCollection(
+        KnowledgeDocumentCriteriaTransfer $knowledgeDocumentCriteriaTransfer,
+    ): KnowledgeDocumentCollectionTransfer;
 }

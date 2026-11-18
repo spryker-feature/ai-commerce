@@ -14,11 +14,18 @@ use Generated\Shared\Transfer\BackofficeAssistantConversationCollectionTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationConditionsTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCriteriaTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationTransfer;
+use Generated\Shared\Transfer\KnowledgeDocumentCollectionTransfer;
+use Generated\Shared\Transfer\KnowledgeDocumentConditionsTransfer;
+use Generated\Shared\Transfer\KnowledgeDocumentCriteriaTransfer;
+use Generated\Shared\Transfer\KnowledgeDocumentTransfer;
+use Generated\Shared\Transfer\PaginationTransfer;
 use Generated\Shared\Transfer\SmartCmsContentItemCollectionTransfer;
 use Generated\Shared\Transfer\SmartCmsContentItemConditionsTransfer;
 use Generated\Shared\Transfer\SmartCmsContentItemCriteriaTransfer;
 use Generated\Shared\Transfer\SmartCmsContentItemTransfer;
+use Orm\Zed\AiCommerce\Persistence\Map\SpyKnowledgeDocumentTableMap;
 use Orm\Zed\AiCommerce\Persistence\SpyBackofficeAssistantConversationQuery;
+use Orm\Zed\AiCommerce\Persistence\SpyKnowledgeDocumentQuery;
 use Orm\Zed\Content\Persistence\SpyContentQuery;
 use Spryker\Zed\Kernel\Persistence\AbstractRepository;
 use Spryker\Zed\PropelOrm\Business\Runtime\ActiveQuery\Criteria;
@@ -32,6 +39,17 @@ class AiCommerceRepository extends AbstractRepository implements AiCommerceRepos
      * Generic persistence safety cap, applied only when a caller provides no pagination limit, to avoid loading the entire content table. The feature-level content-item lookup limit is owned by AiCommerceConfig::getSmartCmsContentItemLookupLimit() and is always set on the criteria by the business layer.
      */
     protected const int CONTENT_ITEM_SAFETY_LIMIT = 1000;
+
+    /**
+     * @var array<string, string>
+     */
+    protected const array KNOWLEDGE_DOCUMENT_SORTABLE_FIELDS = [
+        KnowledgeDocumentTransfer::ID_KNOWLEDGE_DOCUMENT => SpyKnowledgeDocumentTableMap::COL_ID_KNOWLEDGE_DOCUMENT,
+        KnowledgeDocumentTransfer::SOURCE_TYPE => SpyKnowledgeDocumentTableMap::COL_SOURCE_TYPE,
+        KnowledgeDocumentTransfer::SOURCE_IDENTIFIER => SpyKnowledgeDocumentTableMap::COL_SOURCE_IDENTIFIER,
+        KnowledgeDocumentTransfer::STATUS => SpyKnowledgeDocumentTableMap::COL_STATUS,
+        KnowledgeDocumentTransfer::INDEXED_AT => SpyKnowledgeDocumentTableMap::COL_INDEXED_AT,
+    ];
 
     public function getBackofficeAssistantConversationCollection(
         BackofficeAssistantConversationCriteriaTransfer $criteriaTransfer,
@@ -188,5 +206,96 @@ class AiCommerceRepository extends AbstractRepository implements AiCommerceRepos
         }
 
         return $query;
+    }
+
+    public function getKnowledgeDocumentCollection(
+        KnowledgeDocumentCriteriaTransfer $knowledgeDocumentCriteriaTransfer,
+    ): KnowledgeDocumentCollectionTransfer {
+        $knowledgeDocumentQuery = $this->getFactory()->createKnowledgeDocumentQuery();
+        $knowledgeDocumentConditionsTransfer = $knowledgeDocumentCriteriaTransfer->getKnowledgeDocumentConditions();
+
+        if ($knowledgeDocumentConditionsTransfer !== null) {
+            $knowledgeDocumentQuery = $this->applyKnowledgeDocumentConditions(
+                $knowledgeDocumentQuery,
+                $knowledgeDocumentConditionsTransfer,
+            );
+        }
+
+        $knowledgeDocumentQuery = $this->applyKnowledgeDocumentSorting(
+            $knowledgeDocumentQuery,
+            $knowledgeDocumentCriteriaTransfer,
+        );
+
+        $knowledgeDocumentCollectionTransfer = new KnowledgeDocumentCollectionTransfer();
+        $paginationTransfer = $knowledgeDocumentCriteriaTransfer->getPagination();
+
+        if ($paginationTransfer !== null) {
+            $knowledgeDocumentQuery = $this->applyKnowledgeDocumentPagination($knowledgeDocumentQuery, $paginationTransfer);
+            $knowledgeDocumentCollectionTransfer->setPagination($paginationTransfer);
+        }
+
+        $knowledgeDocumentMapper = $this->getFactory()->createKnowledgeDocumentMapper();
+
+        foreach ($knowledgeDocumentQuery->find() as $knowledgeDocumentEntity) {
+            $knowledgeDocumentCollectionTransfer->addKnowledgeDocument(
+                $knowledgeDocumentMapper->mapKnowledgeDocumentEntityToKnowledgeDocumentTransfer(
+                    $knowledgeDocumentEntity,
+                    new KnowledgeDocumentTransfer(),
+                ),
+            );
+        }
+
+        return $knowledgeDocumentCollectionTransfer;
+    }
+
+    protected function applyKnowledgeDocumentConditions(
+        SpyKnowledgeDocumentQuery $knowledgeDocumentQuery,
+        KnowledgeDocumentConditionsTransfer $knowledgeDocumentConditionsTransfer,
+    ): SpyKnowledgeDocumentQuery {
+        if ($knowledgeDocumentConditionsTransfer->getSourceTypes() !== []) {
+            $knowledgeDocumentQuery->filterBySourceType_In($knowledgeDocumentConditionsTransfer->getSourceTypes());
+        }
+
+        if ($knowledgeDocumentConditionsTransfer->getSourceIdentifiers() !== []) {
+            $knowledgeDocumentQuery->filterBySourceIdentifier_In($knowledgeDocumentConditionsTransfer->getSourceIdentifiers());
+        }
+
+        if ($knowledgeDocumentConditionsTransfer->getStatuses() !== []) {
+            $knowledgeDocumentQuery->filterByStatus_In($knowledgeDocumentConditionsTransfer->getStatuses());
+        }
+
+        return $knowledgeDocumentQuery;
+    }
+
+    protected function applyKnowledgeDocumentSorting(
+        SpyKnowledgeDocumentQuery $knowledgeDocumentQuery,
+        KnowledgeDocumentCriteriaTransfer $knowledgeDocumentCriteriaTransfer,
+    ): SpyKnowledgeDocumentQuery {
+        foreach ($knowledgeDocumentCriteriaTransfer->getSortCollection() as $sortTransfer) {
+            $columnName = static::KNOWLEDGE_DOCUMENT_SORTABLE_FIELDS[$sortTransfer->getField()] ?? null;
+
+            if ($columnName === null) {
+                continue;
+            }
+
+            $knowledgeDocumentQuery->orderBy($columnName, $sortTransfer->getIsAscending() === false ? Criteria::DESC : Criteria::ASC);
+        }
+
+        return $knowledgeDocumentQuery->orderByIdKnowledgeDocument(Criteria::ASC);
+    }
+
+    protected function applyKnowledgeDocumentPagination(
+        SpyKnowledgeDocumentQuery $knowledgeDocumentQuery,
+        PaginationTransfer $paginationTransfer,
+    ): SpyKnowledgeDocumentQuery {
+        if ($paginationTransfer->getLimit() !== null) {
+            $knowledgeDocumentQuery->limit(max(1, $paginationTransfer->getLimit()));
+        }
+
+        if ($paginationTransfer->getOffset() !== null) {
+            $knowledgeDocumentQuery->offset(max(0, $paginationTransfer->getOffset()));
+        }
+
+        return $knowledgeDocumentQuery;
     }
 }

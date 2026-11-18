@@ -9,9 +9,12 @@ declare(strict_types=1);
 
 namespace SprykerFeatureTest\Client\AiCommerce\StorefrontAssistant\Prompt;
 
+use Codeception\Stub;
 use Codeception\Stub\Expected;
 use Codeception\Test\Unit;
 use Generated\Shared\Transfer\StorefrontAssistantChatRequestTransfer;
+use Generated\Shared\Transfer\StorefrontAssistantPageContextTransfer;
+use SprykerFeature\Client\AiCommerce\AiCommerceConfig;
 use SprykerFeature\Client\AiCommerce\Plugin\StorefrontAssistant\Tool\CatalogSearchToolPlugin;
 use SprykerFeature\Client\AiCommerce\Plugin\StorefrontAssistant\Tool\CategoryTreeToolPlugin;
 use SprykerFeature\Client\AiCommerce\Plugin\StorefrontAssistant\Tool\DisplayProductsToolPlugin;
@@ -53,6 +56,12 @@ class StorefrontAssistantSystemPromptTest extends Unit
     protected const string CUSTOMER_REFERENCE = 'DE--test-customer-page-context';
 
     protected const string CONVERSATION_REFERENCE = 'test-conversation-page-context';
+
+    protected const string CUSTOM_PAGE_TYPE = 'machine';
+
+    protected const string CUSTOM_PROMPT_LINE_WITH_NAME = 'The customer views the machine %machineReference% named %machineName%.';
+
+    protected const string CUSTOM_PROMPT_LINE = 'The customer views the machine %machineReference%.';
 
     protected AiCommerceClientTester $tester;
 
@@ -177,7 +186,7 @@ class StorefrontAssistantSystemPromptTest extends Unit
         ]);
 
         // Act
-        $systemPrompt = (new PageContextSystemPromptComposer($categoryTreeFormatter))->composeSystemPrompt(
+        $systemPrompt = (new PageContextSystemPromptComposer($categoryTreeFormatter, new AiCommerceConfig()))->composeSystemPrompt(
             static::SYSTEM_PROMPT,
             new StorefrontAssistantChatRequestTransfer(),
         );
@@ -192,16 +201,54 @@ class StorefrontAssistantSystemPromptTest extends Unit
         $storefrontAssistantChatRequestTransfer = (new StorefrontAssistantChatRequestTransfer())->setLocaleName(static::LOCALE_NAME);
 
         // Act
-        $systemPrompt = (new PageContextSystemPromptComposer($this->makeEmpty(CategoryTreeFormatterInterface::class)))->composeSystemPrompt(
+        $systemPrompt = (new PageContextSystemPromptComposer($this->makeEmpty(CategoryTreeFormatterInterface::class), new AiCommerceConfig()))->composeSystemPrompt(
             static::SYSTEM_PROMPT,
             $storefrontAssistantChatRequestTransfer,
         );
 
         // Assert
         $this->assertStringContainsString(
-            sprintf('Catalog language: %s. Every `catalog_search` and `catalog_suggest` argument is in it: translate the customer\'s words first', static::LOCALE_NAME),
+            sprintf('Catalog language: %s. Every `catalog_search`, `catalog_suggest`, `ssp_asset_compatible_products` and `product_knowledge_search` query is in it: translate the customer\'s words first', static::LOCALE_NAME),
             $systemPrompt,
         );
+    }
+
+    public function testGivenAProjectPageTypeWithAllValuesWhenComposedThenTheFirstPromptLineIsStatedWithQuotedValues(): void
+    {
+        // Arrange
+        $storefrontAssistantChatRequestTransfer = $this->createChatRequestFromCustomPage(['machineReference' => 'REF--3', 'machineName' => 'Printer "X"']);
+
+        // Act
+        $systemPrompt = $this->composeSystemPromptWithCustomPromptLines($storefrontAssistantChatRequestTransfer);
+
+        // Assert
+        $this->assertStringContainsString('The customer views the machine "REF--3" named "Printer \\"X\\"".', $systemPrompt);
+        $this->assertStringNotContainsString('The customer views the machine "REF--3".', $systemPrompt);
+    }
+
+    public function testGivenAProjectPageTypeWithoutAnOptionalValueWhenComposedThenTheNextPromptLineIsStated(): void
+    {
+        // Arrange
+        $storefrontAssistantChatRequestTransfer = $this->createChatRequestFromCustomPage(['machineReference' => 'REF--3', 'machineName' => ' ']);
+
+        // Act
+        $systemPrompt = $this->composeSystemPromptWithCustomPromptLines($storefrontAssistantChatRequestTransfer);
+
+        // Assert
+        $this->assertStringContainsString('The customer views the machine "REF--3".', $systemPrompt);
+    }
+
+    public function testGivenAProjectPageTypeWithoutTheRequiredValueWhenComposedThenNoPageContextIsStated(): void
+    {
+        // Arrange
+        $storefrontAssistantChatRequestTransfer = $this->createChatRequestFromCustomPage(['machineName' => 'Printer']);
+
+        // Act
+        $systemPrompt = $this->composeSystemPromptWithCustomPromptLines($storefrontAssistantChatRequestTransfer);
+
+        // Assert
+        $this->assertStringNotContainsString('The customer views the machine', $systemPrompt);
+        $this->assertStringNotContainsString('Current customer context', $systemPrompt);
     }
 
     public function testGivenResolvedProductPageWhenComposedThenIdProductAbstractAndLabelsAreStated(): void
@@ -297,6 +344,33 @@ class StorefrontAssistantSystemPromptTest extends Unit
             sprintf('Catalog language: %s', $storefrontAssistantChatRequestTransfer->getLocaleName()),
             $systemPrompt,
         );
+    }
+
+    /**
+     * @param array<string, string> $customFields
+     */
+    protected function createChatRequestFromCustomPage(array $customFields): StorefrontAssistantChatRequestTransfer
+    {
+        return (new StorefrontAssistantChatRequestTransfer())->setStorefrontAssistantPageContext(
+            (new StorefrontAssistantPageContextTransfer())
+                ->setPageType(static::CUSTOM_PAGE_TYPE)
+                ->setCustomFields($customFields),
+        );
+    }
+
+    protected function composeSystemPromptWithCustomPromptLines(StorefrontAssistantChatRequestTransfer $storefrontAssistantChatRequestTransfer): string
+    {
+        /**
+         * @var \SprykerFeature\Client\AiCommerce\AiCommerceConfig $aiCommerceConfig
+         */
+        $aiCommerceConfig = Stub::make(AiCommerceConfig::class, [
+            'getStorefrontAssistantCustomPageContextPromptLines' => [
+                static::CUSTOM_PAGE_TYPE => [static::CUSTOM_PROMPT_LINE_WITH_NAME, static::CUSTOM_PROMPT_LINE],
+            ],
+        ]);
+
+        return (new PageContextSystemPromptComposer($this->makeEmpty(CategoryTreeFormatterInterface::class), $aiCommerceConfig))
+            ->composeSystemPrompt(static::SYSTEM_PROMPT, $storefrontAssistantChatRequestTransfer);
     }
 
     protected function createChatRequestFromProductPage(): StorefrontAssistantChatRequestTransfer

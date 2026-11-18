@@ -553,7 +553,7 @@ features:
                         enabled: true
                         secret: false
                         storefront: true
-                        order: 3
+                        order: 4
                         scopes:
                             - global
                         constraints:
@@ -576,7 +576,7 @@ features:
                         enabled: true
                         secret: false
                         storefront: true
-                        order: 4
+                        order: 5
                         scopes:
                             - global
                         constraints:

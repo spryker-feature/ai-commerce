@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace SprykerFeature\Zed\AiCommerce\Business;
 
+use Aws\BedrockAgent\BedrockAgentClient;
+use Spryker\Client\Queue\QueueClientInterface;
 use Spryker\Service\UtilEncoding\UtilEncodingServiceInterface;
 use Spryker\Zed\AiFoundation\Business\AiFoundationFacadeInterface;
 use Spryker\Zed\Category\Business\CategoryFacadeInterface;
@@ -17,6 +19,7 @@ use Spryker\Zed\Discount\Business\DiscountFacadeInterface;
 use Spryker\Zed\Kernel\Business\AbstractBusinessFactory;
 use Spryker\Zed\Locale\Business\LocaleFacadeInterface;
 use Spryker\Zed\Oms\Business\OmsFacadeInterface;
+use Spryker\Zed\ProductAttachment\Business\ProductAttachmentFacadeInterface;
 use Spryker\Zed\Sales\Business\SalesFacadeInterface;
 use SprykerFeature\Zed\AiCommerce\AiCommerceDependencyProvider;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\Conversation\BackofficeAssistantConversationCreator;
@@ -41,6 +44,54 @@ use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\O
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OrderOmsTransitionsReaderInterface;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OrderStateFlagsReader;
 use SprykerFeature\Zed\AiCommerce\Business\BackofficeAssistant\OrderManagement\OrderStateFlagsReaderInterface;
+use SprykerFeature\Zed\AiCommerce\Business\BedrockKnowledgeBase\Checker\BedrockKnowledgeBaseConfigurationChecker;
+use SprykerFeature\Zed\AiCommerce\Business\BedrockKnowledgeBase\Checker\BedrockKnowledgeBaseConfigurationCheckerInterface;
+use SprykerFeature\Zed\AiCommerce\Business\BedrockKnowledgeBase\Indexer\BedrockKnowledgeBaseDocumentIndexer;
+use SprykerFeature\Zed\AiCommerce\Business\BedrockKnowledgeBase\Indexer\BedrockKnowledgeBaseDocumentIndexerInterface;
+use SprykerFeature\Zed\AiCommerce\Business\BedrockKnowledgeBase\Mapper\BedrockKnowledgeBaseDocumentMapper;
+use SprykerFeature\Zed\AiCommerce\Business\BedrockKnowledgeBase\Mapper\BedrockKnowledgeBaseDocumentMapperInterface;
+use SprykerFeature\Zed\AiCommerce\Business\BedrockKnowledgeBase\Mapper\BedrockKnowledgeBaseDocumentStatusMapper;
+use SprykerFeature\Zed\AiCommerce\Business\BedrockKnowledgeBase\Mapper\BedrockKnowledgeBaseDocumentStatusMapperInterface;
+use SprykerFeature\Zed\AiCommerce\Business\BedrockKnowledgeBase\Reader\BedrockKnowledgeBaseReferenceReader;
+use SprykerFeature\Zed\AiCommerce\Business\BedrockKnowledgeBase\Reader\BedrockKnowledgeBaseReferenceReaderInterface;
+use SprykerFeature\Zed\AiCommerce\Business\BedrockKnowledgeBase\Setup\BedrockKnowledgeBaseSetup;
+use SprykerFeature\Zed\AiCommerce\Business\BedrockKnowledgeBase\Setup\BedrockKnowledgeBaseSetupInterface;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Builder\KnowledgeDocumentIndexResponseBuilder;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Builder\KnowledgeDocumentIndexResponseBuilderInterface;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Deleter\KnowledgeDocumentDeleter;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Deleter\KnowledgeDocumentDeleterInterface;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Indexer\KnowledgeDocumentContentIndexer;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Indexer\KnowledgeDocumentContentIndexerInterface;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Indexer\KnowledgeDocumentIndexer;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Indexer\KnowledgeDocumentIndexerInterface;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Mapper\KnowledgeDocumentIndexMessageMapper;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Mapper\KnowledgeDocumentIndexMessageMapperInterface;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Reader\KnowledgeDocumentSourceReader;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Reader\KnowledgeDocumentSourceReaderInterface;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Reader\UrlDocumentContentReader;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Reader\UrlDocumentContentReaderInterface;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Refresher\KnowledgeDocumentStatusRefresher;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Refresher\KnowledgeDocumentStatusRefresherInterface;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Reindexer\KnowledgeDocumentReindexer;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Reindexer\KnowledgeDocumentReindexerInterface;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Resolver\HostAddressResolver;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Resolver\HostAddressResolverInterface;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Resolver\KnowledgeDocumentSourcePluginResolver;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Resolver\KnowledgeDocumentSourcePluginResolverInterface;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Sender\KnowledgeDocumentIndexMessageSender;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Sender\KnowledgeDocumentIndexMessageSenderInterface;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Validator\KnowledgeDocumentIndexMessageValidator;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Validator\KnowledgeDocumentIndexMessageValidatorInterface;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Writer\KnowledgeDocumentEventWriter;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Writer\KnowledgeDocumentEventWriterInterface;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Writer\KnowledgeDocumentIndexFailureWriter;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Writer\KnowledgeDocumentIndexFailureWriterInterface;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Writer\KnowledgeDocumentPendingWriter;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Writer\KnowledgeDocumentPendingWriterInterface;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeStore\Setup\KnowledgeStoreSetup;
+use SprykerFeature\Zed\AiCommerce\Business\KnowledgeStore\Setup\KnowledgeStoreSetupInterface;
+use SprykerFeature\Zed\AiCommerce\Business\ProductAttachmentKnowledgeDocument\Reader\ProductAttachmentDocumentSourceReader;
+use SprykerFeature\Zed\AiCommerce\Business\ProductAttachmentKnowledgeDocument\Reader\ProductAttachmentDocumentSourceReaderInterface;
 use SprykerFeature\Zed\AiCommerce\Business\SmartCmsContent\Collapser\SmartCmsContentItemHtmlCollapser;
 use SprykerFeature\Zed\AiCommerce\Business\SmartCmsContent\Collapser\SmartCmsContentItemHtmlCollapserInterface;
 use SprykerFeature\Zed\AiCommerce\Business\SmartCmsContent\Expander\SmartCmsContentItemHtmlExpander;
@@ -63,11 +114,15 @@ use SprykerFeature\Zed\AiCommerce\Business\SmartProductManagement\Reader\SmartPr
 use SprykerFeature\Zed\AiCommerce\Business\SmartProductManagement\Reader\SmartProductManagementCategoryReaderInterface;
 use SprykerFeature\Zed\AiCommerce\Business\SmartProductManagement\Translator\SmartProductManagementCollectionTranslator;
 use SprykerFeature\Zed\AiCommerce\Business\SmartProductManagement\Translator\SmartProductManagementCollectionTranslatorInterface;
+use SprykerFeature\Zed\AiCommerce\Dependency\KnowledgeStore\KnowledgeStorePluginInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
  * @method \SprykerFeature\Zed\AiCommerce\AiCommerceConfig getConfig()
  * @method \SprykerFeature\Zed\AiCommerce\Persistence\AiCommerceEntityManagerInterface getEntityManager()
  * @method \SprykerFeature\Zed\AiCommerce\Persistence\AiCommerceRepositoryInterface getRepository()
+ *
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
  */
 class AiCommerceBusinessFactory extends AbstractBusinessFactory
 {
@@ -275,5 +330,223 @@ class AiCommerceBusinessFactory extends AbstractBusinessFactory
     public function getContentGuiEditorPlugins(): array
     {
         return $this->getProvidedDependency(AiCommerceDependencyProvider::PLUGINS_CONTENT_GUI_EDITOR);
+    }
+
+    public function createKnowledgeDocumentEventWriter(): KnowledgeDocumentEventWriterInterface
+    {
+        return new KnowledgeDocumentEventWriter(
+            $this->createKnowledgeDocumentSourcePluginResolver(),
+            $this->createKnowledgeDocumentPendingWriter(),
+            $this->createKnowledgeDocumentIndexMessageSender(),
+            $this->getKnowledgeStorePlugin(),
+        );
+    }
+
+    public function createKnowledgeDocumentReindexer(): KnowledgeDocumentReindexerInterface
+    {
+        return new KnowledgeDocumentReindexer(
+            $this->createKnowledgeDocumentSourcePluginResolver(),
+            $this->createKnowledgeDocumentPendingWriter(),
+            $this->createKnowledgeDocumentIndexMessageSender(),
+            $this->getConfig(),
+            $this->getRepository(),
+            $this->getKnowledgeStorePlugin(),
+        );
+    }
+
+    public function createKnowledgeDocumentIndexer(): KnowledgeDocumentIndexerInterface
+    {
+        return new KnowledgeDocumentIndexer(
+            $this->createKnowledgeDocumentIndexMessageValidator(),
+            $this->createKnowledgeDocumentIndexMessageMapper(),
+            $this->createKnowledgeDocumentSourcePluginResolver(),
+            $this->createKnowledgeDocumentSourceReader(),
+            $this->createKnowledgeDocumentContentIndexer(),
+            $this->createKnowledgeDocumentDeleter(),
+            $this->createKnowledgeDocumentIndexFailureWriter(),
+            $this->getRepository(),
+            $this->getKnowledgeStorePlugin(),
+        );
+    }
+
+    public function createKnowledgeDocumentSourceReader(): KnowledgeDocumentSourceReaderInterface
+    {
+        return new KnowledgeDocumentSourceReader();
+    }
+
+    public function createKnowledgeDocumentContentIndexer(): KnowledgeDocumentContentIndexerInterface
+    {
+        return new KnowledgeDocumentContentIndexer(
+            $this->getKnowledgeStorePlugin(),
+            $this->createKnowledgeDocumentIndexResponseBuilder(),
+            $this->getEntityManager(),
+            $this->getConfig(),
+        );
+    }
+
+    public function createKnowledgeDocumentDeleter(): KnowledgeDocumentDeleterInterface
+    {
+        return new KnowledgeDocumentDeleter(
+            $this->getKnowledgeStorePlugin(),
+            $this->createKnowledgeDocumentIndexResponseBuilder(),
+            $this->getEntityManager(),
+        );
+    }
+
+    public function createKnowledgeDocumentIndexFailureWriter(): KnowledgeDocumentIndexFailureWriterInterface
+    {
+        return new KnowledgeDocumentIndexFailureWriter(
+            $this->createKnowledgeDocumentIndexMessageSender(),
+            $this->getEntityManager(),
+            $this->getConfig(),
+        );
+    }
+
+    public function createKnowledgeDocumentIndexResponseBuilder(): KnowledgeDocumentIndexResponseBuilderInterface
+    {
+        return new KnowledgeDocumentIndexResponseBuilder();
+    }
+
+    public function createKnowledgeDocumentSourcePluginResolver(): KnowledgeDocumentSourcePluginResolverInterface
+    {
+        return new KnowledgeDocumentSourcePluginResolver($this->getKnowledgeDocumentSourcePlugins());
+    }
+
+    public function createKnowledgeDocumentPendingWriter(): KnowledgeDocumentPendingWriterInterface
+    {
+        return new KnowledgeDocumentPendingWriter(
+            $this->getRepository(),
+            $this->getEntityManager(),
+        );
+    }
+
+    public function createKnowledgeDocumentIndexMessageSender(): KnowledgeDocumentIndexMessageSenderInterface
+    {
+        return new KnowledgeDocumentIndexMessageSender(
+            $this->getQueueClient(),
+            $this->createKnowledgeDocumentIndexMessageMapper(),
+        );
+    }
+
+    public function createKnowledgeDocumentIndexMessageMapper(): KnowledgeDocumentIndexMessageMapperInterface
+    {
+        return new KnowledgeDocumentIndexMessageMapper($this->getUtilEncodingService());
+    }
+
+    public function createKnowledgeDocumentIndexMessageValidator(): KnowledgeDocumentIndexMessageValidatorInterface
+    {
+        return new KnowledgeDocumentIndexMessageValidator($this->getUtilEncodingService());
+    }
+
+    public function createUrlDocumentContentReader(): UrlDocumentContentReaderInterface
+    {
+        return new UrlDocumentContentReader(
+            $this->getHttpClient(),
+            $this->createHostAddressResolver(),
+            $this->getConfig(),
+        );
+    }
+
+    public function createHostAddressResolver(): HostAddressResolverInterface
+    {
+        return new HostAddressResolver();
+    }
+
+    public function createProductAttachmentDocumentSourceReader(): ProductAttachmentDocumentSourceReaderInterface
+    {
+        return new ProductAttachmentDocumentSourceReader(
+            $this->getProductAttachmentFacade(),
+            $this->getLocaleFacade(),
+        );
+    }
+
+    public function getProductAttachmentFacade(): ProductAttachmentFacadeInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_PRODUCT_ATTACHMENT);
+    }
+
+    public function getQueueClient(): QueueClientInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::CLIENT_QUEUE);
+    }
+
+    public function getHttpClient(): HttpClientInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::HTTP_CLIENT);
+    }
+
+    /**
+     * @return list<\SprykerFeature\Zed\AiCommerce\Dependency\KnowledgeDocument\KnowledgeDocumentSourcePluginInterface>
+     */
+    public function getKnowledgeDocumentSourcePlugins(): array
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::PLUGINS_KNOWLEDGE_DOCUMENT_SOURCE);
+    }
+
+    public function getKnowledgeStorePlugin(): KnowledgeStorePluginInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::PLUGIN_KNOWLEDGE_STORE);
+    }
+
+    public function createKnowledgeDocumentStatusRefresher(): KnowledgeDocumentStatusRefresherInterface
+    {
+        return new KnowledgeDocumentStatusRefresher(
+            $this->getKnowledgeStorePlugin(),
+            $this->getRepository(),
+            $this->getEntityManager(),
+            $this->getConfig(),
+        );
+    }
+
+    public function createBedrockKnowledgeBaseSetup(): BedrockKnowledgeBaseSetupInterface
+    {
+        return new BedrockKnowledgeBaseSetup(
+            $this->getBedrockAgentClient(),
+            $this->getConfig(),
+        );
+    }
+
+    public function createBedrockKnowledgeBaseDocumentIndexer(): BedrockKnowledgeBaseDocumentIndexerInterface
+    {
+        return new BedrockKnowledgeBaseDocumentIndexer(
+            $this->getBedrockAgentClient(),
+            $this->createBedrockKnowledgeBaseReferenceReader(),
+            $this->createBedrockKnowledgeBaseDocumentMapper(),
+            $this->createBedrockKnowledgeBaseDocumentStatusMapper(),
+            $this->getConfig(),
+        );
+    }
+
+    public function createBedrockKnowledgeBaseConfigurationChecker(): BedrockKnowledgeBaseConfigurationCheckerInterface
+    {
+        return new BedrockKnowledgeBaseConfigurationChecker($this->createBedrockKnowledgeBaseReferenceReader());
+    }
+
+    public function createBedrockKnowledgeBaseReferenceReader(): BedrockKnowledgeBaseReferenceReaderInterface
+    {
+        return new BedrockKnowledgeBaseReferenceReader($this->getConfig());
+    }
+
+    public function createBedrockKnowledgeBaseDocumentMapper(): BedrockKnowledgeBaseDocumentMapperInterface
+    {
+        return new BedrockKnowledgeBaseDocumentMapper($this->getConfig());
+    }
+
+    public function createBedrockKnowledgeBaseDocumentStatusMapper(): BedrockKnowledgeBaseDocumentStatusMapperInterface
+    {
+        return new BedrockKnowledgeBaseDocumentStatusMapper();
+    }
+
+    public function getBedrockAgentClient(): BedrockAgentClient
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::BEDROCK_AGENT_CLIENT);
+    }
+
+    public function createKnowledgeStoreSetup(): KnowledgeStoreSetupInterface
+    {
+        return new KnowledgeStoreSetup(
+            $this->getKnowledgeStorePlugin(),
+            $this->createKnowledgeDocumentSourcePluginResolver(),
+        );
     }
 }
