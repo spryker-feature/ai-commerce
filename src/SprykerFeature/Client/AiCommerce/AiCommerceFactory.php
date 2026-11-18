@@ -59,6 +59,8 @@ use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Choice\ChoiceOfferRegis
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Choice\ChoiceOfferRegistryInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Comparison\ComparisonRegistry;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Comparison\ComparisonRegistryInterface;
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Comparison\ProductComparisonAttributeCollector;
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Comparison\ProductComparisonAttributeCollectorInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Comparison\ProductComparisonBuilder;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Comparison\ProductComparisonBuilderInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Conversation\ConversationCollectionDeleter;
@@ -107,6 +109,8 @@ use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Product\ToolResultProdu
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Product\ToolResultProductEnricherInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Product\ToolResultProductExpander;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Product\ToolResultProductExpanderInterface;
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\ProductDetails\MerchantProductOfferBuilder;
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\ProductDetails\MerchantProductOfferBuilderInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\ProductDetails\ProductAttributeDetailsExpander;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\ProductDetails\ProductAvailabilityDetailsExpander;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\ProductDetails\ProductBundleDetailsExpander;
@@ -134,6 +138,8 @@ use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Search\CatalogSearchArg
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Search\CatalogSearchArgumentResolverInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Search\CatalogSearchPageResolver;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Search\CatalogSearchPageResolverInterface;
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Search\CatalogSearchRangeFinder;
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Search\CatalogSearchRangeFinderInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Search\CatalogSearchReader;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Search\CatalogSearchReaderInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Search\CatalogSearchRefinementMapper;
@@ -194,6 +200,9 @@ use SprykerFeature\Shared\AiCommerce\Stream\ToolCallIdResolverInterface;
 
 /**
  * @method \SprykerFeature\Client\AiCommerce\AiCommerceConfig getConfig()
+ *
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
+ * @SuppressWarnings(PHPMD.TooManyMethods)
  */
 class AiCommerceFactory extends AbstractFactory
 {
@@ -428,7 +437,6 @@ class AiCommerceFactory extends AbstractFactory
             $this->createCatalogSearchZeroResultAnalyzer(),
             $this->createShownProductRegistry(),
             $this->createCatalogSearchResultRegistry(),
-            $this->createCategoryNodeNameReader(),
             $this->createCatalogSearchResultExpander(),
         );
     }
@@ -512,6 +520,7 @@ class AiCommerceFactory extends AbstractFactory
             $this->createCatalogSearchPageResolver(),
             $this->createSearchResultDataExtractor(),
             $this->createCatalogSearchZeroResultAnalyzer(),
+            $this->createCategoryNodeNameReader(),
         );
     }
 
@@ -524,6 +533,14 @@ class AiCommerceFactory extends AbstractFactory
     {
         return new CatalogSearchRefinementMapper(
             $this->createCatalogSearchArgumentResolver(),
+            $this->createSearchResultDataExtractor(),
+            $this->createCatalogSearchRangeFinder(),
+        );
+    }
+
+    public function createCatalogSearchRangeFinder(): CatalogSearchRangeFinderInterface
+    {
+        return new CatalogSearchRangeFinder(
             $this->createSearchResultDataExtractor(),
             $this->createStorefrontAssistantPriceFormatter(),
         );
@@ -696,7 +713,13 @@ class AiCommerceFactory extends AbstractFactory
             $this->createComparisonRegistry(),
             $this->createStorefrontAssistantStoreUrlMapper(),
             $this->getConfig()->isStorefrontAssistantProductComparisonPageEnabled(),
+            $this->createProductComparisonAttributeCollector(),
         );
+    }
+
+    public function createProductComparisonAttributeCollector(): ProductComparisonAttributeCollectorInterface
+    {
+        return new ProductComparisonAttributeCollector();
     }
 
     public function createComparisonRegistry(): ComparisonRegistryInterface
@@ -735,9 +758,17 @@ class AiCommerceFactory extends AbstractFactory
     {
         return new ProductOfferDetailsExpander(
             $this->getProductOfferStorageClient(),
+            $this->getPermissionClient(),
+            $this->createStorefrontAssistantPriceFormatter(),
+            $this->createMerchantProductOfferBuilder(),
+        );
+    }
+
+    public function createMerchantProductOfferBuilder(): MerchantProductOfferBuilderInterface
+    {
+        return new MerchantProductOfferBuilder(
             $this->getPriceProductStorageClient(),
             $this->getMerchantStorageClient(),
-            $this->getPermissionClient(),
             $this->createStorefrontAssistantPriceFormatter(),
         );
     }

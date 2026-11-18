@@ -51,19 +51,14 @@ class SeeAllLinkBuilder implements SeeAllLinkBuilderInterface
      */
     public function buildSeeAll(array $catalogSearchResultEntry, int $displayedProductCount): ?array
     {
-        $result = $catalogSearchResultEntry[CatalogSearchResultRegistry::ENTRY_KEY_RESULT] ?? null;
-        $totalResults = is_array($result) ? ($result[static::KEY_TOTAL_RESULTS] ?? null) : null;
+        $totalResults = $this->extractTotalResults($catalogSearchResultEntry);
 
         if (!is_int($totalResults) || $totalResults <= $displayedProductCount || $totalResults <= $this->maxDisplayedProducts) {
             return null;
         }
 
         $query = (string)($catalogSearchResultEntry[CatalogSearchResultRegistry::ENTRY_KEY_QUERY] ?? '');
-        $requestParameters = $catalogSearchResultEntry[CatalogSearchResultRegistry::ENTRY_KEY_REQUEST_PARAMETERS] ?? [];
-        $queryParameters = array_diff_key(
-            is_array($requestParameters) ? $requestParameters : [],
-            array_flip(static::PAGINATION_REQUEST_PARAMETERS),
-        );
+        $queryParameters = $this->extractQueryParameters($catalogSearchResultEntry);
         $category = $queryParameters[CatalogSearchArgumentResolver::REQUEST_PARAMETER_CATEGORY] ?? null;
 
         if ($category === null) {
@@ -83,6 +78,31 @@ class SeeAllLinkBuilder implements SeeAllLinkBuilderInterface
         }
 
         return $this->createSeeAll($totalResults, $queryParameters) + [static::KEY_CATEGORY_URL => $categoryUrl];
+    }
+
+    /**
+     * @param array<string, mixed> $catalogSearchResultEntry
+     */
+    protected function extractTotalResults(array $catalogSearchResultEntry): mixed
+    {
+        $result = $catalogSearchResultEntry[CatalogSearchResultRegistry::ENTRY_KEY_RESULT] ?? null;
+
+        return is_array($result) ? ($result[static::KEY_TOTAL_RESULTS] ?? null) : null;
+    }
+
+    /**
+     * @param array<string, mixed> $catalogSearchResultEntry
+     *
+     * @return array<mixed>
+     */
+    protected function extractQueryParameters(array $catalogSearchResultEntry): array
+    {
+        $requestParameters = $catalogSearchResultEntry[CatalogSearchResultRegistry::ENTRY_KEY_REQUEST_PARAMETERS] ?? [];
+
+        return array_diff_key(
+            is_array($requestParameters) ? $requestParameters : [],
+            array_flip(static::PAGINATION_REQUEST_PARAMETERS),
+        );
     }
 
     /**

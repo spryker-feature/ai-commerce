@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 namespace SprykerFeature\Client\AiCommerce\StorefrontAssistant\Search;
 
+/**
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
+ */
 class CatalogSearchArgumentResolver implements CatalogSearchArgumentResolverInterface
 {
     public const string PARAMETER_QUERY = 'query';
@@ -225,6 +228,29 @@ class CatalogSearchArgumentResolver implements CatalogSearchArgumentResolverInte
         int $limit,
         array $facetConfigTransfers
     ): array {
+        $requestParameters = $this->resolveSelectionParameters($arguments, $ignoredArguments, $facetConfigTransfers);
+        $requestParameters += $this->resolveRangeAndSortParameters($arguments, $ignoredArguments);
+
+        $requestParameters[static::REQUEST_PARAMETER_ITEMS_PER_PAGE] = $this->catalogSearchPageResolver->resolveItemsPerPage($page, $limit);
+
+        if ($page > 1) {
+            $requestParameters[static::REQUEST_PARAMETER_PAGE] = $this->catalogSearchPageResolver->resolveSearchPage($page, $limit);
+        }
+
+        return $requestParameters + $this->resolveConfiguredFilters($arguments, $ignoredArguments, $facetConfigTransfers);
+    }
+
+    /**
+     * @param-out array<int, array<string, string>> $ignoredArguments
+     *
+     * @param array<int|string, mixed> $arguments
+     * @param array<int, array<string, string>> $ignoredArguments
+     * @param array<string, \Generated\Shared\Transfer\FacetConfigTransfer> $facetConfigTransfers
+     *
+     * @return array<string, mixed>
+     */
+    protected function resolveSelectionParameters(array $arguments, array &$ignoredArguments, array $facetConfigTransfers): array
+    {
         $requestParameters = [];
 
         $category = $this->resolveCategory($arguments, $ignoredArguments);
@@ -253,6 +279,21 @@ class CatalogSearchArgumentResolver implements CatalogSearchArgumentResolverInte
             $requestParameters[static::REQUEST_PARAMETER_MERCHANT_NAME] = $merchantNames;
         }
 
+        return $requestParameters;
+    }
+
+    /**
+     * @param-out array<int, array<string, string>> $ignoredArguments
+     *
+     * @param array<int|string, mixed> $arguments
+     * @param array<int, array<string, string>> $ignoredArguments
+     *
+     * @return array<string, mixed>
+     */
+    protected function resolveRangeAndSortParameters(array $arguments, array &$ignoredArguments): array
+    {
+        $requestParameters = [];
+
         $priceRange = $this->resolvePriceRange($arguments, $ignoredArguments);
 
         if ($priceRange !== null) {
@@ -271,13 +312,7 @@ class CatalogSearchArgumentResolver implements CatalogSearchArgumentResolverInte
             $requestParameters[static::REQUEST_PARAMETER_SORT] = $sort;
         }
 
-        $requestParameters[static::REQUEST_PARAMETER_ITEMS_PER_PAGE] = $this->catalogSearchPageResolver->resolveItemsPerPage($page, $limit);
-
-        if ($page > 1) {
-            $requestParameters[static::REQUEST_PARAMETER_PAGE] = $this->catalogSearchPageResolver->resolveSearchPage($page, $limit);
-        }
-
-        return $requestParameters + $this->resolveConfiguredFilters($arguments, $ignoredArguments, $facetConfigTransfers);
+        return $requestParameters;
     }
 
     public function formatFilterArgument(string $parameterName): string
@@ -357,25 +392,37 @@ class CatalogSearchArgumentResolver implements CatalogSearchArgumentResolverInte
             return null;
         }
 
-        $filterValues = [];
-
-        foreach ($value as $singleValue) {
-            if (!is_scalar($singleValue)) {
-                continue;
-            }
-
-            $singleValue = trim((string)$singleValue);
-
-            if ($singleValue !== '') {
-                $filterValues[] = $singleValue;
-            }
-        }
+        $filterValues = $this->trimScalarValues($value);
 
         if ($filterValues === []) {
             return null;
         }
 
         return $isMultiValued ? $filterValues : $filterValues[0];
+    }
+
+    /**
+     * @param array<mixed> $values
+     *
+     * @return array<int, string>
+     */
+    protected function trimScalarValues(array $values): array
+    {
+        $trimmedValues = [];
+
+        foreach ($values as $value) {
+            if (!is_scalar($value)) {
+                continue;
+            }
+
+            $value = trim((string)$value);
+
+            if ($value !== '') {
+                $trimmedValues[] = $value;
+            }
+        }
+
+        return $trimmedValues;
     }
 
     /**
@@ -503,15 +550,8 @@ class CatalogSearchArgumentResolver implements CatalogSearchArgumentResolverInte
         $priceMin = $this->resolveFloatArgument($arguments, static::PARAMETER_PRICE_MIN);
         $priceMax = $this->resolveFloatArgument($arguments, static::PARAMETER_PRICE_MAX);
 
-        if ($priceMin !== null && $priceMin < 0) {
-            $ignoredArguments[] = $this->formatIgnoredArgument(static::PARAMETER_PRICE_MIN, 'cannot be negative');
-            $priceMin = null;
-        }
-
-        if ($priceMax !== null && $priceMax < 0) {
-            $ignoredArguments[] = $this->formatIgnoredArgument(static::PARAMETER_PRICE_MAX, 'cannot be negative');
-            $priceMax = null;
-        }
+        $priceMin = $this->filterNegativePrice($priceMin, static::PARAMETER_PRICE_MIN, $ignoredArguments);
+        $priceMax = $this->filterNegativePrice($priceMax, static::PARAMETER_PRICE_MAX, $ignoredArguments);
 
         if ($priceMin !== null && $priceMax !== null && $priceMin > $priceMax) {
             $ignoredArguments[] = $this->formatIgnoredArgument(
@@ -537,6 +577,22 @@ class CatalogSearchArgumentResolver implements CatalogSearchArgumentResolverInte
         }
 
         return $priceRange === [] ? null : $priceRange;
+    }
+
+    /**
+     * @param-out array<int, array<string, string>> $ignoredArguments
+     *
+     * @param array<int, array<string, string>> $ignoredArguments
+     */
+    protected function filterNegativePrice(?float $price, string $parameterName, array &$ignoredArguments): ?float
+    {
+        if ($price !== null && $price < 0) {
+            $ignoredArguments[] = $this->formatIgnoredArgument($parameterName, 'cannot be negative');
+
+            return null;
+        }
+
+        return $price;
     }
 
     /**

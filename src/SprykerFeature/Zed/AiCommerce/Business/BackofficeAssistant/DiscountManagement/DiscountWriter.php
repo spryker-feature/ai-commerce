@@ -132,10 +132,18 @@ class DiscountWriter implements DiscountWriterInterface
      */
     protected function mergeDiscountData(DiscountConfiguratorTransfer $discountTransfer, array $data): DiscountConfiguratorTransfer
     {
-        $general = $discountTransfer->getDiscountGeneralOrFail();
-        $calculator = $discountTransfer->getDiscountCalculatorOrFail();
-        $condition = $discountTransfer->getDiscountConditionOrFail();
+        $this->mergeGeneralData($discountTransfer->getDiscountGeneralOrFail(), $data);
+        $this->mergeCalculatorData($discountTransfer->getDiscountCalculatorOrFail(), $data);
+        $this->mergeConditionData($discountTransfer->getDiscountConditionOrFail(), $data);
 
+        return $discountTransfer;
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    protected function mergeGeneralData(DiscountGeneralTransfer $general, array $data): void
+    {
         if (isset($data['displayName'])) {
             $general->setDisplayName($data['displayName']);
         }
@@ -163,7 +171,13 @@ class DiscountWriter implements DiscountWriterInterface
         if (isset($data['priority'])) {
             $general->setPriority((int)$data['priority']);
         }
+    }
 
+    /**
+     * @param array<string, mixed> $data
+     */
+    protected function mergeCalculatorData(DiscountCalculatorTransfer $calculator, array $data): void
+    {
         if (isset($data['calculatorPlugin'])) {
             $calculator->setCalculatorPlugin($data['calculatorPlugin']);
         }
@@ -171,12 +185,16 @@ class DiscountWriter implements DiscountWriterInterface
         if (isset($data['amount'])) {
             $calculator->setAmount((string)(int)$data['amount']);
         }
+    }
 
+    /**
+     * @param array<string, mixed> $data
+     */
+    protected function mergeConditionData(DiscountConditionTransfer $condition, array $data): void
+    {
         if (isset($data['minimumItemAmount'])) {
             $condition->setMinimumItemAmount((int)$data['minimumItemAmount']);
         }
-
-        return $discountTransfer;
     }
 
     /**

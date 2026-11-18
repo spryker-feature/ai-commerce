@@ -14,6 +14,9 @@ use Spryker\Client\Locale\LocaleClientInterface;
 use Spryker\Client\Store\StoreClientInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Price\StorefrontAssistantPriceFormatterInterface;
 
+/**
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
+ */
 class RefinementChipBuilder implements RefinementChipBuilderInterface
 {
     public const string KEY_LABEL = 'label';

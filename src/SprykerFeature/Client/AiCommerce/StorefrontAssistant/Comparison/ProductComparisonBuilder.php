@@ -57,8 +57,6 @@ class ProductComparisonBuilder implements ProductComparisonBuilderInterface
 
     protected const string ATTRIBUTE_GLOSSARY_KEY_PREFIX = 'product.attribute.';
 
-    protected const string SUPER_ATTRIBUTE_VALUE_SEPARATOR = ' / ';
-
     protected const string ERROR_PRODUCT_COUNT = 'Pass 2 to 4 different idProductAbstract values to compare.';
 
     protected const string MESSAGE_ALREADY_SHOWN = 'This table is already shown in this reply: answer now without calling compare_products again.';
@@ -84,7 +82,8 @@ class ProductComparisonBuilder implements ProductComparisonBuilderInterface
         protected LocaleClientInterface $localeClient,
         protected ComparisonRegistryInterface $comparisonRegistry,
         protected StorefrontAssistantStoreUrlMapperInterface $storefrontAssistantStoreUrlMapper,
-        protected bool $isProductComparisonPageEnabled
+        protected bool $isProductComparisonPageEnabled,
+        protected ProductComparisonAttributeCollectorInterface $productComparisonAttributeCollector
     ) {
     }
 
@@ -193,11 +192,11 @@ class ProductComparisonBuilder implements ProductComparisonBuilderInterface
      */
     protected function buildAttributeRows(array $productDetailsList): array
     {
-        $attributesList = array_map($this->collectAttributes(...), $productDetailsList);
+        $attributesList = array_map($this->productComparisonAttributeCollector->collectAttributes(...), $productDetailsList);
         $differentRows = [];
         $sameRows = [];
 
-        foreach ($this->collectAttributeKeys($attributesList) as $attributeKey) {
+        foreach ($this->productComparisonAttributeCollector->collectAttributeKeys($attributesList) as $attributeKey) {
             $values = array_map(
                 static fn (array $attributes): ?string => $attributes[$attributeKey] ?? null,
                 $attributesList,
@@ -280,48 +279,6 @@ class ProductComparisonBuilder implements ProductComparisonBuilderInterface
         }
 
         return $attributeNames;
-    }
-
-    /**
-     * @param list<array<string, string>> $attributesList
-     *
-     * @return list<string>
-     */
-    protected function collectAttributeKeys(array $attributesList): array
-    {
-        $attributeKeys = [];
-
-        foreach ($attributesList as $attributes) {
-            foreach (array_keys($attributes) as $attributeKey) {
-                $attributeKeys[$attributeKey] = $attributeKey;
-            }
-        }
-
-        return array_values($attributeKeys);
-    }
-
-    /**
-     * @param array<string, mixed> $productDetails
-     *
-     * @return array<string, string>
-     */
-    protected function collectAttributes(array $productDetails): array
-    {
-        $attributes = $productDetails[StorefrontAssistantProductMapper::KEY_ATTRIBUTES] ?? [];
-        $attributes = is_array($attributes) ? array_map('strval', $attributes) : [];
-        $superAttributes = $productDetails[ProductAttributeDetailsExpander::KEY_VARIANTS][ProductAttributeDetailsExpander::KEY_SUPER_ATTRIBUTES] ?? [];
-
-        if (!is_array($superAttributes)) {
-            return $attributes;
-        }
-
-        foreach ($superAttributes as $attributeKey => $attributeValues) {
-            if (!isset($attributes[$attributeKey]) && is_array($attributeValues) && $attributeValues !== []) {
-                $attributes[(string)$attributeKey] = implode(static::SUPER_ATTRIBUTE_VALUE_SEPARATOR, $attributeValues);
-            }
-        }
-
-        return $attributes;
     }
 
     /**

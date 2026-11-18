@@ -78,62 +78,77 @@ class AttachmentValidator implements AttachmentValidatorInterface
         $attachments = [];
 
         foreach ($rawAttachments as $rawAttachment) {
-            if (!is_array($rawAttachment)) {
-                return AttachmentValidationResult::rejected(
-                    static::MESSAGE_ATTACHMENT_UNSUPPORTED_MEDIA_TYPE,
-                    $this->buildUnsupportedTypeParameters($supportedMimeTypes),
-                );
+            $attachmentTransferOrRejection = $this->validateRawAttachment($rawAttachment, $supportedMimeTypes, $maxSizeBytes);
+
+            if ($attachmentTransferOrRejection instanceof AttachmentValidationResult) {
+                return $attachmentTransferOrRejection;
             }
 
-            $mediaType = is_scalar($rawAttachment[AttachmentPayloadKey::MEDIA_TYPE] ?? null)
-                ? (string)$rawAttachment[AttachmentPayloadKey::MEDIA_TYPE]
-                : '';
-            $content = is_scalar($rawAttachment[AttachmentPayloadKey::CONTENT] ?? null)
-                ? (string)$rawAttachment[AttachmentPayloadKey::CONTENT]
-                : '';
-            $name = is_scalar($rawAttachment[AttachmentPayloadKey::NAME] ?? null)
-                ? (string)$rawAttachment[AttachmentPayloadKey::NAME]
-                : '';
-
-            if (!in_array($mediaType, $supportedMimeTypes, true)) {
-                return AttachmentValidationResult::rejected(
-                    static::MESSAGE_ATTACHMENT_UNSUPPORTED_MEDIA_TYPE,
-                    $this->buildUnsupportedTypeParameters($supportedMimeTypes),
-                );
-            }
-
-            $decodedContent = $this->decodeContent($content);
-
-            if ($decodedContent === null) {
-                return AttachmentValidationResult::rejected(
-                    static::MESSAGE_ATTACHMENT_UNSUPPORTED_MEDIA_TYPE,
-                    $this->buildUnsupportedTypeParameters($supportedMimeTypes),
-                );
-            }
-
-            if (strlen($decodedContent) > $maxSizeBytes) {
-                return AttachmentValidationResult::rejected(
-                    static::MESSAGE_ATTACHMENT_FILE_TOO_LARGE,
-                    $this->buildTooLargeParameters($maxSizeBytes),
-                );
-            }
-
-            if (!$this->isContentMatchingMediaType($decodedContent, $mediaType)) {
-                return AttachmentValidationResult::rejected(
-                    static::MESSAGE_ATTACHMENT_UNSUPPORTED_MEDIA_TYPE,
-                    $this->buildUnsupportedTypeParameters($supportedMimeTypes),
-                );
-            }
-
-            $attachments[] = (new AttachmentTransfer())
-                ->setType($this->resolveAttachmentType($mediaType))
-                ->setContentType(static::ATTACHMENT_CONTENT_TYPE_BASE64)
-                ->setContent($content)
-                ->setMediaType($mediaType)
-                ->setFilename($this->sanitizeFilename($name));
+            $attachments[] = $attachmentTransferOrRejection;
         }
 
         return AttachmentValidationResult::valid($attachments);
+    }
+
+    /**
+     * @param list<string> $supportedMimeTypes
+     */
+    protected function validateRawAttachment(mixed $rawAttachment, array $supportedMimeTypes, int $maxSizeBytes): AttachmentTransfer|AttachmentValidationResult
+    {
+        if (!is_array($rawAttachment)) {
+            return $this->createUnsupportedTypeRejection($supportedMimeTypes);
+        }
+
+        $mediaType = $this->extractStringValue($rawAttachment, AttachmentPayloadKey::MEDIA_TYPE);
+        $content = $this->extractStringValue($rawAttachment, AttachmentPayloadKey::CONTENT);
+        $name = $this->extractStringValue($rawAttachment, AttachmentPayloadKey::NAME);
+
+        if (!in_array($mediaType, $supportedMimeTypes, true)) {
+            return $this->createUnsupportedTypeRejection($supportedMimeTypes);
+        }
+
+        $decodedContent = $this->decodeContent($content);
+
+        if ($decodedContent === null) {
+            return $this->createUnsupportedTypeRejection($supportedMimeTypes);
+        }
+
+        if (strlen($decodedContent) > $maxSizeBytes) {
+            return AttachmentValidationResult::rejected(
+                static::MESSAGE_ATTACHMENT_FILE_TOO_LARGE,
+                $this->buildTooLargeParameters($maxSizeBytes),
+            );
+        }
+
+        if (!$this->isContentMatchingMediaType($decodedContent, $mediaType)) {
+            return $this->createUnsupportedTypeRejection($supportedMimeTypes);
+        }
+
+        return (new AttachmentTransfer())
+            ->setType($this->resolveAttachmentType($mediaType))
+            ->setContentType(static::ATTACHMENT_CONTENT_TYPE_BASE64)
+            ->setContent($content)
+            ->setMediaType($mediaType)
+            ->setFilename($this->sanitizeFilename($name));
+    }
+
+    /**
+     * @param array<mixed> $rawAttachment
+     */
+    protected function extractStringValue(array $rawAttachment, string $key): string
+    {
+        return is_scalar($rawAttachment[$key] ?? null) ? (string)$rawAttachment[$key] : '';
+    }
+
+    /**
+     * @param list<string> $supportedMimeTypes
+     */
+    protected function createUnsupportedTypeRejection(array $supportedMimeTypes): AttachmentValidationResult
+    {
+        return AttachmentValidationResult::rejected(
+            static::MESSAGE_ATTACHMENT_UNSUPPORTED_MEDIA_TYPE,
+            $this->buildUnsupportedTypeParameters($supportedMimeTypes),
+        );
     }
 
     protected function decodeContent(string $base64Content): ?string

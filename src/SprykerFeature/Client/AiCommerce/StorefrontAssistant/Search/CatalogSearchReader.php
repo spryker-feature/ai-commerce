@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace SprykerFeature\Client\AiCommerce\StorefrontAssistant\Search;
 
 use Spryker\Client\Catalog\CatalogClientInterface;
-use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Category\CategoryNodeNameReaderInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Conversation\ShownProductRegistryInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Tool\ToolArgumentNormalizerInterface;
 
@@ -53,7 +52,6 @@ class CatalogSearchReader implements CatalogSearchReaderInterface
         protected CatalogSearchZeroResultAnalyzerInterface $catalogSearchZeroResultAnalyzer,
         protected ShownProductRegistryInterface $shownProductRegistry,
         protected CatalogSearchResultRegistryInterface $catalogSearchResultRegistry,
-        protected CategoryNodeNameReaderInterface $categoryNodeNameReader,
         protected CatalogSearchResultExpanderInterface $catalogSearchResultExpander
     ) {
     }
@@ -97,7 +95,6 @@ class CatalogSearchReader implements CatalogSearchReaderInterface
             $limit,
             $facetConfigTransfers,
             $this->isEmptiedByConstraints($query, $searchResults, $requestParameters),
-            $this->getCategoryNodeNames($searchResults),
         );
         $result = $this->catalogSearchResultExpander->expandWithProductData($result);
         $this->catalogSearchResultRegistry->registerSearchResult($query, $requestParameters, $result);
@@ -147,7 +144,6 @@ class CatalogSearchReader implements CatalogSearchReaderInterface
             $limit,
             $facetConfigTransfers,
             $this->isEmptiedByConstraints($query, $searchResults, $requestParameters),
-            $this->getCategoryNodeNames($searchResults),
         );
         $result = $this->catalogSearchResultExpander->expandWithProductData($result);
 
@@ -160,18 +156,6 @@ class CatalogSearchReader implements CatalogSearchReaderInterface
         $this->catalogSearchResultRegistry->registerSearchResult($query, $requestParameters, $result);
 
         return $result;
-    }
-
-    /**
-     * @param array<string, mixed> $searchResults
-     *
-     * @return array<int, string>
-     */
-    protected function getCategoryNodeNames(array $searchResults): array
-    {
-        return $this->categoryNodeNameReader->getCategoryNodeNamesByIds(
-            $this->catalogSearchResultMapper->extractCategoryNodeIds($searchResults),
-        );
     }
 
     /**

@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace SprykerFeature\Client\AiCommerce\StorefrontAssistant\Search;
 
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Category\CategoryNodeNameReaderInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Mapper\StorefrontAssistantProductMapper;
 
 class CatalogSearchResultMapper implements CatalogSearchResultMapperInterface
@@ -93,7 +94,8 @@ class CatalogSearchResultMapper implements CatalogSearchResultMapperInterface
         protected CatalogSearchRefinementMapperInterface $catalogSearchRefinementMapper,
         protected CatalogSearchPageResolverInterface $catalogSearchPageResolver,
         protected SearchResultDataExtractorInterface $searchResultDataExtractor,
-        protected CatalogSearchZeroResultAnalyzerInterface $catalogSearchZeroResultAnalyzer
+        protected CatalogSearchZeroResultAnalyzerInterface $catalogSearchZeroResultAnalyzer,
+        protected CategoryNodeNameReaderInterface $categoryNodeNameReader
     ) {
     }
 
@@ -140,7 +142,7 @@ class CatalogSearchResultMapper implements CatalogSearchResultMapperInterface
             ),
             static::RESULT_KEY_TOTAL_RESULTS => $totalResults,
             static::RESULT_KEY_PAGE => $page,
-            static::RESULT_KEY_AVAILABLE_REFINEMENTS => $this->catalogSearchRefinementMapper->mapAvailableRefinements($facets, $facetConfigTransfers, $categoryNodeNames),
+            static::RESULT_KEY_AVAILABLE_REFINEMENTS => $this->catalogSearchRefinementMapper->mapAvailableRefinements($facets, $facetConfigTransfers, $this->resolveCategoryNodeNames($searchResults, $categoryNodeNames)),
             static::RESULT_KEY_APPLIED_FILTERS => $this->mapAppliedFilters($requestParameters),
         ];
 
@@ -164,6 +166,18 @@ class CatalogSearchResultMapper implements CatalogSearchResultMapperInterface
             return $this->expandWithEmptiedBy($result, $priceRange, $ratingRange, $ignoredArguments);
         }
 
+        return $this->expandWithSuggestions($result, $totalResults, $searchResults, $ignoredArguments);
+    }
+
+    /**
+     * @param array<string, mixed> $result
+     * @param array<string, mixed> $searchResults
+     * @param array<int, array<string, string>> $ignoredArguments
+     *
+     * @return array<string, mixed>
+     */
+    protected function expandWithSuggestions(array $result, ?int $totalResults, array $searchResults, array $ignoredArguments): array
+    {
         $suggestedNextAction = $this->resolveSuggestedNextAction($totalResults, $searchResults, $ignoredArguments);
 
         if ($suggestedNextAction !== null) {
@@ -343,5 +357,20 @@ class CatalogSearchResultMapper implements CatalogSearchResultMapperInterface
         }
 
         return (int)$idProductAbstract;
+    }
+
+    /**
+     * @param array<string, mixed> $searchResults
+     * @param array<int, string> $categoryNodeNames
+     *
+     * @return array<int, string>
+     */
+    protected function resolveCategoryNodeNames(array $searchResults, array $categoryNodeNames): array
+    {
+        if ($categoryNodeNames !== []) {
+            return $categoryNodeNames;
+        }
+
+        return $this->categoryNodeNameReader->getCategoryNodeNamesByIds($this->extractCategoryNodeIds($searchResults));
     }
 }
