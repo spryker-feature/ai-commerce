@@ -594,6 +594,14 @@ class AiCommerceClientTester extends Actor
         return is_int($price) ? $price : null;
     }
 
+    public function hasPublishedPriceProductAbstract(int $idProductAbstract): bool
+    {
+        return $this->getLocator()->priceProductStorage()->client()->getPriceProductAbstractTransfers(
+            $idProductAbstract,
+            $this->setUpCurrentStore(),
+        ) !== [];
+    }
+
     public function getUnknownIdProductAbstract(): int
     {
         $productAbstractEntity = SpyProductAbstractQuery::create()

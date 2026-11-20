@@ -308,13 +308,12 @@ class CompareProductsToolPluginTest extends Unit
         $this->tester->haveProductComparisonPageEnabled(true);
         $this->tester->haveStoreRoutingEnabled(false);
         [$idFirst] = $this->tester->getProductAbstractStorageDataMatching(
-            static fn (array $productData): bool => ($productData[static::STORAGE_KEY_ATTRIBUTE_MAP][static::STORAGE_KEY_PRODUCT_CONCRETE_IDS] ?? []) !== [],
-            'with a concrete product',
+            fn (array $productData): bool => $this->isPricedProductWithConcreteProducts($productData),
+            'with a concrete product and a published price',
         );
         [$idSecond] = $this->tester->getProductAbstractStorageDataMatching(
-            static fn (array $productData): bool => (int)($productData[static::STORAGE_KEY_ID_PRODUCT_ABSTRACT] ?? 0) !== $idFirst
-                && ($productData[static::STORAGE_KEY_ATTRIBUTE_MAP][static::STORAGE_KEY_PRODUCT_CONCRETE_IDS] ?? []) !== [],
-            'with a concrete product besides the first one',
+            fn (array $productData): bool => $this->isPricedProductWithConcreteProducts($productData, $idFirst),
+            'with a concrete product and a published price besides the first one',
         );
 
         // Act
@@ -323,6 +322,18 @@ class CompareProductsToolPluginTest extends Unit
         // Assert
         $this->assertCount(2, array_filter(array_column($comparison[static::KEY_COMPARED_PRODUCTS], static::KEY_PRICE_FORMATTED)));
         $this->assertStringStartsWith('/product-comparison?skus=', $comparison[static::KEY_COMPARISON_URL]);
+    }
+
+    /**
+     * @param array<string, mixed> $productData
+     */
+    protected function isPricedProductWithConcreteProducts(array $productData, ?int $excludedIdProductAbstract = null): bool
+    {
+        $idProductAbstract = (int)($productData[static::STORAGE_KEY_ID_PRODUCT_ABSTRACT] ?? 0);
+
+        return $idProductAbstract !== $excludedIdProductAbstract
+            && ($productData[static::STORAGE_KEY_ATTRIBUTE_MAP][static::STORAGE_KEY_PRODUCT_CONCRETE_IDS] ?? []) !== []
+            && $this->tester->hasPublishedPriceProductAbstract($idProductAbstract);
     }
 
     /**
