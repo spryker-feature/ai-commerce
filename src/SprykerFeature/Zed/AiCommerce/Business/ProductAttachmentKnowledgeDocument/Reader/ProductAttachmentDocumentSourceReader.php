@@ -9,29 +9,37 @@ declare(strict_types=1);
 
 namespace SprykerFeature\Zed\AiCommerce\Business\ProductAttachmentKnowledgeDocument\Reader;
 
-use Generated\Shared\Transfer\FilterTransfer;
+use Generated\Shared\Transfer\EventEntityTransfer;
 use Generated\Shared\Transfer\KnowledgeDocumentSourceCollectionTransfer;
 use Generated\Shared\Transfer\KnowledgeDocumentSourceCriteriaTransfer;
 use Generated\Shared\Transfer\KnowledgeDocumentSourceTransfer;
-use Generated\Shared\Transfer\ProductAttachmentConditionTransfer;
-use Generated\Shared\Transfer\ProductAttachmentCriteriaTransfer;
+use Generated\Shared\Transfer\ProductAttachmentKnowledgeSelectionConditionsTransfer;
+use Generated\Shared\Transfer\ProductAttachmentKnowledgeSelectionCriteriaTransfer;
 use Generated\Shared\Transfer\ProductAttachmentTransfer;
-use Generated\Shared\Transfer\SortTransfer;
 use Spryker\Zed\Locale\Business\LocaleFacadeInterface;
-use Spryker\Zed\ProductAttachment\Business\ProductAttachmentFacadeInterface;
 use SprykerFeature\Shared\AiCommerce\AiCommerceConfig as SharedAiCommerceConfig;
+use SprykerFeature\Zed\AiCommerce\Dependency\AiCommerceEvents;
+use SprykerFeature\Zed\AiCommerce\Persistence\AiCommerceRepositoryInterface;
 
 class ProductAttachmentDocumentSourceReader implements ProductAttachmentDocumentSourceReaderInterface
 {
     public const string METADATA_KEY_URL = 'url';
 
     /**
-     * @uses \Orm\Zed\ProductAttachment\Persistence\Map\SpyProductAttachmentTableMap::COL_ID_PRODUCT_ATTACHMENT
+     * @uses \Orm\Zed\AiCommerce\Persistence\Map\SpyProductAttachmentKnowledgeSelectionTableMap::COL_FK_PRODUCT_ATTACHMENT
      */
-    protected const string COL_ID_PRODUCT_ATTACHMENT = 'spy_product_attachment.id_product_attachment';
+    protected const string COL_FK_PRODUCT_ATTACHMENT = 'spy_product_attachment_knowledge_selection.fk_product_attachment';
+
+    /**
+     * @var list<string>
+     */
+    protected const array SELECTION_ENTITY_EVENT_NAMES = [
+        AiCommerceEvents::ENTITY_SPY_PRODUCT_ATTACHMENT_KNOWLEDGE_SELECTION_CREATE,
+        AiCommerceEvents::ENTITY_SPY_PRODUCT_ATTACHMENT_KNOWLEDGE_SELECTION_DELETE,
+    ];
 
     public function __construct(
-        protected ProductAttachmentFacadeInterface $productAttachmentFacade,
+        protected AiCommerceRepositoryInterface $aiCommerceRepository,
         protected LocaleFacadeInterface $localeFacade,
     ) {
     }
@@ -41,16 +49,21 @@ class ProductAttachmentDocumentSourceReader implements ProductAttachmentDocument
      *
      * @return list<string>
      */
-    public function extractSourceIdentifiers(array $eventEntityTransfers): array
+    public function extractSourceIdentifiers(array $eventEntityTransfers, string $eventName): array
     {
+        $isSelectionEntityEvent = in_array($eventName, static::SELECTION_ENTITY_EVENT_NAMES, true);
         $sourceIdentifiers = [];
 
         foreach ($eventEntityTransfers as $eventEntityTransfer) {
-            if ($eventEntityTransfer->getId() === null) {
+            $idProductAttachment = $isSelectionEntityEvent
+                ? $this->findForeignKeyProductAttachmentId($eventEntityTransfer)
+                : $eventEntityTransfer->getId();
+
+            if ($idProductAttachment === null) {
                 continue;
             }
 
-            $sourceIdentifiers[] = (string)$eventEntityTransfer->getId();
+            $sourceIdentifiers[] = (string)$idProductAttachment;
         }
 
         return array_values(array_unique($sourceIdentifiers));
@@ -67,13 +80,14 @@ class ProductAttachmentDocumentSourceReader implements ProductAttachmentDocument
             return $knowledgeDocumentSourceCollectionTransfer;
         }
 
-        $productAttachmentCollectionTransfer = $this->productAttachmentFacade->getProductAttachmentCollection(
-            $this->createProductAttachmentCriteriaTransfer($productAttachmentIds, $knowledgeDocumentSourceCriteriaTransfer),
+        $productAttachmentKnowledgeSelectionCollectionTransfer = $this->aiCommerceRepository->getProductAttachmentKnowledgeSelectionCollection(
+            $this->createProductAttachmentKnowledgeSelectionCriteriaTransfer($productAttachmentIds, $knowledgeDocumentSourceCriteriaTransfer),
         );
 
         $localeNamesById = [];
 
-        foreach ($productAttachmentCollectionTransfer->getProductAttachments() as $productAttachmentTransfer) {
+        foreach ($productAttachmentKnowledgeSelectionCollectionTransfer->getProductAttachmentKnowledgeSelections() as $productAttachmentKnowledgeSelectionTransfer) {
+            $productAttachmentTransfer = $productAttachmentKnowledgeSelectionTransfer->getProductAttachmentOrFail();
             $localeNamesById = $this->addLocaleName($localeNamesById, $productAttachmentTransfer->getFkLocale());
 
             $knowledgeDocumentSourceCollectionTransfer->addKnowledgeDocumentSource(
@@ -86,6 +100,11 @@ class ProductAttachmentDocumentSourceReader implements ProductAttachmentDocument
         }
 
         return $knowledgeDocumentSourceCollectionTransfer;
+    }
+
+    protected function findForeignKeyProductAttachmentId(EventEntityTransfer $eventEntityTransfer): int|string|null
+    {
+        return $eventEntityTransfer->getForeignKeys()[static::COL_FK_PRODUCT_ATTACHMENT] ?? null;
     }
 
     /**
@@ -111,31 +130,21 @@ class ProductAttachmentDocumentSourceReader implements ProductAttachmentDocument
     /**
      * @param list<int> $productAttachmentIds
      */
-    protected function createProductAttachmentCriteriaTransfer(
+    protected function createProductAttachmentKnowledgeSelectionCriteriaTransfer(
         array $productAttachmentIds,
         KnowledgeDocumentSourceCriteriaTransfer $knowledgeDocumentSourceCriteriaTransfer,
-    ): ProductAttachmentCriteriaTransfer {
-        $productAttachmentConditionTransfer = new ProductAttachmentConditionTransfer();
-        $productAttachmentCriteriaTransfer = (new ProductAttachmentCriteriaTransfer())
-            ->setProductAttachmentCondition($productAttachmentConditionTransfer)
-            ->addSort((new SortTransfer())->setField(static::COL_ID_PRODUCT_ATTACHMENT)->setIsAscending(true));
+    ): ProductAttachmentKnowledgeSelectionCriteriaTransfer {
+        $productAttachmentKnowledgeSelectionCriteriaTransfer = (new ProductAttachmentKnowledgeSelectionCriteriaTransfer())
+            ->setProductAttachmentKnowledgeSelectionConditions(
+                (new ProductAttachmentKnowledgeSelectionConditionsTransfer())->setProductAttachmentIds($productAttachmentIds),
+            );
 
         if ($productAttachmentIds !== []) {
-            $productAttachmentConditionTransfer->setProductAttachmentIds($productAttachmentIds);
-
-            return $productAttachmentCriteriaTransfer;
+            return $productAttachmentKnowledgeSelectionCriteriaTransfer;
         }
 
-        $paginationTransfer = $knowledgeDocumentSourceCriteriaTransfer->getPagination();
-
-        if ($paginationTransfer === null) {
-            return $productAttachmentCriteriaTransfer;
-        }
-
-        return $productAttachmentCriteriaTransfer->setFilter(
-            (new FilterTransfer())
-                ->setLimit($paginationTransfer->getLimit())
-                ->setOffset($paginationTransfer->getOffset()),
+        return $productAttachmentKnowledgeSelectionCriteriaTransfer->setPagination(
+            $knowledgeDocumentSourceCriteriaTransfer->getPagination(),
         );
     }
 

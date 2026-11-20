@@ -59,6 +59,8 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
 
     public const string FACADE_PRODUCT_ATTACHMENT = 'FACADE_PRODUCT_ATTACHMENT';
 
+    public const string FACADE_PRODUCT = 'FACADE_PRODUCT';
+
     public const string CLIENT_QUEUE = 'CLIENT_QUEUE';
 
     public const string HTTP_CLIENT = 'HTTP_CLIENT';
@@ -101,6 +103,7 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
         $container = $this->addUtilEncodingService($container);
         $container = $this->addContentGuiEditorPlugins($container);
         $container = $this->addProductAttachmentFacade($container);
+        $container = $this->addProductFacade($container);
         $container = $this->addQueueClient($container);
         $container = $this->addHttpClient($container);
         $container = $this->addKnowledgeDocumentSourcePlugins($container);
@@ -268,6 +271,15 @@ class AiCommerceDependencyProvider extends AbstractBundleDependencyProvider
     {
         $container->set(static::FACADE_PRODUCT_ATTACHMENT, function (Container $container) {
             return $container->getLocator()->productAttachment()->facade();
+        });
+
+        return $container;
+    }
+
+    protected function addProductFacade(Container $container): Container
+    {
+        $container->set(static::FACADE_PRODUCT, function (Container $container) {
+            return $container->getLocator()->product()->facade();
         });
 
         return $container;

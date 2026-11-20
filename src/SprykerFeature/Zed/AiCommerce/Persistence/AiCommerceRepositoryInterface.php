@@ -13,6 +13,8 @@ use Generated\Shared\Transfer\BackofficeAssistantConversationCollectionTransfer;
 use Generated\Shared\Transfer\BackofficeAssistantConversationCriteriaTransfer;
 use Generated\Shared\Transfer\KnowledgeDocumentCollectionTransfer;
 use Generated\Shared\Transfer\KnowledgeDocumentCriteriaTransfer;
+use Generated\Shared\Transfer\ProductAttachmentKnowledgeSelectionCollectionTransfer;
+use Generated\Shared\Transfer\ProductAttachmentKnowledgeSelectionCriteriaTransfer;
 use Generated\Shared\Transfer\SmartCmsContentItemCollectionTransfer;
 use Generated\Shared\Transfer\SmartCmsContentItemCriteriaTransfer;
 
@@ -52,4 +54,14 @@ interface AiCommerceRepositoryInterface
     public function getKnowledgeDocumentCollection(
         KnowledgeDocumentCriteriaTransfer $knowledgeDocumentCriteriaTransfer,
     ): KnowledgeDocumentCollectionTransfer;
+
+    /**
+     * Specification:
+     * - Returns the knowledge selections of product attachments in 1 query, with the selected product attachment of each selection.
+     * - Filters by `ProductAttachmentKnowledgeSelectionConditions.productAttachmentIds` when provided.
+     * - Applies the pagination when provided. Sorts by the product attachment ID ascending.
+     */
+    public function getProductAttachmentKnowledgeSelectionCollection(
+        ProductAttachmentKnowledgeSelectionCriteriaTransfer $productAttachmentKnowledgeSelectionCriteriaTransfer,
+    ): ProductAttachmentKnowledgeSelectionCollectionTransfer;
 }

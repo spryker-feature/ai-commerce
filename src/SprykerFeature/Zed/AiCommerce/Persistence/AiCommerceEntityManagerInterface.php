@@ -11,6 +11,8 @@ namespace SprykerFeature\Zed\AiCommerce\Persistence;
 
 use Generated\Shared\Transfer\BackofficeAssistantConversationTransfer;
 use Generated\Shared\Transfer\KnowledgeDocumentTransfer;
+use Generated\Shared\Transfer\ProductAttachmentKnowledgeSelectionConditionsTransfer;
+use Generated\Shared\Transfer\ProductAttachmentKnowledgeSelectionTransfer;
 
 interface AiCommerceEntityManagerInterface
 {
@@ -36,4 +38,23 @@ interface AiCommerceEntityManagerInterface
     public function saveKnowledgeDocumentCollection(string $sourceType, array $knowledgeDocumentTransfers): void;
 
     public function deleteKnowledgeDocument(KnowledgeDocumentTransfer $knowledgeDocumentTransfer): void;
+
+    /**
+     * Specification:
+     * - Creates the knowledge selection of the product attachment `ProductAttachmentKnowledgeSelection.idProductAttachment`.
+     * - Triggers the `Entity.spy_product_attachment_knowledge_selection.create` event.
+     */
+    public function createProductAttachmentKnowledgeSelection(
+        ProductAttachmentKnowledgeSelectionTransfer $productAttachmentKnowledgeSelectionTransfer,
+    ): ProductAttachmentKnowledgeSelectionTransfer;
+
+    /**
+     * Specification:
+     * - Deletes the knowledge selections of the product attachments `ProductAttachmentKnowledgeSelectionConditions.productAttachmentIds`.
+     * - Does nothing when no product attachment ID is provided.
+     * - Triggers the `Entity.spy_product_attachment_knowledge_selection.delete` event for each deleted selection.
+     */
+    public function deleteProductAttachmentKnowledgeSelections(
+        ProductAttachmentKnowledgeSelectionConditionsTransfer $productAttachmentKnowledgeSelectionConditionsTransfer,
+    ): void;
 }

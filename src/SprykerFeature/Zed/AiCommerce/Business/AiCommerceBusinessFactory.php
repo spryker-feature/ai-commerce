@@ -10,15 +10,20 @@ declare(strict_types=1);
 namespace SprykerFeature\Zed\AiCommerce\Business;
 
 use Aws\BedrockAgent\BedrockAgentClient;
+use Generated\Shared\Transfer\DataImporterConfigurationTransfer;
 use Spryker\Client\Queue\QueueClientInterface;
 use Spryker\Service\UtilEncoding\UtilEncodingServiceInterface;
 use Spryker\Zed\AiFoundation\Business\AiFoundationFacadeInterface;
 use Spryker\Zed\Category\Business\CategoryFacadeInterface;
 use Spryker\Zed\ContentGui\Business\ContentGuiFacadeInterface;
+use Spryker\Zed\DataImport\Business\DataImportFactoryTrait;
+use Spryker\Zed\DataImport\Business\Model\DataImporterInterface;
+use Spryker\Zed\DataImport\Business\Model\DataImportStep\DataImportStepInterface;
 use Spryker\Zed\Discount\Business\DiscountFacadeInterface;
 use Spryker\Zed\Kernel\Business\AbstractBusinessFactory;
 use Spryker\Zed\Locale\Business\LocaleFacadeInterface;
 use Spryker\Zed\Oms\Business\OmsFacadeInterface;
+use Spryker\Zed\Product\Business\ProductFacadeInterface;
 use Spryker\Zed\ProductAttachment\Business\ProductAttachmentFacadeInterface;
 use Spryker\Zed\Sales\Business\SalesFacadeInterface;
 use SprykerFeature\Zed\AiCommerce\AiCommerceDependencyProvider;
@@ -92,6 +97,13 @@ use SprykerFeature\Zed\AiCommerce\Business\KnowledgeStore\Setup\KnowledgeStoreSe
 use SprykerFeature\Zed\AiCommerce\Business\KnowledgeStore\Setup\KnowledgeStoreSetupInterface;
 use SprykerFeature\Zed\AiCommerce\Business\ProductAttachmentKnowledgeDocument\Reader\ProductAttachmentDocumentSourceReader;
 use SprykerFeature\Zed\AiCommerce\Business\ProductAttachmentKnowledgeDocument\Reader\ProductAttachmentDocumentSourceReaderInterface;
+use SprykerFeature\Zed\AiCommerce\Business\ProductAttachmentKnowledgeSelection\DataImport\Step\ProductAttachmentKnowledgeSelectionWriterStep;
+use SprykerFeature\Zed\AiCommerce\Business\ProductAttachmentKnowledgeSelection\Expander\ProductAttachmentKnowledgeSelectionExpander;
+use SprykerFeature\Zed\AiCommerce\Business\ProductAttachmentKnowledgeSelection\Expander\ProductAttachmentKnowledgeSelectionExpanderInterface;
+use SprykerFeature\Zed\AiCommerce\Business\ProductAttachmentKnowledgeSelection\Reader\ProductAttachmentKnowledgeSelectionReader;
+use SprykerFeature\Zed\AiCommerce\Business\ProductAttachmentKnowledgeSelection\Reader\ProductAttachmentKnowledgeSelectionReaderInterface;
+use SprykerFeature\Zed\AiCommerce\Business\ProductAttachmentKnowledgeSelection\Writer\ProductAttachmentKnowledgeSelectionWriter;
+use SprykerFeature\Zed\AiCommerce\Business\ProductAttachmentKnowledgeSelection\Writer\ProductAttachmentKnowledgeSelectionWriterInterface;
 use SprykerFeature\Zed\AiCommerce\Business\SmartCmsContent\Collapser\SmartCmsContentItemHtmlCollapser;
 use SprykerFeature\Zed\AiCommerce\Business\SmartCmsContent\Collapser\SmartCmsContentItemHtmlCollapserInterface;
 use SprykerFeature\Zed\AiCommerce\Business\SmartCmsContent\Expander\SmartCmsContentItemHtmlExpander;
@@ -126,6 +138,8 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  */
 class AiCommerceBusinessFactory extends AbstractBusinessFactory
 {
+    use DataImportFactoryTrait;
+
     public function createBackofficeAssistantConversationReader(): BackofficeAssistantConversationReaderInterface
     {
         return new BackofficeAssistantConversationReader(
@@ -455,7 +469,7 @@ class AiCommerceBusinessFactory extends AbstractBusinessFactory
     public function createProductAttachmentDocumentSourceReader(): ProductAttachmentDocumentSourceReaderInterface
     {
         return new ProductAttachmentDocumentSourceReader(
-            $this->getProductAttachmentFacade(),
+            $this->getRepository(),
             $this->getLocaleFacade(),
         );
     }
@@ -463,6 +477,11 @@ class AiCommerceBusinessFactory extends AbstractBusinessFactory
     public function getProductAttachmentFacade(): ProductAttachmentFacadeInterface
     {
         return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_PRODUCT_ATTACHMENT);
+    }
+
+    public function getProductFacade(): ProductFacadeInterface
+    {
+        return $this->getProvidedDependency(AiCommerceDependencyProvider::FACADE_PRODUCT);
     }
 
     public function getQueueClient(): QueueClientInterface
@@ -547,6 +566,62 @@ class AiCommerceBusinessFactory extends AbstractBusinessFactory
         return new KnowledgeStoreSetup(
             $this->getKnowledgeStorePlugin(),
             $this->createKnowledgeDocumentSourcePluginResolver(),
+        );
+    }
+
+    public function createProductAttachmentKnowledgeSelectionReader(): ProductAttachmentKnowledgeSelectionReaderInterface
+    {
+        return new ProductAttachmentKnowledgeSelectionReader($this->getRepository());
+    }
+
+    public function createProductAttachmentKnowledgeSelectionExpander(): ProductAttachmentKnowledgeSelectionExpanderInterface
+    {
+        return new ProductAttachmentKnowledgeSelectionExpander($this->createProductAttachmentKnowledgeSelectionReader());
+    }
+
+    public function createProductAttachmentKnowledgeSelectionWriter(): ProductAttachmentKnowledgeSelectionWriterInterface
+    {
+        return new ProductAttachmentKnowledgeSelectionWriter(
+            $this->createProductAttachmentKnowledgeSelectionReader(),
+            $this->getEntityManager(),
+        );
+    }
+
+    public function getProductAttachmentKnowledgeSelectionDataImporter(
+        ?DataImporterConfigurationTransfer $dataImporterConfigurationTransfer = null,
+    ): DataImporterInterface {
+        /** @var \Spryker\Zed\DataImport\Business\Model\DataImporter $dataImporter */
+        $dataImporter = $this->getProductAttachmentKnowledgeSelectionCsvDataImporter($dataImporterConfigurationTransfer);
+
+        /** @var \Spryker\Zed\DataImport\Business\Model\DataSet\DataSetStepBroker $dataSetStepBroker */
+        $dataSetStepBroker = $this->createTransactionAwareDataSetStepBroker();
+        $dataSetStepBroker->addStep($this->createProductAttachmentKnowledgeSelectionWriterStep());
+
+        $dataImporter->addDataSetStepBroker($dataSetStepBroker);
+
+        return $dataImporter;
+    }
+
+    public function getProductAttachmentKnowledgeSelectionCsvDataImporter(
+        ?DataImporterConfigurationTransfer $dataImporterConfigurationTransfer = null,
+    ): DataImporterInterface {
+        if ($dataImporterConfigurationTransfer?->getReaderConfiguration() !== null) {
+            return $this->getDataImportFactory()->getCsvDataImporterFromConfig($dataImporterConfigurationTransfer);
+        }
+
+        return $this->getCsvDataImporterFromConfig(
+            $this->getConfig()->getProductAttachmentKnowledgeSelectionDataImporterConfiguration(),
+        );
+    }
+
+    public function createProductAttachmentKnowledgeSelectionWriterStep(): DataImportStepInterface
+    {
+        return new ProductAttachmentKnowledgeSelectionWriterStep(
+            $this->getProductFacade(),
+            $this->getLocaleFacade(),
+            $this->getProductAttachmentFacade(),
+            $this->createProductAttachmentKnowledgeSelectionReader(),
+            $this->getEntityManager(),
         );
     }
 }

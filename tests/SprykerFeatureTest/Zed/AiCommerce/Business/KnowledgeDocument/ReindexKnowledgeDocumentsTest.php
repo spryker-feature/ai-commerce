@@ -10,17 +10,22 @@ declare(strict_types=1);
 namespace SprykerFeatureTest\Zed\AiCommerce\Business\KnowledgeDocument;
 
 use Codeception\Test\Unit;
+use Generated\Shared\Transfer\KnowledgeDocumentCollectionResponseTransfer;
+use Generated\Shared\Transfer\KnowledgeDocumentIndexResponseTransfer;
 use Generated\Shared\Transfer\KnowledgeDocumentReindexRequestTransfer;
 use Generated\Shared\Transfer\KnowledgeDocumentSourceCollectionTransfer;
 use Generated\Shared\Transfer\KnowledgeDocumentSourceCriteriaTransfer;
 use Generated\Shared\Transfer\KnowledgeDocumentSourceTransfer;
 use Generated\Shared\Transfer\KnowledgeDocumentTransfer;
+use Generated\Shared\Transfer\QueueReceiveMessageTransfer;
 use Spryker\Client\Queue\QueueClientInterface;
+use SprykerFeature\Shared\AiCommerce\AiCommerceConfig as SharedAiCommerceConfig;
 use SprykerFeature\Zed\AiCommerce\AiCommerceDependencyProvider;
 use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Indexer\KnowledgeDocumentIndexer;
 use SprykerFeature\Zed\AiCommerce\Dependency\KnowledgeDocument\KnowledgeDocumentSourcePluginInterface;
 use SprykerFeature\Zed\AiCommerce\Dependency\KnowledgeStore\KnowledgeStorePluginInterface;
 use SprykerFeatureTest\Zed\AiCommerce\AiCommerceBusinessTester;
+use SprykerFeatureTest\Zed\AiCommerce\Stub\ProductAttachmentKnowledgeDocumentSourcePluginStub;
 
 /**
  * Auto-generated group annotations
@@ -43,6 +48,10 @@ class ReindexKnowledgeDocumentsTest extends Unit
 
     protected const string CONTENT_HASH = 'previous-content-hash';
 
+    protected const string DOCUMENT_CONTENT = 'Content of the product attachment.';
+
+    protected const int PRODUCT_ATTACHMENT_PAGE_SIZE = 4;
+
     protected AiCommerceBusinessTester $tester;
 
     /**
@@ -50,11 +59,17 @@ class ReindexKnowledgeDocumentsTest extends Unit
      */
     protected array $queuedSourceIdentifiers = [];
 
+    /**
+     * @var list<\Generated\Shared\Transfer\QueueSendMessageTransfer>
+     */
+    protected array $sentQueueSendMessageTransfers = [];
+
     protected function _before(): void
     {
         parent::_before();
 
         $this->queuedSourceIdentifiers = [];
+        $this->sentQueueSendMessageTransfers = [];
         $this->tester->setDependency(AiCommerceDependencyProvider::CLIENT_QUEUE, $this->createQueueClientMock());
         $this->tester->setDependency(AiCommerceDependencyProvider::PLUGIN_KNOWLEDGE_STORE, $this->createKnowledgeStorePluginMock([
             static::SOURCE_TYPE_FIRST,
@@ -309,6 +324,88 @@ class ReindexKnowledgeDocumentsTest extends Unit
         $this->assertSame(0, $knowledgeDocumentReindexResponseTransfer->getQueuedDeletedSourceDocumentCount());
     }
 
+    public function testGivenIndexedProductAttachmentDocumentsWhenReindexingThenNotSelectedDocumentsAreQueuedAndRemovedAfterProcessing(): void
+    {
+        // Arrange
+        $selectedSourceIdentifiers = $this->haveIndexedProductAttachmentKnowledgeDocuments(6, true);
+        $notSelectedSourceIdentifiers = $this->haveIndexedProductAttachmentKnowledgeDocuments(4, false);
+        $this->setProductAttachmentReindexDependencies();
+
+        // Act
+        $knowledgeDocumentReindexResponseTransfer = $this->tester->getFactory()->createKnowledgeDocumentReindexer()->reindex(
+            (new KnowledgeDocumentReindexRequestTransfer())->addSourceType(SharedAiCommerceConfig::KNOWLEDGE_DOCUMENT_SOURCE_TYPE_PRODUCT_ATTACHMENT),
+        );
+        $this->processQueuedMessages(array_merge($selectedSourceIdentifiers, $notSelectedSourceIdentifiers));
+
+        // Assert
+        $this->assertTrue($knowledgeDocumentReindexResponseTransfer->getIsSuccessful());
+        $this->assertSame([], array_diff($notSelectedSourceIdentifiers, $this->queuedSourceIdentifiers));
+        $this->assertSame($selectedSourceIdentifiers, $this->getRemainingProductAttachmentSourceIdentifiers(array_merge($selectedSourceIdentifiers, $notSelectedSourceIdentifiers)));
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function haveIndexedProductAttachmentKnowledgeDocuments(int $count, bool $isAssistantKnowledge): array
+    {
+        $sourceIdentifiers = [];
+
+        for ($i = 0; $i < $count; $i++) {
+            $sourceIdentifiers[] = (string)$this->tester->haveProductAttachment($isAssistantKnowledge)->getIdProductAttachmentOrFail();
+        }
+
+        return $this->haveIndexedKnowledgeDocuments(SharedAiCommerceConfig::KNOWLEDGE_DOCUMENT_SOURCE_TYPE_PRODUCT_ATTACHMENT, $sourceIdentifiers);
+    }
+
+    protected function setProductAttachmentReindexDependencies(): void
+    {
+        $knowledgeStorePluginMock = $this->createMock(KnowledgeStorePluginInterface::class);
+        $knowledgeStorePluginMock->method('isConfigured')->willReturn(true);
+        $knowledgeStorePluginMock->method('getMaxDocumentSize')->willReturn(strlen(static::DOCUMENT_CONTENT));
+        $knowledgeStorePluginMock->method('indexDocument')->willReturn(
+            (new KnowledgeDocumentIndexResponseTransfer())->setIsSuccessful(true)->setStatus(KnowledgeDocumentIndexer::STATUS_INDEXED),
+        );
+        $knowledgeStorePluginMock->method('deleteDocuments')->willReturn((new KnowledgeDocumentCollectionResponseTransfer())->setIsSuccessful(true));
+
+        $this->tester->mockConfigMethod('getKnowledgeDocumentReindexPageSize', static::PRODUCT_ATTACHMENT_PAGE_SIZE);
+        $this->tester->setDependency(AiCommerceDependencyProvider::PLUGIN_KNOWLEDGE_STORE, $knowledgeStorePluginMock);
+        $this->tester->setDependency(AiCommerceDependencyProvider::PLUGINS_KNOWLEDGE_DOCUMENT_SOURCE, [
+            new ProductAttachmentKnowledgeDocumentSourcePluginStub(static::DOCUMENT_CONTENT),
+        ]);
+    }
+
+    /**
+     * @param list<string> $sourceIdentifiers
+     */
+    protected function processQueuedMessages(array $sourceIdentifiers): void
+    {
+        $queueReceiveMessageTransfers = [];
+
+        foreach ($this->sentQueueSendMessageTransfers as $queueSendMessageTransfer) {
+            if (in_array(json_decode((string)$queueSendMessageTransfer->getBody(), true)['sourceIdentifier'], $sourceIdentifiers, true)) {
+                $queueReceiveMessageTransfers[] = (new QueueReceiveMessageTransfer())->setQueueMessage($queueSendMessageTransfer);
+            }
+        }
+
+        $this->tester->getFactory()->createKnowledgeDocumentIndexer()->indexDocuments($queueReceiveMessageTransfers);
+    }
+
+    /**
+     * @param list<string> $sourceIdentifiers
+     *
+     * @return list<string>
+     */
+    protected function getRemainingProductAttachmentSourceIdentifiers(array $sourceIdentifiers): array
+    {
+        return array_values(array_filter(
+            $sourceIdentifiers,
+            fn (string $sourceIdentifier): bool => $this->tester->findKnowledgeDocument(
+                SharedAiCommerceConfig::KNOWLEDGE_DOCUMENT_SOURCE_TYPE_PRODUCT_ATTACHMENT,
+                $sourceIdentifier,
+            )?->getStatus() === KnowledgeDocumentIndexer::STATUS_INDEXED,
+        ));
+    }
+
     /**
      * @param list<string> $sourceIdentifiers
      *
@@ -404,6 +501,7 @@ class ReindexKnowledgeDocumentsTest extends Unit
         $queueClientMock = $this->createMock(QueueClientInterface::class);
         $queueClientMock->method('sendMessages')->willReturnCallback(function (string $queueName, array $queueSendMessageTransfers): void {
             foreach ($queueSendMessageTransfers as $queueSendMessageTransfer) {
+                $this->sentQueueSendMessageTransfers[] = $queueSendMessageTransfer;
                 $this->queuedSourceIdentifiers[] = json_decode((string)$queueSendMessageTransfer->getBody(), true)['sourceIdentifier'];
             }
         });

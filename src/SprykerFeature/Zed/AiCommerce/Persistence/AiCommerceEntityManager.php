@@ -11,8 +11,11 @@ namespace SprykerFeature\Zed\AiCommerce\Persistence;
 
 use Generated\Shared\Transfer\BackofficeAssistantConversationTransfer;
 use Generated\Shared\Transfer\KnowledgeDocumentTransfer;
+use Generated\Shared\Transfer\ProductAttachmentKnowledgeSelectionConditionsTransfer;
+use Generated\Shared\Transfer\ProductAttachmentKnowledgeSelectionTransfer;
 use Orm\Zed\AiCommerce\Persistence\SpyBackofficeAssistantConversation;
 use Orm\Zed\AiCommerce\Persistence\SpyKnowledgeDocument;
+use Orm\Zed\AiCommerce\Persistence\SpyProductAttachmentKnowledgeSelection;
 use Spryker\Zed\Kernel\Persistence\AbstractEntityManager;
 use Spryker\Zed\Propel\Persistence\BatchProcessor\ActiveRecordBatchProcessorTrait;
 
@@ -141,5 +144,39 @@ class AiCommerceEntityManager extends AbstractEntityManager implements AiCommerc
             ->filterBySourceType($knowledgeDocumentTransfer->getSourceTypeOrFail())
             ->filterBySourceIdentifier($knowledgeDocumentTransfer->getSourceIdentifierOrFail())
             ->delete();
+    }
+
+    public function createProductAttachmentKnowledgeSelection(
+        ProductAttachmentKnowledgeSelectionTransfer $productAttachmentKnowledgeSelectionTransfer,
+    ): ProductAttachmentKnowledgeSelectionTransfer {
+        $productAttachmentKnowledgeSelectionMapper = $this->getFactory()->createProductAttachmentKnowledgeSelectionMapper();
+        $productAttachmentKnowledgeSelectionEntity = $productAttachmentKnowledgeSelectionMapper->mapProductAttachmentKnowledgeSelectionTransferToEntity(
+            $productAttachmentKnowledgeSelectionTransfer,
+            new SpyProductAttachmentKnowledgeSelection(),
+        );
+
+        $productAttachmentKnowledgeSelectionEntity->save();
+
+        return $productAttachmentKnowledgeSelectionMapper->mapProductAttachmentKnowledgeSelectionEntityToTransfer(
+            $productAttachmentKnowledgeSelectionEntity,
+            $productAttachmentKnowledgeSelectionTransfer,
+        );
+    }
+
+    public function deleteProductAttachmentKnowledgeSelections(
+        ProductAttachmentKnowledgeSelectionConditionsTransfer $productAttachmentKnowledgeSelectionConditionsTransfer,
+    ): void {
+        if ($productAttachmentKnowledgeSelectionConditionsTransfer->getProductAttachmentIds() === []) {
+            return;
+        }
+
+        $productAttachmentKnowledgeSelectionEntities = $this->getFactory()
+            ->createProductAttachmentKnowledgeSelectionQuery()
+            ->filterByFkProductAttachment_In($productAttachmentKnowledgeSelectionConditionsTransfer->getProductAttachmentIds())
+            ->find();
+
+        foreach ($productAttachmentKnowledgeSelectionEntities as $productAttachmentKnowledgeSelectionEntity) {
+            $productAttachmentKnowledgeSelectionEntity->delete();
+        }
     }
 }

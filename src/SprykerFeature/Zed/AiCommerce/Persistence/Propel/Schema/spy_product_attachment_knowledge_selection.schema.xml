@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<database xmlns="spryker:schema-01"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          name="zed"
+          xsi:schemaLocation="spryker:schema-01 https://static.spryker.com/schema-01.xsd"
+          namespace="Orm\Zed\AiCommerce\Persistence"
+          package="src.Orm.Zed.AiCommerce.Persistence">
+
+    <table name="spy_product_attachment_knowledge_selection" idMethod="native" phpName="SpyProductAttachmentKnowledgeSelection">
+        <column name="id_product_attachment_knowledge_selection" type="INTEGER" required="true" primaryKey="true" autoIncrement="true"/>
+        <column name="fk_product_attachment" type="INTEGER" required="true"/>
+
+        <foreign-key name="spy_product_attachment_knowledge_selection-fk_product_attachment" foreignTable="spy_product_attachment" phpName="ProductAttachment" refPhpName="ProductAttachmentKnowledgeSelection" onDelete="CASCADE">
+            <reference local="fk_product_attachment" foreign="id_product_attachment"/>
+        </foreign-key>
+
+        <unique name="spy_product_attachment_knowledge_selection-unique-fk_product_attachment">
+            <unique-column name="fk_product_attachment"/>
+        </unique>
+
+        <behavior name="timestampable"/>
+        <behavior name="event">
+            <parameter name="spy_product_attachment_knowledge_selection_all" column="*"/>
+        </behavior>
+
+        <id-method-parameter value="spy_product_attachment_knowledge_selection_pk_seq"/>
+    </table>
+
+</database>

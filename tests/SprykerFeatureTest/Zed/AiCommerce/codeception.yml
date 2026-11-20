@@ -45,3 +45,5 @@ suites:
                 - \SprykerTest\Zed\Testify\Helper\Communication\DependencyProviderHelper
                 - \SprykerTest\Shared\Propel\Helper\TransactionHelper
                 - \SprykerTest\Shared\User\Helper\UserDataHelper
+                - \SprykerTest\Shared\Testify\Helper\DataCleanupHelper
+                - \SprykerTest\Shared\Product\Helper\ProductDataHelper

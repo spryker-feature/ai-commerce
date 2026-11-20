@@ -123,3 +123,4 @@ Close,Close
 "Enter a JSON object with a locale name as each key and a list of the prompts of that locale as each value, for example {""en_US"": [""What is new?"", ""What is on sale?""]}.","Enter a JSON object with a locale name as each key and a list of the prompts of that locale as each value, for example {""en_US"": [""What is new?"", ""What is on sale?""]}."
 "The locale ""{{ locale }}"" is not assigned to any store.","The locale ""{{ locale }}"" is not assigned to any store."
 "Enter the prompts of the locale ""{{ locale }}"" as a list of text values.","Enter the prompts of the locale ""{{ locale }}"" as a list of text values."
+"Use for assistant knowledge","Use for assistant knowledge"

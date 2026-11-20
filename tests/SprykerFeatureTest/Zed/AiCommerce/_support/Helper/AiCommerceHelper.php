@@ -24,10 +24,13 @@ use Generated\Shared\Transfer\KnowledgeDocumentConditionsTransfer;
 use Generated\Shared\Transfer\KnowledgeDocumentCriteriaTransfer;
 use Generated\Shared\Transfer\KnowledgeDocumentTransfer;
 use Generated\Shared\Transfer\LocalizedContentTransfer;
+use Generated\Shared\Transfer\ProductAttachmentTransfer;
 use Generated\Shared\Transfer\SmartCmsContentItemCollectionTransfer;
 use Generated\Shared\Transfer\SmartCmsContentItemTransfer;
 use GuzzleHttp\Psr7\Response;
 use Orm\Zed\AiCommerce\Persistence\SpyKnowledgeDocument;
+use Orm\Zed\AiCommerce\Persistence\SpyProductAttachmentKnowledgeSelection;
+use Orm\Zed\ProductAttachment\Persistence\SpyProductAttachment;
 use SprykerFeature\Zed\AiCommerce\AiCommerceDependencyProvider;
 use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Indexer\KnowledgeDocumentIndexer;
 use SprykerFeature\Zed\AiCommerce\Persistence\AiCommerceRepository;
@@ -172,6 +175,26 @@ class AiCommerceHelper extends Module
         $knowledgeDocumentEntity->save();
 
         return $knowledgeDocumentTransfer->setIdKnowledgeDocument($knowledgeDocumentEntity->getIdKnowledgeDocument());
+    }
+
+    public function haveProductAttachment(bool $isAssistantKnowledge): ProductAttachmentTransfer
+    {
+        $productAttachmentEntity = (new SpyProductAttachment())
+            ->setLabel(uniqid('Attachment ', true))
+            ->setUrl(sprintf('https://docs.example.com/%s.pdf', uniqid('', true)));
+        $productAttachmentEntity->save();
+
+        if ($isAssistantKnowledge) {
+            (new SpyProductAttachmentKnowledgeSelection())
+                ->setFkProductAttachment($productAttachmentEntity->getIdProductAttachment())
+                ->save();
+        }
+
+        return (new ProductAttachmentTransfer())
+            ->setIdProductAttachment($productAttachmentEntity->getIdProductAttachment())
+            ->setLabel($productAttachmentEntity->getLabel())
+            ->setUrl($productAttachmentEntity->getUrl())
+            ->setIsAssistantKnowledge($isAssistantKnowledge);
     }
 
     public function findKnowledgeDocument(string $sourceType, string $sourceIdentifier): ?KnowledgeDocumentTransfer

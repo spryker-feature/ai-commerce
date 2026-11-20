@@ -14,20 +14,24 @@ use Generated\Shared\Transfer\ErrorTransfer;
 use Generated\Shared\Transfer\KnowledgeDocumentCollectionResponseTransfer;
 use Generated\Shared\Transfer\KnowledgeDocumentCollectionTransfer;
 use Generated\Shared\Transfer\KnowledgeDocumentContentTransfer;
+use Generated\Shared\Transfer\KnowledgeDocumentIndexResponseTransfer;
 use Generated\Shared\Transfer\KnowledgeDocumentSourceCollectionTransfer;
 use Generated\Shared\Transfer\KnowledgeDocumentSourceCriteriaTransfer;
 use Generated\Shared\Transfer\KnowledgeDocumentSourceTransfer;
 use Generated\Shared\Transfer\KnowledgeDocumentTransfer;
 use Generated\Shared\Transfer\QueueReceiveMessageTransfer;
 use Generated\Shared\Transfer\QueueSendMessageTransfer;
+use Orm\Zed\ProductAttachment\Persistence\SpyProductAttachmentQuery;
 use PHPUnit\Framework\MockObject\MockObject;
 use RuntimeException;
 use Spryker\Client\Queue\QueueClientInterface;
+use SprykerFeature\Shared\AiCommerce\AiCommerceConfig as SharedAiCommerceConfig;
 use SprykerFeature\Zed\AiCommerce\AiCommerceDependencyProvider;
 use SprykerFeature\Zed\AiCommerce\Business\KnowledgeDocument\Indexer\KnowledgeDocumentIndexer;
 use SprykerFeature\Zed\AiCommerce\Dependency\KnowledgeDocument\KnowledgeDocumentSourcePluginInterface;
 use SprykerFeature\Zed\AiCommerce\Dependency\KnowledgeStore\KnowledgeStorePluginInterface;
 use SprykerFeatureTest\Zed\AiCommerce\AiCommerceBusinessTester;
+use SprykerFeatureTest\Zed\AiCommerce\Stub\ProductAttachmentKnowledgeDocumentSourcePluginStub;
 
 /**
  * Auto-generated group annotations
@@ -313,6 +317,54 @@ class IndexKnowledgeDocumentsTest extends Unit
         $this->assertSame([], $this->sentQueueSendMessageTransfers);
     }
 
+    public function testGivenSelectedProductAttachmentWhenIndexingThenContentIsReadAndIndexedOnce(): void
+    {
+        // Arrange
+        $sourceIdentifier = $this->haveProductAttachmentKnowledgeDocument(true, KnowledgeDocumentIndexer::STATUS_PENDING);
+        $productAttachmentSourcePluginStub = $this->setProductAttachmentSourcePluginStub();
+        $this->knowledgeStorePluginMock->expects($this->once())->method('indexDocument')->willReturn($this->createIndexedResponseTransfer());
+
+        // Act
+        $this->tester->getFactory()->createKnowledgeDocumentIndexer()->indexDocuments([$this->createProductAttachmentQueueReceiveMessageTransfer($sourceIdentifier)]);
+
+        // Assert
+        $this->assertSame([$sourceIdentifier], $productAttachmentSourcePluginStub->getReadSourceIdentifiers());
+        $this->assertSame([], $this->knowledgeStoreCalls);
+        $this->assertSame(KnowledgeDocumentIndexer::STATUS_INDEXED, $this->findProductAttachmentKnowledgeDocument($sourceIdentifier)?->getStatus());
+    }
+
+    public function testGivenNotSelectedProductAttachmentWhenIndexingThenContentIsNotReadAndStoreDocumentIsDeleted(): void
+    {
+        // Arrange
+        $sourceIdentifier = $this->haveProductAttachmentKnowledgeDocument(false, KnowledgeDocumentIndexer::STATUS_INDEXED);
+        $productAttachmentSourcePluginStub = $this->setProductAttachmentSourcePluginStub();
+        $this->knowledgeStorePluginMock->expects($this->never())->method('indexDocument');
+
+        // Act
+        $this->tester->getFactory()->createKnowledgeDocumentIndexer()->indexDocuments([$this->createProductAttachmentQueueReceiveMessageTransfer($sourceIdentifier)]);
+
+        // Assert
+        $this->assertSame([], $productAttachmentSourcePluginStub->getReadSourceIdentifiers());
+        $this->assertSame([$this->createDeleteCall($sourceIdentifier)], $this->knowledgeStoreCalls);
+        $this->assertNull($this->findProductAttachmentKnowledgeDocument($sourceIdentifier));
+    }
+
+    public function testGivenSelectedProductAttachmentRemovedBeforeWorkerWhenIndexingThenContentIsNotReadAndStoreDocumentIsDeleted(): void
+    {
+        // Arrange
+        $sourceIdentifier = $this->haveProductAttachmentKnowledgeDocument(true, KnowledgeDocumentIndexer::STATUS_PENDING);
+        SpyProductAttachmentQuery::create()->filterByIdProductAttachment((int)$sourceIdentifier)->delete();
+        $productAttachmentSourcePluginStub = $this->setProductAttachmentSourcePluginStub();
+
+        // Act
+        $this->tester->getFactory()->createKnowledgeDocumentIndexer()->indexDocuments([$this->createProductAttachmentQueueReceiveMessageTransfer($sourceIdentifier)]);
+
+        // Assert
+        $this->assertSame([], $productAttachmentSourcePluginStub->getReadSourceIdentifiers());
+        $this->assertSame([$this->createDeleteCall($sourceIdentifier)], $this->knowledgeStoreCalls);
+        $this->assertNull($this->findProductAttachmentKnowledgeDocument($sourceIdentifier));
+    }
+
     /**
      * @dataProvider provideDeleteFailures
      */
@@ -361,6 +413,53 @@ class IndexKnowledgeDocumentsTest extends Unit
         ];
     }
 
+    protected function haveProductAttachmentKnowledgeDocument(bool $isAssistantKnowledge, string $status): string
+    {
+        $sourceIdentifier = (string)$this->tester->haveProductAttachment($isAssistantKnowledge)->getIdProductAttachmentOrFail();
+        $this->tester->haveKnowledgeDocument([
+            KnowledgeDocumentTransfer::SOURCE_TYPE => SharedAiCommerceConfig::KNOWLEDGE_DOCUMENT_SOURCE_TYPE_PRODUCT_ATTACHMENT,
+            KnowledgeDocumentTransfer::SOURCE_IDENTIFIER => $sourceIdentifier,
+            KnowledgeDocumentTransfer::STATUS => $status,
+        ]);
+
+        return $sourceIdentifier;
+    }
+
+    protected function setProductAttachmentSourcePluginStub(): ProductAttachmentKnowledgeDocumentSourcePluginStub
+    {
+        $productAttachmentSourcePluginStub = new ProductAttachmentKnowledgeDocumentSourcePluginStub(static::DOCUMENT_CONTENT);
+        $this->tester->setDependency(AiCommerceDependencyProvider::PLUGINS_KNOWLEDGE_DOCUMENT_SOURCE, [$productAttachmentSourcePluginStub]);
+
+        return $productAttachmentSourcePluginStub;
+    }
+
+    protected function createIndexedResponseTransfer(): KnowledgeDocumentIndexResponseTransfer
+    {
+        return (new KnowledgeDocumentIndexResponseTransfer())
+            ->setIsSuccessful(true)
+            ->setStatus(KnowledgeDocumentIndexer::STATUS_INDEXED);
+    }
+
+    protected function createProductAttachmentQueueReceiveMessageTransfer(string $sourceIdentifier): QueueReceiveMessageTransfer
+    {
+        return (new QueueReceiveMessageTransfer())->setQueueMessage(
+            (new QueueSendMessageTransfer())->setBody((string)json_encode([
+                'sourceType' => SharedAiCommerceConfig::KNOWLEDGE_DOCUMENT_SOURCE_TYPE_PRODUCT_ATTACHMENT,
+                'sourceIdentifier' => $sourceIdentifier,
+            ])),
+        );
+    }
+
+    protected function createDeleteCall(string $sourceIdentifier): string
+    {
+        return sprintf('delete:%s:%s', SharedAiCommerceConfig::KNOWLEDGE_DOCUMENT_SOURCE_TYPE_PRODUCT_ATTACHMENT, $sourceIdentifier);
+    }
+
+    protected function findProductAttachmentKnowledgeDocument(string $sourceIdentifier): ?KnowledgeDocumentTransfer
+    {
+        return $this->tester->findKnowledgeDocument(SharedAiCommerceConfig::KNOWLEDGE_DOCUMENT_SOURCE_TYPE_PRODUCT_ATTACHMENT, $sourceIdentifier);
+    }
+
     protected function mockExistingSource(string $sourceIdentifier): void
     {
         $this->sourcePluginMock->method('getDocumentSourceCollection')->willReturn(
@@ -404,7 +503,7 @@ class IndexKnowledgeDocumentsTest extends Unit
     ): KnowledgeStorePluginInterface&MockObject {
         $knowledgeStorePluginMock = $this->createMock(KnowledgeStorePluginInterface::class);
         $knowledgeStorePluginMock->method('isConfigured')->willReturnCallback(
-            fn (string $sourceType): bool => $sourceType === static::SOURCE_TYPE && $isConfigured,
+            fn (string $sourceType): bool => $isConfigured && in_array($sourceType, [static::SOURCE_TYPE, SharedAiCommerceConfig::KNOWLEDGE_DOCUMENT_SOURCE_TYPE_PRODUCT_ATTACHMENT], true),
         );
         $knowledgeStorePluginMock->method('getMaxDocumentSize')->willReturn($maxDocumentSize);
         $knowledgeStorePluginMock->method('deleteDocuments')->willReturnCallback(

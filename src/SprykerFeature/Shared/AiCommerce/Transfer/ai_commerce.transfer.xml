@@ -1180,6 +1180,7 @@
 
     <transfer name="EventEntity">
         <property name="id" type="int"/>
+        <property name="foreignKeys" type="array" singular="foreignKeys"/>
     </transfer>
 
     <transfer name="QueueSendMessage">
@@ -1199,6 +1200,27 @@
         <property name="fkLocale" type="int"/>
         <property name="label" type="string"/>
         <property name="url" type="string"/>
+        <property name="isAssistantKnowledge" type="bool" description="True: the attachment is selected as Storefront Assistant knowledge. False: not selected. Null: the selection is not changed on save."/>
+    </transfer>
+
+    <transfer name="ProductAttachmentKnowledgeSelection" strict="true">
+        <property name="idProductAttachmentKnowledgeSelection" type="int"/>
+        <property name="idProductAttachment" type="int"/>
+        <property name="productAttachment" type="ProductAttachment"/>
+    </transfer>
+
+    <transfer name="ProductAttachmentKnowledgeSelectionCriteria" strict="true">
+        <property name="productAttachmentKnowledgeSelectionConditions" type="ProductAttachmentKnowledgeSelectionConditions"/>
+        <property name="sortCollection" type="Sort[]" singular="sort"/>
+        <property name="pagination" type="Pagination"/>
+    </transfer>
+
+    <transfer name="ProductAttachmentKnowledgeSelectionConditions" strict="true">
+        <property name="productAttachmentIds" type="int[]" singular="idProductAttachment"/>
+    </transfer>
+
+    <transfer name="ProductAttachmentKnowledgeSelectionCollection" strict="true">
+        <property name="productAttachmentKnowledgeSelections" type="ProductAttachmentKnowledgeSelection[]" singular="productAttachmentKnowledgeSelection"/>
     </transfer>
 
     <transfer name="ProductAttachmentCriteria" strict="true">
@@ -1209,6 +1231,7 @@
 
     <transfer name="ProductAttachmentCondition" strict="true">
         <property name="productAttachmentIds" type="int[]" singular="idProductAttachment"/>
+        <property name="productAbstractIds" type="int[]" singular="idProductAbstract"/>
     </transfer>
 
     <transfer name="ProductAttachmentCollection" strict="true">
@@ -1223,5 +1246,32 @@
     <transfer name="Locale">
         <property name="idLocale" type="int"/>
         <property name="localeName" type="string"/>
+    </transfer>
+
+    <transfer name="LocaleCriteria">
+        <property name="localeConditions" type="LocaleConditions"/>
+    </transfer>
+
+    <transfer name="LocaleConditions">
+        <property name="localeNames" type="string[]" singular="localeName"/>
+    </transfer>
+
+    <transfer name="DataImporterConfiguration">
+        <property name="importType" type="string"/>
+        <property name="readerConfiguration" type="DataImporterReaderConfiguration"/>
+    </transfer>
+
+    <transfer name="DataImporterDataSourceConfiguration">
+        <property name="importType" type="string"/>
+        <property name="fileName" type="string"/>
+        <property name="moduleName" type="string"/>
+        <property name="directory" type="string"/>
+    </transfer>
+
+    <transfer name="DataImporterReaderConfiguration">
+        <property name="fileName" type="string"/>
+    </transfer>
+
+    <transfer name="DataImporterReport">
     </transfer>
 </transfers>

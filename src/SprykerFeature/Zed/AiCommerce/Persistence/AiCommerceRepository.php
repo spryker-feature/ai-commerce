@@ -19,6 +19,11 @@ use Generated\Shared\Transfer\KnowledgeDocumentConditionsTransfer;
 use Generated\Shared\Transfer\KnowledgeDocumentCriteriaTransfer;
 use Generated\Shared\Transfer\KnowledgeDocumentTransfer;
 use Generated\Shared\Transfer\PaginationTransfer;
+use Generated\Shared\Transfer\ProductAttachmentKnowledgeSelectionCollectionTransfer;
+use Generated\Shared\Transfer\ProductAttachmentKnowledgeSelectionConditionsTransfer;
+use Generated\Shared\Transfer\ProductAttachmentKnowledgeSelectionCriteriaTransfer;
+use Generated\Shared\Transfer\ProductAttachmentKnowledgeSelectionTransfer;
+use Generated\Shared\Transfer\ProductAttachmentTransfer;
 use Generated\Shared\Transfer\SmartCmsContentItemCollectionTransfer;
 use Generated\Shared\Transfer\SmartCmsContentItemConditionsTransfer;
 use Generated\Shared\Transfer\SmartCmsContentItemCriteriaTransfer;
@@ -26,6 +31,7 @@ use Generated\Shared\Transfer\SmartCmsContentItemTransfer;
 use Orm\Zed\AiCommerce\Persistence\Map\SpyKnowledgeDocumentTableMap;
 use Orm\Zed\AiCommerce\Persistence\SpyBackofficeAssistantConversationQuery;
 use Orm\Zed\AiCommerce\Persistence\SpyKnowledgeDocumentQuery;
+use Orm\Zed\AiCommerce\Persistence\SpyProductAttachmentKnowledgeSelectionQuery;
 use Orm\Zed\Content\Persistence\SpyContentQuery;
 use Spryker\Zed\Kernel\Persistence\AbstractRepository;
 use Spryker\Zed\PropelOrm\Business\Runtime\ActiveQuery\Criteria;
@@ -297,5 +303,85 @@ class AiCommerceRepository extends AbstractRepository implements AiCommerceRepos
         }
 
         return $knowledgeDocumentQuery;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @module ProductAttachment
+     */
+    public function getProductAttachmentKnowledgeSelectionCollection(
+        ProductAttachmentKnowledgeSelectionCriteriaTransfer $productAttachmentKnowledgeSelectionCriteriaTransfer,
+    ): ProductAttachmentKnowledgeSelectionCollectionTransfer {
+        $productAttachmentKnowledgeSelectionQuery = $this->getFactory()
+            ->createProductAttachmentKnowledgeSelectionQuery()
+            ->joinWithProductAttachment();
+        $productAttachmentKnowledgeSelectionConditionsTransfer = $productAttachmentKnowledgeSelectionCriteriaTransfer->getProductAttachmentKnowledgeSelectionConditions();
+
+        if ($productAttachmentKnowledgeSelectionConditionsTransfer !== null) {
+            $productAttachmentKnowledgeSelectionQuery = $this->applyProductAttachmentKnowledgeSelectionConditions(
+                $productAttachmentKnowledgeSelectionQuery,
+                $productAttachmentKnowledgeSelectionConditionsTransfer,
+            );
+        }
+
+        $productAttachmentKnowledgeSelectionQuery->orderByFkProductAttachment(Criteria::ASC);
+        $productAttachmentKnowledgeSelectionCollectionTransfer = new ProductAttachmentKnowledgeSelectionCollectionTransfer();
+        $paginationTransfer = $productAttachmentKnowledgeSelectionCriteriaTransfer->getPagination();
+
+        if ($paginationTransfer !== null) {
+            $productAttachmentKnowledgeSelectionQuery = $this->applyProductAttachmentKnowledgeSelectionPagination(
+                $productAttachmentKnowledgeSelectionQuery,
+                $paginationTransfer,
+            );
+        }
+
+        $productAttachmentKnowledgeSelectionMapper = $this->getFactory()->createProductAttachmentKnowledgeSelectionMapper();
+
+        foreach ($productAttachmentKnowledgeSelectionQuery->find() as $productAttachmentKnowledgeSelectionEntity) {
+            $productAttachmentKnowledgeSelectionTransfer = $productAttachmentKnowledgeSelectionMapper->mapProductAttachmentKnowledgeSelectionEntityToTransfer(
+                $productAttachmentKnowledgeSelectionEntity,
+                new ProductAttachmentKnowledgeSelectionTransfer(),
+            );
+
+            $productAttachmentKnowledgeSelectionCollectionTransfer->addProductAttachmentKnowledgeSelection(
+                $productAttachmentKnowledgeSelectionTransfer->setProductAttachment(
+                    $productAttachmentKnowledgeSelectionMapper->mapProductAttachmentEntityToProductAttachmentTransfer(
+                        $productAttachmentKnowledgeSelectionEntity->getProductAttachment(),
+                        new ProductAttachmentTransfer(),
+                    ),
+                ),
+            );
+        }
+
+        return $productAttachmentKnowledgeSelectionCollectionTransfer;
+    }
+
+    protected function applyProductAttachmentKnowledgeSelectionConditions(
+        SpyProductAttachmentKnowledgeSelectionQuery $productAttachmentKnowledgeSelectionQuery,
+        ProductAttachmentKnowledgeSelectionConditionsTransfer $productAttachmentKnowledgeSelectionConditionsTransfer,
+    ): SpyProductAttachmentKnowledgeSelectionQuery {
+        if ($productAttachmentKnowledgeSelectionConditionsTransfer->getProductAttachmentIds() !== []) {
+            $productAttachmentKnowledgeSelectionQuery->filterByFkProductAttachment_In(
+                $productAttachmentKnowledgeSelectionConditionsTransfer->getProductAttachmentIds(),
+            );
+        }
+
+        return $productAttachmentKnowledgeSelectionQuery;
+    }
+
+    protected function applyProductAttachmentKnowledgeSelectionPagination(
+        SpyProductAttachmentKnowledgeSelectionQuery $productAttachmentKnowledgeSelectionQuery,
+        PaginationTransfer $paginationTransfer,
+    ): SpyProductAttachmentKnowledgeSelectionQuery {
+        if ($paginationTransfer->getLimit() !== null) {
+            $productAttachmentKnowledgeSelectionQuery->limit(max(1, $paginationTransfer->getLimit()));
+        }
+
+        if ($paginationTransfer->getOffset() !== null) {
+            $productAttachmentKnowledgeSelectionQuery->offset(max(0, $paginationTransfer->getOffset()));
+        }
+
+        return $productAttachmentKnowledgeSelectionQuery;
     }
 }

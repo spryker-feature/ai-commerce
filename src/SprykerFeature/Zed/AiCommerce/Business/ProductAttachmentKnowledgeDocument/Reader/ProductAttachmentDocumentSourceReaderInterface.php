@@ -19,7 +19,7 @@ interface ProductAttachmentDocumentSourceReaderInterface
      *
      * @return list<string>
      */
-    public function extractSourceIdentifiers(array $eventEntityTransfers): array;
+    public function extractSourceIdentifiers(array $eventEntityTransfers, string $eventName): array;
 
     public function getDocumentSourceCollection(
         KnowledgeDocumentSourceCriteriaTransfer $knowledgeDocumentSourceCriteriaTransfer,

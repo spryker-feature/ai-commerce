@@ -16,6 +16,7 @@ use Generated\Shared\Transfer\KnowledgeDocumentSourceTransfer;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 use Spryker\Zed\ProductAttachment\Dependency\ProductAttachmentEvents;
 use SprykerFeature\Shared\AiCommerce\AiCommerceConfig as SharedAiCommerceConfig;
+use SprykerFeature\Zed\AiCommerce\Dependency\AiCommerceEvents;
 use SprykerFeature\Zed\AiCommerce\Dependency\KnowledgeDocument\KnowledgeDocumentSourcePluginInterface;
 
 /**
@@ -40,6 +41,7 @@ class ProductAttachmentKnowledgeDocumentSourcePlugin extends AbstractPlugin impl
     /**
      * {@inheritDoc}
      * - Returns the create, update and delete events of `spy_product_attachment`, and the product abstract attachment publish event of the data import.
+     * - Returns the create and delete events of `spy_product_attachment_knowledge_selection`, and the knowledge selection publish event of the data import.
      *
      * @api
      *
@@ -52,12 +54,17 @@ class ProductAttachmentKnowledgeDocumentSourcePlugin extends AbstractPlugin impl
             ProductAttachmentEvents::ENTITY_SPY_PRODUCT_ATTACHMENT_UPDATE,
             ProductAttachmentEvents::ENTITY_SPY_PRODUCT_ATTACHMENT_DELETE,
             ProductAttachmentEvents::PRODUCT_ABSTRACT_ATTACHMENT_PUBLISH,
+            AiCommerceEvents::ENTITY_SPY_PRODUCT_ATTACHMENT_KNOWLEDGE_SELECTION_CREATE,
+            AiCommerceEvents::ENTITY_SPY_PRODUCT_ATTACHMENT_KNOWLEDGE_SELECTION_DELETE,
+            AiCommerceEvents::PRODUCT_ATTACHMENT_KNOWLEDGE_SELECTION_PUBLISH,
         ];
     }
 
     /**
      * {@inheritDoc}
      * - Returns the product attachment IDs of the events as strings.
+     * - Takes the ID from `foreignKeys['spy_product_attachment_knowledge_selection.fk_product_attachment']` for the knowledge selection entity events, and from `id` for all other events.
+     * - Skips an event without the product attachment ID.
      *
      * @api
      *
@@ -69,12 +76,13 @@ class ProductAttachmentKnowledgeDocumentSourcePlugin extends AbstractPlugin impl
     {
         return $this->getBusinessFactory()
             ->createProductAttachmentDocumentSourceReader()
-            ->extractSourceIdentifiers($eventEntityTransfers);
+            ->extractSourceIdentifiers($eventEntityTransfers, $eventName);
     }
 
     /**
      * {@inheritDoc}
-     * - Reads the product attachments through `ProductAttachmentFacade::getProductAttachmentCollection()`.
+     * - Returns only the product attachments that are selected as assistant knowledge, in 1 query.
+     * - Sorts the sources by the product attachment ID ascending.
      * - Sets the attachment label as document name, the attachment locale name (null for all locales) and the attachment URL.
      *
      * @api

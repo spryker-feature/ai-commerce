@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace SprykerFeature\Zed\AiCommerce;
 
+use Generated\Shared\Transfer\DataImporterDataSourceConfigurationTransfer;
 use Spryker\Zed\Kernel\AbstractBundleConfig;
 use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
 
@@ -19,6 +20,20 @@ use SprykerFeature\Shared\AiCommerce\AiCommerceConstants;
  */
 class AiCommerceConfig extends AbstractBundleConfig
 {
+    /**
+     * Specification:
+     * - Defines the data import type of the product attachment knowledge selection.
+     *
+     * @api
+     */
+    public const string IMPORT_TYPE_PRODUCT_ATTACHMENT_KNOWLEDGE_SELECTION = 'product-attachment-knowledge-selection';
+
+    protected const string PRODUCT_ATTACHMENT_KNOWLEDGE_SELECTION_IMPORT_FILE_NAME = 'product_attachment_knowledge_selection.csv';
+
+    protected const string PRODUCT_ATTACHMENT_KNOWLEDGE_SELECTION_IMPORT_DIRECTORY = '/data/import/common/common/';
+
+    protected const string MODULE_NAME = 'AiCommerce';
+
     protected const string CONFIGURATION_KEY_AI_COMMERCE_BACKOFFICE_ASSISTANT_GENERAL_IS_ENABLED = 'ai_commerce:backoffice_assistant:general:is_enabled';
 
     protected const string CONFIGURATION_KEY_ORDER_MANAGEMENT_AGENT_IS_ENABLED = 'ai_commerce:backoffice_assistant:general:is_order_management_agent_enabled';
@@ -799,5 +814,20 @@ class AiCommerceConfig extends AbstractBundleConfig
     public function getBedrockKnowledgeBaseDataSourceIds(): array
     {
         return $this->getSharedConfig()->getBedrockKnowledgeBaseDataSourceIds();
+    }
+
+    /**
+     * Specification:
+     * - Returns the data import configuration of the product attachment knowledge selection.
+     *
+     * @api
+     */
+    public function getProductAttachmentKnowledgeSelectionDataImporterConfiguration(): DataImporterDataSourceConfigurationTransfer
+    {
+        return (new DataImporterDataSourceConfigurationTransfer())
+            ->setImportType(static::IMPORT_TYPE_PRODUCT_ATTACHMENT_KNOWLEDGE_SELECTION)
+            ->setFileName(static::PRODUCT_ATTACHMENT_KNOWLEDGE_SELECTION_IMPORT_FILE_NAME)
+            ->setModuleName(static::MODULE_NAME)
+            ->setDirectory(static::PRODUCT_ATTACHMENT_KNOWLEDGE_SELECTION_IMPORT_DIRECTORY);
     }
 }
