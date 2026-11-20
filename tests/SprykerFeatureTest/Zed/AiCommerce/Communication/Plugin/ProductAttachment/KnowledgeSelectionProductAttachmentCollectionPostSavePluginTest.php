@@ -208,7 +208,7 @@ class KnowledgeSelectionProductAttachmentCollectionPostSavePluginTest extends Un
     {
         $selectionQueryCount = 1 + ($deleteCount > 0 ? 1 : 0) + $createCount + $deleteCount;
         $eventChangeLogInsertCount = $createCount + $deleteCount;
-        $sequenceReadCount = $this->tester->isPostgreSql() ? $createCount : 0;
+        $sequenceReadCount = $this->tester->isPostgreSql() ? $createCount + $eventChangeLogInsertCount : 0;
 
         return $selectionQueryCount + $eventChangeLogInsertCount + $sequenceReadCount;
     }
