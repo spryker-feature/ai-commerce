@@ -367,11 +367,11 @@ class UrlDocumentContentReader implements UrlDocumentContentReaderInterface
 
     protected function isPublicIpAddress(string $address): bool
     {
-        return filter_var(
+        return (bool)filter_var(
             $address,
             FILTER_VALIDATE_IP,
             FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE | FILTER_FLAG_GLOBAL_RANGE,
-        ) !== false;
+        );
     }
 
     protected function findEmbeddedIpv4Address(string $address): ?string
