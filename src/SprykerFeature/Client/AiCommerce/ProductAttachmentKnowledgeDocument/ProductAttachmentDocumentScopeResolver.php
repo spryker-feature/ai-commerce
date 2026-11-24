@@ -9,9 +9,12 @@ declare(strict_types=1);
 
 namespace SprykerFeature\Client\AiCommerce\ProductAttachmentKnowledgeDocument;
 
+use ArrayObject;
 use Generated\Shared\Transfer\KnowledgeDocumentScopeRequestTransfer;
 use Generated\Shared\Transfer\KnowledgeDocumentScopeTransfer;
+use Generated\Shared\Transfer\KnowledgeDocumentSourceTransfer;
 use Generated\Shared\Transfer\ProductAttachmentStorageCriteriaTransfer;
+use Generated\Shared\Transfer\ProductAttachmentStorageTransfer;
 use Spryker\Client\ProductAttachmentStorage\ProductAttachmentStorageClientInterface;
 use Spryker\Client\ProductStorage\ProductStorageClientInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Product\ProductAbstractIdResolverInterface;
@@ -115,23 +118,31 @@ class ProductAttachmentDocumentScopeResolver implements ProductAttachmentDocumen
         string $productReference,
         string $localeName
     ): void {
-        $documentKeys = $this->getProductAttachmentDocumentKeys($idProductAbstract, $localeName);
+        $knowledgeDocumentSourceTransfers = $this->getProductAttachmentDocumentSources($idProductAbstract, $localeName);
 
-        if ($documentKeys === []) {
+        if ($knowledgeDocumentSourceTransfers === []) {
             $knowledgeDocumentScopeTransfer->addMessage(sprintf(static::MESSAGE_PRODUCT_HAS_NO_DOCUMENTS, $productReference));
 
             return;
         }
 
-        $knowledgeDocumentScopeTransfer->setDocumentKeys(
-            array_values(array_unique([...$knowledgeDocumentScopeTransfer->getDocumentKeys(), ...$documentKeys])),
-        );
+        foreach ($knowledgeDocumentSourceTransfers as $knowledgeDocumentSourceTransfer) {
+            $documentKey = $this->createDocumentKey((string)$knowledgeDocumentSourceTransfer->getSourceIdentifier());
+
+            if (in_array($documentKey, $knowledgeDocumentScopeTransfer->getDocumentKeys(), true)) {
+                continue;
+            }
+
+            $knowledgeDocumentScopeTransfer
+                ->addDocumentKey($documentKey)
+                ->addKnowledgeDocumentSource($knowledgeDocumentSourceTransfer);
+        }
     }
 
     /**
-     * @return list<string>
+     * @return list<\Generated\Shared\Transfer\KnowledgeDocumentSourceTransfer>
      */
-    protected function getProductAttachmentDocumentKeys(int $idProductAbstract, string $localeName): array
+    protected function getProductAttachmentDocumentSources(int $idProductAbstract, string $localeName): array
     {
         $productAbstractAttachmentStorageTransfer = $this->productAttachmentStorageClient->findProductAbstractAttachmentStorage(
             (new ProductAttachmentStorageCriteriaTransfer())
@@ -143,17 +154,27 @@ class ProductAttachmentDocumentScopeResolver implements ProductAttachmentDocumen
             return [];
         }
 
-        $documentKeys = [];
+        $knowledgeDocumentSourceTransfers = [];
 
         foreach ($productAbstractAttachmentStorageTransfer->getAttachments() as $productAttachmentStorageTransfer) {
             if ($productAttachmentStorageTransfer->getIdProductAttachment() === null) {
                 continue;
             }
 
-            $documentKeys[] = $this->createDocumentKey((string)$productAttachmentStorageTransfer->getIdProductAttachment());
+            $knowledgeDocumentSourceTransfers[] = $this->createKnowledgeDocumentSource($productAttachmentStorageTransfer);
         }
 
-        return $documentKeys;
+        return $knowledgeDocumentSourceTransfers;
+    }
+
+    protected function createKnowledgeDocumentSource(
+        ProductAttachmentStorageTransfer $productAttachmentStorageTransfer
+    ): KnowledgeDocumentSourceTransfer {
+        return (new KnowledgeDocumentSourceTransfer())
+            ->setSourceType(SharedAiCommerceConfig::KNOWLEDGE_DOCUMENT_SOURCE_TYPE_PRODUCT_ATTACHMENT)
+            ->setSourceIdentifier((string)$productAttachmentStorageTransfer->getIdProductAttachmentOrFail())
+            ->setDocumentName($productAttachmentStorageTransfer->getLabel())
+            ->setUrl($productAttachmentStorageTransfer->getUrl());
     }
 
     /**
@@ -174,7 +195,33 @@ class ProductAttachmentDocumentScopeResolver implements ProductAttachmentDocumen
             $knowledgeDocumentScopeTransfer->addMessage(static::MESSAGE_REQUESTED_DOCUMENTS_NOT_FOUND);
         }
 
-        return $knowledgeDocumentScopeTransfer->setDocumentKeys($documentKeys);
+        return $knowledgeDocumentScopeTransfer
+            ->setDocumentKeys($documentKeys)
+            ->setKnowledgeDocumentSources($this->filterKnowledgeDocumentSources(
+                $knowledgeDocumentScopeTransfer->getKnowledgeDocumentSources(),
+                $documentKeys,
+            ));
+    }
+
+    /**
+     * @param \ArrayObject<int, \Generated\Shared\Transfer\KnowledgeDocumentSourceTransfer> $knowledgeDocumentSourceTransfers
+     * @param list<string> $documentKeys
+     *
+     * @return \ArrayObject<int, \Generated\Shared\Transfer\KnowledgeDocumentSourceTransfer>
+     */
+    protected function filterKnowledgeDocumentSources(ArrayObject $knowledgeDocumentSourceTransfers, array $documentKeys): ArrayObject
+    {
+        $filteredKnowledgeDocumentSourceTransfers = new ArrayObject();
+
+        foreach ($knowledgeDocumentSourceTransfers as $knowledgeDocumentSourceTransfer) {
+            if (!in_array($this->createDocumentKey((string)$knowledgeDocumentSourceTransfer->getSourceIdentifier()), $documentKeys, true)) {
+                continue;
+            }
+
+            $filteredKnowledgeDocumentSourceTransfers->append($knowledgeDocumentSourceTransfer);
+        }
+
+        return $filteredKnowledgeDocumentSourceTransfers;
     }
 
     /**

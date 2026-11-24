@@ -1,0 +1,38 @@
+{% extends model('component') %}
+
+{% define config = {
+    name: 'chat-knowledge-sources',
+    tag: 'chat-knowledge-sources',
+} %}
+
+{% define data = {
+    linkOrigins: [],
+} %}
+
+{% define attributes = {
+    'link-origins': data.linkOrigins | join(','),
+} %}
+
+{% block body %}
+    {% block knowledgeSources %}
+        {% set sourcesTitle = 'ai_commerce.storefront_assistant.knowledge_sources.title' | trans %}
+        <template data-block="knowledgeSources">
+            <div class="spryker-chat-message chat-knowledge-sources__result">
+                <ul class="chat-knowledge-sources__list" data-ref="list" aria-label="{{ sourcesTitle }}"></ul>
+            </div>
+        </template>
+    {% endblock %}
+    {% block knowledgeSource %}
+        <template data-block="knowledgeSource">
+            <li class="chat-knowledge-sources__item">
+                <svg class="spryker-chat__icon chat-knowledge-sources__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 13H8"/><path d="M16 17H8"/><path d="M16 13h-2"/></g></svg>
+                <a class="chat-knowledge-sources__link" data-ref="link" target="_blank" rel="noopener noreferrer">
+                    <span data-ref="linkName"></span>
+                    <span class="spryker-chat__visually-hidden">{{ 'ai_commerce.storefront_assistant.knowledge_sources.opens_in_new_tab' | trans }}</span>
+                    <svg class="spryker-chat__icon chat-knowledge-sources__external-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></g></svg>
+                </a>
+                <span class="chat-knowledge-sources__name" data-ref="name"></span>
+            </li>
+        </template>
+    {% endblock %}
+{% endblock %}

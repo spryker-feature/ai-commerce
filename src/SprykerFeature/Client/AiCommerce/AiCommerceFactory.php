@@ -58,6 +58,8 @@ use SprykerFeature\Client\AiCommerce\KnowledgeDocument\KnowledgeDocumentSearchRe
 use SprykerFeature\Client\AiCommerce\KnowledgeDocument\KnowledgeDocumentSearchRequestValidatorInterface;
 use SprykerFeature\Client\AiCommerce\KnowledgeDocument\KnowledgeDocumentSearchResultBuilder;
 use SprykerFeature\Client\AiCommerce\KnowledgeDocument\KnowledgeDocumentSearchResultBuilderInterface;
+use SprykerFeature\Client\AiCommerce\KnowledgeDocument\KnowledgeDocumentUrlSanitizer;
+use SprykerFeature\Client\AiCommerce\KnowledgeDocument\KnowledgeDocumentUrlSanitizerInterface;
 use SprykerFeature\Client\AiCommerce\ProductAttachmentKnowledgeDocument\ProductAttachmentDocumentScopeResolver;
 use SprykerFeature\Client\AiCommerce\ProductAttachmentKnowledgeDocument\ProductAttachmentDocumentScopeResolverInterface;
 use SprykerFeature\Client\AiCommerce\SearchByImage\AiSearchByImageTermResolver;
@@ -102,6 +104,10 @@ use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Conversation\ShownProdu
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Conversation\ShownProductRegistryInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Document\DocumentSearchReader;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Document\DocumentSearchReaderInterface;
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Document\DocumentToolArgumentMapper;
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Document\DocumentToolArgumentMapperInterface;
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Document\KnowledgeSourceDisplayReader;
+use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Document\KnowledgeSourceDisplayReaderInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Gate\StorefrontAssistantFeatureGate;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Gate\StorefrontAssistantFeatureGateInterface;
 use SprykerFeature\Client\AiCommerce\StorefrontAssistant\Mapper\StorefrontAssistantProductMapper;
@@ -1169,6 +1175,11 @@ class AiCommerceFactory extends AbstractFactory
         return new KnowledgeDocumentSearchResultBuilder();
     }
 
+    public function createKnowledgeDocumentUrlSanitizer(): KnowledgeDocumentUrlSanitizerInterface
+    {
+        return new KnowledgeDocumentUrlSanitizer();
+    }
+
     public function createKnowledgeDocumentPassageFilter(): KnowledgeDocumentPassageFilterInterface
     {
         return new KnowledgeDocumentPassageFilter($this->getConfig());
@@ -1188,6 +1199,25 @@ class AiCommerceFactory extends AbstractFactory
         return new DocumentSearchReader(
             $this->createToolArgumentNormalizer(),
             $this->createKnowledgeDocumentSearcher(),
+            $this->createDocumentToolArgumentMapper(),
+        );
+    }
+
+    public function createDocumentToolArgumentMapper(): DocumentToolArgumentMapperInterface
+    {
+        return new DocumentToolArgumentMapper();
+    }
+
+    public function createKnowledgeSourceDisplayReader(): KnowledgeSourceDisplayReaderInterface
+    {
+        return new KnowledgeSourceDisplayReader(
+            $this->createToolArgumentNormalizer(),
+            $this->createDocumentToolArgumentMapper(),
+            $this->createKnowledgeDocumentScopeResolver(),
+            $this->createKnowledgeDocumentUrlSanitizer(),
+            $this->getLocaleClient(),
+            $this->getStoreClient(),
+            $this->getConfig(),
         );
     }
 

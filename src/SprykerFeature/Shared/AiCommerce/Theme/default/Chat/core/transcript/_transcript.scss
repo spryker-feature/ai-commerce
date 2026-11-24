@@ -90,6 +90,10 @@ spryker-chat {
     background: var(--chat-bubble-assistant-background);
 }
 
+.spryker-chat-message__footer:empty {
+    display: none;
+}
+
 .spryker-chat-message--error {
     align-self: flex-start;
     padding: var(--chat-space-medium) var(--chat-space-medium-large);

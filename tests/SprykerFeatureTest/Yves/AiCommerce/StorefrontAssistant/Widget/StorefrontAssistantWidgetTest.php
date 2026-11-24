@@ -11,6 +11,7 @@ namespace SprykerFeatureTest\Yves\AiCommerce\StorefrontAssistant\Widget;
 
 use Codeception\Test\Unit;
 use Generated\Shared\Transfer\CustomerTransfer;
+use SprykerFeature\Client\AiCommerce\Plugin\StorefrontAssistant\Tool\DisplayKnowledgeSourcesToolPlugin;
 use SprykerFeature\Client\AiCommerce\Plugin\StorefrontAssistant\Tool\ProductDetailsToolPlugin;
 use SprykerFeature\Shared\AiCommerce\StorefrontAssistant\StorefrontAssistantPageType;
 use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Widget\StorefrontAssistantWidget;
@@ -45,6 +46,10 @@ class StorefrontAssistantWidgetTest extends Unit
     protected const string PARAMETER_SUGGESTED_PROMPTS = 'suggestedPrompts';
 
     protected const string PARAMETER_CHAT_OWNER_TOKEN = 'chatOwnerToken';
+
+    protected const string PARAMETER_KNOWLEDGE_SOURCE_LINK_ORIGINS = 'knowledgeSourceLinkOrigins';
+
+    protected const string KNOWLEDGE_SOURCE_LINK_ORIGIN = 'media.example.com';
 
     /**
      * @var array<int, array<string, string>>
@@ -164,6 +169,30 @@ class StorefrontAssistantWidgetTest extends Unit
 
         // Assert
         $this->assertContains(ProductDetailsToolPlugin::TOOL_NAME, $parameters[static::PARAMETER_TOOL_NAMES]);
+    }
+
+    public function testGivenWidgetWhenBuiltThenKnowledgeSourcesToolNameIsPublishedForItsLabel(): void
+    {
+        // Arrange
+        $customerTransfer = (new CustomerTransfer())->setCustomerReference(static::CUSTOMER_REFERENCE);
+
+        // Act
+        $parameters = $this->createWidget(true, $customerTransfer)->getParameters();
+
+        // Assert
+        $this->assertContains(DisplayKnowledgeSourcesToolPlugin::TOOL_NAME, $parameters[static::PARAMETER_TOOL_NAMES]);
+    }
+
+    public function testGivenConfiguredLinkOriginsWhenBuiltThenKnowledgeSourceLinkOriginsArePublished(): void
+    {
+        // Arrange
+        $customerTransfer = (new CustomerTransfer())->setCustomerReference(static::CUSTOMER_REFERENCE);
+
+        // Act
+        $parameters = $this->tester->createStorefrontAssistantWidget(true, $customerTransfer, static::PROMPT_URL, static::ENABLED_AGENTS, [], [static::KNOWLEDGE_SOURCE_LINK_ORIGIN])->getParameters();
+
+        // Assert
+        $this->assertSame([static::KNOWLEDGE_SOURCE_LINK_ORIGIN], $parameters[static::PARAMETER_KNOWLEDGE_SOURCE_LINK_ORIGINS]);
     }
 
     public function testGivenNoEnabledAgentWhenBuiltThenWidgetIsDisabled(): void

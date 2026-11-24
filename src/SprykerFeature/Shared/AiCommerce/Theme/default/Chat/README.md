@@ -63,6 +63,7 @@ empty one, and a host feature by not including it.
 | tool-compare | `chat-tool-compare` | storefront only | tool-calls, tool-products |
 | offer-choices | `chat-offer-choices` | storefront only | tool-calls |
 | display-setup | `chat-display-setup` | storefront only | tool-calls, tool-products |
+| knowledge-sources | `chat-knowledge-sources` | storefront only | tool-calls |
 | form-fill, form-context | `chat-form-fill`, `chat-form-context` | Back Office only | — |
 
 DOM order is initialization order; `requires` moves a feature after the features it names.
@@ -76,7 +77,7 @@ owner, the block and the reference.
 
 | Owner | Blocks (required `data-ref`) |
 |---|---|
-| core (`core/panel/panel.twig`, `core/composer/composer.twig`, `core/transcript/transcript.twig`) | `launcher`, `panel` (close, scroller, transcript, composer, newConversation; optional welcomeZone, moreToggle, moreMenu, expand), `composer` (input, send, stop; optional limit: the length notice, which takes the disclosure's line while shown; optional disclosure: the AI notice the input is described by), `messageUser` (text), `messageAssistant` (content), `messageError` (text), `loading` (optional label, status), `retry` |
+| core (`core/panel/panel.twig`, `core/composer/composer.twig`, `core/transcript/transcript.twig`) | `launcher`, `panel` (close, scroller, transcript, composer, newConversation; optional welcomeZone, moreToggle, moreMenu, expand), `composer` (input, send, stop; optional limit: the length notice, which takes the disclosure's line while shown; optional disclosure: the AI notice the input is described by), `messageUser` (text), `messageAssistant` (content; optional footer: the answer footer that features append to), `messageError` (text), `loading` (optional label, status), `retry` |
 | agent-selector | `agentSelectorPicker` (toggle, label, menu), `agentSelectorOption` (label, description) |
 | attachments | `attachmentsControl` (button, input), `attachmentsChip` (name, remove), `attachmentsPills`, `attachmentsPill` (name), `attachmentsNotice` (unsupportedType, tooLarge, tooMany, readFailed, fileName) |
 | histories | `historiesToggle`, `historiesView` (close, startNew, list, loading, empty, count, select, selectLabel, cancelLabel, footer, selectAll, deleteSelected, deleteError), `historiesItem` (checkbox, open, name, current, time, delete), `historiesError` |
@@ -90,6 +91,7 @@ owner, the block and the reference.
 | tool-compare | `compareTray` (count, clear, chips, submit), `compareChip` (image, name, remove), `comparisonCard` (count, products, open, link), `comparisonCardProduct` (image, name, price), `comparisonView` (back, count, differences, body), `comparisonTable` (head, body), `comparisonHeadCell` (image, name, sku, skuValue, price, link), `comparisonSection` (label), `comparisonRow` (label), `comparisonValue`, `comparisonEmptyValue` |
 | offer-choices | `offerChoices` (question, choices), `offerChoice` (text) |
 | display-setup | `setupTotal` |
+| knowledge-sources | `knowledgeSources` (list), `knowledgeSource` (link, linkName, name) |
 | loading-label | none: it writes the running tool into the `label` and `status` references of the core `loading` block |
 | form-context | `formContext` (attach, attachLabel, chip, chipLabel, remove) |
 | trigger | none: it binds the host's buttons from `button.twig`, which are rendered outside the chat |
@@ -123,6 +125,16 @@ keeps the session for any user, as the Back Office does. Only `chat-session-pers
 
 ```ts
 context.zones.insert(CORE_ZONE.composerStart, chip.root, 'start');
+```
+
+Transcript content that belongs to an exchange (a user message and everything up to the next one) goes through
+`transcript.appendToExchange(element, anchor)`, which inserts at the end of the anchor's exchange, or
+`transcript.appendToAnswer(element, anchor)`, which appends to the `footer` of the exchange's last answer. Without a
+`footer` in an overridden `messageAssistant`, the element goes after that answer; without an answer, to the exchange
+end. `chat-message-actions` places its bar with the first, `chat-knowledge-sources` its sources with the second.
+
+```ts
+context.transcript.appendToAnswer(sources, sources);
 ```
 
 The core removes a feature's insertions when the feature is disposed. Consequence: a `panel` or `composer` override
@@ -232,7 +244,8 @@ renderer that cannot read its result reports why before returning `null`.
 ## Links and images from tool results
 
 Tool results come from an AI turn: a link is used only when it is a same-origin path (`/…`, no `//`, no backslash, no
-whitespace), an image when it is such a path or an https URL from `toolProducts.imageOrigins`.
+whitespace), an image when it is such a path or an https URL from `toolProducts.imageOrigins`. Features take the path
+check (`isSafePath`) and the origin-list parsing (`readOriginList`) from `core/contracts/links.ts`.
 
 ```twig
 toolProducts: { searchUrl: path('search'), imageOrigins: ['media.example.com'] }
@@ -240,6 +253,12 @@ toolProducts: { searchUrl: path('search'), imageOrigins: ['media.example.com'] }
 
 Consequence: with `imageOrigins` empty any https image host is accepted (the former storefront behaviour); list the
 media hosts to close that.
+
+A knowledge source document is a link when its URL is such a path or an https URL from
+`knowledgeSources.linkOrigins` (Yves `AiCommerceConfig::getKnowledgeSourceLinkOrigins()`); it opens in a new tab
+with `rel="noopener noreferrer"`. Any other URL shows the document name as plain text.
+
+Consequence: with `linkOrigins` empty only URLs on the shop origin are links, unlike `imageOrigins`.
 
 ## Add a feature
 
@@ -320,7 +339,9 @@ Override the block by name in the host embed; keep its `<template data-block>`, 
 {% endblock %}
 ```
 
-Consequence: the override applies only to that host; to change it everywhere, shadow the twig file.
+Consequence: the override applies only to that host; to change it everywhere, shadow the twig file. A
+`messageAssistant` override without the `footer` reference keeps feature content out of its markup: that content shows
+after the answer.
 
 ## Shadow or extend a feature
 

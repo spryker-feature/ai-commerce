@@ -12,6 +12,7 @@ use SprykerFeature\Client\AiCommerce\Plugin\StorefrontAssistant\Tool\CatalogSear
 use SprykerFeature\Client\AiCommerce\Plugin\StorefrontAssistant\Tool\CatalogSuggestToolPlugin;
 use SprykerFeature\Client\AiCommerce\Plugin\StorefrontAssistant\Tool\CategoryTreeToolPlugin;
 use SprykerFeature\Client\AiCommerce\Plugin\StorefrontAssistant\Tool\CompareProductsToolPlugin;
+use SprykerFeature\Client\AiCommerce\Plugin\StorefrontAssistant\Tool\DisplayKnowledgeSourcesToolPlugin;
 use SprykerFeature\Client\AiCommerce\Plugin\StorefrontAssistant\Tool\DisplayProductsToolPlugin;
 use SprykerFeature\Client\AiCommerce\Plugin\StorefrontAssistant\Tool\DisplaySetupToolPlugin;
 use SprykerFeature\Client\AiCommerce\Plugin\StorefrontAssistant\Tool\OfferChoicesToolPlugin;
@@ -59,6 +60,8 @@ class StorefrontAssistantWidget extends AbstractWidget
 
     protected const string PARAMETER_TOOL_NAMES = 'toolNames';
 
+    protected const string PARAMETER_KNOWLEDGE_SOURCE_LINK_ORIGINS = 'knowledgeSourceLinkOrigins';
+
     public function __construct()
     {
         $customerTransfer = $this->getFactory()->getCustomerClient()->getCustomer();
@@ -78,6 +81,7 @@ class StorefrontAssistantWidget extends AbstractWidget
         $this->addEnabledAgentsParameter($enabledAgents);
         $this->addSuggestedPromptsParameter($isEnabled);
         $this->addToolNamesParameter();
+        $this->addKnowledgeSourceLinkOriginsParameter();
     }
 
     /**
@@ -117,7 +121,16 @@ class StorefrontAssistantWidget extends AbstractWidget
             ProductSetsToolPlugin::TOOL_NAME,
             OfferChoicesToolPlugin::TOOL_NAME,
             DisplaySetupToolPlugin::TOOL_NAME,
+            DisplayKnowledgeSourcesToolPlugin::TOOL_NAME,
         ]);
+    }
+
+    protected function addKnowledgeSourceLinkOriginsParameter(): void
+    {
+        $this->addParameter(
+            static::PARAMETER_KNOWLEDGE_SOURCE_LINK_ORIGINS,
+            $this->getConfig()->getKnowledgeSourceLinkOrigins(),
+        );
     }
 
     /**

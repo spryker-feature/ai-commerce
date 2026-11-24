@@ -15,6 +15,7 @@
     enabledAgents: _widget.enabledAgents,
     suggestedPrompts: _widget.suggestedPrompts,
     toolNames: _widget.toolNames,
+    knowledgeSourceLinkOrigins: _widget.knowledgeSourceLinkOrigins,
 } %}
 
 {% block template %}
@@ -39,6 +40,7 @@
             enabledAgents: data.enabledAgents,
             suggestedPrompts: data.suggestedPrompts,
             toolNames: data.toolNames,
+            knowledgeSourceLinkOrigins: data.knowledgeSourceLinkOrigins,
         },
     } only %}
 {% endblock %}

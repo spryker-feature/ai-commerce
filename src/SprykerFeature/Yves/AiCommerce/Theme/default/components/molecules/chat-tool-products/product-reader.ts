@@ -1,8 +1,8 @@
+import { isSafePath } from '@shared/ai-commerce/Chat/core/contracts/links';
+
 const HTTPS_PROTOCOL = 'https:';
 const MAX_REFINEMENT_TEXT_LENGTH = 80;
 const PRODUCT_COLLECTION_KEYS = ['products', 'items'];
-// Same-origin paths only (no `//host`, `/\\host`, whitespace, backslash); kept in sync with comparison-reader.ts.
-const SAFE_PATH_PATTERN = /^\/(?![/\\])[^\s\\]*$/;
 const FILTER_ARGUMENT_PATTERN = /^[A-Za-z][\w.]*(?:, [A-Za-z][\w.]*)*$/;
 export interface ChatProduct {
     readonly name: string;
@@ -60,8 +60,6 @@ const readString = (value: unknown): string => (typeof value === 'string' ? valu
 
 const readNumber = (value: unknown): number | null =>
     typeof value === 'number' && Number.isFinite(value) ? value : null;
-
-export const isSafePath = (path: unknown): path is string => typeof path === 'string' && SAFE_PATH_PATTERN.test(path);
 
 const isSafeImageUrl = (url: string, origins: readonly string[]): boolean => {
     if (isSafePath(url)) {

@@ -124,6 +124,10 @@ export interface ChatTranscriptControl {
     scrollToEnd(): void;
     removeAfter(element: Element): void;
     captureFollow(): () => void;
+    // The exchange of an anchor runs from the user message before it to the next user message.
+    appendToExchange(element: Element, anchor: Element): void;
+    // Into the footer of the exchange's last answer; after that answer when its block has no footer, else the exchange end.
+    appendToAnswer(element: Element, anchor: Element): void;
 }
 
 export interface ChatComposerControl {

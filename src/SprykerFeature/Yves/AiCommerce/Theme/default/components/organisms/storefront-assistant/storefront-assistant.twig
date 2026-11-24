@@ -19,6 +19,7 @@
     enabledAgents: [],
     suggestedPrompts: {},
     toolNames: [],
+    knowledgeSourceLinkOrigins: [],
 } %}
 
 {% block body %}
@@ -62,6 +63,9 @@
             sessionPersistence: {
                 clearStorageKeys: [agentStorageKey],
             },
+            knowledgeSources: {
+                linkOrigins: data.knowledgeSourceLinkOrigins,
+            },
         },
     } only %}
         {% block hostFeatures %}
@@ -70,6 +74,11 @@
             {% include molecule('chat-tool-compare', 'AiCommerce') only %}
             {% include molecule('chat-offer-choices', 'AiCommerce') only %}
             {% include molecule('chat-display-setup', 'AiCommerce') only %}
+            {% include molecule('chat-knowledge-sources', 'AiCommerce') with {
+                data: {
+                    linkOrigins: features.knowledgeSources.linkOrigins ?? [],
+                },
+            } only %}
         {% endblock %}
     {% endembed %}
 {% endblock %}

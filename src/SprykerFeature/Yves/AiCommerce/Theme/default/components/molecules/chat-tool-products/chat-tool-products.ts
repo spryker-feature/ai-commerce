@@ -11,12 +11,12 @@ import { CHAT_MESSAGE_ROLE } from '@shared/ai-commerce/Chat/core/contracts/servi
 import { announceFeature } from '@shared/ai-commerce/Chat/core/contracts/access';
 import { REQUEST_LOCK } from '@shared/ai-commerce/Chat/core/contracts/tokens';
 import { describeFailure } from '@shared/ai-commerce/Chat/core/contracts/failure';
+import { isSafePath, readOriginList } from '@shared/ai-commerce/Chat/core/contracts/links';
 import type { ChatToolCall, ChatToolCalls } from '@shared/ai-commerce/Chat/features/tool-calls/tool-calls';
 import type { ChatSuggestedPrompts } from '@shared/ai-commerce/Chat/features/suggested-prompts/suggested-prompts';
 import {
     decodeResult,
     isRecord,
-    isSafePath,
     parseActiveFilter,
     parseList,
     parseRefinementChip,
@@ -46,7 +46,6 @@ const SUGGESTED_PROMPTS_TAG_NAME = 'chat-suggested-prompts';
 const DISPLAY_PRODUCTS_TOOL_NAME = 'display_products';
 const SEARCH_URL_ATTRIBUTE = 'search-url';
 const IMAGE_ORIGINS_ATTRIBUTE = 'image-origins';
-const URL_SCHEME_SEPARATOR = '://';
 const MAX_REMEMBERED_PRODUCTS = 200;
 const PROMPT_GROUP_ATTRIBUTE = 'prompt-group';
 const DEFAULT_PROMPT_GROUP = 'product_results';
@@ -98,23 +97,12 @@ interface ProductTemplates {
 }
 
 const readImageOrigins = (element: HTMLElement): string[] =>
-    (element.getAttribute(IMAGE_ORIGINS_ATTRIBUTE) ?? '')
-        .split(',')
-        .map((entry) => entry.trim())
-        .filter((entry) => entry !== '')
-        .map((entry) => {
-            try {
-                return new URL(entry.includes(URL_SCHEME_SEPARATOR) ? entry : `https${URL_SCHEME_SEPARATOR}${entry}`)
-                    .origin;
-            } catch (error) {
-                throw new Error(
-                    `<${TOOL_PRODUCTS_TAG_NAME}> has "${entry}" in its "${IMAGE_ORIGINS_ATTRIBUTE}" attribute, which ` +
-                        `is not a host or an origin (reported by ${SOURCE_FILE}); the feature stays inactive. Pass ` +
-                        `toolProducts.imageOrigins as a list such as ['media.example.com'] in the host's include of tool-products.twig.`,
-                    { cause: error },
-                );
-            }
-        });
+    readOriginList(element, IMAGE_ORIGINS_ATTRIBUTE, {
+        httpsOnly: false,
+        fix:
+            "Pass toolProducts.imageOrigins as a list such as ['media.example.com'] in the host's include of " +
+            'tool-products.twig.',
+    });
 
 const requireText = <Reference extends string>(template: ChatBlockTemplate<Reference>, attribute: string): string => {
     const text = template.create().root.getAttribute(attribute) ?? '';

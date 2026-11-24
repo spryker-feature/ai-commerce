@@ -7,6 +7,7 @@ import type { ChatMessageRole } from '../contracts/services';
 const BUSY_ATTRIBUTE = 'aria-busy';
 const FOLLOW_DISTANCE_PROPERTY = '--chat-scroll-follow-distance';
 const DEFAULT_FOLLOW_DISTANCE_PIXELS = 48;
+const FOOTER_REFERENCE = 'footer';
 
 export interface ChatTranscriptTemplates {
     readonly messageUser: ChatBlockTemplate<'text'>;
@@ -56,6 +57,7 @@ export const createTranscript = (parts: ChatTranscriptParts): ChatTranscript => 
     const { transcript, scroller, welcomeZone } = parts.elements;
     let loading: HTMLElement | null = null;
     let userMessageRoots: HTMLElement[] = [];
+    const answerFooters = new WeakMap<Element, HTMLElement | null>();
     let followDistance: number | null = null;
 
     const syncWelcomeZone = (): void => {
@@ -96,6 +98,73 @@ export const createTranscript = (parts: ChatTranscriptParts): ChatTranscript => 
         }
 
         syncWelcomeZone();
+        follow();
+    };
+
+    const isUserMessage = (element: Element): boolean => userMessageRoots.some((root) => root === element);
+
+    const findExchangeEnd = (anchor: Element): Element | null => {
+        let sibling = anchor.nextElementSibling;
+
+        while (sibling !== null && !isUserMessage(sibling)) {
+            sibling = sibling.nextElementSibling;
+        }
+
+        return sibling;
+    };
+
+    const findExchangeAnswer = (anchor: Element, exclude: Element): Element | null => {
+        const end = findExchangeEnd(anchor);
+        let sibling = end === null ? transcript.lastElementChild : end.previousElementSibling;
+
+        while (sibling !== null && !isUserMessage(sibling)) {
+            if (sibling !== exclude && answerFooters.has(sibling)) {
+                return sibling;
+            }
+
+            sibling = sibling.previousElementSibling;
+        }
+
+        return null;
+    };
+
+    const appendToExchange = (element: Element, anchor: Element): void => {
+        const end = anchor.parentElement === transcript ? findExchangeEnd(anchor) : null;
+
+        parts.onFeatureContent();
+
+        if (end === null) {
+            insert(element);
+
+            return;
+        }
+
+        const follow = captureFollow();
+
+        end.before(element);
+        follow();
+    };
+
+    const appendToAnswer = (element: Element, anchor: Element): void => {
+        const answer = anchor.parentElement === transcript ? findExchangeAnswer(anchor, element) : null;
+
+        if (answer === null) {
+            appendToExchange(element, anchor);
+
+            return;
+        }
+
+        const footer = answerFooters.get(answer) ?? null;
+        const follow = captureFollow();
+
+        parts.onFeatureContent();
+
+        if (footer === null) {
+            answer.after(element);
+        } else {
+            footer.append(element);
+        }
+
         follow();
     };
 
@@ -149,6 +218,7 @@ export const createTranscript = (parts: ChatTranscriptParts): ChatTranscript => 
         renderAssistantMessage: (): ChatAssistantMessage => {
             const block = parts.templates.messageAssistant.create();
 
+            answerFooters.set(block.root, block.find(FOOTER_REFERENCE));
             insert(block.root);
             announce(CHAT_MESSAGE_ROLE.assistant, block.root, '');
 
@@ -193,6 +263,8 @@ export const createTranscript = (parts: ChatTranscriptParts): ChatTranscript => 
             transcript.setAttribute(BUSY_ATTRIBUTE, String(isBusy));
         },
         captureFollow: captureFollow,
+        appendToExchange: appendToExchange,
+        appendToAnswer: appendToAnswer,
         clear: (): void => {
             userMessageRoots = [];
             transcript.replaceChildren();

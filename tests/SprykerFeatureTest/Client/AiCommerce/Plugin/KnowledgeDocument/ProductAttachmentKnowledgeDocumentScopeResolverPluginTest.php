@@ -12,6 +12,7 @@ namespace SprykerFeatureTest\Client\AiCommerce\Plugin\KnowledgeDocument;
 use ArrayObject;
 use Codeception\Test\Unit;
 use Generated\Shared\Transfer\KnowledgeDocumentScopeRequestTransfer;
+use Generated\Shared\Transfer\KnowledgeDocumentScopeTransfer;
 use Generated\Shared\Transfer\ProductAbstractAttachmentStorageTransfer;
 use Generated\Shared\Transfer\ProductAttachmentStorageCriteriaTransfer;
 use Generated\Shared\Transfer\ProductAttachmentStorageTransfer;
@@ -63,6 +64,16 @@ class ProductAttachmentKnowledgeDocumentScopeResolverPluginTest extends Unit
     protected const string DOCUMENT_KEY_DATA_SHEET = 'product_attachment:12';
 
     protected const string KEY_ID_PRODUCT_ABSTRACT = 'id_product_abstract';
+
+    protected const string LABEL_MANUAL = 'Installation manual';
+
+    protected const string LABEL_DATA_SHEET = 'Data sheet';
+
+    protected const string URL_MANUAL = 'https://spryker.s3.eu-central-1.amazonaws.com/manual.pdf';
+
+    protected const string URL_DATA_SHEET = 'https://spryker.s3.eu-central-1.amazonaws.com/data-sheet.pdf';
+
+    protected const string SOURCE_TYPE_PRODUCT_ATTACHMENT = 'product_attachment';
 
     protected AiCommerceClientTester $tester;
 
@@ -176,6 +187,78 @@ class ProductAttachmentKnowledgeDocumentScopeResolverPluginTest extends Unit
         $this->assertSame([static::DOCUMENT_KEY_DATA_SHEET], $knowledgeDocumentScopeTransfer->getDocumentKeys());
     }
 
+    public function testGivenAbstractSkuWhenResolvingScopeThenKnowledgeDocumentSourcesWithNameAndUrlAreReturned(): void
+    {
+        // Arrange
+        $this->haveProductStorage();
+        $this->haveProductAttachmentStorage();
+
+        // Act
+        $knowledgeDocumentScopeTransfer = $this->createPlugin()->resolveDocumentScope($this->createScopeRequest()->addScopeReference(SharedAiCommerceConfig::KNOWLEDGE_DOCUMENT_SCOPE_REFERENCE_TYPE_ABSTRACT_SKU, [static::ABSTRACT_SKU]));
+
+        // Assert
+        $this->assertSame(
+            [
+                [static::SOURCE_TYPE_PRODUCT_ATTACHMENT, (string)static::ID_PRODUCT_ATTACHMENT_MANUAL, static::LABEL_MANUAL, static::URL_MANUAL],
+                [static::SOURCE_TYPE_PRODUCT_ATTACHMENT, (string)static::ID_PRODUCT_ATTACHMENT_DATA_SHEET, static::LABEL_DATA_SHEET, static::URL_DATA_SHEET],
+            ],
+            $this->extractSources($knowledgeDocumentScopeTransfer),
+        );
+    }
+
+    public function testGivenTwoProductsWithTheSameAttachmentWhenResolvingScopeThenEachSourceIsReturnedOnce(): void
+    {
+        // Arrange
+        $this->haveProductStorage();
+        $this->haveProductAttachmentStorage();
+
+        // Act
+        $knowledgeDocumentScopeTransfer = $this->createPlugin()->resolveDocumentScope(
+            $this->createScopeRequest()
+                ->addScopeReference(SharedAiCommerceConfig::KNOWLEDGE_DOCUMENT_SCOPE_REFERENCE_TYPE_ABSTRACT_SKU, [static::ABSTRACT_SKU])
+                ->addScopeReference(SharedAiCommerceConfig::KNOWLEDGE_DOCUMENT_SCOPE_REFERENCE_TYPE_CONCRETE_SKU, [static::CONCRETE_SKU]),
+        );
+
+        // Assert
+        $this->assertCount(2, $knowledgeDocumentScopeTransfer->getKnowledgeDocumentSources());
+    }
+
+    public function testGivenSourceIdentifiersWhenResolvingScopeThenOnlyTheSourcesOfRequestedAttachmentsAreKept(): void
+    {
+        // Arrange
+        $this->haveProductStorage();
+        $this->haveProductAttachmentStorage();
+        $knowledgeDocumentScopeRequestTransfer = $this->createScopeRequest()
+            ->addScopeReference(SharedAiCommerceConfig::KNOWLEDGE_DOCUMENT_SCOPE_REFERENCE_TYPE_PRODUCT_ABSTRACT_ID, [(string)static::ID_PRODUCT_ABSTRACT])
+            ->setSourceIdentifiers([(string)static::ID_PRODUCT_ATTACHMENT_DATA_SHEET, '999']);
+
+        // Act
+        $knowledgeDocumentScopeTransfer = $this->createPlugin()->resolveDocumentScope($knowledgeDocumentScopeRequestTransfer);
+
+        // Assert
+        $this->assertSame(
+            [[static::SOURCE_TYPE_PRODUCT_ATTACHMENT, (string)static::ID_PRODUCT_ATTACHMENT_DATA_SHEET, static::LABEL_DATA_SHEET, static::URL_DATA_SHEET]],
+            $this->extractSources($knowledgeDocumentScopeTransfer),
+        );
+    }
+
+    public function testGivenSourceIdentifiersOfOtherProductsWhenResolvingScopeThenNoSourceIsKept(): void
+    {
+        // Arrange
+        $this->haveProductStorage();
+        $this->haveProductAttachmentStorage();
+        $knowledgeDocumentScopeRequestTransfer = $this->createScopeRequest()
+            ->addScopeReference(SharedAiCommerceConfig::KNOWLEDGE_DOCUMENT_SCOPE_REFERENCE_TYPE_PRODUCT_ABSTRACT_ID, [(string)static::ID_PRODUCT_ABSTRACT])
+            ->setSourceIdentifiers(['999']);
+
+        // Act
+        $knowledgeDocumentScopeTransfer = $this->createPlugin()->resolveDocumentScope($knowledgeDocumentScopeRequestTransfer);
+
+        // Assert
+        $this->assertCount(0, $knowledgeDocumentScopeTransfer->getKnowledgeDocumentSources());
+        $this->assertNotEmpty($knowledgeDocumentScopeTransfer->getMessages());
+    }
+
     public function testGivenLocaleWhenResolvingScopeThenAttachmentsAreReadForThatLocale(): void
     {
         // Arrange
@@ -207,6 +290,25 @@ class ProductAttachmentKnowledgeDocumentScopeResolverPluginTest extends Unit
         $knowledgeDocumentScopeResolverPlugin->setFactory($this->tester->getFactory());
 
         return $knowledgeDocumentScopeResolverPlugin;
+    }
+
+    /**
+     * @return list<array{string|null, string|null, string|null, string|null}>
+     */
+    protected function extractSources(KnowledgeDocumentScopeTransfer $knowledgeDocumentScopeTransfer): array
+    {
+        $sources = [];
+
+        foreach ($knowledgeDocumentScopeTransfer->getKnowledgeDocumentSources() as $knowledgeDocumentSourceTransfer) {
+            $sources[] = [
+                $knowledgeDocumentSourceTransfer->getSourceType(),
+                $knowledgeDocumentSourceTransfer->getSourceIdentifier(),
+                $knowledgeDocumentSourceTransfer->getDocumentName(),
+                $knowledgeDocumentSourceTransfer->getUrl(),
+            ];
+        }
+
+        return $sources;
     }
 
     protected function createScopeRequest(): KnowledgeDocumentScopeRequestTransfer
@@ -278,8 +380,8 @@ class ProductAttachmentKnowledgeDocumentScopeResolverPluginTest extends Unit
         return (new ProductAbstractAttachmentStorageTransfer())
             ->setIdProductAbstract(static::ID_PRODUCT_ABSTRACT)
             ->setAttachments(new ArrayObject([
-                (new ProductAttachmentStorageTransfer())->setIdProductAttachment(static::ID_PRODUCT_ATTACHMENT_MANUAL)->setLabel('Installation manual'),
-                (new ProductAttachmentStorageTransfer())->setIdProductAttachment(static::ID_PRODUCT_ATTACHMENT_DATA_SHEET)->setLabel('Data sheet'),
+                (new ProductAttachmentStorageTransfer())->setIdProductAttachment(static::ID_PRODUCT_ATTACHMENT_MANUAL)->setLabel(static::LABEL_MANUAL)->setUrl(static::URL_MANUAL),
+                (new ProductAttachmentStorageTransfer())->setIdProductAttachment(static::ID_PRODUCT_ATTACHMENT_DATA_SHEET)->setLabel(static::LABEL_DATA_SHEET)->setUrl(static::URL_DATA_SHEET),
             ]));
     }
 }

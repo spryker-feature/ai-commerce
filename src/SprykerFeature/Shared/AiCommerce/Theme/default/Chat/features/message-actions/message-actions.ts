@@ -118,7 +118,7 @@ export class ChatMessageActions extends HTMLElement implements ChatFeature {
                     this.regenerate(turn, button).catch((error: unknown) => reportError(error));
                 },
             },
-            null,
+            turn.userMessage,
         );
     }
 
@@ -128,6 +128,7 @@ export class ChatMessageActions extends HTMLElement implements ChatFeature {
             (message) => message.role === CHAT_MESSAGE_ROLE.user || message.role === CHAT_MESSAGE_ROLE.assistant,
         );
         let answerParts: string[] = [];
+        let lastAnswer: HTMLElement | null = null;
 
         this.bars.clear();
         this.replayedMessages = [];
@@ -135,25 +136,27 @@ export class ChatMessageActions extends HTMLElement implements ChatFeature {
 
         rendered.forEach((message, index) => {
             if (message.role === CHAT_MESSAGE_ROLE.user) {
-                this.flushReplayAnswer(answerParts, message.element);
+                this.flushReplayAnswer(answerParts, lastAnswer);
                 answerParts = [];
+                lastAnswer = null;
             } else if (message.role === CHAT_MESSAGE_ROLE.assistant) {
                 answerParts.push((stored[index]?.content ?? '').trim());
+                lastAnswer = message.element;
             }
         });
 
-        this.flushReplayAnswer(answerParts, null);
+        this.flushReplayAnswer(answerParts, lastAnswer);
     }
 
-    private flushReplayAnswer(answerParts: readonly string[], nextUserMessage: HTMLElement | null): void {
+    private flushReplayAnswer(answerParts: readonly string[], lastAnswer: HTMLElement | null): void {
         const text = answerParts.filter((part) => part !== '').join(ANSWER_SEPARATOR);
 
-        if (text !== '') {
-            this.appendBar({ text: text, timestamp: null, onRegenerate: null }, nextUserMessage);
+        if (text !== '' && lastAnswer !== null) {
+            this.appendBar({ text: text, timestamp: null, onRegenerate: null }, lastAnswer);
         }
     }
 
-    private appendBar(options: ActionBarOptions, before: HTMLElement | null): void {
+    private appendBar(options: ActionBarOptions, anchor: HTMLElement): void {
         if (this.context === null || this.template === null) {
             return;
         }
@@ -186,12 +189,7 @@ export class ChatMessageActions extends HTMLElement implements ChatFeature {
             );
         }
 
-        if (before === null) {
-            this.context.transcript.append(block.root);
-        } else {
-            before.before(block.root);
-        }
-
+        this.context.transcript.appendToExchange(block.root, anchor);
         regenerate.toggleAttribute('disabled', this.isBusy);
         this.bars.set(block.root, regenerate);
     }

@@ -77,13 +77,15 @@ class AiCommerceYvesTester extends Actor
     /**
      * @param array<int, array<string, string>> $enabledAgents
      * @param array<string, string> $moduleConfigValues
+     * @param list<string> $knowledgeSourceLinkOrigins
      */
     public function createStorefrontAssistantWidget(
         bool $isStorefrontAssistantEnabled,
         ?CustomerTransfer $customerTransfer,
         string $promptUrl,
         array $enabledAgents,
-        array $moduleConfigValues = []
+        array $moduleConfigValues = [],
+        array $knowledgeSourceLinkOrigins = []
     ): StorefrontAssistantWidget {
         $this->setDependency(StorageDependencyProvider::PLUGIN_STORAGE, new StorageRedisPlugin());
 
@@ -107,6 +109,7 @@ class AiCommerceYvesTester extends Actor
             'getStorefrontAssistantMaxAttachmentSizeBytes' => $sharedAiCommerceConfig->getStorefrontAssistantMaxAttachmentSizeBytes(),
             'getStorefrontAssistantMaxAttachmentCount' => $sharedAiCommerceConfig->getStorefrontAssistantMaxAttachmentCount(),
             'getStorefrontAssistantMaxMessageLengthCharacters' => $sharedAiCommerceConfig->getStorefrontAssistantMaxMessageLengthCharacters(),
+            'getKnowledgeSourceLinkOrigins' => $knowledgeSourceLinkOrigins,
         ]);
 
         $yvesFactory = new AiCommerceYvesFactory();

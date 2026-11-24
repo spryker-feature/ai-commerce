@@ -1064,6 +1064,7 @@
     <transfer name="KnowledgeDocumentScope" strict="true">
         <property name="documentKeys" type="string[]" singular="documentKey"/>
         <property name="messages" type="string[]" singular="message" description="Customer safe reasons, for example a product that is not available."/>
+        <property name="knowledgeDocumentSources" type="KnowledgeDocumentSource[]" singular="knowledgeDocumentSource" description="The sources of the document keys, with document name and URL from shop data."/>
     </transfer>
 
     <transfer name="KnowledgeDocumentSearchRequest" strict="true">
@@ -1135,6 +1136,7 @@
     <transfer name="ProductAttachmentStorage" strict="true">
         <property name="idProductAttachment" type="int"/>
         <property name="label" type="string"/>
+        <property name="url" type="string"/>
     </transfer>
 
     <transfer name="KnowledgeDocumentIndexResponse" strict="true">

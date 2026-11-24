@@ -332,6 +332,22 @@ class AiCommerceConfig extends AbstractBundleConfig
 
     /**
      * Specification:
+     * - Returns the hosts whose https URLs the Storefront Assistant shows as links in the sources of an answer.
+     * - A source URL on the origin of the shop is always shown as a link; a source URL of any other host is shown as plain text.
+     * - Each entry is a host such as `media.example.com` or an https origin such as `https://media.example.com`; an http origin makes the sources feature inactive.
+     * - Returns an empty list by default: only source URLs on the origin of the shop are links.
+     *
+     * @api
+     *
+     * @return list<string>
+     */
+    public function getKnowledgeSourceLinkOrigins(): array
+    {
+        return [];
+    }
+
+    /**
+     * Specification:
      * - Returns the suggested prompts configured for each prompt group in the given locale, keyed by the page type
      *   it applies to, plus the `product_results` follow-up group offered under product cards the assistant renders.
      * - Expects each configuration value as a JSON object keyed by the locale name with a list of prompts as each value,

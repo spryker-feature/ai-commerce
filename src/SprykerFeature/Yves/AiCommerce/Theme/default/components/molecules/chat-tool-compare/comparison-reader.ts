@@ -1,6 +1,6 @@
+import { isSafePath } from '@shared/ai-commerce/Chat/core/contracts/links';
+
 export const MIN_COMPARED_PRODUCTS = 2;
-// Same-origin paths only (no `//host`, `/\\host`, whitespace, backslash); kept in sync with product-reader.ts.
-const SAFE_PATH_PATTERN = /^\/(?![/\\])[^\s\\]*$/;
 
 export interface ComparedProduct {
     readonly name: string;
@@ -102,7 +102,7 @@ export const parseComparison = (result: string): Comparison | string | null => {
     const rows = rowCandidates
         .map((row) => parseRow(row, products.length))
         .filter((row): row is ComparisonRow => row !== null);
-    const isComparisonUrlSafe = SAFE_PATH_PATTERN.test(comparisonUrl);
+    const isComparisonUrlSafe = isSafePath(comparisonUrl);
 
     return {
         products: products,

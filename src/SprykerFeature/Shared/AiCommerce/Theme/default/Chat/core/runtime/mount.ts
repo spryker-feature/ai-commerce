@@ -191,6 +191,8 @@ export const mountCore = (parts: ChatMountParts): MountedCore => {
             scrollToEnd: transcript.scrollToEnd,
             removeAfter: transcript.removeAfter,
             captureFollow: transcript.captureFollow,
+            appendToExchange: transcript.appendToExchange,
+            appendToAnswer: transcript.appendToAnswer,
         }),
         composer: Object.freeze({
             input: composer.input,
