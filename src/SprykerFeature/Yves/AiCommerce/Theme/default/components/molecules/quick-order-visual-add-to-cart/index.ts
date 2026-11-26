@@ -1,0 +1,6 @@
+import './style.scss';
+import register from 'ShopUi/app/registry';
+export default register(
+    'quick-order-visual-add-to-cart',
+    () => import(/* webpackMode: "eager" */ './quick-order-visual-add-to-cart'),
+);

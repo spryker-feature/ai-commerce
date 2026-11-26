@@ -12,6 +12,8 @@ namespace SprykerFeatureTest\Yves\AiCommerce;
 use Codeception\Actor;
 use Codeception\Stub;
 use Generated\Shared\Transfer\CustomerTransfer;
+use Generated\Shared\Transfer\ProductRecognitionCollectionTransfer;
+use Generated\Shared\Transfer\ProductRecognitionTransfer;
 use Generated\Shared\Transfer\PromptResponseTransfer;
 use Generated\Shared\Transfer\SearchByImagePromptResponseTransfer;
 use Generated\Shared\Transfer\SearchByImageRequestTransfer;
@@ -33,6 +35,7 @@ use SprykerFeature\Yves\AiCommerce\AiCommerceDependencyProvider as AiCommerceYve
 use SprykerFeature\Yves\AiCommerce\AiCommerceFactory as AiCommerceYvesFactory;
 use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Reader\StorefrontAssistantSuggestedPromptReaderInterface;
 use SprykerFeature\Yves\AiCommerce\StorefrontAssistant\Widget\StorefrontAssistantWidget;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
@@ -58,6 +61,16 @@ class AiCommerceYvesTester extends Actor
     protected const string IMAGE_MEDIA_TYPE = 'image/jpeg';
 
     protected const string DEFAULT_LOCALE_NAME = 'en_US';
+
+    public const string FIXTURE_MULTI_PAGE_PDF = 'order-form-multi-page.pdf';
+
+    public const string FIXTURE_SINGLE_PAGE_PDF = 'order-form-single-page.pdf';
+
+    public const string FIXTURE_PNG = 'order-list.png';
+
+    public const string FIXTURE_TEXT = 'order-list.txt';
+
+    protected const string QUICK_ORDER_VISUAL_ADD_TO_CART_FIXTURE_DIRECTORY = 'QuickOrderVisualAddToCart';
 
     public function createAiCommerceClient(AiFoundationClientInterface $aiFoundationClient): AiCommerceClientInterface
     {
@@ -196,5 +209,44 @@ class AiCommerceYvesTester extends Actor
     public function createFailedPromptResponse(): PromptResponseTransfer
     {
         return (new PromptResponseTransfer())->setIsSuccessful(false);
+    }
+
+    /**
+     * @param array<string, mixed> $methodOverrides
+     */
+    public function createQuickOrderVisualAddToCartConfig(array $methodOverrides = []): AiCommerceYvesConfig
+    {
+        return Stub::make(AiCommerceYvesConfig::class, array_merge([
+            'getModuleConfig' => fn (string $key, mixed $default = null): mixed => $default,
+        ], $methodOverrides));
+    }
+
+    public function createQuickOrderVisualAddToCartUploadedFile(string $fixtureFileName, ?string $clientOriginalName = null): UploadedFile
+    {
+        return new UploadedFile(
+            codecept_data_dir(sprintf('%s/%s', static::QUICK_ORDER_VISUAL_ADD_TO_CART_FIXTURE_DIRECTORY, $fixtureFileName)),
+            $clientOriginalName ?? $fixtureFileName,
+            null,
+            null,
+            true,
+        );
+    }
+
+    /**
+     * @param array<string, int> $quantitiesByProductName
+     */
+    public function createSuccessfulProductRecognitionPromptResponse(array $quantitiesByProductName): PromptResponseTransfer
+    {
+        $productRecognitionCollectionTransfer = new ProductRecognitionCollectionTransfer();
+
+        foreach ($quantitiesByProductName as $productName => $quantity) {
+            $productRecognitionCollectionTransfer->addProductRecognition(
+                (new ProductRecognitionTransfer())->setName($productName)->setQuantity($quantity),
+            );
+        }
+
+        return (new PromptResponseTransfer())
+            ->setIsSuccessful(true)
+            ->setStructuredMessage($productRecognitionCollectionTransfer);
     }
 }

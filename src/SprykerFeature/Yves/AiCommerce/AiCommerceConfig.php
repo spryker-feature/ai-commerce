@@ -55,78 +55,156 @@ class AiCommerceConfig extends AbstractBundleConfig
      */
     protected const string STOREFRONT_ASSISTANT_PROMPT_GROUP_PRODUCT_RESULTS = 'product_results';
 
-    protected const array QUICK_ORDER_IMAGE_TO_CART_SUPPORTED_MIME_TYPES = [
+    protected const array QUICK_ORDER_VISUAL_ADD_TO_CART_SUPPORTED_IMAGE_MIME_TYPES = [
         'image/jpeg',
         'image/jpg',
         'image/png',
     ];
 
-    protected const array QUICK_ORDER_IMAGE_TO_CART_SUPPORTED_IMAGE_EXTENSIONS = [
+    protected const array QUICK_ORDER_VISUAL_ADD_TO_CART_SUPPORTED_IMAGE_EXTENSIONS = [
         'png',
         'jpeg',
         'jpg',
     ];
 
-    protected const int QUICK_ORDER_IMAGE_TO_CART_MAX_PRODUCTS = 20;
+    protected const array QUICK_ORDER_VISUAL_ADD_TO_CART_SUPPORTED_DOCUMENT_MIME_TYPES = [
+        'application/pdf',
+    ];
 
-    protected const int QUICK_ORDER_IMAGE_TO_CART_MAX_FILE_SIZE_IN_BYTES = 10_485_760;
+    protected const array QUICK_ORDER_VISUAL_ADD_TO_CART_SUPPORTED_DOCUMENT_EXTENSIONS = [
+        'pdf',
+    ];
 
-    protected const int QUICK_ORDER_IMAGE_TO_CART_TEXT_SIMILARITY_THRESHOLD_PERCENT = 30;
+    protected const int QUICK_ORDER_VISUAL_ADD_TO_CART_MAX_PRODUCTS = 20;
+
+    protected const int QUICK_ORDER_VISUAL_ADD_TO_CART_MAX_FILE_SIZE_IN_BYTES = 10_485_760;
+
+    protected const int QUICK_ORDER_VISUAL_ADD_TO_CART_TEXT_SIMILARITY_THRESHOLD_PERCENT = 30;
 
     protected const string AI_COMMERCE_QUICK_ORDER_VISUAL_ADD_TO_CART_ENABLED = 'ai_commerce:quick_order:visual_add_to_cart:enabled';
 
-    protected const string QUICK_ORDER_IMAGE_TO_CART_PROMPT_TEMPLATE = 'I want you to support me for a quick add to cart functionality by identifying from a picture what the customer want to buy and provide me only with a JSON containing a list of products and quantities. If the user asks for a product to be compatible with any other product include it as part of each product name. Important! Your response must only contain the valid JSON object without any special or additional chars. Important! The image may contain SKU instead of product name, so use SKU as product name if it is recognized. Important! Current store locale is %s — translate recognized product names into the corresponding store locale if necessary.';
+    protected const string CONFIGURATION_KEY_QUICK_ORDER_DOCUMENT_RECOGNITION_PROMPT = 'ai_commerce:quick_order:system_prompts:document_recognition_prompt';
+
+    protected const string QUICK_ORDER_VISUAL_ADD_TO_CART_IMAGE_PROMPT_TEMPLATE = 'I want you to support me for a quick add to cart functionality by identifying from a picture what the customer want to buy and provide me only with a JSON containing a list of products and quantities. If the user asks for a product to be compatible with any other product include it as part of each product name. Important! Your response must only contain the valid JSON object without any special or additional chars. Important! The image may contain SKU instead of product name, so use SKU as product name if it is recognized. Important! Current store locale is %s — translate recognized product names into the corresponding store locale if necessary.';
+
+    protected const string QUICK_ORDER_VISUAL_ADD_TO_CART_DOCUMENT_PROMPT_TEMPLATE = 'I want you to support me for a quick add to cart functionality by reading the attached purchase order, order form or order list and provide me only with a JSON containing a list of products and quantities. The document may have several pages and may be scanned. Read every page and put the order lines of all pages into one list. Include only ordered line items: skip headers, addresses, subtotals, taxes, totals, shipping costs and notes. Use the product description of each line as the product name, and use the item number or SKU only when a line has no description. Use the ordered quantity of each line as an integer, or 1 when a line has no quantity. If a line or a cell lists several SKUs, item numbers or products, for example separated by commas, semicolons or slashes, return one entry for each of them. Copy SKUs and item numbers exactly as written and never translate them. Important! Your response must only contain the valid JSON object without any special or additional chars. Important! Current store locale is %s — translate recognized product names into the corresponding store locale if necessary.';
 
     /**
      * Specification:
-     * - Returns the list of MIME types accepted for image upload in quick order image-to-cart.
+     * - Returns the list of image MIME types accepted for upload in Visual add to cart.
      * - Used to restrict the file input and validate uploaded files.
      *
      * @api
      *
      * @return array<string>
      */
-    public function getQuickOrderImageToCartSupportedMimeTypes(): array
+    public function getQuickOrderVisualAddToCartSupportedImageMimeTypes(): array
     {
-        return static::QUICK_ORDER_IMAGE_TO_CART_SUPPORTED_MIME_TYPES;
+        return static::QUICK_ORDER_VISUAL_ADD_TO_CART_SUPPORTED_IMAGE_MIME_TYPES;
     }
 
     /**
      * Specification:
-     * - Returns the list of file extensions accepted for image upload in quick order image-to-cart.
+     * - Returns the list of image file extensions accepted for upload in Visual add to cart.
      * - Used to display allowed formats to the user and validate uploaded files.
      *
      * @api
      *
      * @return array<string>
      */
-    public function getQuickOrderImageToCartSupportedImageExtensions(): array
+    public function getQuickOrderVisualAddToCartSupportedImageExtensions(): array
     {
-        return static::QUICK_ORDER_IMAGE_TO_CART_SUPPORTED_IMAGE_EXTENSIONS;
+        return static::QUICK_ORDER_VISUAL_ADD_TO_CART_SUPPORTED_IMAGE_EXTENSIONS;
     }
 
     /**
      * Specification:
-     * - Returns the maximum allowed file size in bytes for an uploaded image.
+     * - Returns the list of document MIME types accepted for upload in Visual add to cart, in addition to the image MIME types.
+     * - A file of one of these MIME types is sent to the AI as a document attachment, so every page of a multi-page file is read.
+     * - Return an empty list to accept images only. Do so when the selected AI configuration uses `AiFoundationConstants::PROVIDER_OLLAMA`: its message mapper drops document attachments without an error.
+     *
+     * @api
+     *
+     * @return array<string>
+     */
+    public function getQuickOrderVisualAddToCartSupportedDocumentMimeTypes(): array
+    {
+        return static::QUICK_ORDER_VISUAL_ADD_TO_CART_SUPPORTED_DOCUMENT_MIME_TYPES;
+    }
+
+    /**
+     * Specification:
+     * - Returns the list of document file extensions accepted for upload in Visual add to cart, in addition to the image extensions.
+     * - Used to display allowed formats to the user and validate uploaded files.
+     * - Return an empty list to accept images only, together with `getQuickOrderVisualAddToCartSupportedDocumentMimeTypes()`.
+     *
+     * @api
+     *
+     * @return array<string>
+     */
+    public function getQuickOrderVisualAddToCartSupportedDocumentExtensions(): array
+    {
+        return static::QUICK_ORDER_VISUAL_ADD_TO_CART_SUPPORTED_DOCUMENT_EXTENSIONS;
+    }
+
+    /**
+     * Specification:
+     * - Returns every MIME type accepted for upload in Visual add to cart: the image MIME types followed by the document MIME types.
+     * - Used to restrict the file input and validate uploaded files.
+     * - Override the image or document getter to change the list. This getter only combines them.
+     *
+     * @api
+     *
+     * @return array<string>
+     */
+    public function getQuickOrderVisualAddToCartSupportedFileMimeTypes(): array
+    {
+        return array_merge(
+            $this->getQuickOrderVisualAddToCartSupportedImageMimeTypes(),
+            $this->getQuickOrderVisualAddToCartSupportedDocumentMimeTypes(),
+        );
+    }
+
+    /**
+     * Specification:
+     * - Returns every file extension accepted for upload in Visual add to cart: the image extensions followed by the document extensions.
+     * - Used to display allowed formats to the user and validate uploaded files.
+     * - Override the image or document getter to change the list. This getter only combines them.
+     *
+     * @api
+     *
+     * @return array<string>
+     */
+    public function getQuickOrderVisualAddToCartSupportedFileExtensions(): array
+    {
+        return array_merge(
+            $this->getQuickOrderVisualAddToCartSupportedImageExtensions(),
+            $this->getQuickOrderVisualAddToCartSupportedDocumentExtensions(),
+        );
+    }
+
+    /**
+     * Specification:
+     * - Returns the maximum allowed file size in bytes for an uploaded image or document.
      * - Files exceeding this limit are rejected during validation.
      *
      * @api
      */
-    public function getQuickOrderImageToCartMaxFileSizeInBytes(): int
+    public function getQuickOrderVisualAddToCartMaxFileSizeInBytes(): int
     {
-        return static::QUICK_ORDER_IMAGE_TO_CART_MAX_FILE_SIZE_IN_BYTES;
+        return static::QUICK_ORDER_VISUAL_ADD_TO_CART_MAX_FILE_SIZE_IN_BYTES;
     }
 
     /**
      * Specification:
-     * - Returns the maximum number of products that can be recognized from a single image.
-     * - Images containing more products than this limit are rejected during validation.
+     * - Returns the maximum number of products that can be recognized from a single uploaded file.
+     * - Files containing more products than this limit are rejected during validation.
      *
      * @api
      */
-    public function getQuickOrderImageToCartMaxProducts(): int
+    public function getQuickOrderVisualAddToCartMaxProducts(): int
     {
-        return static::QUICK_ORDER_IMAGE_TO_CART_MAX_PRODUCTS;
+        return static::QUICK_ORDER_VISUAL_ADD_TO_CART_MAX_PRODUCTS;
     }
 
     /**
@@ -137,30 +215,30 @@ class AiCommerceConfig extends AbstractBundleConfig
      *
      * @api
      */
-    public function getQuickOrderImageToCartTextSimilarityThresholdPercent(): int
+    public function getQuickOrderVisualAddToCartTextSimilarityThresholdPercent(): int
     {
-        return static::QUICK_ORDER_IMAGE_TO_CART_TEXT_SIMILARITY_THRESHOLD_PERCENT;
+        return static::QUICK_ORDER_VISUAL_ADD_TO_CART_TEXT_SIMILARITY_THRESHOLD_PERCENT;
     }
 
     /**
      * Specification:
-     * - Returns whether the quick order image-to-cart feature is enabled.
+     * - Returns whether the Visual add to cart feature on the Quick Order page is enabled.
      * - Reads the enabled flag from the application configuration.
      *
      * @api
      */
-    public function isQuickOrderImageToCartEnabled(): bool
+    public function isQuickOrderVisualAddToCartEnabled(): bool
     {
         return $this->getModuleConfig(static::AI_COMMERCE_QUICK_ORDER_VISUAL_ADD_TO_CART_ENABLED, false);
     }
 
     /**
      * Specification:
-     * - Returns the AI configuration name used for image-to-cart product recognition.
+     * - Returns the AI configuration name used for Visual add to cart product recognition.
      *
      * @api
      */
-    public function getQuickOrderImageToCartAiConfigurationName(): ?string
+    public function getQuickOrderVisualAddToCartAiConfigurationName(): ?string
     {
         return null;
     }
@@ -173,14 +251,37 @@ class AiCommerceConfig extends AbstractBundleConfig
      *
      * @api
      */
-    public function getQuickOrderImageToCartPromptTemplate(): string
+    public function getQuickOrderVisualAddToCartImagePromptTemplate(): string
     {
         $systemPrompt = (string)$this->getModuleConfig(
             AiCommerceConstants::CONFIGURATION_KEY_QUICK_ORDER_IMAGE_RECOGNITION_PROMPT,
-            static::QUICK_ORDER_IMAGE_TO_CART_PROMPT_TEMPLATE,
+            static::QUICK_ORDER_VISUAL_ADD_TO_CART_IMAGE_PROMPT_TEMPLATE,
         );
         if (trim($systemPrompt) === '') {
-            return static::QUICK_ORDER_IMAGE_TO_CART_PROMPT_TEMPLATE;
+            return static::QUICK_ORDER_VISUAL_ADD_TO_CART_IMAGE_PROMPT_TEMPLATE;
+        }
+
+        return $systemPrompt;
+    }
+
+    /**
+     * Specification:
+     * - Returns the prompt used to recognize products from an uploaded document (for example a PDF order form) on the Quick Order page.
+     * - Resolves the value from Configuration Management.
+     * - Falls back to the module default when the value is unset or blank.
+     * - Contains a single `%s` placeholder for the current store locale, substituted by the caller.
+     *
+     * @api
+     */
+    public function getQuickOrderVisualAddToCartDocumentPromptTemplate(): string
+    {
+        $systemPrompt = (string)$this->getModuleConfig(
+            static::CONFIGURATION_KEY_QUICK_ORDER_DOCUMENT_RECOGNITION_PROMPT,
+            static::QUICK_ORDER_VISUAL_ADD_TO_CART_DOCUMENT_PROMPT_TEMPLATE,
+        );
+
+        if (trim($systemPrompt) === '') {
+            return static::QUICK_ORDER_VISUAL_ADD_TO_CART_DOCUMENT_PROMPT_TEMPLATE;
         }
 
         return $systemPrompt;

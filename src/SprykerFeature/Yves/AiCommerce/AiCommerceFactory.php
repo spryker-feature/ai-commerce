@@ -19,29 +19,29 @@ use Spryker\Shared\Kernel\StrategyResolver;
 use Spryker\Shared\Kernel\StrategyResolverInterface;
 use Spryker\Yves\Kernel\AbstractFactory;
 use Spryker\Yves\Messenger\FlashMessenger\FlashMessengerInterface;
-use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Collector\QuickOrderItemCollector;
-use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Collector\QuickOrderItemCollectorInterface;
-use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Finder\CatalogProductFinder;
-use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Finder\CatalogProductFinderInterface;
-use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Form\Constraint\ImageOrderFormConstraint;
-use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Form\Handler\ImageOrderFormHandler;
-use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Form\Handler\ImageOrderFormHandlerInterface;
-use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Form\ImageOrderForm;
-use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Image\Encoder\UploadedImageEncoder;
-use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Image\Encoder\UploadedImageEncoderInterface;
-use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Image\Validator\UploadedImageValidator;
-use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Image\Validator\UploadedImageValidatorInterface;
-use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Matcher\ProductNameMatcher;
-use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Matcher\ProductNameMatcherInterface;
-use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Message\NotFoundProductNotifier;
-use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Message\NotFoundProductNotifierInterface;
-use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Product\ProductImageRecognizer;
-use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Product\ProductImageRecognizerInterface;
-use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Product\Validator\ProductRecognitionValidator;
-use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Product\Validator\ProductRecognitionValidatorInterface;
-use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Product\Validator\Rule\NonEmptyProductCollectionProductValidationRule;
-use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Product\Validator\Rule\ProductLimitProductValidationRule;
-use SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Product\Validator\Rule\ProductValidationRuleInterface;
+use SprykerFeature\Yves\AiCommerce\QuickOrderVisualAddToCart\Collector\QuickOrderItemCollector;
+use SprykerFeature\Yves\AiCommerce\QuickOrderVisualAddToCart\Collector\QuickOrderItemCollectorInterface;
+use SprykerFeature\Yves\AiCommerce\QuickOrderVisualAddToCart\File\Encoder\UploadedFileEncoder;
+use SprykerFeature\Yves\AiCommerce\QuickOrderVisualAddToCart\File\Encoder\UploadedFileEncoderInterface;
+use SprykerFeature\Yves\AiCommerce\QuickOrderVisualAddToCart\File\Validator\UploadedFileValidator;
+use SprykerFeature\Yves\AiCommerce\QuickOrderVisualAddToCart\File\Validator\UploadedFileValidatorInterface;
+use SprykerFeature\Yves\AiCommerce\QuickOrderVisualAddToCart\Finder\CatalogProductFinder;
+use SprykerFeature\Yves\AiCommerce\QuickOrderVisualAddToCart\Finder\CatalogProductFinderInterface;
+use SprykerFeature\Yves\AiCommerce\QuickOrderVisualAddToCart\Form\Constraint\VisualAddToCartFormConstraint;
+use SprykerFeature\Yves\AiCommerce\QuickOrderVisualAddToCart\Form\Handler\VisualAddToCartFormHandler;
+use SprykerFeature\Yves\AiCommerce\QuickOrderVisualAddToCart\Form\Handler\VisualAddToCartFormHandlerInterface;
+use SprykerFeature\Yves\AiCommerce\QuickOrderVisualAddToCart\Form\VisualAddToCartForm;
+use SprykerFeature\Yves\AiCommerce\QuickOrderVisualAddToCart\Matcher\ProductNameMatcher;
+use SprykerFeature\Yves\AiCommerce\QuickOrderVisualAddToCart\Matcher\ProductNameMatcherInterface;
+use SprykerFeature\Yves\AiCommerce\QuickOrderVisualAddToCart\Message\NotFoundProductNotifier;
+use SprykerFeature\Yves\AiCommerce\QuickOrderVisualAddToCart\Message\NotFoundProductNotifierInterface;
+use SprykerFeature\Yves\AiCommerce\QuickOrderVisualAddToCart\Product\ProductRecognizer;
+use SprykerFeature\Yves\AiCommerce\QuickOrderVisualAddToCart\Product\ProductRecognizerInterface;
+use SprykerFeature\Yves\AiCommerce\QuickOrderVisualAddToCart\Product\Validator\ProductRecognitionValidator;
+use SprykerFeature\Yves\AiCommerce\QuickOrderVisualAddToCart\Product\Validator\ProductRecognitionValidatorInterface;
+use SprykerFeature\Yves\AiCommerce\QuickOrderVisualAddToCart\Product\Validator\Rule\NonEmptyProductCollectionProductValidationRule;
+use SprykerFeature\Yves\AiCommerce\QuickOrderVisualAddToCart\Product\Validator\Rule\ProductLimitProductValidationRule;
+use SprykerFeature\Yves\AiCommerce\QuickOrderVisualAddToCart\Product\Validator\Rule\ProductValidationRuleInterface;
 use SprykerFeature\Yves\AiCommerce\SearchByImage\Executor\SearchByImageExecutor;
 use SprykerFeature\Yves\AiCommerce\SearchByImage\Executor\SearchByImageExecutorInterface;
 use SprykerFeature\Yves\AiCommerce\SearchByImage\Form\DataTransformer\UploadedImageTransformer;
@@ -85,9 +85,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  */
 class AiCommerceFactory extends AbstractFactory
 {
-    public function createImageOrderForm(): FormInterface
+    public function createVisualAddToCartForm(): FormInterface
     {
-        return $this->getFormFactory()->create(ImageOrderForm::class);
+        return $this->getFormFactory()->create(VisualAddToCartForm::class);
     }
 
     public function getFormFactory(): FormFactoryInterface
@@ -95,25 +95,25 @@ class AiCommerceFactory extends AbstractFactory
         return $this->getProvidedDependency(ApplicationConstants::FORM_FACTORY);
     }
 
-    public function createImageOrderFormHandler(): ImageOrderFormHandlerInterface
+    public function createVisualAddToCartFormHandler(): VisualAddToCartFormHandlerInterface
     {
-        return new ImageOrderFormHandler(
-            $this->createUploadedImageEncoder(),
-            $this->createProductImageRecognizer(),
+        return new VisualAddToCartFormHandler(
+            $this->createUploadedFileEncoder(),
+            $this->createProductRecognizer(),
             $this->createProductRecognitionValidator(),
             $this->createQuickOrderItemCollector(),
             $this->createNotFoundProductNotifier(),
         );
     }
 
-    public function createUploadedImageEncoder(): UploadedImageEncoderInterface
+    public function createUploadedFileEncoder(): UploadedFileEncoderInterface
     {
-        return new UploadedImageEncoder();
+        return new UploadedFileEncoder();
     }
 
-    public function createProductImageRecognizer(): ProductImageRecognizerInterface
+    public function createProductRecognizer(): ProductRecognizerInterface
     {
-        return new ProductImageRecognizer(
+        return new ProductRecognizer(
             $this->getAiFoundationClient(),
             $this->getLocaleClient(),
             $this->getConfig(),
@@ -152,18 +152,18 @@ class AiCommerceFactory extends AbstractFactory
         );
     }
 
-    public function createImageOrderFormConstraint(): ImageOrderFormConstraint
+    public function createVisualAddToCartFormConstraint(): VisualAddToCartFormConstraint
     {
-        return new ImageOrderFormConstraint(
+        return new VisualAddToCartFormConstraint(
             [
-                ImageOrderFormConstraint::OPTION_UPLOADED_IMAGE_VALIDATOR => $this->createUploadedImageValidator(),
+                VisualAddToCartFormConstraint::OPTION_UPLOADED_FILE_VALIDATOR => $this->createUploadedFileValidator(),
             ],
         );
     }
 
-    public function createUploadedImageValidator(): UploadedImageValidatorInterface
+    public function createUploadedFileValidator(): UploadedFileValidatorInterface
     {
-        return new UploadedImageValidator(
+        return new UploadedFileValidator(
             $this->getConfig(),
         );
     }
@@ -234,7 +234,7 @@ class AiCommerceFactory extends AbstractFactory
     }
 
     /**
-     * @return array<\SprykerFeature\Yves\AiCommerce\QuickOrderImageToCart\Product\Validator\Rule\ProductValidationRuleInterface>
+     * @return array<\SprykerFeature\Yves\AiCommerce\QuickOrderVisualAddToCart\Product\Validator\Rule\ProductValidationRuleInterface>
      */
     public function getProductValidationRules(): array
     {

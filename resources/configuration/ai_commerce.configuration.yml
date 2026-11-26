@@ -308,7 +308,7 @@ features:
             groups:
                 - key: visual_add_to_cart
                   name: Visual add to cart
-                  description: Controls how the AI processes uploaded images to recognise products for quick order.
+                  description: Controls how the AI processes uploaded images and PDF files to recognise products for quick order.
                   enabled: true
                   order: 0
                   scopes:
@@ -317,7 +317,7 @@ features:
                   settings:
                       - key: enabled
                         name: Enabled
-                        description: Enables or disables the image to cart feature for quick order.
+                        description: Enables or disables the Visual add to cart feature for quick order.
                         type: boolean
                         default_value: false
                         enabled: true
@@ -329,7 +329,7 @@ features:
                             - store
                 - key: system_prompts
                   name: System Prompts
-                  description: Prompt configuration for the Quick Order Image-to-Cart feature.
+                  description: Prompt configuration for the Quick Order Visual add to cart feature.
                   enabled: true
                   order: 1
                   scopes:
@@ -344,6 +344,17 @@ features:
                         secret: false
                         storefront: true
                         order: 0
+                        scopes:
+                            - global
+                      - key: document_recognition_prompt
+                        name: Document Recognition Prompt
+                        description: Prompt used to recognise products from an uploaded PDF order form, purchase order or order list for quick order. All pages are sent in one request. Keep the %s placeholder for the current store locale.
+                        type: text
+                        default_value: 'I want you to support me for a quick add to cart functionality by reading the attached purchase order, order form or order list and provide me only with a JSON containing a list of products and quantities. The document may have several pages and may be scanned. Read every page and put the order lines of all pages into one list. Include only ordered line items: skip headers, addresses, subtotals, taxes, totals, shipping costs and notes. Use the product description of each line as the product name, and use the item number or SKU only when a line has no description. Use the ordered quantity of each line as an integer, or 1 when a line has no quantity. If a line or a cell lists several SKUs, item numbers or products, for example separated by commas, semicolons or slashes, return one entry for each of them. Copy SKUs and item numbers exactly as written and never translate them. Important! Your response must only contain the valid JSON object without any special or additional chars. Important! Current store locale is %s — translate recognized product names into the corresponding store locale if necessary.'
+                        enabled: true
+                        secret: false
+                        storefront: true
+                        order: 1
                         scopes:
                             - global
           - key: search_by_image
